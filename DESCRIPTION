@@ -1,0 +1,20 @@
+Package: stringmagick
+Type: Package
+Title: Brings Magick Dust to String Operations
+Version: 0.1.0
+Author@R: c(person(given = "Laurent",
+                   family = "Berge",
+                   role = c("aut", "cre"),
+                   email = "laurent.berge@u-bordeaux.fr")
+Imports: Rcpp(>= 1.0.5)
+Suggests: knitr, data.table
+LinkingTo: Rcpp
+Description: Performs complex string operations compactly and efficiently. Supports string interpolation jointly with over 40 string operations. 
+             Includes formula interpolation with the function xpd().
+SystemRequirements: C++11
+License: MIT
+Encoding: UTF-8
+VignetteBuilder: knitr
+RoxygenNote: 7.2.0
+Roxygen: list(markdown = TRUE)
+

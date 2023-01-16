@@ -1,0 +1,17 @@
+useDynLib(stringmagick, .registration = TRUE)
+
+# str_*
+export(str_op, str_is, str_which, str_get, str_clean, str_split2df)
+export(selvars)
+
+# dsb
+export(dsb, .dsb)
+export(dsb_c, dsb_cat, dsb_msg)
+
+# cub
+export(cub, .cub)
+export(cub_c, cub_cat, cub_msg)
+
+# Methods
+S3method(print, string_ops)
+

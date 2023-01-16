@@ -1,0 +1,529 @@
+#----------------------------------------------#
+# Author: Laurent Berge
+# Date creation: Wed Jul 27 10:06:18 2022
+# ~: checking functions
+#----------------------------------------------#
+
+# string.ops will be an import of dreamerr, so I cannot use dreamerr here
+
+# NOTE: it's unusual for me but there will be A LOT of code duplication
+#       the objective is to limit the most possible the overheads, hence this decision
+#       + the functions are simple and to the point (much less complex than what is possible with dreamerr), so that's manageable
+
+####
+#### checking ####
+####
+
+
+check_logical = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FALSE, mbt = FALSE){
+
+  if(missing(x)){
+    if(mbt){
+      x_dp = deparse_short(substitute(x))
+      stop_up("The argument `", x_dp, "` must be provided. Problem: it is missing.")
+    }
+
+    return()
+  }
+
+  if(null && is.null(x)){
+    return()
+  }
+
+  if(!is.logical(x)){
+    x_dp = deparse_short(substitute(x))
+    nullable = if(null) "(nullable) " else ""
+    type = if(scalar) "scalar" else "vector"
+    stop_up("The ", nullable, "argument `", x_dp, "` must be a logical ", type, ".",
+            " Problem: it is not logical, it is of class ", enum(class(x)), ".")
+  }
+
+  len_x = length(x)
+  if(len_x == 0 &&  l0) return()
+
+  if(scalar){
+    if(missing(no_na)) no_na = TRUE
+
+    if(len_x != 1){
+      x_dp = deparse_short(substitute(x))
+      nullable = if(null) "(nullable) " else ""
+      stop_up("The ", nullable, "argument `", x_dp, "` must be a logical scalar.",
+              " Problem: it is not of length 1, it is of length ", length(x), ".")
+    }
+  }
+
+  if(no_na && anyNA(x)){
+    x_dp = deparse_short(substitute(x))
+    nullable = if(null) "(nullable) " else ""
+    type = if(scalar) "scalar" else "vector without NA"
+    problem = if(scalar) "it is equal to NA" else "it contains NA values"
+    stop_up("The ", nullable, "argument `", x_dp, "` must be a logical ", type, ". ",
+            "Problem: ", problem, ".")
+  }
+
+}
+
+check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FALSE, mbt = TRUE){
+
+  if(missing(x)){
+    if(mbt){
+      x_dp = deparse_short(substitute(x))
+      stop_up("The argument `", x_dp, "` must be provided. Problem: it is missing.")
+    }
+
+    return()
+  }
+
+  if(null && is.null(x)){
+    return()
+  }
+
+  if(!is.character(x)){
+    x_dp = deparse_short(substitute(x))
+    nullable = if(null) "(nullable) " else ""
+    type = if(scalar) "scalar" else "vector"
+    stop_up("The ", nullable, "argument `", x_dp, "` must be a character ", type, ".",
+            " Problem: it is not character, it is of class ", enum(class(x)), ".")
+  }
+
+  len_x = length(x)
+  if(len_x == 0 &&  l0) return()
+
+  if(scalar){
+    if(missing(no_na)) no_na = TRUE
+
+    if(len_x != 1){
+      x_dp = deparse_short(substitute(x))
+      nullable = if(null) "(nullable) " else ""
+      stop_up("The ", nullable, "argument `", x_dp, "` must be a character scalar.",
+              " Problem: it is not of length 1, it is of length ", length(x), ".")
+    }
+  }
+
+  if(no_na && anyNA(x)){
+    x_dp = deparse_short(substitute(x))
+    nullable = if(null) "(nullable) " else ""
+    type = if(scalar) "scalar" else "vector without NA"
+    problem = if(scalar) "it is equal to NA" else "it contains NA values"
+    stop_up("The ", nullable, "argument `", x_dp, "` must be a character ", type, ". ",
+            "Problem: ", problem, ".")
+  }
+
+}
+
+
+check_envir = function(x){
+
+  if(!inherits(x, "environment")){
+    x_dp = deparse_short(substitute(x))
+    stop_up("The argument `", x_dp, "` must be an environment (ex: parent.frame()). ",
+            "Problem: it is not an environment, it is of class ", enum(class(x)), ".")
+  }
+
+}
+
+####
+#### utilities ####
+####
+
+
+
+deparse_short = function(x){
+  x_dp = deparse(x)
+  if(length(x_dp) > 1){
+    x_dp = paste0(x_dp, "...")
+  }
+
+  x_dp
+}
+
+set_pblm_hook = function(){
+  assign("STRINGOPS_HOOK", 1, parent.frame())
+}
+
+stop_hook = function(..., msg = NULL){
+
+  main_msg = paste0(...)
+
+  up = get_up_hook()
+
+  stop_up(..., up = up + 1, msg = msg)
+}
+
+get_up_hook = function(){
+  # up with set_up
+  f = parent.frame()
+  up = 1
+  while(!identical(f, .GlobalEnv)){
+    if(exists("STRINGOPS_HOOK", f)){
+      break
+    }
+    up = up + 1
+    f = parent.frame(up + 1)
+  }
+
+  if(identical(f, .GlobalEnv)){
+    up = 1
+  }
+
+  up
+}
+
+
+####
+#### dreamerr's copies ####
+####
+
+# DO NOT MAKE ANY SUBSTANTIAL CHANGE TO THESE FUNCTIONS!!!
+# They come from dreamerr. If I want to improve them, I should change the ones of dreamerr first
+
+
+set_up = function(.up = 1){
+  if(length(.up) == 1 && is.numeric(.up) && !is.na(.up) && .up == floor(.up) && .up >= 0){
+    assign("DREAMERR__UP", .up, parent.frame())
+  } else {
+    stop("Argument '.up' must be an integer scalar greater or equal to 1. This is currently not the case.")
+  }
+}
+
+stop_up = function(..., up = 1, msg = NULL){
+
+  main_msg = paste0(...)
+
+  # up with set_up
+  mc = match.call()
+  if(!"up" %in% names(mc)){
+    up_value = mget("DREAMERR__UP", parent.frame(), ifnotfound = 1)
+    up = up_value[[1]]
+  }
+
+  # The original call
+  my_call = deparse(sys.calls()[[max(1, sys.parent(1 + up))]])[1] # call can have svl lines
+  nmax = 50
+  if(nchar(my_call) > nmax) my_call = paste0(substr(my_call, 1, nmax - 1), "...")
+
+  intro = paste0("in ", my_call)
+
+  main_msg = fit_screen(main_msg)
+
+  if(!is.null(msg)){
+    if(length(msg) > 1){
+      msg = paste(msg, collapse = "")
+    }
+    msg = fit_screen(msg)
+    on.exit(message(msg))
+  }
+
+  stop(intro, ": \n", main_msg, call. = FALSE)
+
+}
+
+
+fit_screen = function(msg, width = 0.9, leading_ws = TRUE){
+  # makes a message fit the current screen, by cutting the text at the appropriate location
+  # msg must be a character string of length 1
+
+  # Note that \t are NOT handled
+
+  if(width > 1){
+    MAX_WIDTH = width
+  } else {
+    MAX_WIDTH = getOption("width") * width
+  }
+
+  MAX_WIDTH = max(MAX_WIDTH, 20)
+
+  res = c()
+
+  msg_split = strsplit(msg, "\n", fixed = TRUE)[[1]]
+
+  for(m in msg_split){
+    if(nchar(m) <= MAX_WIDTH){
+      res = c(res, m)
+    } else {
+      # we apply a splitting algorithm
+
+      lead_ws = gsub("^([ \t]*).*", "\\1", m, perl = TRUE)
+      m = trimws(m)
+      N_LEAD = nchar(lead_ws)
+      add_lead = TRUE
+      first = TRUE
+
+      m_split = strsplit(m, "(?<=[^ ]) ", perl = TRUE)[[1]]
+
+      while(TRUE){
+
+        if(add_lead){
+          width = MAX_WIDTH - N_LEAD
+          prefix = lead_ws
+        } else {
+          width = MAX_WIDTH
+          prefix = ""
+        }
+
+        if(sum(nchar(m_split) + 1) - 1 <= width){
+          res = c(res, paste0(prefix, paste(m_split, collapse = " ")))
+          break
+        }
+
+        where2split = which.max(cumsum(nchar(m_split) + 1) - 1 > width) - 1
+        res = c(res, paste0(prefix, paste(m_split[1:where2split], collapse = " ")))
+        m_split = m_split[-(1:where2split)]
+
+        if(!leading_ws && first){
+          add_lead = FALSE
+          first = FALSE
+        }
+
+      }
+    }
+  }
+
+  paste(res, collapse = "\n")
+}
+
+
+enum = function (x, type, verb = FALSE, s = FALSE, past = FALSE, or = FALSE,
+                 start_verb = FALSE, quote = FALSE, enum = FALSE, other = "", nmax = 7){
+  # function that enumerates items and add verbs
+  # in argument type, you can have a mix of the different arguments, all separated with a "."
+
+  if(length(x) == 0) return("");
+
+  if(!missing(type)){
+    args = strsplit(type, "\\.")[[1]]
+    s = "s" %in% args
+    past = "past" %in% args
+    or = "or" %in% args
+    start_verb = "start" %in% args
+    quote = "quote" %in% args
+    enum = any(grepl("^enum", args))
+    if(enum){
+      arg_enum = args[grepl("^enum", args)][1]
+      if(grepl("i", arg_enum)){
+        enum = "i"
+      } else if(grepl("I", arg_enum)){
+        enum = "I"
+      } else if(grepl("a", arg_enum)){
+        enum = "a"
+      } else if(grepl("A", arg_enum)){
+        enum = "A"
+      } else if(grepl("1", arg_enum)){
+        enum = "1"
+      } else {
+        enum = "i"
+      }
+
+      args = args[!grepl("^enum", args)]
+    }
+
+    is_other = any(grepl("^other\\(", args))
+    if(is_other){
+      arg_other = args[grepl("^other\\(", args)][1]
+      other = gsub("^.+\\(|\\).*", "", arg_other)
+
+      args = args[!grepl("^other", args)]
+    }
+
+    # Now the verb
+    verb = setdiff(args, c("s", "past", "or", "start", "quote"))
+    if(length(verb) == 0){
+      verb = "no"
+    } else {
+      verb = verb[1]
+    }
+
+  } else {
+    verb = as.character(verb)
+
+    enum = match.arg(as.character(enum), c("i", "a", "1", "I", "A", "FALSE", "TRUE"))
+    if(enum == "TRUE") enum = "i"
+  }
+
+  n = length(x)
+
+  # Ensuring it's not too long
+  if(n > nmax){
+
+    nmax = nmax - 1
+
+    other = trimws(other)
+    if(nchar(other) > 0){
+      other = paste0(other, " ", n - nmax, " others")
+    } else {
+      other = paste0(n - nmax, " others")
+    }
+
+    if(quote){
+      x = c(paste0("'", x[1:nmax], "'"), other)
+    } else {
+      x = c(x[1:nmax], other)
+    }
+
+    n = length(x)
+  } else if(quote){
+    x = paste0("'", x, "'")
+  }
+
+  # The verb
+  if(verb == "FALSE"){
+    verb = "no"
+  } else if(verb %in% c("be", "are")){
+    verb = "is"
+  } else if(verb == "have"){
+    verb = "has"
+  } else if(verb == "does"){
+    verb = "do"
+  } else if(verb %in% c("do not", "does not", "don't", "doesn't")){
+    verb = "do not"
+  } else if(verb %in% c("is not", "are not", "isn't", "aren't")){
+    verb = "is not"
+  } else if(verb %in% c("was", "were")){
+    verb = "is"
+    past = TRUE
+  }
+
+  if(past){
+    if(verb %in% c("no", "is", "is not", "has", "do", "do not")){
+      verb_format = switch(verb, is = ifunit(n, " was", " were"), "is not" = ifunit(n, " wasn't", " weren't"), no = "", has=" had", do = "did", "do not" = " didn't")
+    } else {
+      verb_format = paste0(" ", verb, "ed")
+    }
+  } else {
+    if(verb %in% c("no", "is", "is not", "has", "do", "do not")){
+      verb_format = switch(verb, is = ifunit(n, " is", " are"), "is not" = ifunit(n, " isn't", " aren't"), no = "", has = ifunit(n, " has", " have"), do = ifunit(n, " does", " do"), "do not" = ifunit(n, " doesn't", " don't"))
+    } else {
+      verb_format = ifelse(n == 1, paste0(" ", verb, "s"), paste0(" ", verb))
+    }
+
+  }
+
+  if (s) {
+    startWord = ifelse(n == 1, " ", "s ")
+  } else {
+    startWord = ""
+  }
+
+  if(enum != "FALSE"){
+    enum_comma = ","
+
+    if(enum == "i"){
+      enum_all = strsplit("i.ii.iii.iv.v.vi.vii.viii.ix.x.xi.xii.xiii.xiv.xv", "\\.")[[1]][1:n]
+    } else if(enum == "I"){
+      enum_all = toupper(strsplit("i.ii.iii.iv.v.vi.vii.viii.ix.x.xi.xii.xiii.xiv.xv", "\\.")[[1]][1:n])
+    } else if(enum == "a"){
+      enum_all = base::letters[1:n]
+    } else if(enum == "A"){
+      enum_all = base::LETTERS[1:n]
+    } else if(enum == "1"){
+      enum_all = 1:n
+    }
+
+    enum_all = paste0(enum_all, ") ")
+  } else {
+    enum_comma = ""
+    enum_all = rep("", n)
+  }
+
+  if (n == 1) {
+    if(!start_verb){
+      res = paste0(startWord, x, verb_format)
+    } else {
+      res = paste0(startWord, gsub(" ", "", verb_format), " ", x)
+    }
+
+  } else {
+    and_or = ifelse(or, " or ", " and ")
+    if(!start_verb){
+      res = paste0(startWord, paste0(enum_all[-n], x[-n], collapse = ", "), enum_comma, and_or, enum_all[n], x[n], verb_format)
+    } else {
+      res = paste0(startWord, gsub(" ", "", verb_format), " ", paste0(x[-n], collapse = ", "), and_or, x[n])
+    }
+
+  }
+
+  res
+}
+
+
+
+####
+#### fixest copies ####
+####
+
+
+error_sender = function(expr, ..., clean, up = 0, arg_name){
+
+  res = tryCatch(expr, error = function(e) structure(list(conditionCall(e),
+                                                          conditionMessage(e)), class = "try-error"))
+  if ("try-error" %in% class(res)) {
+
+    if(missing(up)){
+      # up with set_up
+      f = parent.frame()
+      up = 1
+      while(!identical(f, .GlobalEnv)){
+        if(exists("STRINGOPS_HOOK", f)){
+          break
+        }
+        up = up + 1
+        f = parent.frame(up + 1)
+      }
+
+      if(identical(f, .GlobalEnv)){
+        up = 1
+      }
+    }
+
+
+    set_up(1 + up)
+
+    msg = paste0(..., collapse = "")
+    if (nchar(msg) == 0) {
+      if (missing(arg_name)) {
+        arg_name = deparse(substitute(expr))
+      }
+      msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
+      stop_up(msg, res[[2]])
+    }
+    else {
+      call_non_informative = deparse(substitute(expr),100)[1]
+
+      call_error = deparse(res[[1]], 100)[1]
+
+      if (call_error == call_non_informative || call_error ==
+          "NULL" || grepl("^(doTry|eval)", call_error)) {
+        call_error = ""
+      } else {
+        call_error = paste0("In ", call_error, ": ")
+      }
+
+      err = res[[2]]
+      if (grepl("^in eval\\(str[^:]+:\n", err)) {
+        err = sub("^in eval\\(str[^:]+:\n", "", err)
+      }
+
+      if (!missing(clean)) {
+        if (grepl(" => ", clean)) {
+          clean_split = strsplit(clean, " => ")[[1]]
+          from = clean_split[1]
+          to = clean_split[2]
+        }
+        else {
+          from = clean
+          to = ""
+        }
+        stop_up(msg, "\n  ", call_error, gsub(from, to,
+                                              err))
+      }
+      else {
+        stop_up(msg, "\n  ", call_error, err)
+      }
+    }
+  }
+  res
+}
+
+
+
+
