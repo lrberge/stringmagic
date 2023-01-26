@@ -46,13 +46,12 @@ str_op = function(x, op, do_unik = NULL){
     stop("Argument `x` must be atomic. Currently it is of class `", class(x)[1], "`")
   }
 
-  check_character(x, mbt = TRUE)
-  check_character(op, mbt = TRUE, scalar = TRUE)
-  check_logical(do_unik, null = TRUE, scalar = TRUE)
-
   if(!is.character(x)){
     x = as.character(x)
   }
+
+  check_character(op, mbt = TRUE, scalar = TRUE)
+  check_logical(do_unik, null = TRUE, scalar = TRUE)
 
   # For very large vectors, we unique
   n = length(x)
@@ -1032,7 +1031,8 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
     x = as.character(..1)
 
     if(length(x) > 1){
-      stop_hook("`", fun_name, "` can only be applied to character scalars. Problem: the argument is of length ",
+      stop_hook("`", fun_name, "` can only be applied to character scalars. ",
+                "Problem: the argument is of length ",
            length(qui), "")
     }
 
@@ -1462,7 +1462,7 @@ sop_char2operator = function(x, fun_name){
                 "k", "K", "d", "D", "last", "first",
                 "cfirst", "clast", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
-                "w", "W", "stop", "i", "ir")
+                "w", "W", "stop", "i", "ir", "nth", "Nth")
 
   ok = do_eval = FALSE
 
@@ -2153,11 +2153,19 @@ sop_operators = function(x, quoted, op, check = FALSE, frame = NULL, conditional
 
     # END: insert/append
 
+  } else if(op %in% c("nth", "Nth")){
+
+    #
+    # nth, Nth ####
+    #
+
+    res = n_th(x, letters = str_x(op, 1) == "N")
+
+  } else if(op == "e"){
+
     #
     # e, E, d, D, num ####
     #
-
-  } else if(op == "e"){
 
     if(!is.null(group_index) && conditional_flag == 2){
       qui = which(x != "")
@@ -2595,10 +2603,10 @@ sop_pluralize = function(operators, xi, fun_name){
     } else if(op == "N"){
       res[i] = n_letter(n)
 
-    } else if(op == "n_th"){
+    } else if(op == "nth"){
       res[i] = n_th(n, letters = FALSE)
 
-    } else if(op == "N_th"){
+    } else if(op == "Nth"){
       res[i] = n_th(n, letters = TRUE)
 
     } else if(op == "n_times"){
