@@ -403,38 +403,6 @@ non_ascii = function(folder = "R"){
 }
 
 
-# To circumvent an Rstudio/Google Drive bug preventing
-# the source files to remain open when closing/opening the project
-open_all = function(){
-
-    # Opening R files
-
-    R_not_open = c("R/alias_generator.R", "R/RcppExports.R", "R/Deprecated_funs.R", "R/index",
-                   "R/etable_aliases.R", "R/ML_Families.R", "R/VCOV_aliases.R", "R/xaxis.R")
-
-    R_files = list.files("R/", full.names = TRUE)
-
-    for(f in R_files){
-        if(f %in% R_not_open) next
-        eval(str2lang(.dsb("rstudioapi::navigateToFile('.[f]', moveCursor = FALSE)")))
-    }
-
-    # Opening extra files
-
-    extra_files = c("../PROBLEMS.R", "../Problems.Rmd", "../Development.R",
-                    "../social.rmd", "NEWS.md", "DESCRIPTION", "NAMESPACE", "tests/fixest_tests.R",
-                    list.files("vignettes/", pattern = "Rmd$", full.names = TRUE),
-                    "../todo.txt")
-
-    for(f in extra_files){
-        eval(str2lang(.dsb("rstudioapi::navigateToFile('.[f]', moveCursor = FALSE)")))
-    }
-
-
-}
-
-
-
 
 
 
