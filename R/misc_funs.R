@@ -326,26 +326,39 @@ str_trim = function(x, n_first = 0, n_last = 0){
 
 
 # internal fun, n is ALWAYS len 1, positive and not missing
-n_th = function(n, letters = TRUE){
+n_th = function(x, letters = TRUE){
+  # The main purpose of this function is for smallish 'x'
+  # only to print info, not performance oriented.
 
-  if(n == 0){
-    return("0")
-  }
+  if(is.character(x)) return(x)
+
+  res = character(length(x))
 
   if(letters){
     # We don't go all the way, it makes no sense
 
-    if(n <= 13){
-      dict = c("first", "second", "third", "fourth", "fifth", "sixth", "seventh",
-               "eighth", "nineth", "tenth", "eleventh", "twelfth", "thirteenth")
-      return(dict[n])
+    res[x == 0] = "zeroth"
+
+    dict = c("first", "second", "third", "fourth", "fifth", "sixth", "seventh",
+             "eighth", "nineth", "tenth", "eleventh", "twelfth", "thirteenth",
+             "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth",
+             "nineteenth", "twentyth")
+
+    qui = x >= 1 & x <= 20
+    res[qui] = dict[x[qui]]
+
+    if(!any(res == "")){
+      return(res)
     }
   }
 
-  rest = n %% 10
+  qui = res == ""
+  rest = x[qui] %% 10
   rest[rest == 0 | rest >= 4] = 4
+  rest[x[qui] %in% 11:13] = 4
   postfix = c("st", "nd", "rd", "th")
-  res = paste0(n, postfix[rest])
+
+  res[qui] = paste0(x[qui], postfix[rest])
 
   res
 }
