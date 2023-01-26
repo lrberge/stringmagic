@@ -10,8 +10,9 @@
 #' Function that detects if patterns are in a string. The patterns can be chained, by default this is a regex search but fixed search can be triggered with a special syntax, supports negation.
 #'
 #' @param x A character vector.
-#' @param pattern A character vector, the patterns to be found. By default a (perl) regular-expression search is triggered. To use a fixed search instead, use an `#` first (ex: `"#.["` will search for `".["`). You can negate by adding a `!` first (ex: `"!sepal$"` will return TRUE for strings that do not end with `"sepal"`). If there are two or more patterns, the results are combined with a logical "and". To combine with an "or", you can start with a `|`. `|` has precedence over `!` which has precedence over `#`. You can escape the meaning of the first `!` or `#` with a double backslash `\\\\`.
+#' @param ... Character scalars representing the patterns to be found. By default a (perl) regular-expression search is triggered. To use a fixed search instead, use an `#` first (ex: `"#.["` will search for `".["`). You can negate by adding a `!` first (ex: `"!sepal$"` will return `TRUE` for strings that do not end with `"sepal"`). If there are two or more patterns, the results are combined with a logical "and". To combine with an "or", you can start with a `|`. `|` has precedence over `!` which has precedence over `#`. You can escape the meaning of the first `!` or `#` with a double backslash `\\\\`.
 #' @param or Logical, default is `FALSE`. In the presence of two or more patterns, whether to combine them with a logical "or" (the default is to combine them with a logical "and").
+#' @param pattern (If provided, elements of `...` are ignored.) A character vector representing the patterns to be found. By default a (perl) regular-expression search is triggered. To use a fixed search instead, use an `#` first (ex: `"#.["` will search for `".["`). You can negate by adding a `!` first (ex: `"!sepal$"` will return `TRUE` for strings that do not end with `"sepal"`). If there are two or more patterns, the results are combined with a logical "and". To combine with an "or", you can start with a `|`. `|` has precedence over `!` which has precedence over `#`. You can escape the meaning of the first `!` or `#` with a double backslash `\\\\`.
 #'
 #' @details
 #' Note that fixed search is much faster than regular expression search, so for large vectors it should be used whenever possible.
@@ -34,13 +35,13 @@
 #'
 #' # you can combine several patterns
 #' # default combination is a logical "and"
-#' str_is(x, c("one", "c"))
+#' str_is(x, "one", "c")
 #'
 #' # to combine with a logical "or"
-#' str_is(x, c("one", "|c"))
+#' str_is(x, "one", "|!o")
 #'
 #' # same using the argument `or`:
-#' str_is(x, c("one", "c"), or = TRUE)
+#' str_is(x, "one", "!o", or = TRUE)
 #'
 #' #
 #' # str_which
@@ -48,14 +49,19 @@
 #'
 #' # it works exactly the same way as str_is
 #' # Which are the items containing an 'e' and an 'o'?
-#' str_which(x, c("e", "o"))
+#' str_which(x, "e", "o")
 #'
 #'
-str_is = function(x, pattern, or = FALSE){
+str_is = function(x, ..., or = FALSE, pattern = NULL){
 
-  check_character(pattern, mbt = TRUE, no_na = TRUE)
   check_character(x, mbt = TRUE, l0 = TRUE)
   check_logical(or, scalar = TRUE)
+  check_character(pattern, null = TRUE, no_na = TRUE)
+
+  if(missnull(pattern)){
+    dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
+    pattern = unlist(dots)
+  }
 
   or_origin = or
   negate = FALSE
@@ -124,8 +130,16 @@ str_is = function(x, pattern, or = FALSE){
 }
 
 #' @describeIn str_is
-str_which = function(x, pattern, or = FALSE){
-  which(str_is(x, pattern, or = or))
+str_which = function(x, ..., or = FALSE, pattern = NULL){
+
+  check_character(pattern, null = TRUE, no_na = TRUE)
+
+  if(missnull(pattern)){
+    dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
+    pattern = unlist(dots)
+  }
+
+  which(str_is(x, or = or, pattern = pattern))
 }
 
 
@@ -138,7 +152,7 @@ str_which = function(x, pattern, or = FALSE){
 #'
 #' @param x A character vector.
 #' @param seq Logical, default is `FALSE`. The argument `pattern` accepts a vector of patterns which are combined with an `and` by default. If `seq = TRUE`, then it is like if `str_get` was called sequentially with its results stacked. See examples.
-#' @param seq.unique Logical, default is `FALSE`. If `seq = TRUE`, then the elements obtained are stacked and unique is also performed.
+#' @param seq.unik Logical, default is `FALSE`. The argument `pattern` accepts a vector of patterns which are combined with an `and` by default. If `seq.unik = TRUE`, then it is like if `str_get` was called sequentially with its results stacked, and `unique()` was applied in the end. See examples.
 #'
 #' @return
 #' It always return a character vector.
@@ -151,26 +165,44 @@ str_which = function(x, pattern, or = FALSE){
 #' str_get(x, "Mazda")
 #'
 #' # Finds car names without numbers AND containing `u`
-#' str_get(x, c("!\\d", "u"))
+#' str_get(x, "!\\d", "u")
 #'
 #' # Stacks all Mazda and Volvo cars. Mazda first
-#' str_get(x, c("Mazda", "Volvo"), seq = TRUE)
+#' str_get(x, "Mazda", "Volvo", seq = TRUE)
 #'
 #' # Stacks all Mazda and Volvo cars. Volvo first
-#' str_get(x, c("Volvo", "Mazda"), seq = TRUE)
+#' str_get(x, "Volvo", "Mazda", seq = TRUE)
+#'
+#' # let's get the first word of each car name
+#' car_first = str_op(x, "x")
+#' # we select car brands ending with 'a', then ending with 'i'
+#' str_get(car_first, "a$", "i$", seq = TRUE)
+#' # seq.unik is similar to seq but applies unique()
+#' str_get(car_first, "a$", "i$", seq.unik = TRUE)
 #'
 #'
-str_get = function(x, pattern, or = FALSE, seq = FALSE, seq.unique = TRUE){
+#'
+#'
+str_get = function(x, ..., or = FALSE, seq = FALSE, seq.unik = FALSE, pattern = NULL){
 
   check_character(x, mbt = TRUE)
-  check_character(pattern, mbt = TRUE, no_na = TRUE)
+  check_character(pattern, null = TRUE, no_na = TRUE)
   check_logical(or, scalar = TRUE)
   check_logical(seq, scalar = TRUE)
-  check_logical(seq.unique, scalar = TRUE)
+  check_logical(seq.unik, scalar = TRUE)
+
+  if(missnull(pattern)){
+    dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
+    pattern = unlist(dots)
+  }
+
+  if(seq.unik){
+    seq = TRUE
+  }
 
   if(seq){
     for(i in seq_along(pattern)){
-      value = str_get(x, pattern[i], or = or, seq = FALSE)
+      value = str_get(x, pattern = pattern[i], or = or, seq = FALSE)
       if(i == 1){
         res = value
       } else {
@@ -178,14 +210,14 @@ str_get = function(x, pattern, or = FALSE, seq = FALSE, seq.unique = TRUE){
       }
     }
 
-    if(seq.unique){
+    if(seq.unik){
       res = unique(res)
     }
 
     return(res)
   }
 
-  index = str_is(x, pattern, or)
+  index = str_is(x, pattern = pattern, or)
   x[index]
 }
 
@@ -593,12 +625,14 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
     fml = x
 
     if(!missnull(data) && !is.list(data)){
-      stop("When `x` is a formula, the argument `data` must be a list containing the variables in the formula.",
+      stop("When `x` is a formula, the argument `data` must be a list containing ",
+           "the variables in the formula.",
            "\nPROBLEM: `data` is not a list.")
     }
 
     if(length(fml) < 3){
-      stop("When `x` is a formula, it must be two sided (on the left the variable, on the right the identifier).\nPROBLEM: it is currently only one sided.")
+      stop("When `x` is a formula, it must be two sided (on the left the variable,",
+           " on the right the identifier).\nPROBLEM: it is currently only one sided.")
     }
 
     x = try(eval(fml[[2]], data, enclos = parent.frame()))
@@ -773,7 +807,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 
   mc = match.call()
   str_split2df(x, data = data, split = split, id = id, add.pos = add.pos,
-               id_unik = id_unik, fixed = fixed, dt = TRUE)
+               id_unik = id_unik, fixed = fixed, mc = mc, dt = TRUE)
 }
 
 
@@ -844,7 +878,7 @@ to_integer_single = function(x){
 #' Has shortcuts for common cleaning cases (normalizing white spaces, punctuation, etc)
 #'
 #' @param x A character vector.
-#' @param pat A vector of patterns. The function `gsub` with `replace = ""` is applied recursively to each of the patterns. By default regular expressions are used. To used fixed-search instead, you can add `#` as the first element of your pattern. Ex: `#.` will clean all the points. You can include the special pattern `@w` to normalize white spaces (trims + concatenate multiple WS). To `@w` you can add any of the following codes in any order: `p` for punctuation, `d` for digits, and `i` for isolated. Ex: `@wpi` will clean punctuation, isolated letters and will normalize white spaces. It must always start with `@W`.
+#' @param ... Character scalars representing patterns. The function `gsub` with `replace = ""` is applied recursively to each of the patterns. By default regular expressions are used. To used fixed-search instead, you can add `#` as the first element of your pattern. Ex: `#.` will clean all the points. You can include the special pattern `@w` to normalize white spaces (trims + concatenate multiple WS). To `@w` you can add any of the following codes in any order: `p` for punctuation, `d` for digits, and `i` for isolated. Ex: `@wpi` will clean punctuation, isolated letters and will normalize white spaces. It must always start with `@W`.
 #'
 #' @return
 #' It returns a character vector of the same length as the vector in input.
