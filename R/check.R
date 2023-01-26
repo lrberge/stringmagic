@@ -122,6 +122,147 @@ check_envir = function(x){
 
 }
 
+
+check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
+                          no_na = FALSE, scalar = FALSE){
+  # check the dots arguments
+
+  n = ...length()
+  if(n == 0){
+
+    if(mbt){
+      stop_up("At least one element in `...` must be provided. PROBLEM: `...` is empty.")
+    } else {
+      return(list())
+    }
+
+  }
+
+  if(is.null(mc)){
+    sysOrigin = sys.parent()
+    mc = match.call(definition = sys.function(sysOrigin),
+                    call = sys.call(sysOrigin), expand.dots = FALSE)
+  }
+
+  dots = vector("list", n)
+  dots_nm = ...names()
+
+  # We first catch evaluation problems
+  for(i in 1:n){
+    elem = try(...elt(i), silent = TRUE)
+
+    if(isError(elem)){
+      nm = if(is.null(dots_nm)) "" else dots_nm[i]
+      if(is.na(nm)) nm = ""
+
+      mc_dots = mc[["..."]]
+      value = deparse_short(mc_dots[[i]])
+
+      # really, this is gibberish: who can understand the code?
+      nm = dsb(" (.[@<4(d) ! .[nm] = ].[value])")
+
+      if(grepl("try(...", elem, fixed = TRUE)){
+        elem = gsub("^[^:]+:", "", elem)
+      }
+
+      stop_up(dsb("In the argument `...`, the .[$$nth ? i] element.[nm] raises an error:\n",
+                  elem))
+    }
+
+    dots[[i]] = elem
+  }
+
+  # now we catch type problems
+  if(scalar){
+    if(any(lengths(dots) != 1)){
+      len_dots = lengths(dots)
+      i_pblm = which(len_dots != 1)
+      len_pblm = len_dots[i_pblm]
+
+      # I purposefully copy-paste in each block
+      # otherwise the code becomes too complicated and especially more difficult to debug
+
+      # We try to give as much info as possible
+      n_pblm = length(i_pblm)
+      nm_pblm = character(n_pblm)
+
+      if(!is.null(dots_nm)){
+        rep = dots_nm[i_pblm]
+        rep[is.na(rep)] = ""
+        nm_pblm = rep
+      }
+
+      # the value of the variables
+      mc_dots = mc[["..."]]
+      value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
+
+      # really, this is gibberish: who can understand the code?
+      info_call = dsb("`.[@<4(d) ! .[nm_pblm] = ].[value_all]`")
+
+      stop_up(dsb("In the argument `...`, all elements must be scalars (i.e. of length 1).\nPROBLEM: ",
+                  ".['\n'c ! The .[nth ? i_pblm] element (.[info_call]) is ",
+                  "of length .[f, w ? len_pblm]."))
+    }
+  }
+
+  if(character){
+    if(!all(sapply(dots, is.character))){
+      i_pblm = which(!sapply(dots, is.character))
+
+      # We try to give as much info as possible
+      n_pblm = length(i_pblm)
+      nm_pblm = character(n_pblm)
+
+      if(!is.null(dots_nm)){
+        rep = dots_nm[i_pblm]
+        rep[is.na(rep)] = ""
+        nm_pblm = rep
+      }
+
+      # the value of the variables
+      mc_dots = mc[["..."]]
+      value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
+
+      # really, this is gibberish: who can understand the code?
+      info_call = dsb("`.[@<4(d) ! .[nm_pblm] = ].[value_all]`")
+
+      cls_pblm = sapply(dots[i_pblm], function(x) dsb("bq ! .[enum ? class(x)]"))
+      stop_up(dsb("In the argument `...`, all elements must be character strings.\nPROBLEM: ",
+                  ".['\n'c ! The .[Nth ? i_pblm] element (.[info_call]) is not character",
+                  " (instead it is of class: .[cls_pblm]).]"))
+    }
+  }
+
+  if(no_na){
+    if(any(sapply(dots, anyNA))){
+      i_pblm = which(sapply(dots, anyNA))
+
+      # We try to give as much info as possible
+      n_pblm = length(i_pblm)
+      nm_pblm = character(n_pblm)
+
+      if(!is.null(dots_nm)){
+        rep = dots_nm[i_pblm]
+        rep[is.na(rep)] = ""
+        nm_pblm = rep
+      }
+
+      # the value of the variables
+      mc_dots = mc[["..."]]
+      value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
+
+      # really, this is gibberish: who can understand the code?
+      info_call = dsb("`.[@<4(d) ! .[nm_pblm] = ].[value_all]`")
+
+      stop_up(dsb("In the argument `...`, all elements must be without NA.\nPROBLEM: ",
+                  "The .[nth, enum ? i_pblm] element.[$s] (.[C ? info_call])",
+                  " .[$contain] NA values"))
+    }
+  }
+
+  return(dots)
+}
+
 ####
 #### utilities ####
 ####
@@ -445,7 +586,9 @@ enum = function (x, type, verb = FALSE, s = FALSE, past = FALSE, or = FALSE,
   res
 }
 
-
+isError = function(x){
+  inherits(x, "try-error")
+}
 
 ####
 #### fixest copies ####
