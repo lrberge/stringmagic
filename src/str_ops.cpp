@@ -323,15 +323,15 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
     operator_vec.push_back(operator_tmp);
     ++i;
 
-  } else if(str[i] == '&'){
+  } else if(str[i] == '='){
     //
     // if else
     //
 
-    operator_tmp = "&";
+    operator_tmp = "=";
     ++i;
-    if(i < n && str[i] == '&'){
-      operator_tmp += '&';
+    if(i < n && str[i] == '='){
+      operator_tmp += '=';
       ++i;
     }
 
