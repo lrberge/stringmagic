@@ -200,6 +200,84 @@ void extract_quote(const char * str, int &i, int n,
   }
 }
 
+inline bool ending_ifelse_part(int part, const int box_type, const char * str, int &i){
+
+  if(part == 1){
+    return str[i] == ';' || is_box_close(box_type, str, i);
+  } else {
+    return is_box_close(box_type, str, i);
+  }
+
+}
+
+void extract_ifelse_section(const int box_type, const char * str, int &i, int n,
+                            std::string &operator_tmp, int part){
+  // extracts the content of a 'box' in the ifelse statement
+  // there are limitations in the parsing of this function:
+  // .[&test ; a.[']'R ? x]] will not be parsed properly bc the ';' or ']' in operators don't work
+  // In this case, we need to escape them explicitly
+
+  int n_open = 0;
+
+  while(i < n){
+    if(ending_ifelse_part(part, box_type, str, i)){
+        if(str[i - 1] == '\\'){
+          // means the value has been escaped
+          operator_tmp.pop_back();
+          operator_tmp += str[i++];
+        } else {
+          // we're done
+          break;
+        }
+    } else if(is_box_open(box_type, str, i, n)){
+
+      if(str[i - 1] == '\\'){
+        // means the value has been escaped
+        operator_tmp.pop_back();
+        operator_tmp += str[i++];
+      } else {
+        // valid opening box:
+        // we go all our way until we find a closing statement
+        n_open = 1;
+        operator_tmp += str[i++];
+        if(box_type == DSB){
+          operator_tmp += str[i++];
+        }
+
+        while(n_open > 0 && i < n){
+
+          // we bookkeep the brackets
+          if(is_box_bracket_open(box_type, str, i)){
+            if(str[i - 1] == '\\'){
+              // escaped
+              operator_tmp.pop_back();
+            } else {
+              ++n_open;
+            }
+          } else if(is_box_close(box_type, str, i)){
+            if(str[i - 1] == '\\'){
+              // escaped
+              operator_tmp.pop_back();
+            } else {
+              --n_open;
+            }
+          }
+
+          operator_tmp += str[i++];
+
+          if(n_open == 0){
+            break;
+          }
+        }
+      }
+    } else {
+      // regular case
+      operator_tmp += str[i++];
+    }
+  }
+
+}
+
 void extract_operator(const int box_type, const char * str, int &i, int n,
                       std::vector<std::string> &operator_vec,
                       bool &is_eval, bool &any_plural, bool no_whitespace = false){
@@ -212,14 +290,14 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
   //     "hej! How are you?"  => could have been, but will lead to parsing failure
 
   // Here is the exhaustive list of operations allowed:
-  // - "/1, 2, 3" =< the split string operator. Cannot contain anything else
+  // - "/1, 2, 3" => the split string operator. Cannot contain anything else
   // - ".['arg1'op1, 'arg2'op2 ? x]": argument + operator
   // - ".[op1, op2, ? x]": operator without argument
   // - @<=5(true:false) (also works with #): if special operator. Can be chained.
   //   ex: ".[@<=3(q) ? x]"
   // - @(true:false): special if without comparator
-  // - 'regex'(true:false): if special operator. Can be chained
-  //    ex: ".[<bon.+r>(Q:D) ? x]" or ".['bon.+r'(Q:D) ? x]" or "[/bon.+r/(Q:D) ? x]"
+  // - <regex>(true:false): if special operator. Can be chained
+  //    ex: ".[<bon.+r>(Q:D) ? x]" 
   //    => I'm still hesitating on the form of the operator.
   // - .[& i %% 3 == 0;':'] ifelse operator
   //   .[& condition ; verbatim1 : verbatim2]
@@ -287,17 +365,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
       // the second part
       //
 
-      while(i < n){
-        if(str[i] == ';' || is_box_close(box_type, str, i)){
-          if(str[i - 1] == '\\'){
-            operator_tmp.pop_back();
-          } else {
-            break;
-          }
-        }
-
-        operator_tmp += str[i++];
-      }
+      extract_ifelse_section(box_type, str, i, n, operator_tmp, 1);
 
       if(i == n || (i == n - 1 && !is_box_close(box_type, str, i))){
         any_operator = false;
@@ -319,24 +387,16 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
 
       // we trim 1 WS on each side of ' ; '
       if(str[i - 2] == ' ' && str[i] == ' '){
-        operator_tmp.pop_back();
-        ++i;
+        if(!operator_tmp.empty()){
+          operator_tmp.pop_back();
+          ++i;
+        }
       }
 
       operator_vec.push_back(operator_tmp);
       operator_tmp = "";
 
-      while(i < n){
-        if(is_box_close(box_type, str, i)){
-          if(str[i - 1] == '\\'){
-            operator_tmp.pop_back();
-          } else {
-            break;
-          }
-        }
-
-        operator_tmp += str[i++];
-      }
+      extract_ifelse_section(box_type, str, i, n, operator_tmp, 2);
 
       if(i == n){
         any_operator = false;
@@ -389,8 +449,10 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
 
         in_operator = false;
 
-        // we parse it into: 'stuff'singular, 'stuff'plural
+        // we parse it into: 'stuff'zero 'stuff'singular, 'stuff'plural
         ++i;
+
+        std::string op_first = "", op_second = "", op_third = "";
 
         if(is_quote(str, i)){
           extract_quote(str, i, n, operator_tmp);
@@ -443,7 +505,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
             operator_tmp += '"';
           }
 
-          if(i == n || str[i] != ')'){
+          if(i == n || (str[i] != ')' || str[i] != ':')){
             // parsing error
             any_operator = false;
             break;
@@ -456,6 +518,44 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
           ++i;
         }
 
+        // OK, the second part is valid
+
+        // is there a third part?
+        if(str[i - 1] == ':'){
+
+          if(str[i] == ' ' && str[i - 2] == ' '){
+            // we strip the WS: ".[$(no:the : the)]" => ".[$(no:the:the)]"
+            // beware: ".[no : :the]"
+            ++i;
+          }
+
+          // now the second part
+
+          if(is_quote(str, i)){
+            extract_quote(str, i, n, operator_tmp);
+            // we move along, stripping the white spaces
+            while(i < n && str[i] == ' ') ++i;
+
+          } else {
+            operator_tmp = '"';
+            while(i < n && str[i] != ')'){
+              operator_tmp += str[i++];
+            }
+            operator_tmp += '"';
+          }
+
+          if(i == n || (str[i] != ')' || str[i] != ':')){
+            // parsing error
+            any_operator = false;
+            break;
+          }
+
+          operator_tmp += "plural";
+
+          operator_vec.push_back(operator_tmp);
+          operator_tmp = "";
+          ++i;
+        }
       } else if(str[i] == ','){
         // comma: separator of operators
 
