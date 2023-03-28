@@ -1341,7 +1341,8 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
           }
 
-          xi = sop_ifelse(operators, xi, xi_val, fun_name)
+          xi = sop_ifelse(operators, xi, xi_val, fun_name, frame = frame,
+                          check = check, is_dsb = is_dsb)
         } else {
           #
           # REGULAR OPERATORS
@@ -2651,7 +2652,11 @@ sop_pluralize = function(operators, xi, fun_name){
   paste(res, collapse = " ")
 }
 
-sop_ifelse = function(operators, xi, xi_val, fun_name){
+sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
+
+  if(length(xi) == 1 && is.numeric(xi) &  !is.na(xi)){
+    xi = xi != 0 
+  }
 
   if(!is.logical(xi)){
     form = paste0(".[", operators[1], " cond ; true ; false]")
@@ -2668,11 +2673,12 @@ sop_ifelse = function(operators, xi, xi_val, fun_name){
   if(anyNA(xi)){
     form = paste0(".[", operators[1], " cond ; true ; false]")
 
-    example = 'Example: x = Sys.time(); dsb("Hello .[&format(x, \'%M\') < 20 ; Sun ; Moon]!")'
+    example = 'Example: x = Sys.time(); dsb("Hello .[&format(x, \'%H\') < 20 ; Sun ; Moon]!")'
     example = bespoke_msg(example, fun_name)
 
     stop_hook("The if-else operator `", operators[1], "`, of the form ", form,
-            ", accepts only non-NA logical values. PROBLEM: the condition contains NA values.\n", example)
+              ", accepts only non-NA logical values.\n",
+              "PROBLEM: the condition contains NA values.\n", example)
   }
 
   true = operators[3]
@@ -2701,6 +2707,9 @@ sop_ifelse = function(operators, xi, xi_val, fun_name){
     }
 
   }
+
+  res = string_ops_internal(res, is_dsb = is_dsb, frame = frame,
+                            string_as_box = FALSE, check = check)
 
 
   res
