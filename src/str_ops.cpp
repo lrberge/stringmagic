@@ -416,17 +416,13 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
     }
 
 
-  } else if(str[i] == '$'){
+  } else if(str[i] == '$' || str[i] == '#'){
     //
     // pluralisation
     //
 
     operator_tmp = "$";
     ++i;
-    if(i < n && str[i] == '$'){
-      operator_tmp += '$';
-      ++i;
-    }
 
     operator_vec.push_back(operator_tmp);
     operator_tmp = "";
@@ -434,7 +430,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
     bool in_operator = false;
     while(i < n && !is_separator(str, i) && !is_box_close(box_type, str, i)){
 
-      // pluralization: op1, op2, (sing:plural)
+      // pluralization: op1, op2, (sing;plural)
 
       if(str[i] == ' '){
         // we strip white spaces
@@ -462,13 +458,13 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
 
         } else {
           operator_tmp = '"';
-          while(i < n && str[i] != ':' && str[i] != ')'){
+          while(i < n && str[i] != ';' && str[i] != ')'){
             operator_tmp += str[i++];
           }
           operator_tmp += '"';
         }
 
-        if(i == n || !(str[i] == ':' || str[i] == ')')){
+        if(i == n || !(str[i] == ';' || str[i] == ')')){
           // parsing error
           any_operator = false;
           break;
@@ -483,10 +479,10 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
         // OK, the first part is valid
 
         // is there a second part?
-        if(str[i - 1] == ':'){
+        if(str[i - 1] == ';'){
 
           if(str[i] == ' ' && str[i - 2] == ' '){
-            // we strip the WS: ".[$(he : they)]" => ".[$(he:they)]"
+            // we strip the WS: ".[$(he ; they)]" => ".[$(he;they)]"
             ++i;
           }
 
@@ -505,7 +501,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
             operator_tmp += '"';
           }
 
-          if(i == n || (str[i] != ')' || str[i] != ':')){
+          if(i == n || (str[i] != ')' || str[i] != ';')){
             // parsing error
             any_operator = false;
             break;
@@ -521,15 +517,15 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
         // OK, the second part is valid
 
         // is there a third part?
-        if(str[i - 1] == ':'){
+        if(str[i - 1] == ';'){
 
           if(str[i] == ' ' && str[i - 2] == ' '){
-            // we strip the WS: ".[$(no:the : the)]" => ".[$(no:the:the)]"
-            // beware: ".[no : :the]"
+            // we strip the WS: ".[$(no;the ; the)]" => ".[$(no;the;the)]"
+            // beware: ".[no ; ;the]"
             ++i;
           }
 
-          // now the second part
+          // now the third part
 
           if(is_quote(str, i)){
             extract_quote(str, i, n, operator_tmp);
@@ -544,7 +540,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
             operator_tmp += '"';
           }
 
-          if(i == n || (str[i] != ')' || str[i] != ':')){
+          if(i == n || (str[i] != ')' || str[i] != ';')){
             // parsing error
             any_operator = false;
             break;
