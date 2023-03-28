@@ -87,7 +87,7 @@ check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = 
   }
 
   len_x = length(x)
-  if(len_x == 0 &&  l0) return()
+  if(len_x == 0 && l0 && !scalar) return()
 
   if(scalar){
     if(missing(no_na)) no_na = TRUE
@@ -109,6 +109,66 @@ check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = 
             "Problem: ", problem, ".")
   }
 
+}
+
+check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, 
+                               no_na = FALSE, mbt = TRUE){
+
+  if(missing(x)){
+    if(mbt){
+      x_dp = deparse_short(substitute(x))
+      stop_up("The argument `", x_dp, "` must be provided. Problem: it is missing.")
+    }
+
+    return(NULL)
+  }
+
+  if(null && is.null(x)){
+    return(NULL)
+  }
+
+  if(!is.atomic(x)){
+    x_dp = deparse_short(substitute(x))
+    stop_up(dsb("Argument `.[x_dp]` must be atomic. \n",
+                "PROBLEM: Currently it is of the non-atomic class .[bq?class(x)[1]]."))
+  }
+
+  if(!is.character(x)){
+    x = as.character(x)
+  }
+
+  len_x = length(x)
+  if(len_x == 0 && l0 && !scalar) return()
+
+  if(scalar){
+    if(missing(no_na)) no_na = TRUE
+
+    if(len_x != 1){
+      x_dp = deparse_short(substitute(x))
+      nullable = if(null) "(nullable) " else ""
+      stop_up("The ", nullable, "argument `", x_dp, "` must be a character scalar.\n",
+              " Problem: it is not of length 1, it is of length ", length(x), ".")
+      # .[length(x)]
+      # .[len, n ? x]
+      # .[Len ? x]
+    }
+  }
+
+  if(no_na && anyNA(x)){
+    x_dp = deparse_short(substitute(x))
+    nullable = if(null) "(nullable) " else ""
+    type = if(scalar) "scalar" else "vector without NA"
+    problem = if(scalar) "it is equal to NA" else "it contains NA values"
+    stop_up("The ", nullable, "argument `", x_dp, "` must be a character ", type, ". \n",
+            " Problem: ", problem, ".")
+    # alternative:
+    # stop_cub("The {nullable}argument {bq?x_dp} must be a character ",
+    #          "{&scalar ; scalar ; vector without NA}.\n",
+    #          " Problem: {=scalar ; it is equal to NA ; it contains NA values}")
+    #                     if(scalar) "it is equal to NA" else "it contains NA values"
+  }
+  
+  return(x)
 }
 
 
