@@ -904,36 +904,52 @@ to_integer_single = function(x){
 #' str_clean(x, c("o(?= )", "@wpi"))
 #'
 #'
-str_clean = function(x, pat){
-  check_character(x, mbt = TRUE)
-  check_character(pat, no_na = TRUE, mbt = TRUE)
+str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+"){
+
+  check_character(x, )
+
+  rep_main = rep
+
+  dots = list(...)
 
   res = x
-  for(v in pat){
-    if(substr(v, 1, 2) == "@w"){
-      # special keys
-      v = str_trim(v, 1)
-      res = str_op(res, v)
+  for(i in seq_along(dots)){
+    di = dots[[i]]
+
+    if(grepl(pipe, di)){
+      # application du pipe
+      di_split = strsplit(di, pipe)[[1]]
+      rep = di_split[2]
+      di = di_split[1]
+    }
+
+    all_op = strsplit(di, split = sep)[[1]]
+
+    if(grepl("^@", all_op[1])){
+      stop("Not yet available.")
+      # SPECIAL
+      all_op[1] = substr(all_op[1], 2, nchar(all_op[1]))
+
+      for(op in all_op){
+        res = str_op(res, op)
+      }
 
     } else {
+      # normal
 
-      first_char = substr(v, 1, 1)
-      if(first_char == "\\" && substr(v, 2, 2) == "#"){
-        v = str_trim(v, 1)
+      for(pat in all_op){
+        fixed = grepl("^#", pat)
+        if(fixed){
+          pat = substr(pat, 2, nchar(pat))
+        }
+        res = gsub(pat, rep, res, perl = TRUE)
       }
 
-      fixed = first_char == "#"
-      if(fixed){
-        v = str_trim(v, 1)
-      }
-
-      res = gsub(v, "", res, fixed = fixed, perl = !fixed)
     }
   }
 
   res
 }
-
 
 
 
