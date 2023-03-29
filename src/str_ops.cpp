@@ -741,9 +741,11 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
 
           if(is_comma){
             // nothing, we move along
-          } else if(!any_ws){
+          } else {
+            if(!any_ws && i < n + 1 && !(str[i + 1] == ' ' || str[i + 1] == ',' || is_separator(str, i + 1))){
             // tolerance for single WS in operator
             any_ws = true;
+              operator_tmp += ' ';
           } else {
             // if the spaces are only trailing, OK
             while(i < n && str[i] == ' ') ++i;
@@ -756,6 +758,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
               any_operator = false;
               break;
             }
+          }
           }
 
         } else {
