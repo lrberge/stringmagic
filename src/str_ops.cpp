@@ -1273,6 +1273,8 @@ List cpp_parse_operator(SEXP Rstr){
   // - ~(5 first, enum.i.or) => operator "~(5 first, enum.i.or)", options = "", argument = ""
   //   => same for @, & and <
   // - "5ko" => operator = "ko", options = "", argument = "5"
+  // - backticks can be used to be free to use ' and " in quotes
+  //   the syntax is `!my'stuff" is ok`, ie ! right after the backtick
 
 
   const char *str = CHAR(STRING_ELT(Rstr, 0));
@@ -1292,6 +1294,15 @@ List cpp_parse_operator(SEXP Rstr){
     is_eval = str[i] == '`';
     extract_quote(str, i, n, argument, true);
   }
+  
+  // special case: `!stuff`
+  if(!argument.empty() && argument[0] == '!'){
+    std::string new_arg;
+    for(size_t j=1 ; j<argument.length() ; ++j) new_arg += argument[j];
+    is_eval = false;
+    argument = new_arg;
+  }
+
   
   //
   // operator extraction (beware the case "80 swidth")
