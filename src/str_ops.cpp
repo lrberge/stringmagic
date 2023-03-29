@@ -743,22 +743,22 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
             // nothing, we move along
           } else {
             if(!any_ws && i < n + 1 && !(str[i + 1] == ' ' || str[i + 1] == ',' || is_separator(str, i + 1))){
-            // tolerance for single WS in operator
-            any_ws = true;
+              // tolerance for single WS in operator
+              any_ws = true;
               operator_tmp += ' ';
-          } else {
-            // if the spaces are only trailing, OK
-            while(i < n && str[i] == ' ') ++i;
-            if(is_separator(str, i)){
-              // OK
-              break;
             } else {
-              // non trailing WS, not after comma, not a single WS in operator
-              // => error
-              any_operator = false;
-              break;
+              // if the spaces are only trailing, OK
+              while(i < n && str[i] == ' ') ++i;
+              if(is_separator(str, i)){
+                // OK
+                break;
+              } else {
+                // non trailing WS, not after comma, not a single WS in operator
+                // => error
+                any_operator = false;
+                break;
+              }
             }
-          }
           }
 
         } else {
@@ -1245,6 +1245,96 @@ std::string cpp_extract_quote_from_op(SEXP Rstr){
     int i = 0;
     extract_quote(str, i, n, res, true);
   }
+
+  return res;
+}
+
+// [[Rcpp::export]]
+List cpp_parse_operator(SEXP Rstr){
+  // returns a vectors of the values of the operator
+  // it always return a list of length 4:
+  // - operator: str
+  // - options: str vector
+  // - argument: str
+  // - eval: logical
+  // 
+  // ex: 
+  // "80 swidth.#" 
+  // => list(operator = "swidth", options = "#", argument = "80", eval = FALSE)
+  // 
+  // "enum.5.i.or"
+  // => list(operator = "enum", options = c("5", "i", "or"), argument = "", eval = FALSE)
+  //
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+  
+  std::string argument;
+  int i = 0;
+  bool is_eval = false;
+  
+  //
+  // quote extraction (if available)
+  //
+
+  if(is_quote(str, i)){
+    is_eval = str[i] == '`';
+    extract_quote(str, i, n, argument, true);
+  }
+  
+  //
+  // operator extraction (beware the case "80 swidth")
+  //
+  
+  // we skip possible leading space (can't be more than 1)
+  if(str[i] == ' ') ++i;
+
+  std::string op;
+  
+  while(i < n && str[i] != '.' && str[i] != ' '){
+    op += str[i++];
+  }
+  
+  if(str[i] == ' '){
+    // case "80 swidth"
+    argument = op;
+    op = "";
+
+    while (i < n && str[i] != '.'){
+      op += str[i++];
+    }
+  }
+  
+  //
+  // options
+  //
+
+  std::vector<std::string> options;
+  
+  if(str[i] == '.'){
+    ++i;
+    
+    while(i < n){
+      std::string opt_tmp;
+
+      while(i < n && str[i] != '.'){
+        opt_tmp += str[i++];
+      }
+
+      options.push_back(opt_tmp);
+      opt_tmp = "";
+      ++i;
+    }
+  }
+
+  //
+  // save
+  //
+
+  List res;
+  res["operator"] = op;
+  res["options"] = options;
+  res["argument"] = argument;
+  res["eval"] = is_eval;
 
   return res;
 }
