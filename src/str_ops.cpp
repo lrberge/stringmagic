@@ -72,6 +72,9 @@ inline bool is_box_close(const int box_type, const char * str, int i){
   return box_type == DSB ? str[i] == ']' : str[i] == '}';
 }
 
+inline bool is_digit(const char * str, int i){
+  return str[i] >= '0' && str[i] <= '9';
+}
 
 inline bool is_special_char(const char * str, int i){
   return str[i] == '\'' || str[i] == '"' || str[i] == '`' || str[i] == ':' ||
@@ -1265,12 +1268,21 @@ List cpp_parse_operator(SEXP Rstr){
   // "enum.5.i.or"
   // => list(operator = "enum", options = c("5", "i", "or"), argument = "", eval = FALSE)
   //
+  // We also handle SPECIAL CASES:
+  // - "%.3f" => operator = "%", options = "", argument = ".3f"
+  // - ~(5 first, enum.i.or) => operator "~(5 first, enum.i.or)", options = "", argument = ""
+  //   => same for @, & and <
+  // - "5ko" => operator = "ko", options = "", argument = "5"
+
+
   const char *str = CHAR(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
   
   std::string argument;
   int i = 0;
   bool is_eval = false;
+
+  std::vector<std::string> options;
   
   //
   // quote extraction (if available)
@@ -1285,32 +1297,70 @@ List cpp_parse_operator(SEXP Rstr){
   // operator extraction (beware the case "80 swidth")
   //
   
-  // we skip possible leading space (can't be more than 1)
+  // we skip a possible leading space (can't be more than 1)
   if(str[i] == ' ') ++i;
 
-  std::string op;
-  
-  while(i < n && str[i] != '.' && str[i] != ' '){
-    op += str[i++];
-  }
-  
-  if(str[i] == ' '){
-    // case "80 swidth"
-    argument = op;
-    op = "";
-
-    while (i < n && str[i] != '.'){
+  std::string op, op_raw;
+    
+  if(str[i] == '~' || str[i] == '@' || str[i] == '&' || str[i] == '<'){
+    // special case => everything in the operator
+    while(i < n){
       op += str[i++];
+    }
+
+  } else if(str[i] == '%' && argument.empty()){
+    // special case: "%.3f", here .3f is an argument and NOT an option!
+    // we send everything after '%' in the options
+
+    op = "%";
+    ++i;
+
+    while(i < n){
+      argument += str[i++];
+    }
+
+  } else {
+    // we extract up to the ' ' if there is one
+    // then we extract up to the '.' that defines the options
+    // why? "0.8 swidth" => we don't want to have '.' as an option here
+
+    int i_start = i;
+    while(i < n && str[i] != ' '){
+      op_raw += str[i++];
+    }
+
+    if(i < n && str[i] == ' '){
+      // case "80 swidth"
+      argument = op_raw;
+      op = "";
+
+      while(i < n && str[i] != '.'){
+        op += str[i++];
+      }
+    } else {
+      // we restart the parsing
+      i = i_start;
+      
+      // special case: integer stuck to operator ("5ko")
+      if(is_digit(str, i) && argument.empty()){
+        argument += str[i++];
+        while(i < n && is_digit(str, i)){
+          argument += str[i++];
+        }
+      }
+      
+      while(i < n && str[i] != '.'){
+        op += str[i++];
+      }
+      
     }
   }
   
   //
   // options
   //
-
-  std::vector<std::string> options;
   
-  if(str[i] == '.'){
+  if(i < n && str[i] == '.'){
     ++i;
     
     while(i < n){
