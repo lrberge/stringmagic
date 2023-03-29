@@ -101,7 +101,7 @@ inline bool is_valid_operator_paren(std::string &x){
 
   if(n == 0) return false;
 
-  if(!(x[0] == '@' || x[0] == '#' || x[0] == '<' || x[0] == '~')){
+  if(!(x[0] == '@' || x[0] == '&' || x[0] == '<' || x[0] == '~')){
     return false;
   }
 
@@ -600,6 +600,11 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
     //
 
     bool is_comma = false;
+    // any_ws: flag for whitespaces:
+    // we tolerate only one whitespace per operator:
+    // - "{80 swidth ? x}": valid
+    // - "{80  swidth ? x}": not valid
+    bool any_ws = false;
 
     if(str[i] == ' '){
       if(no_whitespace){
@@ -615,15 +620,19 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
 
     while(i < n && !is_separator(str, i)){
 
-      if(str[i] == '(' || (operator_tmp.empty() && (str[i] == '<' || str[i] == '@' || str[i] == '#' || str[i] == '~'))){
+      if(str[i] == '(' || (operator_tmp.empty() && (str[i] == '<' || str[i] == '@' 
+                           || str[i] == '&' || str[i] == '~'))){
+        // this if deals with:
+        // ~(ops), @<=3(t;f), <regex>(t;f), &(t;f)
+
         // we deal with quotes
         // Used (so far) only in if statements
 
-        // Note that if str[i] == <, we parse directly here because WE WANT TO KEEP THE WHITESPACES!!!
+        // Note that if str[i] == '<', we parse directly here because WE WANT TO KEEP THE WHITESPACES!!!
         // We also WANT TO KEEP THE PARENTHESES!!!
 
         if(str[i] == '('){
-          // error: paren MUST follow only @, #, <, ~
+          // error: paren MUST follow only @, &, <, ~
           any_operator = false;
           break;
 
@@ -683,6 +692,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
           operator_tmp += str[i++];
 
           operator_vec.push_back(operator_tmp);
+          any_ws = false;
           operator_tmp = "";
 
         } else {
@@ -696,6 +706,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
         if(operator_tmp.length() > 0){
           // we save the existing command if needed
           operator_vec.push_back(operator_tmp);
+          any_ws = false;
           operator_tmp = "";
         }
 
@@ -717,18 +728,31 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
         if(str[i] == ','){
           if(operator_tmp.length() > 0){
             operator_vec.push_back(operator_tmp);
+            any_ws = false;
             operator_tmp = "";
           }
           is_comma = true;
         } else if(str[i] == ' '){
-          // nothing, but if NOT after a comma => error
-          if(!is_comma){
+          // spaces are only allowed:
+          // - after a comma
+          // - as trailing before the operand (? or !)
+          // - a single space separating the operator from its argument
+          //   ex: "{5 first}" is OK while "{5   first}" is not
+
+          if(is_comma){
+            // nothing, we move along
+          } else if(!any_ws){
+            // tolerance for single WS in operator
+            any_ws = true;
+          } else {
             // if the spaces are only trailing, OK
             while(i < n && str[i] == ' ') ++i;
             if(is_separator(str, i)){
               // OK
               break;
             } else {
+              // non trailing WS, not after comma, not a single WS in operator
+              // => error
               any_operator = false;
               break;
             }
@@ -926,7 +950,7 @@ List cpp_string_ops_full_string(SEXP Rstr, bool is_dsb){
 
 inline bool is_if_separator(const char * str, int i, int n, bool case_true = false){
   if(case_true){
-    return i >= n || str[i] == ':';
+    return i >= n || str[i] == ';';
   } else {
     return i >= n;
   }
@@ -1030,7 +1054,7 @@ List cpp_string_op_if_extract_old(SEXP Rstr){
 
 // [[Rcpp::export]]
 List cpp_string_op_if_extract(SEXP Rstr){
-  // in: @<=3(true : false)
+  // in: @<=3(true ; false)
   // out: [[1]] @<=3
   //      [[2]] true
   //      [[3]] false
@@ -1143,13 +1167,13 @@ List cpp_string_op_if_extract(SEXP Rstr){
     if_elements.push_back(operator_vec);
     operator_vec = empty_vec;
 
-    if(case_true && (i == n - 1 && str[i] == ':')){
+    if(case_true && (i == n - 1 && str[i] == ';')){
       // we don't go through the 'false'  case
       if_elements.push_back(empty_vec);
       break;
     }
 
-    // we pass the separator (:)
+    // we pass the separator (;)
     ++i;
   }
 
