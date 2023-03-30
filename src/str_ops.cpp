@@ -1343,6 +1343,7 @@ List cpp_parse_operator(SEXP Rstr){
     if(i < n && str[i] == ' '){
       // case "80 swidth"
       argument = op_raw;
+      ++i;
       op = "";
 
       while(i < n && str[i] != '.'){
