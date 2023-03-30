@@ -1506,39 +1506,6 @@ StringVector cpp_normalize_string(SEXP Rstr, bool clean_punct, bool clean_digit,
 }
 
 // [[Rcpp::export]]
-StringVector cpp_trimws_old(SEXP Rstr){
-  // works but so so
-  // problems: 
-  // - copy of elements inefficient
-  // - NAs are turned to string
-  // later:
-  // - use pure R and modify the vector in place (just by checking the bounds you can skip many)
-
-  int n_vec = Rf_length(Rstr);
-
-  StringVector res(n_vec);
-
-  for(int i_vec=0 ; i_vec<n_vec ; ++i_vec){
-    const char *str = CHAR(STRING_ELT(Rstr, i_vec));
-    int n = std::strlen(str);
-
-    std::string x;
-    int i = 0;
-    while(i < n && is_blank(str, i)) ++i;
-
-    while(n > 0 && is_blank(str, n - 1)) --n;
-
-    for(int j=i ; j<n ; ++j){
-      x += str[j];
-    }
-
-    res[i_vec] = x;
-  }
-
-  return res;
-}
-
-// [[Rcpp::export]]
 StringVector cpp_trimws(StringVector x){
   // this is 'fast' because the changes are in place:
   // 'res' is an alias here
