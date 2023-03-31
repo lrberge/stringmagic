@@ -452,6 +452,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
         ++i;
 
         std::string op_first = "", op_second = "", op_third = "";
+        bool is_third = false, is_special = false;
 
         if(is_quote(str, i)){
           extract_quote(str, i, n, operator_tmp);
@@ -467,22 +468,36 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
           operator_tmp += '"';
         }
 
-        if(i == n || !(str[i] == ';' || str[i] == ')')){
-          // parsing error
+        // debug
+        Rcout << "first op:" << operator_tmp << "\n";
+
+        if(i == n || str[i] != ';'){
+          // parsing error: there must be something after a ';', even if empty
           any_operator = false;
           break;
         }
 
-        operator_tmp += "singular";
+        op_first = operator_tmp;
+        // operator_tmp += "singular";
 
-        operator_vec.push_back(operator_tmp);
+        // operator_vec.push_back(operator_tmp);
         operator_tmp = "";
         ++i;
 
         // OK, the first part is valid
 
-        // is there a second part?
+        // debug
+        Rcout << "str[i] = '" << str[i] << "'\n";
+
+        // the second part
         if(str[i - 1] == ';'){
+
+          if(str[i] == ';'){
+            // this is the special: op_second and op_third are identical
+            ++i;
+            is_special = true;
+            is_third = true;
+          }
 
           if(str[i] == ' ' && str[i - 2] == ' '){
             // we strip the WS: ".[$(he ; they)]" => ".[$(he;they)]"
@@ -498,29 +513,37 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
 
           } else {
             operator_tmp = '"';
-            while(i < n && str[i] != ')'){
+            while(i < n && str[i] != ';' && str[i] != ')'){
               operator_tmp += str[i++];
             }
             operator_tmp += '"';
           }
+          
+          // debug
+          Rcout << "second op: " << operator_tmp << "\n";
+          Rcout << "str[i] = '" << str[i] << "'\n";
 
-          if(i == n || (str[i] != ')' || str[i] != ';')){
+          if(i == n || !(str[i] == ';' || str[i] == ')') || (is_special && str[i] != ')')){
             // parsing error
             any_operator = false;
             break;
           }
 
-          operator_tmp += "plural";
+          op_second = operator_tmp;
 
-          operator_vec.push_back(operator_tmp);
+          // operator_tmp += "plural";
+          // operator_vec.push_back(operator_tmp);
           operator_tmp = "";
           ++i;
         }
 
         // OK, the second part is valid
 
+        Rcout << "str[i] = '" << str[i] << "'\n";
+
         // is there a third part?
         if(str[i - 1] == ';'){
+          is_third = true;
 
           if(str[i] == ' ' && str[i - 2] == ' '){
             // we strip the WS: ".[$(no;the ; the)]" => ".[$(no;the;the)]"
@@ -543,18 +566,45 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
             operator_tmp += '"';
           }
 
-          if(i == n || (str[i] != ')' || str[i] != ';')){
+          // debug
+          Rcout << "third operator: " << operator_tmp << "\n";
+          Rcout << "str[i] = " << str[i] << "\n";
+
+          if(i == n || str[i] != ')'){
             // parsing error
             any_operator = false;
             break;
           }
 
-          operator_tmp += "plural";
+          op_third = operator_tmp;
 
-          operator_vec.push_back(operator_tmp);
-          operator_tmp = "";
+          // operator_tmp += "plural";
+
+          // operator_vec.push_back(operator_tmp);
+          // operator_tmp = "";
           ++i;
         }
+
+        // taikng care of the different cases
+
+        if(is_third){
+          op_first += "zero";
+          if(is_special){
+            op_third = op_second;
+          }
+          op_second += "singular";
+          op_third += "plural";
+        } else {
+          op_first += "singular";
+          op_second += "plural";
+        }
+
+        operator_vec.push_back(op_first);
+        operator_vec.push_back(op_second);
+        if(is_third){
+          operator_vec.push_back(op_third);
+        }
+
       } else if(str[i] == ','){
         // comma: separator of operators
 
