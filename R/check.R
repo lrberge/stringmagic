@@ -323,11 +323,40 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
   return(dots)
 }
 
+
+check_set_options = function(x, options, op, free = FALSE){
+  # x: always a character vector
+  # options: the options to match
+  if(length(x) == 0) return(x)
+
+  n = length(x)
+  res = x
+  for(i in 1:n){
+    v = x[i]
+
+    pm = pmatch(tolower(v), tolower(options))
+    if(is.na(pm) && !free){
+      # absence of a match
+      stop_hook(cub("The option {bq?v} is not valid for the operator {bq?op}.\n",
+                "FYI the option{$s ? options} available {$are, enum.bq}."))
+    }
+
+    if(!is.na(pm)){
+      res[i] = options[pm]
+    }
+  }
+
+  res
+}
+
 ####
 #### utilities ####
 ####
 
 
+opt_equal = function(x, option){
+  any(!is.na(pmatch(x, option)))
+}
 
 deparse_short = function(x){
   x_dp = deparse(x)
