@@ -304,13 +304,16 @@ test(txt, "Time since last check: 41 min 42 sec.")
 ####
 
 x = c(15, 550)
-txt = dsb("The value is .[& x > 50 ; > 50 ; <= 50]")
+txt = dsb("The value is .[= x > 50 ; > 50 ; <= 50]")
 test(txt, c("The value is <= 50", "The value is > 50"))
 
 x = c(15, 550)
-txt = dsb("The value is .[&& x > 50 ; > 50]")
+txt = dsb("The value is .[== x > 50 ; > 50]")
 test(txt, c("The value is 15", "The value is > 50"))
 
+x = c(15, 550)
+txt = cub("The values are{=length(x) < 5 ; ': {C ? x}' ; 'too many'}.")
+test(txt, "The values are: 15 and 550.")
 
 ####
 #### ... conditions ####

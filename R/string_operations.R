@@ -1011,8 +1011,8 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
                                help = NULL,
                                check = FALSE, fun_name = "dsb", plural_value = NULL){
 
-  if(!is.null(help)){
 
+  if(!is.null(help)){
     msg = getOption("stringmagick_help")
     if(!is_dsb) {
       msg = dsb2curb(msg)
@@ -2913,7 +2913,7 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
 
 sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
 
-  if(length(xi) == 1 && is.numeric(xi) &  !is.na(xi)){
+  if(length(xi) == 1 && is.numeric(xi) && !is.na(xi)){
     xi = xi != 0 
   }
 
@@ -2967,9 +2967,11 @@ sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
 
   }
 
-  res = string_ops_internal(res, is_dsb = is_dsb, frame = frame,
-                            string_as_box = FALSE, check = check)
-
+  # we allow nestedness only for single values
+  if(length(res) == 1){
+    res = string_ops_internal(res, is_dsb = is_dsb, frame = frame,
+                                string_as_box = FALSE, check = check)
+  }
 
   res
 }
