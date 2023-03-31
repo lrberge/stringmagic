@@ -81,6 +81,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_parse_operator
+List cpp_parse_operator(SEXP Rstr);
+RcppExport SEXP _stringmagick_cpp_parse_operator(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_parse_operator(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_normalize_ws
 StringVector cpp_normalize_ws(SEXP Rstr);
 RcppExport SEXP _stringmagick_cpp_normalize_ws(SEXP RstrSEXP) {
@@ -103,6 +114,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type clean_digit(clean_digitSEXP);
     Rcpp::traits::input_parameter< bool >::type clean_isolated(clean_isolatedSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_normalize_string(Rstr, clean_punct, clean_digit, clean_isolated));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_trimws
+StringVector cpp_trimws(StringVector x);
+RcppExport SEXP _stringmagick_cpp_trimws(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< StringVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_trimws(x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -194,8 +216,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_string_op_if_extract", (DL_FUNC) &_stringmagick_cpp_string_op_if_extract, 1},
     {"_stringmagick_cpp_paste_conditional", (DL_FUNC) &_stringmagick_cpp_paste_conditional, 4},
     {"_stringmagick_cpp_extract_quote_from_op", (DL_FUNC) &_stringmagick_cpp_extract_quote_from_op, 1},
+    {"_stringmagick_cpp_parse_operator", (DL_FUNC) &_stringmagick_cpp_parse_operator, 1},
     {"_stringmagick_cpp_normalize_ws", (DL_FUNC) &_stringmagick_cpp_normalize_ws, 1},
     {"_stringmagick_cpp_normalize_string", (DL_FUNC) &_stringmagick_cpp_normalize_string, 4},
+    {"_stringmagick_cpp_trimws", (DL_FUNC) &_stringmagick_cpp_trimws, 1},
     {"_stringmagick_cpp_which_empty", (DL_FUNC) &_stringmagick_cpp_which_empty, 1},
     {"_stringmagick_cpp_find_first_index", (DL_FUNC) &_stringmagick_cpp_find_first_index, 3},
     {"_stringmagick_cpp_group_rev_index", (DL_FUNC) &_stringmagick_cpp_group_rev_index, 1},

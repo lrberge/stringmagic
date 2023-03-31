@@ -25,12 +25,20 @@ cpp_extract_quote_from_op <- function(Rstr) {
     .Call(`_stringmagick_cpp_extract_quote_from_op`, Rstr)
 }
 
+cpp_parse_operator <- function(Rstr) {
+    .Call(`_stringmagick_cpp_parse_operator`, Rstr)
+}
+
 cpp_normalize_ws <- function(Rstr) {
     .Call(`_stringmagick_cpp_normalize_ws`, Rstr)
 }
 
 cpp_normalize_string <- function(Rstr, clean_punct, clean_digit, clean_isolated) {
     .Call(`_stringmagick_cpp_normalize_string`, Rstr, clean_punct, clean_digit, clean_isolated)
+}
+
+cpp_trimws <- function(x) {
+    .Call(`_stringmagick_cpp_trimws`, x)
 }
 
 cpp_which_empty <- function(Rstr) {
