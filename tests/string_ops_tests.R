@@ -45,6 +45,30 @@ txt = dsb("wpdi ? x")
 test(txt, "Hej Welcome feet wide bed awaits")
 
 #
+# tws, trim
+
+x = c("  bonjour les gens", "ahem
+   ", NA)
+
+txt = dsb("tws ? x")
+test(txt, c("bonjour les gens", "ahem", NA))
+
+x = c("bonjour", "ahem")
+txt = dsb("4 trim ? x")
+test(txt, c("our", ""))
+
+txt = dsb("-2 trim ? x")
+test(txt, c("bonjo", "ah"))
+
+txt = dsb("5 trim.r ? x")
+test(txt, c("bo", ""))
+
+# 
+# ascii
+
+test(dsb("laurent .[ascii ! bergé]"), "laurent berge")
+
+#
 # Case
 
 x = "where is bryan? Bryan is in the KITCHEN."
@@ -60,6 +84,10 @@ test(txt, "WHERE IS BRYAN? BRYAN IS IN THE KITCHEN.")
 
 txt = dsb("title ? x")
 test(txt, "Where Is Bryan? Bryan Is In The KITCHEN.")
+
+x = "results from a new estimator: a new hope"
+txt = dsb("title.i ? x")
+test(txt, "Results from a New Estimator: A New Hope")
 
 #
 # r, R
@@ -95,23 +123,23 @@ txt = dsb("Those are the texts: .[E ? x]")
 test(txt, c("Those are the texts: 55", "Those are the texts: bonjour"))
 
 
-# a, ar, al, da
+# app
 x = c("Sir Eustace", "Anne", "Suzanne")
-txt = dsb("Names emph: .['*|*'a, C ? x].")
+txt = dsb("Names emph: .['*'app.b, C ? x].")
 test(txt, "Names emph: *Sir Eustace*, *Anne* and *Suzanne*.")
 
-txt = dsb("Names strong: .['**'al, '**'ar, C ? x].")
-test(txt, "Names strong: **Sir Eustace**, **Anne** and **Suzanne**.")
+txt = dsb("Names emph: .[* app.b, C ? x].")
+test(txt, "Names emph: *Sir Eustace*, *Anne* and *Suzanne*.")
 
-txt = dsb("Here comes .[<#Eustace>('man'da : 'woman'da), 'a 'al, C ? x].")
+txt = dsb("Here comes .[<#Eustace>('man'app.d ; 'woman'app.d), 'a 'a, C ? x].")
 test(txt, "Here comes a man, a woman and a woman.")
 
 
-# A, Ar, Al
+# App
 
 x = c("Saint Estephe", "Saint Julien")
 
-txt = dsb("My fav. wine.[#('s are 'A : ' is 'Al), C ? x].")
+txt = dsb("My fav. wine.[&('s are 'A ; ' is 'A), C ? x].")
 test(txt, "My fav. wines are Saint Estephe and Saint Julien.")
 
 
@@ -121,27 +149,86 @@ test(txt, "My fav. wines are Saint Estephe and Saint Julien.")
 
 # With numbers
 x = 5
-txt = dsb("There .[$$is, N ? x] cat.[$$s] in the room.")
+txt = dsb("There .[#is, N ? x] cat.[#s] in the room.")
 test(txt, "There are five cats in the room.")
 
 x = 1
-txt = dsb("There .[$$is, N] cat.[$$s ? x] in the room.")                  # + afterwards
+txt = dsb("There .[#is, N] cat.[#s ? x] in the room.")                  # + afterwards
 test(txt, "There is one cat in the room.")
 
 x = 7953
-txt = dsb(".[$$n ? x] observation.[$$s, are] missing.")
+txt = dsb(".[#n ? x] observation.[#s, are] missing.")
 test(txt, "7,953 observations are missing.")
 
 x = 1
-txt = dsb(".[$$n ? x] observation.[$$s, are] missing.")
+txt = dsb(".[#n ? x] observation.[#s, are] missing.")
 test(txt, "1 observation is missing.")
+
+# With 0 in ()
+
+x = 0
+txt = dsb("There .[#(are no;;.[#is, N]) ? x] director.[#(ies;y;ies)].")
+test(txt, "There are no directories.")
+
+x = 1
+txt = dsb("There .[#(are no;;.[#is, N]) ? x] director.[#(ies;y;ies)].")
+test(txt, "There is one directory.")
+
+x = 5
+txt = dsb("There .[#(are no;;.[#is, N]) ? x] director.[#(ies;y;ies)].")
+test(txt, "There are five directories.")
+
+#
+# plural (s, ies)
+
+# without 0 option
+n = 0
+txt = cub("There {#is, n ? n} file{#s} and {#N} director{#y}.")
+test(txt, "There is 0 file and zero directory.")
+
+n = 1
+txt = cub("There {#is, n ? n} file{#s} and {#N} director{#y}.")
+test(txt, "There is 1 file and one directory.")
+
+n = 5
+txt = cub("There {#is, n ? n} file{#s} and {#N} director{#y}.")
+test(txt, "There are 5 files and five directories.")
+
+# with 0 option
+n = 0
+txt = cub("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
+test(txt, "There are no files and zero directories.")
+
+n = 1
+txt = cub("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
+test(txt, "There is 1 file and one directory.")
+
+n = 5
+txt = cub("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
+test(txt, "There are 5 files and five directories.")
+
+#
+# plural: nested evaluation
+
+x = character(0)
+txt = cub("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
+test(txt, "The value `a` does not exist.")
+
+x = "append"
+txt = cub("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
+test(txt, "The value `a` does not exist. Maybe you meant: `append`?")
+
+x = c("append", "array")
+txt = cub("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
+test(txt, "The value `a` does not exist. Maybe you meant: `append` or `array`?")
+
 
 # With length
 x = c("Charles", "Alice")
-txt = dsb(".[$Is, enum ? x] crazy? Hmm... no .[$(he:they), aren't].")
+txt = dsb(".[$Is, enum ? x] crazy? Hmm... no .[$(he;they), aren't].")
 test(txt, "Are Charles and Alice crazy? Hmm... no they aren't.")
 
-txt = dsb(".[$Is, enum] crazy? Hmm... no .[$(he:they), aren't ? x[1]].")  # + afterwards
+txt = dsb(".[$Is, enum] crazy? Hmm... no .[$(he;they), aren't ? x[1]].")  # + afterwards
 test(txt, "Is Charles crazy? Hmm... no he isn't.")
 
 # enum, full force
@@ -157,17 +244,60 @@ test(txt, "Choose one: `1`, `2` or `3`")
 # multiple values
 a = 577
 b = c("x", "y")
-txt = dsb(".[$$n ? a] observation.[$$s, are] missing. It concerns the variable.[$s, enum.bq ? b].")
+txt = dsb(".[#n ? a] observation.[#s, are] missing. It concerns the variable.[$s, enum.bq ? b].")
 test(txt, "577 observations are missing. It concerns the variables `x` and `y`.")
 
 a = 1
-txt = dsb(".[$$n ? a] observation.[$$s, are] missing. It concerns the variable.[$s, enum.bq ? b].")
+txt = dsb(".[#n ? a] observation.[#s, are] missing. It concerns the variable.[$s, enum.bq ? b].")
 test(txt, "1 observation is missing. It concerns the variables `x` and `y`.")
 
-txt = dsb(".[$$n ? a] observation.[$$s, are] missing. It concerns the variable.[$s, enum.bq ? b[1]].")
+txt = dsb(".[#n ? a] observation.[#s, are] missing. It concerns the variable.[$s, enum.bq ? b[1]].")
 test(txt, "1 observation is missing. It concerns the variable `x`.")
 
+# combining the two
 
+x = 1:5
+txt = cub("{$n.u ? x} observation{$s}. He arrived {#nth.letter ? 3} and scored {#ntimes.le ? 1}.")
+text(txt, "5 observations. He arrived third.")
+
+####
+#### n, len ####
+####
+
+x = c(45546, "bonjour")
+txt = cub("A = {n ? x} ; B = {n.l ? 55}")
+test(txt, c("A = 45,546 ; B = fifty-five", "A = bonjour ; B = fifty-five"))
+
+txt = cub("x is of length {len ? x}, or {Len ? x}.")
+test(txt, "x is of length 2, or two.")
+
+# conditionnaly
+x = c("bonjour les gens", "la pluie", "est drue, je rentre")
+txt = cub("Number of words: {' 'S, ~(len), C ? x}.")
+test(txt, "Number of words: 3, 2 and 4.")
+
+num = str_op(x, "' 'S, ~(len), num")
+test(num, c(3, 2, 4))
+
+#
+# swidth
+#
+
+x = "Rome, l'unique objet de mon ressentiment, Rome a qui vient ton bras d'immoler mon amant"
+txt = cub("Voici le texte a apprendre:\n{40 swidth.> ? x}.")
+test(txt, c("Voici le texte a apprendre:\n> Rome, l'unique objet de mon\n> ressentiment, Rome a qui vient ton\n> bras d'immoler mon amant."))
+
+#
+# difftime
+#
+
+x = 3654
+txt = cub("Time since last check: {dtime ? x}.")
+test(txt, "Time since last check: 1 hour 00 min.")
+
+x = structure(1680294984.14505, class = c("POSIXct", "POSIXt")) - structure(1680292481.19258, class = c("POSIXct", "POSIXt"))
+txt = cub("Time since last check: {dtime ? x}.")
+test(txt, "Time since last check: 41 min 42 sec.")
 
 ####
 #### ... if-else ####

@@ -271,6 +271,10 @@ bespoke_msg = function(x, fun_name = NULL){
   # cat(bespoke_msg('x = 1:5; dsb("test.[3K ? x[-1]]")', ".cub", FALSE))
   # the original error msg must always be written in the dsb way
 
+  if(length(x) > 1){
+    x = paste(x, collapse = "")
+  }
+
   # We find the original functions, the one just before string_ops_internal
   if(is.null(fun_name)){
     all_funs = sapply(sys.calls(), function(x) deparse(x)[1])
@@ -389,36 +393,45 @@ n_th = function(x, letters = TRUE){
 }
 
 # Internal fun, n is ALWAYS len 1, positive and not missing
-n_letter = function(n){
+n_letter = function(x){
 
-  if(n > 100){
-    res = format(n, big.mark = ",")
-  } else {
+  res = character(length(x))
 
-    is_minus = n < 0
-    if(is_minus) n = abs(n)
+  for(i in seq_along(x)){
 
-    num2char = c("zero", "one", "two", "three", "four", "five", "six", "seven",
-                 "eight", "nine", "ten", "eleven", "twelve", "thirteen",
-                 "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
-                 "nineteen")
-    if(n < 20){
-      res = num2char[n + 1]
-    } else if(n < 100){
-      tens = n %/% 10
-      digit = n %% 10
-      tens_letter = c("twenty", "thirty", "forty", "fifty",
-                      "sixty", "seventy", "eighty", "ninety")
+    xi = x[i]
+    
+    if(xi > 100){
+      val = format(xi, big.mark = ",")
+    } else {
 
-      num2char = paste0("-", num2char)
-      num2char[1] = ""
+      is_minus = xi < 0
+      if(is_minus) xi = abs(xi)
 
-      res = paste0(tens_letter[tens - 1], num2char[digit + 1])
+      num2char = c("zero", "one", "two", "three", "four", "five", "six", "seven",
+                  "eight", "nine", "ten", "eleven", "twelve", "thirteen",
+                  "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
+                  "nineteen")
+      if(xi < 20){
+        val = num2char[xi + 1]
+      } else if(xi < 100){
+        tens = xi %/% 10
+        digit = xi %% 10
+        tens_letter = c("twenty", "thirty", "forty", "fifty",
+                        "sixty", "seventy", "eighty", "ninety")
+
+        num2char = paste0("-", num2char)
+        num2char[1] = ""
+
+        val = paste0(tens_letter[tens - 1], num2char[digit + 1])
+      }
+
+      if(is_minus){
+        val = paste0("minus ", val)
+      }
     }
-
-    if(is_minus){
-      res = paste0("minus ", res)
-    }
+    
+    res[i] = val
   }
 
   res
@@ -463,22 +476,30 @@ enum_letter = function(n){
 
 
 # Internal fun, n is ALWAYS len 1, positive and not missing
-n_times = function(n, letter = TRUE){
+n_times = function(x, letters = TRUE){
 
-  if(n == 0) {
-    if(letter) return("zero times") else return("0 times")
+  res = character(length(x))
+
+  for(i in seq_along(x)){
+    xi = x[i]
+
+    if(xi == 0) {
+      if(letters){
+        res[i] = "zero times"
+      } else {
+        res[i] = "0 times"
+      }
+    } else if(xi < 4 && letters){
+      dict = c("once", "twice", "three times", "four times")
+      res[i] = dict[xi]
+    } else if(n == 1 && !letters){
+      res[i] = "1 time"
+    } else {
+      res[i] = paste0(xi, " times")
+    }    
   }
 
-  if(n < 4 && letter){
-    dict = c("once", "twice", "three times", "four times")
-    return(dict[n])
-  }
-
-  if(n == 1 && !letter){
-    return("1 time")
-  }
-
-  paste0(n, " times")
+  res
 }
 
 enum_main = function(x, options){
@@ -525,6 +546,141 @@ enum_main = function(x, options){
 
   enumerate_items(x, quote = quote, or = or, enum = enum, nmax = nmax)
 }
+
+format_difftime = function(x, options){
+  # x: number of seconds or difftime or time
+
+  if(is.character(x)){
+    if(is_numeric_in_char(x)){
+      # x: number of seconds
+      x = as.numeric(x)
+    } else {
+      # When the data is not conform:
+      # - should there be an error?
+      # - should I return NA?
+
+      if(!opt_equal(options, "silent")){
+        warning(fit_screen(dsb("Operation `dtime` could not be applied since the data",
+                                " was not numeric, nor a POSIX time, nor a time-difference.",
+                                "\n (To avoid this warning, use the option `silent`: `dtime.silent`.)")))
+      }
+
+      return(rep("(difftime: NA)", length(x)))
+    }
+  }
+
+  res = character(length(x))
+
+  for(i in seq_along(x)){
+    xi = x[i]
+    
+    if(inherits(xi, "POSIXt")){
+      xi = Sys.time() - xi
+    }
+    
+    if(inherits(xi, "difftime")){
+      xi = as.double(xi, units = "secs")
+    }
+    
+    if(xi > 3600){
+      n_hour = xi %/% 3600
+      rest_s = floor(xi %% 3600)
+      n_min = rest_s %/% 60
+      res[i] = cub("{n ? n_hour} hour{#s} {%02i ? n_min} min")
+    } else if(xi > 60){
+      n_min = xi %/% 60
+      n_sec = floor(xi %% 60)
+      res[i] = cub("{n ? n_min} min {%02i ? n_sec} sec")
+    } else if(xi > 0.9){
+      res[i] = paste0(fsignif(xi, 2, 1), "s")
+    } else if(xi > 1e-3){
+      res[i] = paste0(fsignif(xi * 1000, 2, 0), "ms")
+    } else {
+      res[i] = "<1 ms"
+    }
+  }
+  
+  res
+}
+
+fsignif = function (x, s = 2, r = 0, commas = TRUE){
+  # This is not intended to be applied to large vectors (not efficient)
+  # Only for the in-print formatting of some numbers
+
+  # It would supa dupa simple in c++...
+
+  if(is.character(x)){
+    return(x)
+  }
+
+  if(!is.numeric(x)){
+    stop("The argumnent 'x' must be numeric.")
+  }
+
+  commas_single = function(x, s, r){
+
+    if(!is.finite(x) || abs(x) < 1) return(as.character(x))
+
+    if((p <- ceiling(log10(abs(x)))) < s){
+      r = max(r, s - p)
+    }
+
+    x_sign = sign(x)
+    x = abs(x)
+
+    x_str = deparse(x)
+    dec_string = ""
+
+    if(grepl(".", x_str, fixed = TRUE)){
+      decimal = gsub(".*\\.", ".", x_str)
+      dec_string = substr(decimal, 1, 1 + r)
+
+      if(dec_string == ".") dec_string = ""
+    }
+
+    entier = sprintf("%.0f", floor(x))
+    quoi = rev(strsplit(entier, "")[[1]])
+    n = length(quoi)
+    sol = c()
+    for (i in 1:n) {
+      sol = c(sol, quoi[i])
+      if (i%%3 == 0 && i != n) sol = c(sol, ",")
+    }
+
+    res = paste0(ifelse(x_sign == -1, "-", ""), paste0(rev(sol), collapse = ""), dec_string)
+
+    res
+  }
+
+  signif_single = function(x, s, r) {
+    if(is.na(x)) {
+      return(NA)
+    }
+
+    if(abs(x) >= 10^(s - 1)){
+      return(round(x, r))
+    } else {
+      return(signif(x, s))
+    }
+  }
+
+  res = sapply(x, signif_single, s = s, r = r)
+
+  if(commas) res = sapply(res, commas_single, s = s, r = r)
+
+  qui0 = grepl("^0.", res, perl = TRUE)
+  if(any(qui0)){
+    qui_short = nchar(res) < s + 2
+    if(any(qui_short)){
+      for(i in which(qui0)[qui_short]){
+        res[i] = as.vector(sprintf("%s%.*s", res[i], s + 2 - nchar(res[i]), "0000000000000000"))
+      }
+    }
+  }
+
+  res
+}
+
 
 
 enumerate_items = function (x, or = FALSE, quote = NULL,

@@ -324,7 +324,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
 }
 
 
-check_set_options = function(x, options, op, free = FALSE){
+check_set_options = function(x, options, op, free = FALSE, case = FALSE){
   # x: always a character vector
   # options: the options to match
   if(length(x) == 0) return(x)
@@ -334,7 +334,12 @@ check_set_options = function(x, options, op, free = FALSE){
   for(i in 1:n){
     v = x[i]
 
-    pm = pmatch(tolower(v), tolower(options))
+    if(case){
+      pm = pmatch(v, options)
+    } else {
+      pm = pmatch(tolower(v), tolower(options))
+    }
+    
     if(is.na(pm) && !free){
       # absence of a match
       stop_hook(cub("The option {bq?v} is not valid for the operator {bq?op}.\n",
@@ -353,6 +358,66 @@ check_set_options = function(x, options, op, free = FALSE){
 #### utilities ####
 ####
 
+suggest_item = function(x, items){
+  # typical use: x is not in items
+  #              we want to suggest possible values
+  # returns FALSE if no suggestion found
+  
+
+  # 1: with case
+  nx = nchar(x)
+  items_nx = substr(items, 1, nx)
+
+  qui = items_nx == x
+  if(any(qui)){
+    return(items[qui])
+  }
+
+  # 2: without case
+
+  x = tolower(x)
+  items_nx = tolower(items_nx)
+
+  qui = items_nx == x
+  if(any(qui)){
+    return(items[qui])
+  }
+
+  # 3: with spelling mistakes, keeping the order
+  # only if x > 3 characters
+
+  if(nx < 3) return(character(0))
+
+  # lazy algorithm
+  score = numeric(length(items))
+  for(i in 1:nx){
+    score = score + (substr(items_nx, i, i) == substr(x, i, i))
+  }
+
+  if(any(score > 0)){
+    s_order = order(score, decreasing = TRUE)
+    score = score[s_order]
+    items = items[s_order]
+    
+    res = items[score > 0]
+    return(res)
+  }
+
+  # 4: with spelling mistakes, ignoring the order
+  x_letters = strsplit(x, "")[[1]]
+  score = numeric(length(items))
+  for(i in 1:nx){
+    score = score + (substr(items_nx, i, i) %in% x_letters)
+  }
+
+  s_order = order(score, decreasing = TRUE)
+  score = score[s_order]
+  items = items[s_order]
+  
+  res =  tems[score > 0]
+
+  res
+}
 
 opt_equal = function(x, option){
   any(!is.na(pmatch(x, option)))
@@ -449,11 +514,13 @@ stop_up = function(..., up = 1, msg = NULL){
 }
 
 
-fit_screen = function(msg, width = 0.9, leading_ws = TRUE){
+fit_screen = function(msg, width = 0.9, leading_ws = TRUE, leader = ""){
   # makes a message fit the current screen, by cutting the text at the appropriate location
   # msg must be a character string of length 1
 
   # Note that \t are NOT handled
+
+  N_LEAD = nchar(leader)
 
   if(width > 1){
     MAX_WIDTH = width
@@ -461,7 +528,7 @@ fit_screen = function(msg, width = 0.9, leading_ws = TRUE){
     MAX_WIDTH = getOption("width") * width
   }
 
-  MAX_WIDTH = max(MAX_WIDTH, 20)
+  MAX_WIDTH = max(MAX_WIDTH, 15)
 
   res = c()
 
@@ -475,7 +542,7 @@ fit_screen = function(msg, width = 0.9, leading_ws = TRUE){
 
       lead_ws = gsub("^([ \t]*).*", "\\1", m, perl = TRUE)
       m = trimws(m)
-      N_LEAD = nchar(lead_ws)
+      N_LEAD_WS = nchar(lead_ws)
       add_lead = TRUE
       first = TRUE
 
@@ -484,11 +551,11 @@ fit_screen = function(msg, width = 0.9, leading_ws = TRUE){
       while(TRUE){
 
         if(add_lead){
-          width = MAX_WIDTH - N_LEAD
-          prefix = lead_ws
+          width = MAX_WIDTH - N_LEAD_WS - N_LEAD
+          prefix = paste0(leader, lead_ws)
         } else {
-          width = MAX_WIDTH
-          prefix = ""
+          width = MAX_WIDTH - N_LEAD
+          prefix = leader
         }
 
         if(sum(nchar(m_split) + 1) - 1 <= width){

@@ -71,6 +71,10 @@ str_op = function(x, op, do_unik = NULL){
   # Note that I don't need to use string_ops_internal
   # I could simply parse + evaluate in here
 
+  if("group_index" %in% names(attributes(res))){
+    attr(res, "group_index") = NULL
+  }
+
   res
 }
 
@@ -1005,7 +1009,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
                                sep = "", vectorize = FALSE,
                                string_as_box = TRUE, collapse = NULL,
                                help = NULL,
-                               check = FALSE, fun_name = "dsb"){
+                               check = FALSE, fun_name = "dsb", plural_value = NULL){
 
   if(!is.null(help)){
 
@@ -1185,7 +1189,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
         is_ifelse = FALSE
         concat_nested = FALSE
         is_xi_done = FALSE
-        is_plural = ANY_PLURAL && operators[1] %in% c("$", "$$")
+        is_plural = ANY_PLURAL && operators[1] %in% c("$", "#")
         i_candidate = i # => used when evaluating later xi by anticipation
         if(ANY_PLURAL){
 
@@ -1204,44 +1208,57 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
             if(identical(xi, "")){
 
-              if(length(operators) == 1){
-                example = 'Example: x = c("Mark", "Sarah"); dsb(".[$enum, is ? x] away.")'
-                example = bespoke_msg(example, fun_name)
-                stop_hook("In `", fun_name, "`, the pluralization operator (`", operators[1], "`) must contain operations. ",
-                        '\n', example)
-              }
+              if(!is.null(plural_value)){
+                # we are in a nested pluralization call:
+                # ex: "{$(;; Maybe you meant: {enum.bq.4}?) ? sugg)}"
+                # here 'sugg' would be in `plural_value`
+                # we would be in the evaluation of 
+                # " Maybe you meant: {enum.bq.4}?"
+                # if we did not pass it along, there would have been an error
 
-              # We need to find it out!!!!!!
-              xl = lengths(x_values_all)
-              if(all(xl == 0)){
-                # We need to evaluate the next ones
-                ok = FALSE
-                if(i < n){
-                  for(j in (i + 1):n){
-                    if(length(x_parsed[[j]]) == 2 && !identical(x_parsed[[j]][[2]], "")){
-                      ok = TRUE
-                      break
-                    }
-                  }
-                }
-
-                if(!ok){
-                  pblm = paste0(operators[1], paste0(operators[-1], collapse = ", "))
-                  example = 'Example: x = c("Mark", "Sarah"); dsb(".[$enum, is ? x] away.")'
-                  example = bespoke_msg(example, fun_name)
-
-                  stop_hook("In `", fun_name, "`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
-                          "Please provide one by adding it after a question mark.\n", example)
-                }
-
-                i_candidate = j
-                xi = x_parsed[[j]][[2]]
+                xi = plural_value
+                is_xi_done = TRUE
 
               } else {
-                # Means that stg has been evaluated before
-                qui = tail(which(xl > 0), 1)
-                xi = x_values_all[[qui]]
-                is_xi_done = TRUE
+                if(length(operators) == 1){
+                  example = 'Example: x = c("Mark", "Sarah"); dsb(".[$enum, is ? x] away.")'
+                  example = bespoke_msg(example, fun_name)
+                  stop_hook("In `", fun_name, "`, the pluralization operator (`", operators[1], "`) must contain operations. ",
+                          '\n', example)
+                }
+
+                # We need to find it out!!!!!!
+                xl = lengths(x_values_all)
+                if(all(xl == 0)){
+                  # We need to evaluate the next ones
+                  ok = FALSE
+                  if(i < n){
+                    for(j in (i + 1):n){
+                      if(length(x_parsed[[j]]) == 2 && !identical(x_parsed[[j]][[2]], "")){
+                        ok = TRUE
+                        break
+                      }
+                    }
+                  }
+
+                  if(!ok){
+                    pblm = paste0(operators[1], paste0(operators[-1], collapse = ", "))
+                    example = 'Example: x = c("Mark", "Sarah"); dsb(".[$enum, is ? x] away.")'
+                    example = bespoke_msg(example, fun_name)
+
+                    stop_hook("In `", fun_name, "`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
+                            "Please provide one by adding it after a question mark.\n", example)
+                  }
+
+                  i_candidate = j
+                  xi = x_parsed[[j]][[2]]
+
+                } else {
+                  # Means that stg has been evaluated before
+                  qui = tail(which(xl > 0), 1)
+                  xi = x_values_all[[qui]]
+                  is_xi_done = TRUE
+                }
               }
 
             } else {
@@ -1256,7 +1273,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
         if(!is_plural) {
           # regular operators
 
-          if(operators[1] %in% c("&", "&&")){
+          if(operators[1] %in% c("=", "==")){
             # if else operator
             is_ifelse = TRUE
             xi_raw = xi = operators[2]
@@ -1326,7 +1343,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
             if(length(vars) == 0){
               # ERROR
               form = ".[== cond ; true ; false]"
-              example = 'Example: x = c(5, 700); dsb("Value: .[&&x > 20 ; > 20]")'
+              example = 'Example: x = c(5, 700); dsb("Value: .[==x > 20 ; > 20]")'
 
               form = bespoke_msg(form, fun_name)
               example = bespoke_msg(example, fun_name)
@@ -1688,24 +1705,38 @@ sop_char2operator = function(x, fun_name){
   }
     
   if(!ok && !op %in% OPERATORS){
+    
+    op = check_set_options(op, OPERATORS, case = TRUE, free = TRUE)
 
-    example = 'x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")'
-    example = bespoke_msg(example)
+    if(!op %in% OPERATORS){
+      example = 'x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")'
+      example = bespoke_msg(example)
 
-    msg = c("The operation `", x, "` is not valid. It must be something quoted followed by a valid operator.",
-            "\n  Valid operators (limited list, see help): ",
-            "\n                   to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
-            "\n                   to replicate: * / to replicate and collapse with the empty string: *c",
-            "\n                   to upper/lower case: u, U, L / to single/double quote: q, Q",
-            "\n                   to format f, F / to apply sprintf format: %",
-            "\n                   to format whitespaces: w, tws / to append: a, A / to insert: i, I",
-            "\n                   to keep: k (#characters), K (#items) / to delete: d, D",
-            "\n                   to remove stopwords: stop ",
-            "\n------------------------------",
-            "\n  type dsb('--help') for more help.",
-            "\n  Example: .[', *'S, 'a => b'r ? var] first splits the variable var by commas then replaces every 'a' with a 'b'.")
+      sugg = suggest_item(op, OPERATORS)
+      sugg_txt = ""
+      if(length(sugg) > 0){
+        sugg_txt = cub(" Maybe you meant: {enum.or.bq.4 ? sugg}?")
+      }
+      # "{$(;; Maybe you meant: {enum.or.bq.4}) ? sugg}"
 
-    stop_hook("In ", fun_name, ", the operation is not valid, see below. ", msg = msg)
+      msg = c("The operation `", x, "` is not valid. It must be something quoted followed by a valid operator.",
+              "\n `", op, "` is not a valid operator.", sugg_txt,
+              "\n  Valid operators (limited list, see help): ",
+              "\n                   to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
+              "\n                   to replicate: * / to replicate and collapse with the empty string: *c",
+              "\n                   to upper/lower case: u, U, L / to single/double quote: q, Q",
+              "\n                   to format f, F / to apply sprintf format: %",
+              "\n                   to format whitespaces: w, tws / to append: a, A / to insert: i, I",
+              "\n                   to keep: k (#characters), K (#items) / to delete: d, D",
+              "\n                   to remove stopwords: stop ",
+              "\n------------------------------",
+              "\n  type dsb('--help') for more help.",
+              "\n  Example: .[', *'S, 'a => b'r ? var] first splits the variable var by commas then replaces every 'a' with a 'b'.")
+
+      msg = bespoke_msg(msg)
+
+      stop_hook("In ", fun_name, ", the operation is not valid, see below. ", msg = msg)
+    }
 
   }
 
@@ -2123,62 +2154,31 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       res = sort(x, decreasing = op == "dsort")
     }
 
-  } else if(op %in% c("a", "A", "i")){
+  } else if(op %in% c("app", "App", "insert")){
     # Appends at the beginning/end of all strings
 
     #
     # Insert/Append ####
     #
 
-    if(opt_equal(options, "d")){
+    if("d" %in% options){
       x = character(length(x))
-      op = "a"
     }
 
-    # Conditional A
-    if(op == "*A"){
-      # We transform it into a regular A call
-      op = "A"
-
-      pat = c("_/_", " / ", "/")
-      argument_split = argument
-      for(p in pat){
-        if(grepl(p, argument, fixed = TRUE)){
-          argument_split = strsplit(argument, p, fixed = TRUE)[[1]]
-          break
-        }
-      }
-
-      if(length(x) == 1){
-        argument = argument_split[[1]]
-      } else {
-        argument = if(length(argument_split) > 1) argument_split[[2]] else ""
-      }
-    }
-
-    if(op %in% c("ar", "Ar", "ir", "Ir")){
-      left = ""
+    left = right = ""
+    if("b" %in% options){
+      # 'both'
+      left = right = argument
+    } else if("r" %in% options){
       right = argument
-      op = substr(op, 1, 1)
     } else {
-      pat = c("_|_", "|")
-      argument_split = argument
-      for(p in pat){
-        if(grepl(p, argument, fixed = TRUE)){
-          argument_split = strsplit(argument, p, fixed = TRUE)[[1]]
-          break
-        }
-      }
-
-      left = argument_split[[1]]
-      right = if(length(argument_split) > 1) argument_split[[2]] else ""
+      left = argument
     }
-
 
     if(nchar(argument) == 0){
       res = x
 
-    } else if(op == "a"){
+    } else if(op == "app"){
 
       if(length(x) == 0){
         res = x
@@ -2234,7 +2234,6 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
           }
         }
 
-
         if(any(nchar(left) > 0)){
           if(any(nchar(right) > 0)){
             res = paste0(left, x, right)
@@ -2245,7 +2244,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
           res = paste0(x, right)
         }
       }
-    } else if(op == "i"){
+    } else if(op == "insert"){
       # inserts an ELEMENT at the beginning/end
 
       if(nchar(left) > 0){
@@ -2258,8 +2257,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
         res = c(x, right)
       }
 
-    } else if(op %in% c("A", "I")){
-      # appends/inserts **implicitly** at the beginning of the first/last string
+    } else if(op %in% "App"){
+      # appends **implicitly** at the beginning of the first/last string
 
       res = x
 
@@ -2280,23 +2279,14 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
         extra = list()
       }
 
-      if(op == "A"){
-        if(nchar(left) > 0){
-          extra$str_add_first = paste0(extra$str_add_first, left)
-        }
-
-        if(nchar(right) > 0){
-          extra$str_add_last = paste0(extra$str_add_last, right)
-        }
-      } else if(op == "I"){
-        if(nchar(left) > 0){
-          extra$element_add_first = c(extra$element_add_first, left)
-        }
-
-        if(nchar(right) > 0){
-          extra$element_add_last = c(extra$element_add_last, right)
-        }
+      if(nchar(left) > 0){
+        extra$str_add_first = paste0(extra$str_add_first, left)
       }
+
+      if(nchar(right) > 0){
+        extra$str_add_last = paste0(extra$str_add_last, right)
+      }
+
     }
 
     # END: insert/append
@@ -2304,12 +2294,95 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   } else if(op %in% c("nth", "Nth")){
 
     #
-    # nth, Nth ####
+    # nth, n, len ####
     #
 
     is_letter = any(grepl("^l", options)) || str_x(op, 1) == "N"
 
     res = n_th(x, letters = is_letter)
+  } else if(op %in% c("n", "N")){
+    # format numbers
+
+    is_letters = opt_equal(options, "letter") || op == "N"
+
+    if(is.numeric(x)){
+      if(is_letters){
+        res = n_letter(x)
+      } else {
+        res = format(x, big.mark = ",")
+        res = cpp_trimws(res)
+      }
+    } else {
+      x_num = suppressWarnings(as.numeric(x))
+      is_x_num = which(!is.na(x_num))
+      num_val = x_num[is_x_num]
+
+      if(is_letters){
+        res_num = n_letter(num_val)
+      } else {
+        res_num = format(num_val, big.mark = ",")
+        res_num = cpp_trimws(res_num)
+      }
+
+      res = x
+      res[is_x_num] = res_num
+
+    }
+
+  } else if(op %in% c("len", "Len")){
+    # the length of the vector
+
+    is_letters = opt_equal(options, "letters") || substr(op, 1, 1) == "L"
+
+    # if conditional: lengths of all the groups
+    if(!is.null(group_index) && conditional_flag == 2){
+      res = tabulate(group_index)
+      group_index = seq_along(res)
+    } else {
+      if(conditional_flag == 1){
+        group_index = 1
+      }
+
+      res = length(x)
+    }
+
+    if(is_letters){
+      res = n_letter(res)
+    }
+
+  } else if(op == "swidth"){
+    #
+    # swidth, dtime ####
+    #
+
+    comment = ""
+    if(length(options) > 0) comment = options[1]
+
+    if(str_x(comment, -1) == "!"){
+      # the bang means that we don't add a space
+      comment = str_trim(comment, -1)
+    } else {
+      comment = paste0(comment, " ")
+    }
+
+    nb = argument
+    if(!is_numeric_in_char(nb)){
+      msg = paste0("In `dsb`: the operator `", op, "` must first contain a numeric argument. PROBLEM: `",
+                   argument, "` is not numeric.")
+      stop_hook(bespoke_msg(msg))
+    }
+    nb = as.numeric(nb)
+
+    # code is slow but I don't see why would one want it to be super fast
+    # (only for user-content, not performance/data-analysis concent)
+
+    res = character(length(x))
+    for(i in seq_along(x)){
+      res[i] = fit_screen(x[i], width = nb, leader = comment)
+    }
+    
+  } else if(op == "dtime"){
+    res = format_difftime(x)
 
   } else if(op == "e"){
 
@@ -2325,7 +2398,6 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     } else {
       res = x[x != ""]
     }
-
 
   } else if(op == "E"){
 
@@ -2736,6 +2808,7 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
   }
 
   n = if(plural_len) length(xi) else xi
+  IS_ZERO = n == 0
   IS_PLURAL = n > 1
 
   operators = operators[-1]
@@ -2744,51 +2817,74 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
   for(i in 1:n_op){
     op_parsed = cpp_parse_operator(operators[i])
 
-    op = op_parsed$op
+    op = op_parsed$operator
     options = op_parsed$options
     argument = op_parsed$argument
 
-    if(op == "s"){
-      if(IS_PLURAL){
-        res[i] = "s"
+    if(op %in% c("s", "y", "ies")){
+      zero_case = opt_equal(options, c("zero", "0"))
+
+      is_really_plural = IS_PLURAL || (zero_case && IS_ZERO)
+
+      if(op == "s"){
+        if(is_really_plural){
+          res[i] = "s"
+        } else {
+          res[i] = ""
+        }
       } else {
-        res[i] = ""
+        if(is_really_plural){
+          res[i] = "ies"
+        } else {
+          res[i] = "y"
+        }
       }
 
     } else if(op %in% c("n", "N", "len", "Len")){
 
-      is_letter = opt_equal(options, "letter") || substr(op, 1, 1) %in% c("N", "L")
+      is_letter = opt_equal(options, c("letter", "upper")) || substr(op, 1, 1) %in% c("N", "L")
+      is_upper = opt_equal(options, "upper")
 
-      if(is_letter){
-        res[i] = n_letter(n)
+      if(opt_equal(options, "no") && IS_ZERO){
+        if(is_upper){
+          res[i] = "No"
+        } else {
+          res[i] = "no"
+        }
+      } else if(is_letter){
+        val = n_letter(n)
+
+        if(is_upper){
+          val = gsub("^(.)", "\\U\\1", val, perl = TRUE)
+        }
+
+        res[i] = val
       } else {
         res[i] = format(n, big.mark = ",")
       }
       
     } else if(op %in% c("nth", "Nth")){
-      is_letter = opt_equal(options, "letter") || substr(op, 1, 1) == "N"
-      res[i] = n_th(n, letters = is_letter)
+      is_letter = opt_equal(options, c("letter", "upper")) || substr(op, 1, 1) == "N"
+      val = n_th(n, letters = is_letter)
+      if(opt_equal(options, "upper")){
+        val = gsub("^(.)", "\\U\\1", val, perl = TRUE)
+      }
+      res[i] = val
 
     } else if(op %in% c("ntimes", "Ntimes")){
       is_letter = opt_equal(options, "letter") || substr(op, 1, 1) == "N"
       res[i] = n_times(n, letters = is_letter)
 
-    } else if(op == "singular"){
-      if(!IS_PLURAL){
-        value = string_ops_internal(argument, is_dsb = is_dsb, frame = frame,
-                                    string_as_box = FALSE, check = check)
+    } else if(op %in% c("zero", "singular", "plural")){
+      if((op == "zero" && IS_ZERO) || 
+         (op == "singular" && !IS_PLURAL && !(any(grepl("zero$", operators)) && IS_ZERO)) || 
+         (op == "plural" && IS_PLURAL)){
+          value = string_ops_internal(argument, is_dsb = is_dsb, frame = frame,
+                                      string_as_box = FALSE, check = check, 
+                                      plural_value = xi)
 
         res[i] = value
       }
-
-    } else if(op == "plural"){
-      if(IS_PLURAL){
-        value = string_ops_internal(argument, is_dsb = is_dsb, frame = frame,
-                                    string_as_box = FALSE, check = check)
-
-        res[i] = value
-      }
-
     } else if(op == "enum"){
 
       res[i] = enum_main(xi, options = options)
@@ -2803,7 +2899,10 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
         stop_hook("In pluralization, `", op, "` is expected to be a verb and verbs must always be composed of at least two letters.\n", example)
       }
 
-      res[i] = conjugate(op, IS_PLURAL)
+      zero_case = opt_equal(options, c("zero", "0"))
+      is_really_plural = IS_PLURAL || (zero_case && IS_ZERO)
+
+      res[i] = conjugate(op, is_really_plural)
     }
 
   }
