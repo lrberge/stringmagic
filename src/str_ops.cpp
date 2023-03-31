@@ -424,7 +424,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
     // pluralisation
     //
 
-    operator_tmp = "$";
+    operator_tmp = str[i];
     ++i;
 
     operator_vec.push_back(operator_tmp);
@@ -581,7 +581,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
           // operator_tmp += "plural";
 
           // operator_vec.push_back(operator_tmp);
-          // operator_tmp = "";
+          operator_tmp = "";
           ++i;
         }
 
