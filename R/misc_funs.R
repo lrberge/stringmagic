@@ -10,18 +10,37 @@
 #### string manipulation ####
 ####
 
-str_to_ascii = function(x){
+str_to_ascii = function(x, options){
   # force to ASCII using iconv. Keeps track of encoding error
+
+  opts = c("silent", "utf8")
+  options = check_set_options(options, opts, "ascii", free = TRUE)
+
+  is_silent = "silent" %in% options
+
+  if("utf8" %in% options){
+    from = "UTF-8"
+  } else {
+    from = setdiff(options, opts)
+    if(length(from) == 0){
+      from = ""
+    }
+  }
 
   old_char = try(nchar(x), silent = TRUE)
 
   if("try-error" %in% class(old_char)){
     # super nasty encoding => nchar can't be used
-    x_conv = iconv(x, to = "ASCII//TRANSLIT//IGNORE")
+    x_conv = iconv(x, to = "ASCII//TRANSLIT//IGNORE", from = from)
     nbfail = 0
 
+    if(!is_silent){
+      warning(fit_screen("The encoding was a bit nasty (nchar couldn't be used!): please check the conversion to ASCII.",
+              "\n(Ignore this message with the `silent` option [ex: `ascii.silent`]. Pass the native encoding as an option?)"))
+    }
+
   } else {
-    x_conv = iconv(x, to = "ASCII//TRANSLIT//IGNORE")
+    x_conv = iconv(x, to = "ASCII//TRANSLIT//IGNORE", from = from)
     which_failed = which(old_char != nchar(x_conv) | grepl("?", x_conv, fixed = TRUE))
     nbfail = length(which_failed)
   }
@@ -36,6 +55,12 @@ str_to_ascii = function(x){
     if("isFailed" %in% names(attributes(x_manual))){
       ANY_FAILED = TRUE
       attr(x_conv, "isFailed") = which_failed[attr(x_manual, "isFailed")]
+
+      if(!is_silent){
+        warning(fit_screen(cub("When transforming to ASCII, there {#was, n ? nbfail} failed encoding{#s}. ",
+                    "Attribute `isFailed` is created (note that you can only access it if the variable is not transformed).",
+                    "\n(Ignore this message with the `silent` option [ex: `ascii.silent`]. Pass the native encoding as an option?)")))
+      }
     }
   }
 
@@ -113,7 +138,7 @@ ascii_convert_manual = function(x, type = c("all", "upper", "lower")){
     x[which_failed] = x_new
 
     if(nb_failed > 0){
-      warning("There has been ", nb_failed, " failed encoding. Attribute isFailed is created to track the problems.")
+      # warning("There has been ", nb_failed, " failed encoding. Attribute isFailed is created to track the problems.")
       attr(x, "isFailed") = which_failed
     }
 
@@ -456,9 +481,7 @@ n_times = function(n, letter = TRUE){
   paste0(n, " times")
 }
 
-enum_main = function(x, op){
-  enum_split = strsplit(op, ".", fixed = TRUE)[[1]]
-  enum_split = enum_split[-1]
+enum_main = function(x, options){
 
   # we construct the call to enum
   # default values
@@ -469,35 +492,35 @@ enum_main = function(x, op){
 
   # Quote
   q_map = c("q" = "'", "Q" = '"', "bq" = "`")
-  qui = which(enum_split %in% names(q_map))
+  qui = which(options %in% names(q_map))
   if(length(qui) > 0){
     if(length(qui) > 1){
       stop_hook("In `enum`, you cannot use more than one quote keyword ",
                 "(q, Q, or bq) in the enumeration. PROBLEM: `", op, "` is not valid.")
     }
 
-    q = enum_split[qui]
-    enum_split = enum_split[-qui]
+    q = options[qui]
+    options = options[-qui]
     quote = q_map[q]
   }
 
   # or
-  if("or" %in% enum_split){
+  if("or" %in% options){
     or = TRUE
-    enum_split = enum_split[!enum_split == "or"]
+    options = options[!options == "or"]
   }
 
   # i, a, etc
-  qui = which(enum_split %in% c("i", "I", "a", "A", "1"))
+  qui = which(options %in% c("i", "I", "a", "A", "1"))
   if(length(qui) > 0){
-    enum = enum_split[qui[1]]
-    enum_split = enum_split[-qui]
+    enum = options[qui[1]]
+    options = options[-qui]
   }
 
   # digit
-  qui = which(grepl("^[[:digit:]]+$", enum_split))
+  qui = which(grepl("^[[:digit:]]+$", options))
   if(length(qui) > 0){
-    nmax = as.numeric(enum_split[qui[1]])
+    nmax = as.numeric(options[qui[1]])
   }
 
   enumerate_items(x, quote = quote, or = or, enum = enum, nmax = nmax)
