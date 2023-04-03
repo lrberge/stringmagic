@@ -24,7 +24,18 @@ enum {
 CUB = 1, DSB = 2
 };
 
-inline bool is_box_open(const int box_type, const char * str, int i, int n){
+inline bool is_box_open(const int box_type, const char * str, int &i, int n, bool skip = false){
+
+  if(skip && str[i] == '\\'){
+    // here we need to 'avoid' the backslash since it is only used to
+    // escape the opening box (note that in regex this is not checked)
+    if(box_type == DSB && i + 2 < n && str[i + 1] == '.' && str[i + 2] == '['){
+      ++i;
+    } else if(box_type == CUB && i + 1 < n && str[i + 1] == '{'){
+      ++i;
+    }
+    return false;
+  }
 
   if(box_type == DSB){
     if(i + 2 < n){
@@ -68,7 +79,17 @@ inline bool is_box_bound(const int box_type, const char * str, int i, int n){
   }
 }
 
-inline bool is_box_close(const int box_type, const char * str, int i){
+inline bool is_box_close(const int box_type, const char * str, int &i, bool skip = false){
+  // sikp: we skip the backslash which can be used for escaping
+
+  if(skip && str[i] == '\\'){
+    int n = std::strlen(str);
+    if( i + 1 < n && ((box_type == DSB && str[i + 1] == ']') || (box_type == CUB && str[i + 1] == '}')) ){
+      ++i;
+    }
+    return false;
+  }
+
   return box_type == DSB ? str[i] == ']' : str[i] == '}';
 }
 
@@ -468,8 +489,8 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
           operator_tmp += '"';
         }
 
-        // debug
-        Rcout << "first op:" << operator_tmp << "\n";
+        // // debug
+        // Rcout << "first op:" << operator_tmp << "\n";
 
         if(i == n || str[i] != ';'){
           // parsing error: there must be something after a ';', even if empty
@@ -486,8 +507,8 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
 
         // OK, the first part is valid
 
-        // debug
-        Rcout << "str[i] = '" << str[i] << "'\n";
+        // // debug
+        // Rcout << "str[i] = '" << str[i] << "'\n";
 
         // the second part
         if(str[i - 1] == ';'){
@@ -519,9 +540,9 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
             operator_tmp += '"';
           }
           
-          // debug
-          Rcout << "second op: " << operator_tmp << "\n";
-          Rcout << "str[i] = '" << str[i] << "'\n";
+          // // debug
+          // Rcout << "second op: " << operator_tmp << "\n";
+          // Rcout << "str[i] = '" << str[i] << "'\n";
 
           if(i == n || !(str[i] == ';' || str[i] == ')') || (is_special && str[i] != ')')){
             // parsing error
@@ -539,7 +560,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
 
         // OK, the second part is valid
 
-        Rcout << "str[i] = '" << str[i] << "'\n";
+        // Rcout << "str[i] = '" << str[i] << "'\n";
 
         // is there a third part?
         if(str[i - 1] == ';'){
@@ -566,9 +587,9 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
             operator_tmp += '"';
           }
 
-          // debug
-          Rcout << "third operator: " << operator_tmp << "\n";
-          Rcout << "str[i] = " << str[i] << "\n";
+          // // debug
+          // Rcout << "third operator: " << operator_tmp << "\n";
+          // Rcout << "str[i] = " << str[i] << "\n";
 
           if(i == n || str[i] != ')'){
             // parsing error
@@ -881,7 +902,8 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
 
     // if not currently open => we check until open
     if(n_open == 0){
-      while(i < n && !is_box_open(box_type, str, i, n)){
+
+      while(i < n && !is_box_open(box_type, str, i, n, true)){
         string_value += str[i++];
       }
 
@@ -943,7 +965,7 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
         // we bookeep the brackets
         if(is_box_bracket_open(box_type, str, i)){
           ++n_open;
-        } else if(is_box_close(box_type, str, i)){
+        } else if(is_box_close(box_type, str, i, true)){
           --n_open;
         }
 
