@@ -1080,6 +1080,10 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
   if(string_as_box){
     x_parsed = list(cpp_string_ops_full_string(x, is_dsb))
 
+    if(identical(x_parsed[[1]][[2]], "")){
+      x_parsed = cpp_string_ops(x, is_dsb)
+    }
+
   } else if(!grepl(BOX_OPEN, x, fixed = TRUE)){
     return(x)
 
@@ -2882,8 +2886,9 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
           value = string_ops_internal(argument, is_dsb = is_dsb, frame = frame,
                                       string_as_box = FALSE, check = check, 
                                       plural_value = xi)
-
-        res[i] = value
+        if(value != ""){
+          res[i] = value
+        }        
       }
     } else if(op == "enum"){
 
