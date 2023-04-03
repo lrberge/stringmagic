@@ -539,7 +539,7 @@ enum_main = function(x, options){
   }
 
   # digit
-  qui = which(grepl("^[[:digit:]]+$", options))
+  qui = which(grepl("^[[:digit:]]+$", options) & options != "1")
   if(length(qui) > 0){
     nmax = as.numeric(options[qui[1]])
   }
@@ -766,12 +766,22 @@ conjugate = function(verb, plural){
     verb = "is"
   } else if(verb %in% c("has", "have")){
     verb = "has"
-  } else if(verb %in% c("donot", "doesnot", "don't", "doesn't")){
+  } else if(verb %in% c("has not", "have not")){
+    verb = "has not"
+  } else if(verb %in% c("hasn't", "haven't")){
+    verb = "hasn't"
+  } else if(verb %in% c("donot", "doesnot")){
     verb = "do not"
-  } else if(verb %in% c("isnot", "arenot", "isn't", "aren't")){
+  } else if(verb %in% c("don't", "doesn't")){
+    verb = "don't"
+  } else if(verb %in% c("isnot", "arenot")){
     verb = "is not"
-  } else if(verb %in% c("wasnot", "werenot", "wasn't", "weren't")){
+  } else if(verb %in% c("isn't", "aren't")){
+    verb = "isn't"
+  } else if(verb %in% c("wasnot", "werenot")){
     ver = "was not"
+  } else if(verb %in% c("wasn't", "weren't")){
+    ver = "wasn't"
   } else if(verb %in% c("was", "were")){
     verb = "was"
   } else if(grepl("ies$", verb)){
@@ -786,16 +796,22 @@ conjugate = function(verb, plural){
 
   pick = function(a, b) if(plural) b else a
 
-  if(verb %in% c("is", "has", "do", "do not", "is not", "was", "was not", "try")){
+  if(verb %in% c("is", "is not", "isn't", "has", "has not", "hasn't", 
+                 "do", "do not", "don't", "was", "was not", "wasn't")){
+
     res = switch(verb,
                  is = pick("is", "are"),
+                 "is not" = pick("is not", "are not"),
+                 "isn't" = pick("isn't", "aren't"),
                  has = pick("has", "have"),
+                 "has not" = pick("has not", "have not"),
+                 "hasn't" = pick("hasn't", "haven't"),
                  do = pick("does", "do"),
-                 "do not" = pick("doesn't", "don't"),
-                 "is not" = pick("isn't", "aren't"),
+                 "do not" = pick("does not", "do not"),
+                 "don't" = pick("doesn't", "don't"),
                  "was" = pick("was", "were"),
-                 "was not" = pick("wasn't", "weren't"),
-                 try = pick("tries", "try"))
+                 "was not" = pick("was not", "were not"),
+                 "wasn't" = pick("wasn't", "weren't"))
 
   } else {
     # by default, the rest is in plural form
@@ -880,10 +896,10 @@ fml_extract_elements = function(fml){
 
 # x = "x = 1:5; dsb(Hi .[' 'c ! .[letters[x]].[x[]]])"
 dsb2curb = function(x){
-  # transforms help written for dsb into help for curb
+  # transforms help written for dsb into help for cub
 
   # function name
-  res = gsub("dsb", "curb", x)
+  res = gsub("dsb", "cub", x)
 
   # opening
   res = gsub(".[", "{", res, fixed = TRUE)
