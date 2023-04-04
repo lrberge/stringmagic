@@ -915,7 +915,70 @@ dsb2curb = function(x){
   res
 }
 
+insert = function(x, y, i, replace = FALSE){
+    # x = list(a = 1, b = 2, c = 3) ; y = list(u = 33, v = 55) ; i = 2 ; insert(x, y, i)
+    # we insert y into x in location i
+    # we don't lose the names!
+    # replace: whether to erase the value at the index
 
+    mode = mode(x)
+    if(!mode %in% c("list", "numeric", "logical", "character", "integer")){
+        stop("Internal error: the current mode (", mode, ") is node supported in insert().")
+    }
+
+    n_x = length(x)
+
+    if(n_x == 0){
+        return(y)
+    }
+
+    n_y = length(y)
+    res = vector(mode, n_x + n_y - replace)
+
+    names_x = names(x)
+    if(is.null(names_x)) names_x = character(n_x)
+    names_y = names(y)
+    if(is.null(names_y)) names_y = character(n_y)
+
+    if(replace && i <= n_x && length(x) == 1){
+      # edge case of replacement
+      res = setNames(y, names_y)
+      return(res)
+    }
+
+    if(i > n_x){
+        res[1:n_x] = x
+        res[n_x + 1:n_y] = y
+        names(res) = c(names_x, names_y)
+
+    } else if(i == 1){
+        res[1:n_y] = y
+        if(replace){
+          res[n_y + 2:n_x] = x
+          names(res) = c(names_y, names_x[-1])
+        } else {
+          res[n_y + 1:n_x] = x
+          names(res) = c(names_y, names_x)
+        }      
+
+    } else {
+        res[1:(i-1)] = x[1:(i-1)]
+        res[(i-1) + 1:n_y] = y
+        if(replace){
+          if(i == n_x){
+            names(res) = c(names_x[1:(i-1)], names_y)
+          } else {
+            res[(i+n_y):(n_x + n_y - 1)] = x[(i + 1):n_x]
+            names(res) = c(names_x[1:(i-1)], names_y, names_x[(i + 1):n_x])
+          }
+        } else {
+          res[(i+n_y):(n_x + n_y)] = x[i:n_x]
+          names(res) = c(names_x[1:(i-1)], names_y, names_x[i:n_x])
+        }
+    }
+
+    return(res)
+}
 
 
 
