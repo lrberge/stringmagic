@@ -542,6 +542,276 @@ selvars = function(x, pattern = NULL, order = NULL){
   res
 }
 
+selvars_old = function(x, pattern = NULL, order = NULL){
+
+
+  mc = match.call()
+  if("x" %in% names(mc) && mc$x == "."){
+    # this is a data table call
+    sc_all = sys.calls()
+    if(length(sc_all) >= 4 && as.character(sc_all[[length(sc_all) - 3]][1])[1] == "[.data.table"){
+      x = eval(quote(names_x), parent.frame(3))
+    }
+  }
+
+  if(missing(x)){
+    stop("Argument 'x' must be provided. PROBLEM: it is missing.")
+  }
+
+  is_data_set = is.data.frame(x)
+  if(is_data_set){
+    x_df = x
+    x = names(x)
+  } else {
+    check_character(x)
+  }
+
+  check_character(pattern, no_na = TRUE, null = TRUE)
+  check_character(order, null = TRUE, no_na = TRUE)
+
+  x_origin = x
+
+  if(length(pattern) > 1){
+    if(any(grepl("||", pattern[1:(length(pattern) - 1)], fixed = TRUE))){
+      # the order must always come last!!!!
+      i = which(grepl("||", pattern[1:(length(pattern) - 1)], fixed = TRUE))[i]
+      stop("You can use the double pipe `||` to reorder the variables, ",
+           "but it must always come in the last element of argument `pattern`.",
+           "\nPROBLEM: the double pipe appears in the ", n_th(i),
+           " element (of ", length(pattern), ").")
+    }
+  }
+
+  if(length(pattern) == 0){
+    pattern = "@."
+  }
+
+  pattern = str_op(pattern, "'[, \t\n]+'S")
+
+  n_pat = length(pattern)
+
+  if(n_pat > 0 && grepl("||", pattern[n_pat], fixed = TRUE)){
+    pat_split = str_op(pattern[n_pat], "'||'s, w")
+    pattern[n_pat] = pat_split[1]
+    order = str_op(pat_split[2], "'[, \t\n]+'S")
+  }
+
+  # default: full var
+  qui_all = rep(FALSE, length(x))
+  init = TRUE
+  res = c()
+  for(p in pattern){
+    p_raw = p
+    p_clean = NULL
+    first_char = substr(p, 1, 1)
+
+    is_and = first_char == "&"
+    if(is_and){
+      p = substr(p, 2, nchar(p))
+      first_char = substr(p, 1, 1)
+      all_vars = x_origin
+    } else {
+      all_vars = x
+    }
+
+    negate = first_char == "!"
+    if(negate){
+      p = substr(p, 2, nchar(p))
+      first_char = substr(p, 1, 1)
+    }
+
+    if(p %in% c(".num", ".log", ".lnum", ".fact", ".char", ".fchar", ".date")){
+      if(!is_data_set){
+        stop(dsb("The special value .[bq?p] can only be used when the argument `x` is a data set. ",
+                 "It is meaningless for character vectors."))
+      }
+
+      type_fun = switch(p,
+                        .num = is.numeric,
+                        .log = is.logical,
+                        .lnum = function(x) is.numeric(x) || is.logical(x),
+                        .fact = is.factor,
+                        .char = is.character,
+                        .fchar = function(x) is.factor(x) || is.character(x),
+                        .date = function(x) any(grepl("date", class(x), ignore.case = TRUE)))
+
+      is_selected = sapply(x_df, type_fun)
+
+      if(!any(is_selected)){
+        info = switch(p,
+                      .num = "numeric",
+                      .log = "logical",
+                      .lnum = "numeric or logical",
+                      .fact = "factor",
+                      .char = "character",
+                      .fchar = "factor or character",
+                      .date = "date")
+
+        stop(dsb("The special value .[bq?p] did not find any variable. ",
+                 "Maybe you could check that there are .[info] variables in the data set?"))
+      }
+
+    } else if(first_char %in% c("#", "@", "^")){
+      # fixed char search
+      fixed = first_char == "#"
+      p = substr(p, 2, nchar(p))
+
+      if(first_char == "^"){
+        p_clean = p
+        p = paste0("^\\Q", p, "\\E")
+      }
+
+      is_selected = grepl(p, all_vars, perl = !fixed, fixed = fixed)
+
+    } else {
+      is_selected = all_vars == p
+    }
+
+    if(!any(is_selected) || (negate && all(is_selected))){
+      info = switch(first_char,
+                    "#" = "fixed pattern",
+                    "@" = "regular expression",
+                    "^" = "partial matching of",
+                    "value")
+
+      if(!is.null(p_clean)) p = p_clean
+
+      p_info = if(p != p_raw) paste0("(raw is `", p_raw, "`) ") else ""
+      consequence = "led to no variable being selected."
+      if(info == "value"){
+        consequence = paste0("is not ", ifelse(is_data_set, "a variable from the data set.", "present."))
+      }
+      extra = if(info == "value") " Note that you can use regex with `@` and partial matching with `^`." else ""
+
+      stop("In the argument `pattern`, the ", info, " `", p, "` ", p_info, consequence, extra)
+    }
+
+    if(init){
+      if(negate){
+        res = all_vars[!is_selected]
+        if(!is_and){
+          # we restrict the values (unless asked explicitly not too)
+          x = res
+        }
+      } else {
+        res = all_vars[is_selected]
+      }
+
+    } else {
+      if(negate){
+        if(is_and){
+          # we want the negated variables in
+          wanted = setdiff(all_vars[!is_selected], res)
+          res = c(res, wanted)
+        } else {
+          # we want the negated variables out
+          unwanted = all_vars[is_selected]
+          x = all_vars[!is_selected]
+          res = setdiff(res, unwanted)
+        }
+      } else {
+        # we respect the order of the user
+        wanted = setdiff(all_vars[is_selected], res)
+        res = c(res, wanted)
+      }
+
+    }
+
+    init = FALSE
+  }
+
+  n_o = length(order)
+  if(n_o == 0){
+    return(res)
+  }
+
+  order = str_op(order, "'[, \t\n]+'S")
+
+  for(i in n_o:1){
+    or_raw = or = order[i]
+    or_clean = NULL
+
+    first_char = substr(or, 1, 1)
+    negate = first_char == "!"
+    if(negate){
+      or = substr(or, 2, nchar(or))
+      first_char = substr(or, 1, 1)
+    }
+
+    if(or %in% c(".num", ".log", ".lnum", ".fact", ".char", ".fchar", ".date")){
+      if(!is_data_set){
+        stop(dsb("The special value .[bq?or] can only be used when the argument `x` is a data set. ",
+                 "It is meaningless for character vectors."))
+      }
+
+      type_fun = switch(or,
+                        .num = is.numeric,
+                        .log = is.logical,
+                        .lnum = function(x) is.numeric(x) || is.logical(x),
+                        .fact = is.factor,
+                        .char = is.character,
+                        .fchar = function(x) is.factor(x) || is.character(x),
+                        .date = function(x) any(grepl("date", class(x), ignore.case = TRUE)))
+
+      is_selected = sapply(x_df, type_fun)
+
+      if(!any(is_selected)){
+        info = switch(or,
+                      .num = "numeric",
+                      .log = "logical",
+                      .lnum = "numeric or logical",
+                      .fact = "factor",
+                      .char = "character",
+                      .fchar = "factor or character",
+                      .date = "date")
+
+        stop(dsb("The special value .[bq?or] did not find any variable. ",
+                 "Maybe you could check that there are .[info] variables in the data set?"))
+      }
+
+    } else if(first_char %in% c("#", "@", "^")){
+      fixed = first_char == "#"
+      or = substr(or, 2, nchar(or))
+
+      if(first_char == "^"){
+        or_clean = or
+        or = paste0("^\\Q", or, "\\E")
+      }
+
+      is_selected = grepl(or, res, perl = !fixed, fixed = fixed)
+
+    } else {
+      is_selected = res == or
+    }
+
+    if(!any(is_selected)){
+      info = switch(first_char,
+                    "#" = "fixed pattern",
+                    "@" = "regular expression",
+                    "^" = "partial matching of",
+                    "value")
+
+      if(!is.null(or_clean)) or = or_clean
+      or_info = if(or != or_raw) paste0("(raw is `", or_raw, "`) ") else ""
+      consequence = "led to no variable being selected."
+      if(info == "value"){
+        consequence = paste0("is not ", ifelse(is_data_set, "a variable from the data set.", " present."))
+      }
+      extra = if(info == "value") " Note that you can use regex with `@` and partial matching with `^`." else ""
+
+      stop("In the argument `pattern`, the ", info, " `", or, "` ", or_info, consequence, extra)
+    }
+
+    if(negate){
+      res = c(res[!is_selected], res[is_selected])
+    } else {
+      res = c(res[is_selected], res[!is_selected])
+    }
+
+  }
+
+  res
+}
 
 
 #' Splits a character vector into a data frame
