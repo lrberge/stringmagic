@@ -10,10 +10,21 @@
 #' Function that detects if patterns are in a string. The patterns can be chained, by default this is a regex search but fixed search can be triggered with a special syntax, supports negation.
 #'
 #' @param x A character vector.
-#' @param ... Character scalars representing the patterns to be found. By default a (perl) regular-expression search is triggered. To use a fixed search instead, use an `#` first (ex: `"#.["` will search for `".["`). You can negate by adding a `!` first (ex: `"!sepal$"` will return `TRUE` for strings that do not end with `"sepal"`). If there are two or more patterns, the results are combined with a logical "and". To combine with an "or", you can start with a `|`. `|` has precedence over `!` which has precedence over `#`. You can escape the meaning of the first `!` or `#` with a double backslash `\\\\`.
-#' @param or Logical, default is `FALSE`. In the presence of two or more patterns, whether to combine them with a logical "or" (the default is to combine them with a logical "and").
-#' @param pattern (If provided, elements of `...` are ignored.) A character vector representing the patterns to be found. By default a (perl) regular-expression search is triggered. To use a fixed search instead, use an `#` first (ex: `"#.["` will search for `".["`). You can negate by adding a `!` first (ex: `"!sepal$"` will return `TRUE` for strings that do not end with `"sepal"`). If there are two or more patterns, the results are combined with a logical "and". To combine with an "or", you can start with a `|`. `|` has precedence over `!` which has precedence over `#`. You can escape the meaning of the first `!` or `#` with a double backslash `\\\\`.
-#'
+#' @param ... Character scalars representing the patterns to be found. By default a (perl) regular-expression 
+#' search is triggered. To use a fixed search instead, use an `#` first (ex: `"#.["` will search for `".["`). 
+#' You can negate by adding a `!` first (ex: `"!sepal$"` will return `TRUE` for strings 
+#' that do not end with `"sepal"`). If there are two or more patterns, the results are combined with 
+#' a logical "and". To combine with an "or", use the argument `or`. The tag `!` 
+#' has precedence over `#`. You can escape the meaning of the first `!` or `#` with a double backslash `\\\\`.
+#' @param or Logical, default is `FALSE`. In the presence of two or more patterns, 
+#' whether to combine them with a logical "or" (the default is to combine them with a logical "and").
+#' @param pattern (If provided, elements of `...` are ignored.) A character vector representing the 
+#' patterns to be found. By default a (perl) regular-expression search is triggered. 
+#' To use a fixed search instead, use an `#` first (ex: `"#.["` will search for `".["`). 
+#' You can negate by adding a `!` first (ex: `"!sepal$"` will return `TRUE` for strings 
+#' that do not end with `"sepal"`). If there are two or more patterns, the results are combined 
+#' with a logical "and". To combine with an "or", use the argument `or`. The tag  `!`  has precedence 
+#' over `#`. You can escape the meaning of the first `!` or `#` with a double backslash `\\\\`.
 #' @details
 #' Note that fixed search is much faster than regular expression search, so for large vectors it should be used whenever possible.
 #'
@@ -38,9 +49,6 @@
 #' str_is(x, "one", "c")
 #'
 #' # to combine with a logical "or"
-#' str_is(x, "one", "|!o")
-#'
-#' # same using the argument `or`:
 #' str_is(x, "one", "!o", or = TRUE)
 #'
 #' #
