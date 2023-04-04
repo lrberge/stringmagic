@@ -827,12 +827,12 @@ setup_help = function(){
     "    ex: dsb(\"C ? 1:5\")",
     "",
     "  Replication:",
-    "    - use 5* to replicate 5 times,",
-    "    - using quotes also works, like in '5'*.",
-    "    * _TAB_ NO DEFAULT _TAB_ replicates n times",
-    "    *c _TAB_ NO DEFAULT _TAB_ replicates n times, then collapses with ''",
-    "    ** _TAB_ NO DEFAULT _TAB_ replicates n times, each",
-    "    **c _TAB_ NO DEFAULT _TAB_ replicates n times, each, then collapses with ''",
+    "    - use '5'times to replicate 5 times,",
+    "    - you can avoid using quotes, as in: `5 times`",
+    "    times _TAB_ NO DEFAULT _TAB_ replicates n times",
+    "    times.c _TAB_ NO DEFAULT _TAB_ replicates n times, then collapses with ''",
+    "    each _TAB_ NO DEFAULT _TAB_ replicates n times, each",
+    "    each.c _TAB_ NO DEFAULT _TAB_ replicates n times, each, then collapses with ''",
     "    ex: dsb(\"yes.[10*c ! !]\")",
     "",
     "  Replacement: ",
@@ -890,8 +890,9 @@ setup_help = function(){
     "  sprintf formatting:",
     "    - applies a formatting via sprintf,",
     "    - .['.3f'%?x] is equivalent to sprintf('%.3f', x),",
+    "    - you can also use `%.3f` directly: .[%.3f ? pi]",
     "    % _TAB_ NO DEFAULT _TAB_ applies sprintf formatting",
-    "    ex: dsb(\"pi = .['.2f'% ? pi]\")",
+    "    ex: dsb(\"pi = .[%.2f ? pi]\")",
     "",
     "  Selecting the first/last elements/characters",
     "    - syntax is 'n'first or firstn",
@@ -902,7 +903,7 @@ setup_help = function(){
     "    ex: dsb(\"'15'first, last3 ? letters\")",
     "",
     "  Keeping a selected number of characters or elements: ",
-    "    - the syntax is nK, 'n'K, 'n|s'K, or 'n||s'K",
+    "    - the syntax is n K, 'n'K, 'n|s'K, or 'n||s'K",
     "    - with 'n' a number and 's' a string,",
     "    - K keeps the first n elements and drops the rest,",
     "    - k keeps the first n characters of each element,",
@@ -943,7 +944,7 @@ setup_help = function(){
     "    ex: x = c(\"short\", \"long sentence\") ; dsb(\"@<=5('*|*'a:x) ? x\")",
     "",
     "  Condition on the number of elements:",
-    "    - the syntax is: #<=3(true:false)",
+    "    - the syntax is: &<=3(true:false)",
     "    - the operations listed in `true` will be applied to the full vector if it contains 3 elements or less",
     "    - the operations listed in `false` will be applied to the full vector if it contains strictly more than 3 elements",
     "    - the operation #(true:false) is a shorthand for #>1(true:false)",
@@ -968,19 +969,22 @@ setup_help = function(){
     "",
     "# PLURALIZATION ----|",
     "  To trigger pluralization use a dollar sign right at the beginning of the operators.",
-    "  By default the pluralization is based on the *length* of the element.",
-    "  ex: x = c(\"Mark\", \"Francis\"); dsb(\".[$enum, is?x] here.\")",
-    "  You can instead trigger pluralization on a value using two dollar signs.",
-    "  ex: n = 1; dsb(\".[n] file.[$$s, were] found.\")",
+    "  There are two pluralization tags: `$` and `#`.",
+    "  The tag `$` pluralizes on the *length* of the element.",
+    "  The tag `#` pluralizes on the *value* of the element.",
+    "  ex, length: x = c(\"Mark\", \"Francis\"); dsb(\".[$enum, is?x] here.\")",
+    "  ex, value: n = 1; dsb(\".[n] file.[#s, were] found.\")",
     "",
     "  When pluralizing you can perform the following operations:",
     "    - s: adds an 's' if it is plural",
+    "    - y or ies: adds an 'y' if singular and 'ies' if plural",
     "    - enum: enumerates the elements (see help for the regular enum)",
-    "    - (s1:s2): adds verbatim 's1' if singular and 's2' if plural",
+    "    - (s1;s2): adds verbatim 's1' if singular and 's2' if plural",
+    "    - (s1;s2;s3): adds verbatim 's1' if zero, 's2' if singular and 's3' if plural",
     "    - is, or any verb: conjugates the verb appropriately",
     "    - n, N: add the number of elements as a number (n) or in letters (N)",
     "  You can chain operations, in that case a whitespace is automatically added between them.",
-    "  ex: x = sample(20, 5); dsb(\"The winning number.[$s, is, enum ? sort(x)]\".)",
+    "  ex: x = sample(20, 5); dsb(\"The winning number.[$s, is, enum ? sort(x)].\")",
     "",
     "  You need not provide the value over which to pluralize if it has been used previously or will be used afterwards:",
     "  ex: x = \"Mara\"; dsb(\"I like .[C ? x], .[$(she:they), is] my best friend.[$s].\")",
@@ -991,7 +995,7 @@ setup_help = function(){
     '        dsb("Hi .[/David, Dora]!") -> c("Hi David!", "Hi Dora!")',
     "",
     "    In quoted arguments, use backticks to evaluate them from the frame.",
-    '    Ex: n = 3 ; dsb("`n`*c!$") -> "$$$". The \'$\' is replicated n times, then collapsed.'
+    '    Ex: n = 3 ; dsb("`n`times.c!$") -> "$$$". The \'$\' is replicated n times, then collapsed.'
   )
 
 
@@ -1649,7 +1653,7 @@ sop_char2operator = function(x, fun_name){
                 "k", "K", "d", "D", "last", "first",
                 "cfirst", "clast", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
-                "w", "tws", "trim",
+                "ws", "tws", "trim",
                 "n", "len", "Len", "swidth", "dtime",
                 "stop", "insert", "nth", "Nth")
   
@@ -1760,9 +1764,18 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   if(op %in% c("s", "S")){
     # S, C, R ####
     # Split is always applied on verbatim stuff => length 1
-    fixed = op == "s"
 
-    x_split = strsplit(x, argument, fixed = fixed, perl = !fixed)
+    is_ignore = opt_equal(options, "ignore")
+    is_fixed = opt_equal(options, "fixed")
+
+    # fixed = op == "s"
+    if(is_ignore){
+      # ignore case
+      is_fixed = FALSE
+      argument = paste0("(?i)", argument)
+    }
+
+    x_split = strsplit(x, argument, fixed = is_fixed, perl = !is_fixed)
 
     if(conditional_flag != 0){
       # we keep track of the group index
@@ -1834,11 +1847,26 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       new = argument_split[[2]]
     }
 
-    if(op == "r"){
-      res = gsub(argument, new, x, fixed = TRUE)
-    } else {
-      res = gsub(argument, new, x, perl = TRUE)
+    is_ignore = opt_equal(options, "ignore")
+    is_fixed = opt_equal(options, "fixed")
+    is_word = opt_equal(options, "word")
+
+    if(is_word){
+      items = strsplit(argument, ",[ \t\n]+")[[1]]
+      if(is_fixed){
+        items = paste0("\\Q", items, "\\E")
+        is_fixed = FALSE
+      }
+      argument = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
     }
+
+    if(is_ignore){
+      # ignore case
+      is_fixed = FALSE
+      argument = paste0("(?i)", argument)
+    }
+
+    res = gsub(argument, new, x, fixed = is_fixed, perl = !is_fixed)
 
   } else if(op %in% c("each", "times")){
     # times/each, X ####
@@ -1861,30 +1889,52 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     group_index = NULL
 
-  } else if(op == "x"){
-    # extract the first pattern
+  } else if(op %in% c("x", "X")){
+    # extraction
 
-    x_pat = regexpr(argument, x, perl = TRUE)
+    is_ignore = opt_equal(options, "ignore")
+    is_fixed = opt_equal(options, "fixed")
+    is_word = opt_equal(options, "word")
 
-    res = substr(x, x_pat, x_pat - 1 + attr(x_pat, "match.length"))
-
-  } else if(op == "X"){
-    # extract all patterns
-
-    x_list = regmatches(x, gregexpr(argument, x, perl = TRUE))
-
-    if(conditional_flag != 0){
-      # we keep track of the group index
-      x_len_all = lengths(x_list)
-      # I could avoid the last line... later
-      group_index = rep(seq_along(x_len_all), x_len_all)
-      group_index = cpp_recreate_index(group_index)
+    if(is_word){
+      items = strsplit(argument, ",[ \t\n]+")[[1]]
+      if(is_fixed){
+        items = paste0("\\Q", items, "\\E")
+        is_fixed = FALSE
+      }
+      argument = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
     }
 
-    res = unlist(x_list)
+    if(is_ignore){
+      # ignore case
+      is_fixed = FALSE
+      argument = paste0("(?i)", argument)
+    }
+
+    # extract the first pattern
+
+    if(op == 'x'){
+      x_pat = regexpr(argument, x, fixed = is_fixed, perl = !is_fixed)
+
+      res = substr(x, x_pat, x_pat - 1 + attr(x_pat, "match.length"))
+    } else if(op == "X"){
+      # extract all patterns
+
+      x_list = regmatches(x, gregexpr(argument, x, fixed = is_fixed, perl = !is_fixed))
+
+      if(conditional_flag != 0){
+        # we keep track of the group index
+        x_len_all = lengths(x_list)
+        # I could avoid the last line... later
+        group_index = rep(seq_along(x_len_all), x_len_all)
+        group_index = cpp_recreate_index(group_index)
+      }
+
+      res = unlist(x_list)
+    }
 
   } else if(op == "U"){
-    # U, L, titles, Q, F, %, W ####
+    # U, L, titles, Q, F, % ####
 
     res = toupper(x)
 
@@ -1941,7 +1991,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   } else if(op == "%"){
     res = sprintf(paste0("%", argument), x)
 
-  } else if(op == "w"){
+  } else if(op == "ws"){
     # White spaces, tws, trim ####
 
     # w: only whitespaces
@@ -1973,10 +2023,18 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     }
     nb = as.numeric(nb)
 
-    is_rev = any(c("r", "rev") %in% options) || nb < 0
+    is_both = opt_equal(options, "both")
+    is_right = any(c("r", "right") %in% options) || nb < 0
 
     nx = nchar(x)
-    if(is_rev){
+    if(is_both){
+      # on both sides
+      nb = abs(nb)
+
+      res = substr(x, 1, nx - nb)
+      res = substr(res, 1 + nb, nchar(res))
+
+    } else if(is_right){
       # we revert: start from the end
       nb = abs(nb)
       res = substr(x, 1, nx - nb)
@@ -2307,7 +2365,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   } else if(op %in% c("n", "N")){
     # format numbers
 
-    is_letters = opt_equal(options, "letter") || op == "N"
+    is_letter = opt_equal(options, c("letter", "upper")) || op == "N"
+    is_upper = opt_equal(options, "upper")
 
     if(is.numeric(x)){
       if(is_letters){
@@ -2333,10 +2392,15 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     }
 
+    if(is_upper){
+      val = gsub("^(.)", "\\U\\1", val, perl = TRUE)
+    }
+
   } else if(op %in% c("len", "Len")){
     # the length of the vector
 
-    is_letters = opt_equal(options, "letters") || substr(op, 1, 1) == "L"
+    is_letter = opt_equal(options, c("letter", "upper")) || substr(op, 1, 1) == "L"
+    is_upper = opt_equal(options, "upper")
 
     # if conditional: lengths of all the groups
     if(!is.null(group_index) && conditional_flag == 2){
@@ -2352,6 +2416,10 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     if(is_letters){
       res = n_letter(res)
+    }
+
+    if(is_upper){
+      val = gsub("^(.)", "\\U\\1", val, perl = TRUE)
     }
 
   } else if(op == "swidth"){
