@@ -16,57 +16,97 @@
 ####
 
 #
-# w & co
+# split
+#
 
-x = " &Hej! Welcome!! A\t\n 6-feet wide bed awaits!\t."
+x = "Cogito...Ergo...Sum"
+txt = cub("He said: {'...'s.f ? x}")
+test(txt, c("He said: Cogito", "He said: Ergo", "He said: Sum"))
 
-txt = dsb("w ? x")
-test(txt, "&Hej! Welcome!! A 6-feet wide bed awaits! .")
+txt = cub("He said: {'c|s's.ignor ? x}")
+test(txt, c("He said: ogito...Ergo...", "He said: um"))
 
-txt = dsb("wp ? x")
-test(txt, "Hej Welcome A 6 feet wide bed awaits")
-
-txt = dsb("wd ? x")
-test(txt, "&Hej! Welcome!! A -feet wide bed awaits! .")
-
-txt = dsb("wi ? x")
-test(txt, "&Hej! Welcome!! 6-feet wide bed awaits!")
-
-txt = dsb("wpd ? x")
-test(txt, "Hej Welcome A feet wide bed awaits")
-
-txt = dsb("wpi ? x")
-test(txt, "Hej Welcome feet wide bed awaits")
-
-txt = dsb("wdi ? x")
-test(txt, "&Hej! Welcome!! -feet wide bed awaits!")
-
-txt = dsb("wpdi ? x")
-test(txt, "Hej Welcome feet wide bed awaits")
 
 #
-# tws, trim
+# collapse
+#
 
-x = c("  bonjour les gens", "ahem
-   ", NA)
+x = 1:3
+test(cub("win = {'-'c ? x}"), "win = 1-2-3")
 
-txt = dsb("tws ? x")
-test(txt, c("bonjour les gens", "ahem", NA))
+test(cub("win = {c ? x}"), "win = 1 2 3")
 
-x = c("bonjour", "ahem")
-txt = dsb("4 trim ? x")
-test(txt, c("our", ""))
+test(cub("win = {C ? x}"), "win = 1, 2 and 3")
 
-txt = dsb("-2 trim ? x")
-test(txt, c("bonjo", "ah"))
+test(cub("win = {'||/'c ? x}"), "win = 12/3")
 
-txt = dsb("5 trim.r ? x")
-test(txt, c("bo", ""))
 
-# 
-# ascii
+#
+# replace
+#
 
-test(dsb("laurent .[ascii ! bergé]"), "laurent berge")
+x = c("Blanche dit 'Bla bla blanc'.")
+txt = cub("She said: {'bla'r, ws ? x}")
+test(x, "She said: Blanche dit 'Bla nc'.")
+
+txt = cub("She said: {'bla'r.i, ws ? x}")
+test(x, "She said: nche dit ' nc'.")
+
+txt = cub("She said: {'bla'r.w, ws ? x}")
+test(x, "She said: Blanche dit 'Bla blanc'.")
+
+txt = cub("She said: {'bla'r.w.i, ws ? x}")
+test(x, "She said: Blanche dit ' blanc'.")
+
+txt = cub("She said: {'.'r.f, ws ? x}")
+test(x, "She said: Blanche dit 'Bla bla blanc'")
+
+txt = cub("She said: {'Bla, blanc => ??'r.w, ws ? x}")
+test(x, "She said: Blanche dit '?? bla ??'.")
+
+txt = cub("She said: {'Bla, blanc => \\1\\1'r.w, ws ? x}")
+test(x, "She said: Blanche dit 'BlaBla bla blancblanc'.")
+
+#
+# each/times
+#
+
+test(cub("I like {5 times.c ! ?} marks!"), "I like ????? marks!")
+
+x = c("mary", "richard")
+y = c("yes", "no")
+txt = cub("The discussion: {', 'c ! {u, 2 times ? x}: '{2 times ? y}'}...")
+test(txt, "The discussion: Mary: 'yes', Richard: 'no', Mary: 'yes', Richard: 'no'...")
+
+test(cub("values: {2 each.c ? c('a', 'b')}"), "values: aabb")
+
+#
+# extraction
+#
+
+x = c("Blanche dit", " 'Bla bla blanc'.")
+txt = cub("mots: {'bla'x ? x}")
+test(txt, c("mots: ", "mots: bla"))
+test(cub("mots: {'bla'x.i ? x}"), 
+     c("mots: Bla", "mots: Bla"))
+test(cub("mots: {'bla'x.i.w ? x}"), 
+     c("mots: ", "mots: Bla"))
+
+txt = cub("mots: {x ? x}")
+test(txt, c("mots: Blanche", "mots: Bla"))
+
+#
+# X
+
+x = c("Blanche dit", " 'Bla bla blanc'.")
+txt = cub("{'bla'X ? x}")
+test(txt, c("bla", "bla"))
+
+txt = cub("{'bla'X.i ? x}")
+test(txt, c("Bla", "Bla", "bla", "bla"))
+
+txt = cub("mots: {'bla'X.i.w ? x}")
+test(txt, c("Bla", "bla"))
 
 #
 # Case
@@ -88,6 +128,99 @@ test(txt, "Where Is Bryan? Bryan Is In The KITCHEN.")
 x = "results from a new estimator: a new hope"
 txt = dsb("title.i ? x")
 test(txt, "Results from a New Estimator: A New Hope")
+
+#
+# quotes
+#
+
+x = "siren"
+txt = cub("Is is the song of the {q ? x}, of the {Q ? x} or of the {bq ? x}?")
+test(txt, "Is is the song of the 'siren', of the \"siren\" or of the `siren`?")
+
+#
+# format
+#
+
+x = c(1, 123, 123456)
+txt = cub("The numbers are:\n{'\n'c ! - {f ? x} | {rev, F ? x}}")
+test(txt, "The numbers are:\n- 1       | 123,456\n- 123     |     123\n- 123,456 |       1")
+
+#
+# sprintf
+#
+
+txt = cub("pi = {%.3f ? pi}")
+test(txt, "pi = 3.142")
+
+txt = cub("pi = {% 8.3f ? pi}")
+test(txt, "pi =    3.142")
+
+x = c("michael", "ana")
+txt = cub("The winners are:\n{'\n'c ! - {% 10s ? x}}")
+test(txt, "The winners are:\n-    michael\n-        ana")
+
+txt = cub("The winners are:\n{'\n'c ! - {%- 10s ? x}!}")
+test(txt, "The winners are:\n- michael   !\n- ana       !")
+
+#
+# ws & co
+#
+
+x = " &Hej! Welcome!! A\t\n 6-feet wide bed awaits!\t."
+
+txt = dsb("ws ? x")
+test(txt, "&Hej! Welcome!! A 6-feet wide bed awaits! .")
+
+txt = dsb("ws.p ? x")
+test(txt, "Hej Welcome A 6 feet wide bed awaits")
+
+txt = dsb("ws.d ? x")
+test(txt, "&Hej! Welcome!! A -feet wide bed awaits! .")
+
+txt = dsb("ws.i ? x")
+test(txt, "&Hej! Welcome!! 6-feet wide bed awaits!")
+
+txt = dsb("ws.pd ? x")
+test(txt, "Hej Welcome A feet wide bed awaits")
+
+txt = dsb("ws.pi ? x")
+test(txt, "Hej Welcome feet wide bed awaits")
+
+txt = dsb("ws.di ? x")
+test(txt, "&Hej! Welcome!! -feet wide bed awaits!")
+
+txt = dsb("ws.pdi ? x")
+test(txt, "Hej Welcome feet wide bed awaits")
+
+#
+# tws, trim
+#
+
+x = c("  bonjour les gens", "ahem
+   ", NA)
+
+txt = dsb("tws ? x")
+test(txt, c("bonjour les gens", "ahem", NA))
+
+x = c("bonjour", "ahem")
+txt = dsb("4 trim ? x")
+test(txt, c("our", ""))
+
+txt = dsb("-2 trim ? x")
+test(txt, c("bonjo", "ah"))
+
+txt = dsb("5 trim.r ? x")
+test(txt, c("bo", ""))
+
+txt = dsb("1 trim.b ? x")
+test(txt, c("onjou", "he"))
+
+# 
+# ascii
+
+test(dsb("laurent .[ascii ! bergé]"), "laurent berge")
+
+
 
 #
 # r, R
@@ -231,6 +364,7 @@ test(txt, "Are Charles and Alice crazy? Hmm... no they aren't.")
 txt = dsb(".[$Is, enum] crazy? Hmm... no .[$(he;they), aren't ? x[1]].")  # + afterwards
 test(txt, "Is Charles crazy? Hmm... no he isn't.")
 
+#
 # enum, full force
 txt = dsb("I like the letter.[$s, enum.1.q ! .[/u, v, w]].")
 test(txt, "I like the letters 1) 'u', 2) 'v', and 3) 'w'.")
@@ -251,14 +385,49 @@ a = 1
 txt = dsb(".[#n ? a] observation.[#s, are] missing. It concerns the variable.[$s, enum.bq ? b].")
 test(txt, "1 observation is missing. It concerns the variables `x` and `y`.")
 
-txt = dsb(".[#n ? a] observation.[#s, are] missing. It concerns the variable.[$s, enum.bq ? b[1]].")
-test(txt, "1 observation is missing. It concerns the variable `x`.")
+txt = dsb(".[#n.u ? a] observation.[#s, are] missing. It concerns the variable.[$s, enum.bq ? b[1]].")
+test(txt, "One observation is missing. It concerns the variable `x`.")
 
 # combining the two
-
 x = 1:5
 txt = cub("{$n.u ? x} observation{$s}. He arrived {#nth.letter ? 3} and scored {#ntimes.le ? 1}.")
-text(txt, "5 observations. He arrived third.")
+test(txt, "Five observations. He arrived third and scored once.")
+
+#
+# la conjugaison
+
+pple = c("Francis", "Henry")
+txt = cub("{$enum, is, (a;) ? pple} tall guy{$s}.",
+          "\n{$(He;They), like} to eat donuts.",
+          "\nWhen happy, at the pub {$(he;they), goes}!",
+          "\n{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?")
+test(txt, "Francis and Henry are tall guys.\nThey like to eat donuts.\nWhen happy, at the pub they go!\nDon't they have wit, they who try?")
+
+pple = "Francis"
+txt = cub("{$enum, is, (a;) ? pple} tall guy{$s}.",
+          "\n{$(He;They), like} to eat donuts.",
+          "\nWhen happy, at the pub {$(he;they), goes}!",
+          "\n{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?")
+test(txt, "Francis is a tall guy.\nHe likes to eat donuts.\nWhen happy, at the pub he goes!\nDoesn't he have wit, he who tries?")
+
+cub("{$enum, is, (a;) ? pple} tall guy{$s}.")
+cub("\n{$(He;They), like ? pple} to eat donuts.")
+cub("\nWhen happy, at the pub {$(he;they), goes ? pple}!")
+
+cub("\n{$Don't, (he;they)} have wit, {$(he;they)} who {$try ? pple}?")
+
+cub("\n{$Don't, (he;they) ? pple} have wit,")
+cub("\n{$(he;they)} who {$Try ? pple}?")
+
+cub("\n{$Don't, (he;they) ? pple} have wit, {$(he;they)} who {$try ? pple}?")
+cub("\n{$Don't, (he;they) ! hey} have wit, {$(he;they)} who ?")
+
+cub("{$Don't, (he;they) ! hey} have wit, {$(he;they)} who ?")
+
+cub("\\{} have wit, {$(he;they) ! hey} who ?")
+
+cub("test?")
+
 
 ####
 #### n, len ####
@@ -315,6 +484,24 @@ x = c(15, 550)
 txt = cub("The values are{=length(x) < 5 ; ': {C ? x}' ; 'too many'}.")
 test(txt, "The values are: 15 and 550.")
 
+
+####
+#### escaping ####
+####
+
+txt = cub("\\{} it's some braces")
+test(txt, "{} it's some braces")
+
+txt = dsb("\\.[] it's some dsb")
+test(txt, ".[] it's some dsb")
+
+txt = cub("I'm saying {q!ha \\} ha}!")
+test(txt, "I'm saying 'ha } ha'!")
+
+txt = dsb("I'm saying .[q!ha \\] ha]!")
+test(txt, "I'm saying 'ha ] ha'!")
+
+
 ####
 #### ... conditions ####
 ####
@@ -342,10 +529,10 @@ test(txt, c("le", "BAL", "VIN", "ides", "amens"))
 
 x = dsb("/julien, rebecca, sarah")
 
-txt = dsb("Here .[#('are 'A:'is 'A), C ? x]")
+txt = dsb("Here .[#('are 'A ; 'is 'A), C ? x]")
 test(txt, "Here are julien, rebecca and sarah")
 
-txt = dsb("Here .[#('are 'A:'is 'A), C ? x[1]]")
+txt = dsb("Here .[#('are 'A ; 'is 'A), C ? x[1]]")
 test(txt, "Here is julien")
 
 
