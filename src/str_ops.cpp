@@ -1739,7 +1739,109 @@ IntegerVector cpp_recreate_index(IntegerVector id){
   return res;
 }
 
+inline bool is_blank(char c){
+  return c == ' ' || c == '\n' || c == '\t';
+}
 
+std::vector<std::string> trim_ws(std::vector<std::string> x){
+
+  int n = x.size();
+  std::vector<std::string> res(x);
+
+  std::string tmp, xi;
+  for(int i=0 ; i<n ; ++i){
+    xi = x[i];
+    if(!xi.empty() && (is_blank(xi[0]) || is_blank(xi[xi.size() - 1]))){
+      tmp = "";
+      int n_xi = xi.size();
+
+      while(n_xi >= 1 && is_blank(xi[n_xi - 1])) --n_xi;
+
+      int  j = 0;
+      while(j < n_xi && is_blank(xi[j])) ++j;
+
+      while(j < n_xi) tmp += xi[j++];
+
+      res[i] = tmp;
+    }
+  }
+
+  return res;
+}
+
+inline bool is_select_separator(const char * str, int i){
+  return str[i] == ',' || str[i] == ';' || str[i] == '|' || str[i] == '=';
+}
+
+// [[Rcpp::export]]
+List cpp_parse_charselect(SEXP Rstr){
+  // parses single character vector: 
+  // in: "species, sep_* = ^sepal || @width; ^petal | petal.length, petal.width"
+  // out:
+  // - names: c(       "",  "sep_*",                          "")
+  // -  vars: c("species", "^sepal",                    "^petal")
+  // - order: c(       "", "@width", "petal.length, petal.width")
+  // - otype: c(        0,        2,                           1)
+
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+
+  std::vector<std::string> names, vars, order;
+  std::vector<int> otype;
+  std::string tmp, name_tmp, var_tmp, order_tmp;
+  int type = 0;
+
+  int i=0;
+  while(i < n){
+    name_tmp = "";
+    var_tmp = "";
+    order_tmp = "";
+    type = 0;
+
+    // first we get the variable
+    while(i < n && !is_select_separator(str, i)) var_tmp += str[i++];
+
+    if(i < n && str[i] == '='){
+      name_tmp = var_tmp;
+
+      ++i;
+      var_tmp = "";
+      while(i < n && !is_select_separator(str, i)) var_tmp += str[i++];
+    }
+
+    if(i == n || (i < n && str[i] == ',')){
+      // nothing, we move on
+    } else if(i < n && str[i] == '|'){
+      type = 1;
+      ++i;
+      if(i < n && str[i] == '|'){
+        type = 2;
+        ++i;
+      }
+
+      // only the semi colon can stop the pipe
+      while(i < n && str[i] != ';') order_tmp += str[i++];
+    }
+
+    // saving the data
+    names.push_back(name_tmp);     
+    vars.push_back(var_tmp);
+    order.push_back(order_tmp);
+    otype.push_back(type);
+
+    ++i;
+
+  }
+
+  // we save + trim the WS
+  List res;
+  res["names"] = trim_ws(names);
+  res["vars"]  = trim_ws(vars);
+  res["order"] = trim_ws(order);
+  res["otype"] = otype;
+  
+  return res;
+}
 
 
 
