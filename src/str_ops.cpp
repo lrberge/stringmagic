@@ -238,7 +238,7 @@ void extract_ifelse_section(const int box_type, const char * str, int &i, int n,
                             std::string &operator_tmp, int part){
   // extracts the content of a 'box' in the ifelse statement
   // there are limitations in the parsing of this function:
-  // .[&test ; a.[']'R ? x]] will not be parsed properly bc the ';' or ']' in operators don't work
+  // .[=test ; a.[']'R ? x]] will not be parsed properly bc the ';' or ']' in operators don't work
   // In this case, we need to escape them explicitly
 
   int n_open = 0;
@@ -371,7 +371,7 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
 
       if(i >= n - 1 || i < 3){
         // why n-1? because we require stg after the ';'
-        // why i < 3, because we require a non empty condition! '&a;'
+        // why i < 3, because we require a non empty condition! '=a;'
         any_operator = false;
         break;
       }
@@ -396,14 +396,14 @@ void extract_operator(const int box_type, const char * str, int &i, int n,
         break;
       }
 
-      ++i;
-
-      if(i == n){
-        // means is_box_close -> true: we're done
+      if(is_box_close(box_type, str, i)){
+        ++i;
         operator_vec.push_back(operator_tmp);
         operator_tmp = "";
         break;
       }
+
+      ++i;
 
       //
       // the third part, here str[i - 1] == ';'
@@ -1779,34 +1779,34 @@ List cpp_parse_charselect(SEXP Rstr){
   // in: "species, sep_* = ^sepal || @width; ^petal | petal.length, petal.width"
   // out:
   // - names: c(       "",  "sep_*",                          "")
-  // -  vars: c("species", "^sepal",                    "^petal")
+  // -  patterns: c("species", "^sepal",                    "^petal")
   // - order: c(       "", "@width", "petal.length, petal.width")
   // - otype: c(        0,        2,                           1)
 
   const char *str = CHAR(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
 
-  std::vector<std::string> names, vars, order;
+  std::vector<std::string> names, patterns, order;
   std::vector<int> otype;
-  std::string tmp, name_tmp, var_tmp, order_tmp;
+  std::string tmp, name_tmp, patterns_tmp, order_tmp;
   int type = 0;
 
   int i=0;
   while(i < n){
     name_tmp = "";
-    var_tmp = "";
+    patterns_tmp = "";
     order_tmp = "";
     type = 0;
 
     // first we get the variable
-    while(i < n && !is_select_separator(str, i)) var_tmp += str[i++];
+    while(i < n && !is_select_separator(str, i)) patterns_tmp += str[i++];
 
     if(i < n && str[i] == '='){
-      name_tmp = var_tmp;
+      name_tmp = patterns_tmp;
 
       ++i;
-      var_tmp = "";
-      while(i < n && !is_select_separator(str, i)) var_tmp += str[i++];
+      patterns_tmp = "";
+      while(i < n && !is_select_separator(str, i)) patterns_tmp += str[i++];
     }
 
     if(i == n || (i < n && str[i] == ',')){
@@ -1825,7 +1825,7 @@ List cpp_parse_charselect(SEXP Rstr){
 
     // saving the data
     names.push_back(name_tmp);     
-    vars.push_back(var_tmp);
+    patterns.push_back(patterns_tmp);
     order.push_back(order_tmp);
     otype.push_back(type);
 
@@ -1836,7 +1836,7 @@ List cpp_parse_charselect(SEXP Rstr){
   // we save + trim the WS
   List res;
   res["names"] = trim_ws(names);
-  res["vars"]  = trim_ws(vars);
+  res["patterns"]  = trim_ws(patterns);
   res["order"] = trim_ws(order);
   res["otype"] = otype;
   
