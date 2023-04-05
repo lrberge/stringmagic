@@ -1715,6 +1715,7 @@ sop_char2operator = function(x, fun_name){
   if(!ok && !op %in% OPERATORS){
     
     op = check_set_options(op, OPERATORS, case = TRUE, free = TRUE)
+    op_parsed$operator = op
 
     if(!op %in% OPERATORS){
       example = 'x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")'
@@ -2369,7 +2370,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     is_upper = opt_equal(options, "upper")
 
     if(is.numeric(x)){
-      if(is_letters){
+      if(is_letter){
         res = n_letter(x)
       } else {
         res = format(x, big.mark = ",")
@@ -2380,7 +2381,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       is_x_num = which(!is.na(x_num))
       num_val = x_num[is_x_num]
 
-      if(is_letters){
+      if(is_letter){
         res_num = n_letter(num_val)
       } else {
         res_num = format(num_val, big.mark = ",")
@@ -2414,7 +2415,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       res = length(x)
     }
 
-    if(is_letters){
+    if(is_letter){
       res = n_letter(res)
     }
 
