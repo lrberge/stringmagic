@@ -342,8 +342,8 @@ check_set_options = function(x, options, op, free = FALSE, case = FALSE){
     
     if(is.na(pm) && !free){
       # absence of a match
-      stop_hook(cub("The option {bq?v} is not valid for the operator {bq?op}.\n",
-                "FYI the option{$s ? options} available {$are, enum.bq}."))
+      stop_hook("The option {bq?v} is not valid for the operator {bq?op}.\n",
+                "FYI the option{$s ? options} available {$are, enum.bq}.")
     }
 
     if(!is.na(pm)){
@@ -432,17 +432,23 @@ deparse_short = function(x){
   x_dp
 }
 
+deparse_long = function(x){
+  x_dp = deparse(x, width.cutoff = 500L)
+  if(length(x_dp) > 1){
+    x_dp = paste0(x_dp, collapse = "")
+  }
+
+  x_dp
+}
+
 set_pblm_hook = function(){
   assign("STRINGOPS_HOOK", 1, parent.frame())
 }
 
-stop_hook = function(..., msg = NULL){
-
-  main_msg = paste0(...)
-
+stop_hook = function(..., msg = NULL, frame = parent.frame(), verbatim = FALSE){
   up = get_up_hook()
 
-  stop_up(..., up = up + 1, msg = msg)
+  stop_up(..., up = up + 1, msg = msg, frame = frame, verbatim = verbatim)
 }
 
 get_up_hook = function(){
@@ -481,9 +487,14 @@ set_up = function(.up = 1){
   }
 }
 
-stop_up = function(..., up = 1, msg = NULL){
+stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = FALSE){
 
-  main_msg = paste0(...)
+  if(verbatim){
+    main_msg = paste0(...)
+  } else {
+    main_msg = .cub(..., frame = frame)
+  }
+  
 
   # up with set_up
   mc = match.call()
