@@ -1981,13 +1981,25 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
   } else if(op == "f"){
     res = format(x, big.mark = ",")
+
+    is_zero = opt_equal(options, c("0", "zero"))
+
     if(is.numeric(x)){
-      # we have to do that.... not sure the use cases need to be optimized
-      res = format(cpp_normalize_ws(res))
+      if(is_zero){
+        res = gsub(" ", "0", res, fixed = TRUE)
+      } else {
+        # we have to do that.... not sure the use cases need to be optimized
+        res = format(cpp_normalize_ws(res))
+      }
     }
 
   } else if(op == "F"){
     res = format(x, justify = "right", big.mark = ",")
+
+    is_zero = opt_equal(options, c("0", "zero"))
+    if(is.numeric(x) && is_zero){
+        res = gsub(" ", "0", res, fixed = TRUE)
+    }
 
   } else if(op == "%"){
     res = sprintf(paste0("%", argument), x)
