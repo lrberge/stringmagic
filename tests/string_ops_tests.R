@@ -68,20 +68,7 @@ txt = cub("She said: {'Bla, blanc => \\1\\1'r.w, ws ? x}")
 test(x, "She said: Blanche dit 'BlaBla bla blancblanc'.")
 
 #
-# each/times
-#
-
-test(cub("I like {5 times.c ! ?} marks!"), "I like ????? marks!")
-
-x = c("mary", "richard")
-y = c("yes", "no")
-txt = cub("The discussion: {', 'c ! {u, 2 times ? x}: '{2 times ? y}'}...")
-test(txt, "The discussion: Mary: 'yes', Richard: 'no', Mary: 'yes', Richard: 'no'...")
-
-test(cub("values: {2 each.c ? c('a', 'b')}"), "values: aabb")
-
-#
-# extraction
+# x: single extraction
 #
 
 x = c("Blanche dit", " 'Bla bla blanc'.")
@@ -96,7 +83,8 @@ txt = cub("mots: {x ? x}")
 test(txt, c("mots: Blanche", "mots: Bla"))
 
 #
-# X
+# X: multiple extractions
+#
 
 x = c("Blanche dit", " 'Bla bla blanc'.")
 txt = cub("{'bla'X ? x}")
@@ -107,6 +95,37 @@ test(txt, c("Bla", "Bla", "bla", "bla"))
 
 txt = cub("mots: {'bla'X.i.w ? x}")
 test(txt, c("Bla", "bla"))
+
+#
+# is, get, which
+#
+
+x = c("Hi Mary.", "Hi Charles!", "Are you OK?", "I think so Charles.", "Great to hear, Mary!")
+txt = cub("A few quotes:\n{Q, 'mary || charles && !'get.i, '  'app, '\n'c ? x}")
+test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
+
+x = c("It's me again.", "What do you mean a gain?", "Yes, again!", "Ah AGAIN, I thought A GAIN!")
+index = str_op(x, "'gain'which.w.i")
+test(index, c(2, 4))
+
+index = str_op(x, "'gain && .'is.fixed")
+test(index, c(TRUE, FALSE, FALSE, FALSE))
+
+
+#
+# each/times
+#
+
+test(cub("I like {5 times.c ! ?} marks!"), "I like ????? marks!")
+
+x = c("mary", "richard")
+y = c("yes", "no")
+txt = cub("The discussion: {', 'c ! {u, 2 times ? x}: '{2 times ? y}'}...")
+test(txt, "The discussion: Mary: 'yes', Richard: 'no', Mary: 'yes', Richard: 'no'...")
+
+test(cub("values: {2 each.c ? c('a', 'b')}"), "values: aabb")
+
+
 
 #
 # Case
