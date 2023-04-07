@@ -1651,9 +1651,9 @@ sop_char2operator = function(x, fun_name){
                 "u", "U", "l", "L", "q", "Q", "bq", "f", "F", "%",
                 "e", "E", "app", "App", 
                 "k", "K", "d", "D", "last", "first",
-                "cfirst", "clast", "num", "enum",
+                "cfirst", "clast", "unik", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
-                "ws", "tws", "trim",
+                "ws", "tws", "trim", "get", "is", "which",
                 "n", "len", "Len", "swidth", "dtime",
                 "stop", "insert", "nth", "Nth")
   
@@ -1763,7 +1763,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   group_index = attr(x, "group_index")
 
   if(op %in% c("s", "S")){
-    # S, C, R ####
+    # S, C ####
     # Split is always applied on verbatim stuff => length 1
 
     is_ignore = opt_equal(options, "ignore")
@@ -1832,25 +1832,12 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     }
 
-  } else if(op %in% c("r", "R")){
-    new = ""
-    if(grepl("=>", argument, fixed = TRUE)){
-      pat = "=>"
-
-      if(grepl("_=>_", argument, fixed = TRUE)){
-        pat = "_=>_"
-      } else if(grepl(" => ", argument, fixed = TRUE)){
-        pat = " => "
-      }
-      
-      argument_split = strsplit(argument, pat, fixed = TRUE)[[1]]
-      argument = argument_split[[1]]
-      new = argument_split[[2]]
-    }
-
-    is_ignore = opt_equal(options, "ignore")
-    is_fixed = opt_equal(options, "fixed")
-    is_word = opt_equal(options, "word")
+  } else if(op %in% c("r", "R", "get", "is", "which", "x", "X")){
+    # r, x, get, is, which ####
+    options = check_set_options(options, c("word", "ignore", "fixed"))
+    is_word = "word" %in% options
+    is_ignore = "ignore" %in% options
+    is_fixed = "fixed" %in% options
 
     if(is_word){
       items = strsplit(argument, ",[ \t\n]+")[[1]]
@@ -1867,7 +1854,90 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       argument = paste0("(?i)", argument)
     }
 
-    res = gsub(argument, new, x, fixed = is_fixed, perl = !is_fixed)
+    if(op %in% c("r", "R")){
+      new = ""
+      if(grepl("=>", argument, fixed = TRUE)){
+        pat = "=>"
+
+        if(grepl("_=>_", argument, fixed = TRUE)){
+          pat = "_=>_"
+        } else if(grepl(" => ", argument, fixed = TRUE)){
+          pat = " => "
+        }
+        
+        argument_split = strsplit(argument, pat, fixed = TRUE)[[1]]
+        argument = argument_split[[1]]
+        new = argument_split[[2]]
+      }
+
+      res = gsub(argument, new, x, fixed = is_fixed, perl = !is_fixed)
+    } else if(op == 'x'){
+      x_pat = regexpr(argument, x, fixed = is_fixed, perl = !is_fixed)
+
+      res = substr(x, x_pat, x_pat - 1 + attr(x_pat, "match.length"))
+    } else if(op == "X"){
+      # extract all patterns
+
+      x_list = regmatches(x, gregexpr(argument, x, fixed = is_fixed, perl = !is_fixed))
+
+      if(conditional_flag != 0){
+        # we keep track of the group index
+        x_len_all = lengths(x_list)
+        # I could avoid the last line... later
+        group_index = rep(seq_along(x_len_all), x_len_all)
+        group_index = cpp_recreate_index(group_index)
+      }
+
+      res = unlist(x_list)
+    } else {
+      # default is str_is
+      # the user cannot use " || " nor " && "
+
+      items = strsplit(argument, " ([|]{2}|&&) ")[[1]]
+      res = NULL
+      for(i in seq_along(items)){
+
+        pattern = items[i]
+        if(is_ignore && i > 1){
+          pattern = paste0("(?i)", pattern)
+        }
+
+        value = grepl(pattern, x, fixed = is_fixed, perl = !is_fixed)
+
+        if(is.null(res)){
+          res = value
+        } else {
+          n_items = nchar(items)
+          i_prev = i - 1
+          index = sum(n_items[1:i_prev]) + 4*(i_prev - 1) + 3
+          logical_and = substr(argument, index, index) == "&"
+          if(logical_and){
+            res = res & value
+          } else {
+            res = res | value
+          }          
+        }
+      }
+
+      if(op %in% c("get", "which")){
+
+        if(conditional_flag == 1){
+          group_index = group_index[res]
+        } else if(conditional_flag == 2){
+          stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
+                    "conditionnal statements (inside `~()`).",
+                    "FIX: simply put this operation after the conditionnal statement.")
+        }
+
+        if(op == "get"){
+          res = x[res]
+        } else if(op == "which"){
+          res = which(res)
+        }
+
+      }
+    } 
+    
 
   } else if(op %in% c("each", "times")){
     # times/each, X ####
@@ -1890,51 +1960,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     group_index = NULL
 
-  } else if(op %in% c("x", "X")){
-    # extraction
-
-    is_ignore = opt_equal(options, "ignore")
-    is_fixed = opt_equal(options, "fixed")
-    is_word = opt_equal(options, "word")
-
-    if(is_word){
-      items = strsplit(argument, ",[ \t\n]+")[[1]]
-      if(is_fixed){
-        items = paste0("\\Q", items, "\\E")
-        is_fixed = FALSE
-      }
-      argument = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
-    }
-
-    if(is_ignore){
-      # ignore case
-      is_fixed = FALSE
-      argument = paste0("(?i)", argument)
-    }
-
-    # extract the first pattern
-
-    if(op == 'x'){
-      x_pat = regexpr(argument, x, fixed = is_fixed, perl = !is_fixed)
-
-      res = substr(x, x_pat, x_pat - 1 + attr(x_pat, "match.length"))
-    } else if(op == "X"){
-      # extract all patterns
-
-      x_list = regmatches(x, gregexpr(argument, x, fixed = is_fixed, perl = !is_fixed))
-
-      if(conditional_flag != 0){
-        # we keep track of the group index
-        x_len_all = lengths(x_list)
-        # I could avoid the last line... later
-        group_index = rep(seq_along(x_len_all), x_len_all)
-        group_index = cpp_recreate_index(group_index)
-      }
-
-      res = unlist(x_list)
-    }
-
-  } else if(op == "U"){
+   }else if(op == "U"){
     # U, L, titles, Q, F, % ####
 
     res = toupper(x)
@@ -2365,6 +2391,29 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     }
 
     # END: insert/append
+
+  } else if(op == "unik"){
+    # unik ####
+
+    if(!is.null(group_index) && conditional_flag == 2){
+
+      # not really fast 
+      # => to be improved
+      df = data.frame(g = group_index, x = x, stringsAsFactors = FALSE)
+      df_unik = unique(df)
+
+      group_index = df_unik$g
+      res = df_unik$x
+
+    } else {
+      
+      res = uique(x)
+
+      if(conditional_flag == 1){
+        group_index = NULL
+      }
+
+    }
 
   } else if(op %in% c("nth", "Nth")){
 
