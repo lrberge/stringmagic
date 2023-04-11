@@ -1619,10 +1619,10 @@ sop_char2operator_old = function(x, fun_name){
     msg = c("The operation `", x, "` is not valid. It must be something quoted followed by a valid operator.",
             "\n  Valid operators (limited list, see help): ",
             "\n                   to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
-            "\n                   to replicate: * / to replicate and collapse with the empty string: *c",
+            "\n                   to replicate: times, each / to replicate and collapse with the empty string: times.c",
             "\n                   to upper/lower case: u, U, L / to single/double quote: q, Q",
             "\n                   to format f, F / to apply sprintf format: %",
-            "\n                   to format whitespaces: w, W / to append: a, A / to insert: i, I",
+            "\n                   to format whitespaces: ws / to append: app",
             "\n                   to keep: k (#characters), K (#items) / to delete: d, D",
             "\n                   to remove stopwords: stop ",
             "\n------------------------------",
@@ -1654,8 +1654,8 @@ sop_char2operator = function(x, fun_name){
                 "cfirst", "clast", "unik", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
                 "ws", "tws", "trim", "get", "is", "which",
-                "n", "len", "Len", "swidth", "dtime",
-                "stop", "insert", "nth", "Nth")
+                "n", "N", "len", "Len", "swidth", "dtime",
+                "stop", "insert", "nth", "Nth", "ntimes", "Ntimes")
   
   ok = FALSE
   op = op_parsed$operator
@@ -1889,6 +1889,24 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       }
 
       res = unlist(x_list)
+    } else if(argument == "" && op == "which"){
+
+      if(!is.logical(x)){
+        stop_hook("The operation `which` must apply only to logical values.",
+                 "\nPROBLEM: the current value to which it is applied is not logical ",
+                 "(instead is is of class {enum.bq?class(x)}).")
+      }
+
+      res = which(x)
+
+      if(conditional_flag == 1){
+        group_index = group_index[res]
+      } else if(conditional_flag == 2){
+        stop_hook("The operation `which` cannot be applied in ",
+                  "conditionnal statements (inside `~()`).",
+                  "FIX: simply put this operation after the conditionnal statement.")
+      }
+      
     } else {
       # default is str_is
       # the user cannot use " || " nor " && "
@@ -2415,75 +2433,83 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     }
 
-  } else if(op %in% c("nth", "Nth")){
-
+  } else if(op %in% c("nth", "Nth", "ntimes", "Ntimes", "n", "N", "len", "Len")){
     #
-    # nth, n, len ####
+    # nth, ntimes, nst, n, len ####
     #
-
-    is_letter = any(grepl("^l", options)) || str_x(op, 1) == "N"
-
-    res = n_th(x, letters = is_letter)
-  } else if(op %in% c("n", "N")){
-    # format numbers
-
-    is_letter = opt_equal(options, c("letter", "upper")) || op == "N"
-    is_upper = opt_equal(options, "upper")
-
-    if(is.numeric(x)){
-      if(is_letter){
-        res = n_letter(x)
-      } else {
-        res = format(x, big.mark = ",")
-        res = cpp_trimws(res)
-      }
-    } else {
-      x_num = suppressWarnings(as.numeric(x))
-      is_x_num = which(!is.na(x_num))
-      num_val = x_num[is_x_num]
-
-      if(is_letter){
-        res_num = n_letter(num_val)
-      } else {
-        res_num = format(num_val, big.mark = ",")
-        res_num = cpp_trimws(res_num)
-      }
-
-      res = x
-      res[is_x_num] = res_num
-
-    }
-
-    if(is_upper){
-      val = gsub("^(.)", "\\U\\1", val, perl = TRUE)
-    }
-
-  } else if(op %in% c("len", "Len")){
-    # the length of the vector
-
-    is_letter = opt_equal(options, c("letter", "upper")) || substr(op, 1, 1) == "L"
-    is_upper = opt_equal(options, "upper")
-
-    # if conditional: lengths of all the groups
-    if(!is.null(group_index) && conditional_flag == 2){
-      res = tabulate(group_index)
-      group_index = seq_along(res)
-    } else {
-      if(conditional_flag == 1){
-        group_index = 1
-      }
-
-      res = length(x)
-    }
-
+    
+    # parsing the default values of the options and if we display in letters
+    is_letter = substr(op, 1, 1) %in% c("N", "L")
     if(is_letter){
-      res = n_letter(res)
+      op = tolower(op)
+    }
+    
+    if(op == "nth"){
+      opt_default = c("letter", "upper", "compact")
+    } else {
+      opt_default = c("letter", "upper")
     }
 
-    if(is_upper){
+    options = check_set_options(options, opt_default)
+    
+    if(!is_letter){
+      is_letter = any(c("letter", "upper") %in% options)
+    }
+
+    # operations
+    if(op == "nth"){
+      res = n_th(x, letters = is_letter, compact = "compact" %in% options)
+
+    } else if(op == "ntimes"){
+      res = n_times(x, letters = is_letter)
+
+    } else if(op == "n"){
+      # we force the conversion to numeric
+      if(is.numeric(x)){
+        if(is_letter){
+          res = n_letter(x)
+        } else {
+          res = format(x, big.mark = ",")
+          res = cpp_trimws(res)
+        }
+      } else {
+        x_num = suppressWarnings(as.numeric(x))
+        is_x_num = which(!is.na(x_num))
+        num_val = x_num[is_x_num]
+
+        if(is_letter){
+          res_num = n_letter(num_val)
+        } else {
+          res_num = format(num_val, big.mark = ",")
+          res_num = cpp_trimws(res_num)
+        }
+
+        res = x
+        res[is_x_num] = res_num
+      }
+      
+    } else if(op == "len"){
+
+      # if conditional: lengths of all the groups
+      if(!is.null(group_index) && conditional_flag == 2){
+        res = tabulate(group_index)
+        group_index = seq_along(res)
+      } else {
+        if(conditional_flag == 1){
+          group_index = 1
+        }
+
+        res = length(x)
+      }
+
+      if(is_letter){
+        res = n_letter(res)
+      }
+    }
+
+    if("upper" %in% options){
       val = gsub("^(.)", "\\U\\1", val, perl = TRUE)
     }
-
   } else if(op == "swidth"){
     #
     # swidth, dtime ####
@@ -2998,8 +3024,9 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
       }
       
     } else if(op %in% c("nth", "Nth")){
+      is_compact = opt_equal(options, "compact") 
       is_letter = opt_equal(options, c("letter", "upper")) || substr(op, 1, 1) == "N"
-      val = n_th(n, letters = is_letter)
+      val = n_th(n, letters = is_letter, is_compact = is_compact)
       if(opt_equal(options, "upper")){
         val = gsub("^(.)", "\\U\\1", val, perl = TRUE)
       }
