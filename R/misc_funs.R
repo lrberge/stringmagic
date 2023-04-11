@@ -354,12 +354,17 @@ str_trim = function(x, n_first = 0, n_last = 0){
 }
 
 
-# internal fun, n is ALWAYS len 1, positive and not missing
-n_th = function(x, letters = TRUE){
+n_th = function(x, letters = TRUE, compact = FALSE){
   # The main purpose of this function is for smallish 'x'
   # only to print info, not performance oriented.
 
   if(is.character(x)) return(x)
+
+  is_compact = FALSE
+  if(length(x) > 1 && all(diff(x) == 1)){
+    is_compact = TRUE
+    x = x[c(1, length(x))]
+  }
 
   res = character(length(x))
 
@@ -377,6 +382,9 @@ n_th = function(x, letters = TRUE){
     res[qui] = dict[x[qui]]
 
     if(!any(res == "")){
+      if(is_compact){
+        res = paste0(res[1], " to ", res[2])
+      }
       return(res)
     }
   }
@@ -388,6 +396,10 @@ n_th = function(x, letters = TRUE){
   postfix = c("st", "nd", "rd", "th")
 
   res[qui] = paste0(x[qui], postfix[rest])
+
+  if(is_compact){
+    res = paste0(res[1], " to ", res[2])
+  }
 
   res
 }
@@ -401,7 +413,7 @@ n_letter = function(x){
 
     xi = x[i]
     
-    if(xi > 100){
+    if(xi >= 100){
       val = format(xi, big.mark = ",")
     } else {
 
@@ -981,7 +993,23 @@ insert = function(x, y, i, replace = FALSE){
 }
 
 
+convert_to_list = function(x){
+  if(is.list(x)){
+    res = unclass(x)
+  } else if(is.matrix(x)){
+    res = vector("list", ncol(x))
+    for(i in 1:ncol(x)){
+      res[[i]] = x[, i, drop = TRUE]
+    }
+    names(res) = colnames(x)
+  } else if(is.vector(x)){
+    res = as.list(x)
+  } else {
+    stop_up("Internal error: the current format ({bq, enum ? class(x)}) could not be converted to a list.")
+  }
 
+  res
+}
 
 
 
