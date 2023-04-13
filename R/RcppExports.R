@@ -61,6 +61,10 @@ cpp_parse_charselect <- function(Rstr) {
     .Call(`_stringmagick_cpp_parse_charselect`, Rstr)
 }
 
+cpp_parse_conditions_in_pattern <- function(Rstr) {
+    .Call(`_stringmagick_cpp_parse_conditions_in_pattern`, Rstr)
+}
+
 cpp_to_integer <- function(x) {
     .Call(`_stringmagick_cpp_to_integer`, x)
 }
