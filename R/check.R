@@ -138,7 +138,9 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
   }
 
   len_x = length(x)
-  if(len_x == 0 && l0 && !scalar) return()
+  if(len_x == 0 && l0 && !scalar){
+    return(character(0))
+  }
 
   if(scalar){
     if(missing(no_na)) no_na = TRUE
@@ -225,8 +227,8 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
         elem = gsub("^[^:]+:", "", elem)
       }
 
-      stop_up(dsb("In the argument `...`, the .[$$nth ? i] element.[nm] raises an error:\n",
-                  elem))
+      stop_up("In the argument `...`, the {#nth ? i} element{#s} raises an error:\n",
+              elem)
     }
 
     dots[[i]] = elem
@@ -259,9 +261,9 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       # really, this is gibberish: who can understand the code?
       info_call = dsb("`.[@<4(d) ! .[nm_pblm] = ].[value_all]`")
 
-      stop_up(dsb("In the argument `...`, all elements must be scalars (i.e. of length 1).\nPROBLEM: ",
-                  ".['\n'c ! The .[nth ? i_pblm] element (.[info_call]) is ",
-                  "of length .[f, w ? len_pblm]."))
+      stop_up("In the argument `...`, all elements must be scalars (i.e. of length 1).\nPROBLEM: ",
+              "{'\n'c ! The {nth ? i_pblm} element ({info_call}) is ",
+              "of length {f, ws ? len_pblm}.")
     }
   }
 
@@ -361,7 +363,7 @@ check_set_options = function(x, options, op, free = FALSE, case = FALSE){
 suggest_item = function(x, items){
   # typical use: x is not in items
   #              we want to suggest possible values
-  # returns FALSE if no suggestion found
+  # returns vector of length 0 if no suggestion
   
 
   # 1: with case
@@ -394,7 +396,7 @@ suggest_item = function(x, items){
     score = score + (substr(items_nx, i, i) == substr(x, i, i))
   }
 
-  if(any(score > 0)){
+  if(any(score > (nx / 2))){
     s_order = order(score, decreasing = TRUE)
     score = score[s_order]
     items = items[s_order]
@@ -414,7 +416,7 @@ suggest_item = function(x, items){
   score = score[s_order]
   items = items[s_order]
   
-  res =  tems[score > 0]
+  res = items[score > (nx / 2)]
 
   res
 }
