@@ -1770,64 +1770,91 @@ std::vector<std::string> trim_ws(std::vector<std::string> x){
 }
 
 inline bool is_select_separator(const char * str, int i){
-  return str[i] == ',' || str[i] == ';' || str[i] == '|' || str[i] == '=';
+  return str[i] == ',' || str[i] == '/' || 
+       (str[i] == '=' && i + 1 < static_cast<int>(std::strlen(str)) && str[i + 1] != '>');
+}
+
+inline bool is_cond_operator(const char * str, int i){
+  return str[i] == '&' || str[i] == '|';
 }
 
 // [[Rcpp::export]]
 List cpp_parse_charselect(SEXP Rstr){
   // parses single character vector: 
-  // in: "species, sep_* = ^sepal || @width; ^petal | petal.length, petal.width"
+  // in: "species, sep_{*:'^.. => _'} = ^sepal & .num / (@width), ^petal, / petal.length, petal.width"
   // out:
-  // - names: c(       "",  "sep_*",                          "")
-  // -  patterns: c("species", "^sepal",                    "^petal")
-  // - order: c(       "", "@width", "petal.length, petal.width")
-  // - otype: c(        0,        2,                           1)
+  // -      names: c(       "", "sep_{*:'^.. => _'}",       "",                          "")
+  // -   patterns: c("species",      "^sepal & .num", "^petal",                          "")
+  // -      order: c(       "",             "@width",       "", "petal.length, petal.width")
+  // -    is_cond: c(    false,                 true,    false,                       false)
+  //
+  // NOTA: we don't take care of malformed statements: they will be dealt with in R
 
   const char *str = CHAR(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
 
   std::vector<std::string> names, patterns, order;
-  std::vector<int> otype;
+  std::vector<bool> is_cond;
   std::string tmp, name_tmp, patterns_tmp, order_tmp;
-  int type = 0;
+  bool cond = false;
 
   int i=0;
   while(i < n){
     name_tmp = "";
     patterns_tmp = "";
     order_tmp = "";
-    type = 0;
+    cond = false;
 
-    // first we get the variable
-    while(i < n && !is_select_separator(str, i)) patterns_tmp += str[i++];
+    // first we get the variable + find out if there is a condition
+    while(i < n && !is_select_separator(str, i)){
+      if(is_cond_operator(str, i)){
+        cond = true;
+      }
+      patterns_tmp += str[i++];
+    }
 
     if(i < n && str[i] == '='){
+      cond = false;
       name_tmp = patterns_tmp;
 
       ++i;
       patterns_tmp = "";
-      while(i < n && !is_select_separator(str, i)) patterns_tmp += str[i++];
+      while(i < n && !is_select_separator(str, i)){
+        if(is_cond_operator(str, i)){
+          cond = true;
+        }
+        patterns_tmp += str[i++];
+      }
     }
 
     if(i == n || (i < n && str[i] == ',')){
       // nothing, we move on
-    } else if(i < n && str[i] == '|'){
-      type = 1;
+    } else if(i < n && str[i] == '/'){
+      // we're in a sorting statement
       ++i;
-      if(i < n && str[i] == '|'){
-        type = 2;
-        ++i;
-      }
+      
+      // stripping the WS
+      while(i < n && is_blank(str[i])) ++i;
 
-      // only the semi colon can stop the pipe
-      while(i < n && str[i] != ';') order_tmp += str[i++];
+      if(str[i] == '('){
+        ++i;
+        // only the closing paren can stop it
+        while(i < n && str[i] != ')') order_tmp += str[i++];
+        // we strip the possible comma after it
+        ++i;
+        while(i < n && (is_blank(str[i]) || str[i] == ',')) ++i;
+      } else {
+        // up to the end of the string
+        while(i < n) order_tmp += str[i++];
+      }
+      
     }
 
     // saving the data
     names.push_back(name_tmp);     
     patterns.push_back(patterns_tmp);
     order.push_back(order_tmp);
-    otype.push_back(type);
+    is_cond.push_back(cond);
 
     ++i;
 
@@ -1838,12 +1865,47 @@ List cpp_parse_charselect(SEXP Rstr){
   res["names"] = trim_ws(names);
   res["patterns"]  = trim_ws(patterns);
   res["order"] = trim_ws(order);
-  res["otype"] = otype;
+  res["is_cond"] = is_cond;
   
   return res;
 }
 
+// [[Rcpp::export]]
+List cpp_parse_conditions_in_pattern(SEXP Rstr){
+  // parses single character vector: 
+  // in: "^sepal & .num | petal.length"
+  // out:
+  // -   patterns: c("^sepal", ".num", "petal.length")
+  // - operations: c(      "",  "and",           "or")
 
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+
+  std::vector<std::string> all_patterns, all_operations;
+  all_operations.push_back("");
+  std::string pattern_tmp, operator_tmp;
+
+  int i = 0;
+  while(i < n){
+    pattern_tmp = "";
+
+    while(i < n && !is_cond_operator(str, i)) pattern_tmp += str[i++];
+
+    all_patterns.push_back(pattern_tmp);
+
+    if(i < n){
+      operator_tmp = str[i] == '&' ? "and" : "or";
+      all_operations.push_back(operator_tmp);
+      ++i;
+    }
+  }
+
+  List res;
+  res["patterns"] = trim_ws(all_patterns);
+  res["operations"] = all_operations;
+
+  return res;
+}
 
 
 
