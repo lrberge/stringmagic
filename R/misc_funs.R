@@ -1012,6 +1012,25 @@ convert_to_list = function(x){
 }
 
 
+uniquify = function(x){
+  x_int = to_integer(x)
+  n = length(x)
+
+  if(max(x_int) == n){
+    return(x)
+  }
+
+  suffix = character(n)
+  x_tab = tabulate(x_int)
+  i_multiple = which(x_tab > 1)
+  for(i in i_multiple){
+    n_digits = ceiling(log10(x_tab[i] + 0.1))
+    suffix[x_int == i] = sprintf("%0*i", n_digits, 1:x_tab[i])
+  }
+
+  res = paste0(x, suffix)
+  res
+}
 
 
 
