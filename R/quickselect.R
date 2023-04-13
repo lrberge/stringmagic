@@ -70,7 +70,8 @@
 #' # selecting factor variables and variables starting with Sepal
 #' selvars(iris, ".fact, ^Sepal")
 #'
-selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = parent.frame()){
+selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = parent.frame(),
+                   .ignore.case = TRUE, .strict_eval = FALSE){
 
   mc = match.call(expand.dots = FALSE)
   if("x" %in% names(mc) && mc$x == "."){
@@ -173,8 +174,6 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
     }
   }
 
-  x_origin = x
-
   check_character(.order, null = TRUE, no_na = TRUE)
   check_character(.in, null = TRUE)
   check_character(.pattern, null = TRUE)
@@ -221,7 +220,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
 
     if(is.character(mcdi)){
       # This is the standard variable selection
-      new_vars = selvars_main_selection(x, data, mcdi, dot_names[i])
+      new_vars = selvars_main_selection(x, data, mcdi, dot_names[i], .ignore.case)
       new_names = names(new_vars)
 
       i_keep = !new_vars %in% final_vars
@@ -274,7 +273,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
         vars_expanded_list = vector("list", n_exp)
         names_expanded_list = vector("list", n_exp)
         for(k in 1:n_exp){
-          vars_expanded_list[[k]] = selvars_main_selection(x, data, values_to_expand[k])
+          vars_expanded_list[[k]] = selvars_main_selection(x, data, values_to_expand[k], "", .ignore.case)
           names_expanded_list[[k]] = names(vars_expanded_list[[k]])
           if(all_list_equal && k > 1){
             if(length(vars_expanded_list[[k]]) != length(vars_expanded_list[[k - 1]]) || 
@@ -380,7 +379,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
     # since "new" evaluated variables may not be in the data
     # => we need to evaluate the new data beforehand (but it's a bit costly)
 
-    new_vars = selvars_internal(final_vars, all_vars, data, .order, TRUE)
+    new_vars = selvars_internal(final_vars, all_vars, data, .order, TRUE, .ignore.case)
     final_names = final_names[match(new_vars, final_vars)]
     final_vars = new_vars
   }
@@ -488,10 +487,9 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
   res
 }
 
-selvars_main_selection = function(all_vars, data, pattern, dot_name = ""){
+selvars_main_selection = function(all_vars, data, pattern, dot_name = "", .ignore.case = TRUE){
   # Returns the variables to keep
   # x: vector of variables
-  # x_origin: original vector of variables
   # data: the data (optional)
   # pattern: the pattern, must be of length 1
   # dot_name: name given by the user in the ... argument
@@ -507,42 +505,59 @@ selvars_main_selection = function(all_vars, data, pattern, dot_name = ""){
   new_names = pnames
   all_patterns = pat_parsed$patterns
   order_pat = pat_parsed$order
-  order_type = pat_parsed$otype
+  is_cond = pat_parsed$is_cond
   
   final_names = character(0)
   final_vars = character(0)
   for(i in seq_along(all_patterns)){
-    p = all_patterns[i]
-
-    selection = selvars_internal(current_vars, all_vars, data, p, FALSE)
-
-    if(selection$negate){
+    main_pat = all_patterns[i]
+    
+    if(nchar(main_pat) == 0){
+      # this is an ordering command that should reorder all the previous variables
+      # it is always attached to the empty pattern
+      # (orderings associated to non empty patterns are partial orderings)
       if(i == 1){
-        final_vars = setdiff(current_vars, selection$vars)
-        final_names[final_vars] = new_names[i]        
-
-        if(order_type[i] == 2){
-          final_vars = selvars_internal(final_vars, all_vars, data, order_pat[i], TRUE)
-        }
-      } else {
-        final_vars = setdiff(final_vars, selection$vars)
-        current_vars = final_vars
-        # double pipe ordering is meaningless here
+        final_vars = all_vars
       }
+
+      final_vars = selvars_internal(final_vars, data, order_pat[i], TRUE, .ignore.case)
     } else {
-      i_keep = !selection$vars %in% final_vars
-      new_vars = selection$vars[i_keep]
-      final_names[new_vars] = new_names[i]
 
-      if(order_type[i] == 2){
-        new_vars = selvars_internal(new_vars, all_vars, data, order_pat[i], TRUE)
+      # preparation for handling conditions
+      if(is_cond[i]){
+        info = cpp_parse_conditions_in_pattern(main_pat)
+        current_patterns = info$patterns
+        current_operations = info$operations
+      } else {
+        current_patterns = main_pat
+        current_operations = ""
       }
 
-      final_vars = c(final_vars, new_vars)
-    }
+      new_vars = character(0)
+      for(j in seq_along(current_patterns)){
+        p = current_patterns[j]
+        selection = selvars_internal(all_vars, data, p, FALSE, .ignore.case)
+        if(j == 1){
+          new_vars = selection
+        } else {
+          log_op = current_operations[j]
+          if(log_op == "or"){
+            new_vars = union(new_vars, selection)
+          } else {
+            new_vars = intersect(new_vars, selection)
+          }
+        }        
+      }
 
-    if(order_type[i] == 1){
-      final_vars = selvars_internal(final_vars, all_vars, data, order_pat[i], TRUE)
+      # adding the variables to the final stack + ordering if requested
+      new_vars = setdiff(new_vars, final_vars)
+
+      if(nchar(order_pat[i]) > 0){
+        new_vars = selvars_internal(new_vars, data, order_pat[i], TRUE, .ignore.case)
+      }
+
+      final_names[new_vars] = new_names[i]
+      final_vars = c(final_vars, new_vars)
     }
   }
 
@@ -564,22 +579,21 @@ selvars_main_selection = function(all_vars, data, pattern, dot_name = ""){
   return(final_vars)
 }
 
-selvars_internal = function(x, x_origin, data, pattern, is_order){
+selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
   # Returns the variables to keep
-  # x: vector of variables
-  # x_origin: original vector of variables
+  # x: vector of variable names
   # data: the data (optional)
   # pattern: the pattern, must be of length 1
   # is_order: whether it is about sorting or selecting
   #
-  # if is_order == TRUE: a character vector is returned (vars)
-  # if is_order == FALSE: a list of two elements, vars and negate, is returned
+  # returns a simple character vector
 
   if(!is_order && nchar(pattern) == 0){
     return(character(0))
   }
 
   if(is_order){
+    pattern_origin = pattern
     pattern = str_op(pattern, "'[, \t\n]+'S")
   }
 
@@ -590,160 +604,216 @@ selvars_internal = function(x, x_origin, data, pattern, is_order){
   all_vars = setNames(x, 1:n_x)
 
   for(i in n_pat:1){
-    # we take the reverse order for order to work properly
+    # we take the reverse order for orderings to work properly
     # no consequence for selection since it is of length 1
 
     p = p_raw = pattern[i]
     p_clean = NULL
     first_char = substr(p, 1, 1)
 
-    is_addition = first_char == "+"
-
-    if(is_order && (is_addition)){
-      stop_hook("When ordering the variables, the tag `+` is invalid since it is only ", 
-                "used to select the data.",
-                "\nFIX: remove the {bq?first_char} in {bq?p_raw}.")
-    }
-
-    if(is_addition){
-      p = substr(p, 2, nchar(p))
-      first_char = substr(p, 1, 1)
-      all_vars = x_origin
-    }
-
     negate = first_char == "!"
     if(negate){
       p = substr(p, 2, nchar(p))
-      first_char = substr(p, 1, 1)
     }
 
-    if(p == "."){
-      # => all the remaining variables
-      if(negate){
-        stop_hook("You cannot use the pattern {bq?p_raw}: it is equivalent to removing all variables!")
-      }
+    is_range = grepl(":", p, fixed = TRUE)
+    my_range = integer(2)
+    if(is_range){
+      #  we need to better check => we allow escaping
+      p = gsub("(?<!\\\\):", "___RANGE___", p, perl = TRUE)
+      is_range = grepl("___RANGE___", p, fixed = TRUE)
+      p = gsub("\\:", ":", p, fixed = TRUE)
+    }
 
-      is_selected = rep(TRUE, length(all_vars))
-    } else if(p %in% c(".num", ".log", ".lnum", ".fact", ".char", ".fchar", ".date")){
-      if(is.null(data)){
-        stop_hook("The special value {bq?p} can only be used when the argument `x` is a data set. ",
-                  "It is meaningless when `x` is a character vector.")
-      }
-
-      type_fun = switch(p,
-                        .num = is.numeric,
-                        .log = is.logical,
-                        .lnum = function(x) is.numeric(x) || is.logical(x),
-                        .fact = is.factor,
-                        .char = is.character,
-                        .fchar = function(x) is.factor(x) || is.character(x),
-                        .date = function(x) any(grepl("date", class(x), ignore.case = TRUE)))
-
-      if(is.null(data_list)){
-        data_list = as.list(data)
-        data_list = data_list[all_vars]
-      }
-
-      is_selected = sapply(data_list, type_fun)
-
-      if(!any(is_selected)){
-        info = switch(p,
-                      .num = "numeric",
-                      .log = "logical",
-                      .lnum = "numeric or logical",
-                      .fact = "factor",
-                      .char = "character",
-                      .fchar = "factor or character",
-                      .date = "date")
-
-        stop_hook("The special value {bq?p} did not find any variable. ",
-                  "Maybe you could check that there are {info} variables in the data set?")
-      }
-
-    } else if(is_numeric_in_char(p)){
-      # this is an index
-      # indexes ALWAYS refer to the original positionning
-
-      p_num = as.numeric(p)
-      if(p_num > length(x_origin)){
-        stop_hook("Numeric indexes must be lower or equal to the number of variables in the data set.",
-                  "\nPROBLEM: The value {bq?p} is larger than the total number of variables: {len?x_origin}.")
-      }
-
-      is_selected = logical(length(all_vars))
-      is_selected[p_num] = TRUE
-
-    } else if(first_char %in% c("#", "@", "^", "$")){
-      # fixed char search
-      fixed = first_char == "#"
-      p = substr(p, 2, nchar(p))
-
-      if(first_char == "^"){
-        p_clean = p
-        p = paste0("^\\Q", p, "\\E")
-      } else if(first_char == "$"){
-        p_clean = p
-        p = paste0("\\Q", p, "\\E$")
-      }
-
-      is_selected = grepl(p, all_vars, perl = !fixed, fixed = fixed)
-
+    if(is_range){
+      current_patterns = trimws(strsplit(p, "___RANGE___", fixed = TRUE)[[1]])
     } else {
-      is_selected = all_vars == p
+      current_patterns = p
     }
 
-    if(!any(is_selected) || (negate && all(is_selected))){
-      info = switch(first_char,
-                    "#" = "fixed pattern",
-                    "@" = "regular expression",
-                    "^" = "starts with pattern",
-                    "$" = "ends with pattern",
-                    "value")
+    for(j in seq_along(current_patterns)){
+      p = current_patterns[j]
+      first_char = substr(p, 1, 1)
 
-      if(!is.null(p_clean)) p = p_clean
+      if(p == "."){
+        # => all the remaining variables
+        if(negate){
+          stop_hook("You cannot use the pattern {bq?p_raw}: it is equivalent to removing all variables!")
+        } else if(is_range){
+          stop_hook("You cannot use the pattern {bq?p_raw}. The special value `.` cannot be used in ranges.",
+                    "\nPossible fixes: - to escape the meaning of `:`, prepend it with a backslash",
+                    "\n                - use direct variable names or number indexes",
+                    "\n                - use patterns (`^value` for starts with 'value'; `$var` for ends with 'value'; `@regex`, etc)")
+        }
 
-      p_info = if(p != p_raw) paste0("(raw is `", p_raw, "`) ") else ""
-      
-      is_restricted = length(x_origin) > length(x)
-      consequence = cub("led to no variable being selected{=is_restricted ; in the current selection (after",
-                        " the restrictions have been applied)}.")
+        is_selected = rep(TRUE, length(all_vars))
+      } else if(p %in% c(".num", ".log", ".lnum", ".fact", ".char", ".fchar", ".date", ".list")){
 
-      if(is_restricted){
-        # The problem may come from the fact there was a restriction before, the variable exists
-        # but not in the current set
+        if(is_range){
+          stop_hook("You cannot use the pattern {bq?p_raw}. It is a range (bc of the `:`) and the special value",
+                    " {bq?p} cannot be used in ranges.",
+                    "\nPossible fixes: - to escape the meaning of `:`, prepend it with a backslash",
+                    "\n                - use direct variable names or number indexes",
+                    "\n                - use patterns (`^value` for starts with 'value'; `$var` for ends with 'value'; `@regex`, etc)")
+        }
+
+        if(is.null(data)){
+          stop_hook("The special value {bq?p} can only be used when the argument `x` is a data set. ",
+                    "It is meaningless when `x` is a character vector.")
+        }
+
+        type_fun = switch(p,
+                          .num = is.numeric,
+                          .log = is.logical,
+                          .lnum = function(x) is.numeric(x) || is.logical(x),
+                          .fact = is.factor,
+                          .char = is.character,
+                          .fchar = function(x) is.factor(x) || is.character(x),
+                          .date = function(x) any(grepl("date", class(x), ignore.case = TRUE)),
+                          .list = is.list)
+
+        if(is.null(data_list)){
+          data_list = as.list(data)
+          data_list = data_list[all_vars]
+        }
+
+        is_selected = sapply(data_list, type_fun)
+
+        if(!any(is_selected)){
+          info = switch(p,
+                        .num = "numeric",
+                        .log = "logical",
+                        .lnum = "numeric or logical",
+                        .fact = "factor",
+                        .char = "character",
+                        .fchar = "factor or character",
+                        .date = "date",
+                        .list = "list")
+
+          stop_hook("The special value {bq?p} did not find any variable. ",
+                    "Maybe you could check that there are {info} variables in the data set?")
+        }
+
+      } else if(is_numeric_in_char(p)){
+        # this is an index
+        # indexes ALWAYS refer to the original positionning
+
+        if(is_order){
+          stop_hook("In ordering queries (here in {bq?pattern_origin}), numeric indexes canno be used.",
+                    "\nPROBLEM: the value {bq?p} is not valid. Please use othe means to select variables (",
+                    "e.g. '^var' for start with, '$var' for end with, '@regex' for reg. expressions or ",
+                    "the variable name directly).")
+        }
+
+        p_num = as.numeric(p)
         
-        if(first_char %in% c("#", "@", "^", "$")){
-          is_selection_all = grepl(p, x_origin, perl = !fixed, fixed = fixed)
+        if(abs(p_num) > length(all_vars) || p_num == 0){
+          extra = cub("{= p_num < 0 ; (in absolute value) }")
+          pblm = cub("{= p_num == 0 ; The value of the index cannot be equal to 0!", 
+                    "; The value {bq?p} is larger {extra}than the total number of variables: {len?all_vars}.}")
+          stop_hook("Numeric indexes must be {extra}lower than, or equal to, the number of variables in the data set.",
+                    "\nPROBLEM: {pblm}")
+        }
+
+        if(p_num < 0){
+          p_num = length(all_vars) + p_num + 1
+        }
+
+        is_selected = logical(length(all_vars))
+        is_selected[p_num] = TRUE
+
+      } else if(first_char %in% c("#", "@", "^", "$")){
+        # fixed char search
+        fixed = first_char == "#"
+        p = substr(p, 2, nchar(p))
+
+        if(first_char == "^"){
+          p_clean = p
+          if(.ignore.case){
+            p = paste0("(?i)^\\Q", p, "\\E")
+          } else {
+            p = paste0("^\\Q", p, "\\E")
+          }
+          
+        } else if(first_char == "$"){
+          p_clean = p
+          if(.ignore.case){
+            p = paste0("(?i)\\Q", p, "\\E$")
+          } else {
+            p = paste0("\\Q", p, "\\E$")
+          }
+          
+        }
+        
+        if(fixed && .ignore.case){
+          fixed = FALSE
+          perl = TRUE
+          p = paste0("(?i)\\Q", p, "\\E")
+        }
+
+        is_selected = grepl(p, all_vars, perl = !fixed, fixed = fixed)
+
+      } else {
+
+        if(is_range && first_char == "!"){
+          stop("In ranges, you cannot use negations to select variables on the right side.",
+               "\nPROBLEM: In the range {bq?p_raw} there is a negation in {bq?p}.",
+               "\nFIX: remove the negation (i.e. drop the `!`) and select variables in a regular way (",
+               "with variable names, indexes, or patterns).")
+        }
+
+        if(.ignore.case){
+          is_selected = tolower(all_vars) == tolower(p)
         } else {
-          is_selection_all = x_origin == p
-        }
+          is_selected = all_vars == p
+        }        
+      }
 
-        if(any(is_selection_all)){
-          stop_hook("The value {bq?p_raw} led to no value being selected. ",
-                    "This comes from the restrictions that you previously applied (using `!`).",
-                    "\nFIX: to add a variable despite the restrictions, either:",
-                    "\n     a) write your pattern in a separate argument in `...` (restrictions ",
-                    "are cancelled btw args.)",
-                    "\n     b) add a `+` to specify that you want to fetch the variable from ",
-                    "the original pool (like: `+{p_raw}`)")
-        }
+      if(!any(is_selected) || (negate && all(is_selected))){
+        info = switch(first_char,
+                      "#" = "fixed pattern",
+                      "@" = "regular expression",
+                      "^" = "starting pattern",
+                      "$" = "ending pattern",
+                      "value")
+
+        if(!is.null(p_clean)) p = p_clean
+
+        p_info = if(p != p_raw) paste0("(raw is `", p_raw, "`) ") else ""
         
+        sugg = suggest_item(p, all_vars)
+
+        consequence = "led to no variable being selected."
+        extra = ""
+        if(info == "value"){
+          consequence = paste0("is not ", ifelse(!is.null(data), "a variable from the data set.", "present."))  
+          sugg_txt = cub("{$(;;\nMaybe you meant {$enum.bq.or.6}?) ? sugg}")
+          extra = paste0(sugg_txt, " Note that you can use regex with `@` and partial matching with `^`.")
+        } else if(length(sugg) > 0){
+          sugg_txt = cub("\nFYI here {$are ? sugg} a {$(;few )}variable{$s} that {$are} close: {$enum.bq.or.6}.")
+          extra = sugg_txt
+        }
+
+        stop_hook("The ", info, " `", p, "` ", p_info, consequence, extra)
+
+      } else if(is_range){
+        n_matches = sum(is_selected)
+
+        if(n_matches > 1){
+          stop_hook("In ranges, the patterns from each side of the range must match only a single variable. ", 
+                    "\nPROBLEM: in the range {bq?p_raw}, the pattern {bq?p} matched {n?n_matches} variables.",
+                    "\n         These are: {enum ? all_vars[is_selected]}.")
+        }
+
+        my_range[j] = which(is_selected)
+
       }
-
-      sugg = suggest_item(p, all_vars)
-
-      extra = ""
-      if(info == "value"){
-        consequence = paste0("is not ", ifelse(!is.null(data), "a variable from the data set.", "present."))  
-        sugg_txt = cub("{$(;;\nMaybe you meant {$enum.bq.or.6}?) ? sugg}")
-        extra = paste0(sugg_txt, " Note that you can use regex with `@` and partial matching with `^`.")
-      } else if(length(sugg) > 0){
-        sugg_txt = cub("\nFYI here {$are ? sugg} a {$(;few )}variable{$s} that {$are} close: {$enum.bq.or.6}.")
-        extra = sugg_txt
-      }
-
-      stop_hook("The ", info, " `", p, "` ", p_info, consequence, extra)
     }
+
+    if(is_range){
+      is_selected = logical(length(all_vars))
+      is_selected[my_range[1]:my_range[2]] = TRUE
+    }    
 
     if(is_order){
       if(negate){
@@ -752,26 +822,22 @@ selvars_internal = function(x, x_origin, data, pattern, is_order){
         all_vars = c(all_vars[is_selected], all_vars[!is_selected])
       }
     } else {
-      # simple selection: one single pattern
-      # if(negate){
-      #   vars_select = all_vars[!is_selected]
-      # } else {
-      #   vars_select = all_vars[is_selected]
-      # }
-      if(negate && is_addition){
-        negate = FALSE
+ 
+      if(negate){
         vars_select = all_vars[!is_selected]
       } else {
         vars_select = all_vars[is_selected]
+        if(is_range && my_range[1] > my_range[2]){
+          vars_select = rev(vars_select)
+        }
       }      
 
-      res = list(vars = vars_select, negate = negate)
+      res = vars_select
 
       return(res)
     }    
   }
 
-  # if here: bc is_order = TRUE: we only return the vector
   res = all_vars
 
   return(res)
