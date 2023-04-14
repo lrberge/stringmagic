@@ -1033,61 +1033,6 @@ uniquify = function(x){
 }
 
 
-clean_names = function(x){
-  # x is a character string
-  # the user can apply changes to the string using curly brackets
-  # note that usually this is only used with the * placeholder
-  # - "any_{nb_pub:'nb_'}" => any_pub
-  # - the user can add actions: fix (to fix the names), lower (lower case)
-  #
-  # This is supa supa slow
-  # LATER: apply all these modifications at once on all variable names, to avoid the loop
-
-  i_curly = which(grepl("\\{.+:.+\\}", x))
-
-  for(i in i_curly){
-    xi = x[i]
-
-    xi_parsed = cpp_parse_clean_names(xi)
-
-    j_op = which(lengths(xi_parsed) == 2)
-    for(j in j_op){
-      all_op = xi_parsed[[j]][[1]]
-      txt = xi_parsed[[j]][[2]]
-
-      all_op = check_set_options(all_op, c("fix", "lower"), free = TRUE)
-
-      for(op in all_op){
-        if(op == "fix"){
-          txt = gsub("[^[:alnum:]._]", "_", txt)
-          txt = gsub("_+", "_", txt)
-          txt = gsub("^[_.]+", ".", txt)
-          txt = gsub("([[:lower:]])([[:upper:]])", "\\1_\\2", txt)
-          txt = tolower(txt)
-        } else if(op == "lower"){
-          txt = tolower(txt)
-        } else {
-          op = gsub("^'|'$", "", op)
-          if(grepl(" => ", op, fixed = TRUE)){
-            op_split = strsplit(op, " => ", fixed = TRUE)[[1]]
-          } else {
-            op_split = c(op, "")
-          }
-
-          txt = gsub(op_split[1], op_split[2], txt)
-        }
-      }
-
-      xi_parsed[[j]] = txt
-    }
-
-    x[i] = do.call(paste0, xi_parsed)
-  }
-
-  x
-}
-
-
 apply_star_operation = function(x, all_operations){
   # only a few operations can be applied
 

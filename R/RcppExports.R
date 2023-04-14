@@ -65,10 +65,6 @@ cpp_parse_conditions_in_pattern <- function(Rstr) {
     .Call(`_stringmagick_cpp_parse_conditions_in_pattern`, Rstr)
 }
 
-cpp_parse_clean_names <- function(Rstr) {
-    .Call(`_stringmagick_cpp_parse_clean_names`, Rstr)
-}
-
 cpp_parse_name_stars <- function(Rstr) {
     .Call(`_stringmagick_cpp_parse_name_stars`, Rstr)
 }
