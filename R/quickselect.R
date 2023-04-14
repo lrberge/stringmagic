@@ -210,39 +210,57 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
   prefix_eval = "eval:::"
 
   for(i in seq_len(n_dots)){
-    mcdi = mcdots[[i]]
+    expr = mcdots[[i]]
 
-    if(is.numeric(mcdi)){
-      mcdi = as.character(mcdi)
-    } else if(length(mcdi) == 2 && is_operator(mcdi, "!") && is.numeric(mcdi[[2]])){
-      mcdi = deparse_long(mcdi)
-    }
-
-    if(is.character(mcdi)){
+    if(is.character(expr)){
       # This is the standard variable selection
-      new_vars = selvars_main_selection(x, data, mcdi, dot_names[i], .ignore.case)
+      new_vars = selvars_main_selection(x, data, expr, dot_names[i], .ignore.case)
       new_names = names(new_vars)
 
       i_keep = !new_vars %in% final_vars
       final_vars = c(final_vars, new_vars[i_keep])
       final_names = c(final_names, new_names[i_keep])
     } else {
-      # This is something that needs checking
-      # this is an expression, we will work on its deparsed value
-      expr_dp = deparse(mcdi, width.cutoff = 500)
+      # Here expressions end up always evaluated.
+      # But the user can summon variable expansion by using backtick quoted
+      # expressions. These will be expanded and we need to find out if there are some.
+      
+      expr_dp = deparse(expr, width.cutoff = 500L)
       if(length(expr_dp) > 1){
         stop_hook("Multi-line expressions are not supported in `...` ", 
                   "(it concerns: {'\\n'c, '20|...'k, bq ? expr_dp}).")
       }
 
-      is_char_string = grepl("\"", expr_dp, fixed = TRUE)
-      if(!is_char_string){
-        # case where a variable has been selected
-        # We will apply evaluation the data table way:
-        # - preference for variables in the data set, if not found: in the frame
-        # => add an option to disable that?
-        # - use ..varname to explicilty use variables in the frame
+      # Condition for a variable being treated as an expansion pattern:
+      # - A) not be a variable from the data
+      # - B) be one of the special values (., .data_type)
+      # - C) not be formed like a regular variable name
 
+      # A) not variable names
+      expansions = setdiff(all.vars(expr), x)
+      is_expansion = FALSE
+      if(length(expansions) > 0){
+        # B) special data types
+        special_data_types = names(getOption("stringmagick_QS_data_types"))
+        final_expansions = intersect(expansions, c(".", special_data_types))
+
+        # C) not regular variables (remember that these can be fetched from the frame!)
+        expansions = setdiff(expansions, final_expansions)
+        is_valid_var = grepl("^[.[:alpha:]][._[:alnum:]]*$", expansions)
+
+        final_expansions = c(final_expansions, expansions[!is_valid_var])
+
+        # Rewritting the expressions
+        is_expansion = length(final_expansions) > 0
+        if(is_expansion){
+          pat = cub("(?<![[:alnum:]._])`?({'|'c ! \\Q{expansions}\\E})`?(?![[:alnum:]._([])")
+          expr_dp_origin = expr_dp # useful to report in errors
+          expr_dp = gsub(pat, "\"_P_A_T_\\1\"_P_A_T_", expr_dp, perl = TRUE)
+        }
+      }
+
+      if(!is_expansion){
+        # we move along after cleaning up
         new_vars = paste0(prefix_eval, expr_dp)
 
         if(nchar(dot_names[i]) == 0){
@@ -255,7 +273,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
         final_names = c(final_names, new_names)
       
       } else {
-        expr_dp_split = strsplit(expr_dp, '"')[[1]]
+        expr_dp_split = strsplit(expr_dp, '"?_P_A_T_"?')[[1]]
         values_to_expand = expr_dp_split[seq_along(expr_dp_split) %% 2 == 0]
 
         all_list_equal = TRUE
@@ -265,9 +283,9 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
         n_stars = str_op(dot_names[i], "* X.fixed, len")
         if(!nchar(dot_names[i]) == 0 && !n_stars %in% c(0, n_exp)){
           
-          stop_hook("The expression {bq, '50|...'k ? expr_dp} evaluates {n_exp} variable{#s}. ",
+          stop_hook("The expression {bq, '50|...'k ? expr_dp_origin} evaluates {n_exp} variable{#s}. ",
                     "The new name given in the `...` argument-name should have either 0, or {n_exp} `*` placeholders.",
-                    "\nPROBLEM: the new name contains {=n_exp > n_stars ; only }{n_stars} such placeholder.")
+                    "\nPROBLEM: the new name contains {=n_exp > n_stars ; only }{n_stars} such placeholder{#s}.")
         }
 
         vars_expanded_list = vector("list", n_exp)
@@ -313,7 +331,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
           if(n_stars == 0){
             n_vars = length(new_expr_dp) 
             if(n_vars > 1){
-              stop_hook("The expression {bq, '50|...'k ? expr_dp} leads to {n_vars} variables. ",
+              stop_hook("The expression {bq, '50|...'k ? expr_dp_origin} leads to {n_vars} variables. ",
                     "But the new name given in the `...` argument-name does not contain a `*` placeholder.",
                     "\nFIX: please provide a new name with {len ? vars_expanded} `*` placeholder{$s} in it.")
             }
