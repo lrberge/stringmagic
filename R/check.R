@@ -437,7 +437,7 @@ deparse_short = function(x){
 deparse_long = function(x){
   x_dp = deparse(x, width.cutoff = 500L)
   if(length(x_dp) > 1){
-    x_dp = paste0(x_dp, collapse = "")
+    x_dp = paste0(x_dp, collapse = "\n")
   }
 
   x_dp
