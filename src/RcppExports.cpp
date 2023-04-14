@@ -196,6 +196,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_parse_clean_names
+List cpp_parse_clean_names(SEXP Rstr);
+RcppExport SEXP _stringmagick_cpp_parse_clean_names(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_parse_clean_names(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_parse_name_stars
+List cpp_parse_name_stars(SEXP Rstr);
+RcppExport SEXP _stringmagick_cpp_parse_name_stars(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_parse_name_stars(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_to_integer
 IntegerVector cpp_to_integer(SEXP x);
 RcppExport SEXP _stringmagick_cpp_to_integer(SEXP xSEXP) {
@@ -248,6 +270,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_recreate_index", (DL_FUNC) &_stringmagick_cpp_recreate_index, 1},
     {"_stringmagick_cpp_parse_charselect", (DL_FUNC) &_stringmagick_cpp_parse_charselect, 1},
     {"_stringmagick_cpp_parse_conditions_in_pattern", (DL_FUNC) &_stringmagick_cpp_parse_conditions_in_pattern, 1},
+    {"_stringmagick_cpp_parse_clean_names", (DL_FUNC) &_stringmagick_cpp_parse_clean_names, 1},
+    {"_stringmagick_cpp_parse_name_stars", (DL_FUNC) &_stringmagick_cpp_parse_name_stars, 1},
     {"_stringmagick_cpp_to_integer", (DL_FUNC) &_stringmagick_cpp_to_integer, 1},
     {"_stringmagick_cpp_combine_clusters", (DL_FUNC) &_stringmagick_cpp_combine_clusters, 2},
     {"_stringmagick_cpp_create_pos", (DL_FUNC) &_stringmagick_cpp_create_pos, 1},

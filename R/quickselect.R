@@ -319,6 +319,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
           names_expanded = as.list(do.call(expand.grid, names_expanded_list))
         }
 
+        #
         # we create the call 
         # this looks complicated because we are general and allow several expansions
         n_expr_elem = length(expr_dp_split)
@@ -334,10 +335,26 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
 
         new_expr_dp = do.call(paste0, new_expr_dp_list)
         
+        #
         # now the names (it's a bit tricky: we allow flexibility so we pay the price)
         expr_names_construct = expr_dp_split
         names_expr = NULL
-        if(nchar(dot_names[i]) != 0){
+        if(nchar(dot_names[i]) == 0){
+          # we construct default names
+          n_expr_names = length(expr_names_construct)
+          names_expr_list = vector("list", n_expr_names)
+          for(k in 1:n_expr_names){
+            if(k %% 2 == 0){
+              index = k / 2
+              names_expr_list[[k]] = names_expanded[[index]]
+            } else {
+              names_expr_list[[k]] = expr_names_construct[k]
+            }
+          }
+          names_expr = do.call(paste0, names_expr_list)
+
+        } else {
+          # User-provided names
           if(n_stars == 0){
             n_vars = length(new_expr_dp) 
             if(n_vars > 1){
@@ -348,30 +365,8 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
 
             names_expr = dot_names[i]
           } else {
-            expr_names_construct = strsplit(dot_names[i], "*", fixed = TRUE)[[1]]
-            if(length(expr_names_construct) < n_stars + 1){
-              expr_names_construct[n_stars + 1] = ""
-            }
-            # we need to add 1 bc:
-            # "*_mean" => "" "_mean" (len 2)
-            # "mean_*" => "mean_"    (len 1)
-            # the behavior of splitting is kind of inconsistent
+            names_expr = fill_the_placeholders(dots_names[i], names_expanded)            
           }
-        }
-
-        if(is.null(names_expr)){
-          n_expr_names = length(expr_names_construct)          
-          names_expr_list = vector("list", n_expr_names)
-          for(k in 1:n_expr_names){
-            if(k %% 2 == 0){
-              index = k / 2
-              names_expr_list[[k]] = names_expanded[[index]]
-            } else {
-              names_expr_list[[k]] = expr_names_construct[k]
-            }
-          }
-
-          names_expr = do.call(paste0, names_expr_list)
         }
 
         # we append 'eval:::' to diffenciate it from regular variables
@@ -595,13 +590,17 @@ selvars_main_selection = function(all_vars, data, pattern, dot_name = "", .ignor
   final_names[is_empty] = final_vars[is_empty]
   
   # taking care of placeholders
-  i_star = grepl("*", final_names, fixed = TRUE)
-  if(any(i_star)){
-    names_star = final_names[i_star]
-    before = gsub("\\*.*", "", names_star)
-    after = gsub(".*\\*", "", names_star)
-    final_names[i_star] = paste0(before, final_vars[i_star], after)
-  }
+  if(nchar(dot_name) > 0){
+    # fixed name provided by the user. Very likely contains a plaeholder. 
+    if(grepl("*", dot_name, fixed = TRUE)){
+        final_names = fill_the_placeholders(dot_name, final_vars)
+    }
+  } else {
+    i_star = which(grepl("*", final_names, fixed = TRUE))
+    for(i in i_star){
+      final_names[i] = fill_the_placeholders(final_names[i], final_vars[i])
+    }
+  }  
 
   names(final_vars) = final_names
   return(final_vars)
@@ -698,6 +697,7 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
 
         if(is.null(data_list)){
           data_list = convert_to_list(data)
+          data_list = data_list[all_vars]
         }
 
         is_selected = sapply(data_list, my_type$fun)

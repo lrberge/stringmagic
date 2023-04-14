@@ -1908,12 +1908,166 @@ List cpp_parse_conditions_in_pattern(SEXP Rstr){
 }
 
 
+// [[Rcpp::export]]
+List cpp_parse_clean_names(SEXP Rstr){
+  // "any_{nb_Pub: 'nb_', lower}"
+  // list:
+  //      1: list("any")
+  //      2: list(c("'nb_'", "lower"), "nb_Pub")
+  // writting this function in R would have been a hot mess (way bigger than here!)
+
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+
+  List res;
+
+  std::vector<std::string> all_operations;
+  std::string pattern_tmp, operation_tmp;
+
+  int i_bak = 0;
+  int i = 0;
+  while(i < n){
+    pattern_tmp = "";
+
+    while(i < n && str[i] != '{') pattern_tmp += str[i++];
+
+    if(i == n){
+      res.push_back(pattern_tmp);
+    } else {
+      if(!pattern_tmp.empty()){
+        res.push_back(pattern_tmp);
+      }
+
+      ++i;
+
+      pattern_tmp = "";
+      while(i < n && str[i] != ':') pattern_tmp += str[i++];
+      if(i == n){
+        // parsing failure
+        pattern_tmp = "{" + pattern_tmp;
+        res.push_back(pattern_tmp);
+        break;
+      }
+
+      i_bak = i;
+
+      ++i;
+      all_operations.clear();
+      while(i < n && str[i] != '}'){
+        operation_tmp = "";
+        while(i < n && str[i] != ',' && str[i] != '}'){
+          operation_tmp += str[i++];
+        }
+        
+        all_operations.push_back(operation_tmp);
+        if(str[i] == ',') ++i;
+      }
+
+      if(i == n){
+        // parsing failure yet again
+        pattern_tmp = "{" + pattern_tmp;
+        for(int j=i_bak ; j<n ; ++j) pattern_tmp += str[i];
+        res.push_back(pattern_tmp);
+        break;
+      }
+
+      ++i;
+
+      List info;
+      info.push_back(trim_ws(all_operations));
+      info.push_back(pattern_tmp);
+      res.push_back(info);
+    }
+  }
+
+  return res;
+}
 
 
 
+// [[Rcpp::export]]
+List cpp_parse_name_stars(SEXP Rstr){
+  // "any_{nb_Pub: 'nb_', lower}"
+  // list:
+  //      1: list("any")
+  //      2: list(c("'nb_'", "lower"), "nb_Pub")
+  // writting this function in R would have been a hot mess (way bigger than here!)
 
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
 
+  std::vector<bool> is_star;
+  List all_info;
+  std::vector<std::string> all_operations, empty_vector;
+  std::string pattern_tmp, operations_tmp;
 
+  int i_bak = 0;
+  int i = 0;
+  while(i < n){
+    pattern_tmp = "";
+    while(i < n && str[i] != '{' && str[i] != '*') pattern_tmp += str[i++];
+
+    if(!pattern_tmp.empty()){
+      is_star.push_back(false);
+      all_info.push_back(pattern_tmp);
+    }
+
+    if(i == n) break;
+
+    if(str[i] == '*'){
+      // star without operations
+      is_star.push_back(true);
+      all_info.push_back(empty_vector);
+      ++i;
+      
+    } else {
+      // we have operations     
+      i_bak = i;
+      ++i;
+
+      while(i < n && (is_blank(str[i]) || str[i] == '*')) ++i;
+
+      if(i == n || str[i] != ':'){
+        // parsing problem
+        for(int j=i_bak ; j < n ; ++j) pattern_tmp += str[j];
+        is_star.push_back(false);
+        all_info.push_back(pattern_tmp);
+        break;
+      }
+
+      ++i;
+      all_operations.clear();
+      while(i < n && str[i] != '}'){
+        operations_tmp = "";
+        while(i < n && str[i] != ',' && str[i] != '}'){
+          operations_tmp += str[i++];
+        }
+        
+        all_operations.push_back(operations_tmp);
+        if(str[i] == ',') ++i;
+      }
+
+      if(i == n){
+        // parsing failure yet again
+        for(int j=i_bak ; j < n ; ++j) pattern_tmp += str[j];
+        is_star.push_back(false);
+        all_info.push_back(pattern_tmp);
+        break;
+      }
+
+      ++i;
+
+      is_star.push_back(true);
+      all_info.push_back(trim_ws(all_operations));
+    }
+  }
+
+  List res;
+  res["is_star"] = is_star;
+  res["info"] = all_info;
+
+  return res;
+}
 
 
 
