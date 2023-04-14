@@ -609,7 +609,10 @@ to_integer_single = function(x){
 #'
 str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+"){
 
-  check_character(x, )
+  x = check_set_character(x, l0 = TRUE)
+  if(length(x) == 0){
+    return(x)
+  }
 
   rep_main = rep
 
