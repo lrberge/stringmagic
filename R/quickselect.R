@@ -252,11 +252,6 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
 
         # Rewritting the expressions
         is_expansion = length(final_expansions) > 0
-        if(is_expansion){
-          pat = cub("(?<![[:alnum:]._])`?({'|'c ! \\Q{expansions}\\E})`?(?![[:alnum:]._([])")
-          expr_dp_origin = expr_dp # useful to report in errors
-          expr_dp = gsub(pat, "\"_P_A_T_\\1\"_P_A_T_", expr_dp, perl = TRUE)
-        }
       }
 
       if(!is_expansion){
@@ -273,8 +268,23 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
         final_names = c(final_names, new_names)
       
       } else {
-        expr_dp_split = strsplit(expr_dp, '"?_P_A_T_"?')[[1]]
-        values_to_expand = expr_dp_split[seq_along(expr_dp_split) %% 2 == 0]
+
+        # we first find out:
+        # - expr_dp_split
+        # - values_to_expand
+        expr_dp_origin = expr_dp # => useful to report in errors
+        if(length(expr) == 1 && inherits(expr, "name")){
+          # special case: avoids the costly perl expression stuff
+          values_to_expand = as.character(expr)
+          expr_dp_split = c("", values_to_expand, "")
+        } else {
+          # this is quite costly but should avoid any mistakes and edge cases
+          pat = cub("(?<![[:alnum:]._])`?({'|'c ! \\Q{final_expansions}\\E})`?(?![[:alnum:]._([])")
+          expr_dp = gsub(pat, "\"_P_A_T_\\1\"_P_A_T_", expr_dp, perl = TRUE)
+
+          expr_dp_split = strsplit(expr_dp, '"?_P_A_T_"?')[[1]]
+          values_to_expand = expr_dp_split[seq_along(expr_dp_split) %% 2 == 0]
+        }        
 
         all_list_equal = TRUE
         n_exp = length(values_to_expand)
