@@ -241,7 +241,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
       is_expansion = FALSE
       if(length(expansions) > 0){
         # B) special data types
-        special_data_types = names(getOption("stringmagick_QS_data_types"))
+        special_data_types = names(getSmagick_QS_data_types())
         final_expansions = intersect(expansions, c(".", special_data_types))
 
         # C) not regular variables (remember that these can be fetched from the frame!)
@@ -617,6 +617,10 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
 
   data_list = NULL
 
+  # having the special_data_types in the options instead of hard coded adds only 2us per call 
+  # => worth it I think
+  special_data_types = getSmagick_QS_data_types()
+
   n_pat = length(pattern)
   n_x = length(x)
   all_vars = setNames(x, 1:n_x)
@@ -665,7 +669,7 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
         }
 
         is_selected = rep(TRUE, length(all_vars))
-      } else if(p %in% c(".num", ".log", ".lnum", ".fact", ".char", ".fchar", ".date", ".list")){
+      } else if(p %in% names(special_data_types)){
 
         if(is_range){
           stop_hook("You cannot use the pattern {bq?p_raw}. It is a range (bc of the `:`) and the special value",
@@ -680,33 +684,16 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
                     "It is meaningless when `x` is a character vector.")
         }
 
-        type_fun = switch(p,
-                          .num = is.numeric,
-                          .log = is.logical,
-                          .lnum = function(x) is.numeric(x) || is.logical(x),
-                          .fact = is.factor,
-                          .char = is.character,
-                          .fchar = function(x) is.factor(x) || is.character(x),
-                          .date = function(x) any(grepl("date", class(x), ignore.case = TRUE)),
-                          .list = is.list)
+        my_type = special_data_types[[p]]
 
         if(is.null(data_list)){
-          data_list = as.list(data)
-          data_list = data_list[all_vars]
+          data_list = convert_to_list(data)
         }
 
-        is_selected = sapply(data_list, type_fun)
+        is_selected = sapply(data_list, my_type$fun)
 
         if(!any(is_selected)){
-          info = switch(p,
-                        .num = "numeric",
-                        .log = "logical",
-                        .lnum = "numeric or logical",
-                        .fact = "factor",
-                        .char = "character",
-                        .fchar = "factor or character",
-                        .date = "date",
-                        .list = "list")
+          info = my_type$info
 
           stop_hook("The special value {bq?p} did not find any variable. ",
                     "Maybe you could check that there are {info} variables in the data set?")
@@ -861,6 +848,66 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
   return(res)
 }
 
+####
+#### Utilities ####
+####
+
+
+setup_QS_data_types = function(){
+  # Sets up the special data types in quickselect
+  # Contains:
+  # - the function to apply to identify the variable
+  # - the information to pop in the error if such vars were not found
+
+  res = list()
+
+  res[[".num"]] = list(
+    fun = is.numeric,
+    info = "numeric"
+  )
+
+  res[[".log"]] = list(
+    fun = is.logical,
+    info = "logical"
+  )
+
+  res[[".lnum"]] = list(
+    fun = function(x) is.numeric(x) || is.logical(x),
+    info = "numeric or logical"
+  )
+
+  res[[".fact"]] = list(
+    fun = is.factor,
+    info = "factor"
+  )
+
+  res[[".char"]] = list(
+    fun = is.character,
+    info = "character"
+  )
+
+  res[[".fchar"]] = list(
+    fun = function(x) is.factor(x) || is.character(x),
+    info = "factor or character"
+  )
+
+  res[[".date"]] = list(
+    fun = function(x) any(grepl("date", class(x), ignore.case = TRUE)),
+    info = "date"
+  )
+
+  res[[".list"]] = list(
+    fun = is.list,
+    info = "list"
+  )
+
+  options(stringmagick_QS_data_types = res)
+
+}
+
+getSmagick_QS_data_types = function(){
+  getOption("stringmagick_QS_data_types")
+}
 
 
 
