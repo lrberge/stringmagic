@@ -396,18 +396,18 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
       .order = paste(.order, collapse = ", ")
     }
 
-    if(grepl("[|;=]", .order)){
+    if(grepl("[/=]", .order)){
       stop_hook("In argument `.order`, only regular variable selection is allowed ",
                 "(i.e. a comma separated list of patterns).",
                 "\n Current `.order`: {Q ? .order}",
-                "\nPROBLEM: the character{$s} {'[|;=]'X, unik, enum.bq ? .order} are forbidden, please remove them.")
+                "\nPROBLEM: the character{$s} {'[/=]'X, unik, enum.bq ? .order} are forbidden, please remove them.")
     }
 
     # note that the use of ".num" etc values can be problematic here
     # since "new" evaluated variables may not be in the data
     # => we need to evaluate the new data beforehand (but it's a bit costly)
 
-    new_vars = selvars_internal(final_vars, all_vars, data, .order, TRUE, .ignore.case)
+    new_vars = selvars_internal(final_vars, data, .order, TRUE, .ignore.case)
     final_names = final_names[match(new_vars, final_vars)]
     final_vars = new_vars
   }
