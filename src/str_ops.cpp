@@ -2004,6 +2004,9 @@ bool cpp_is_trailing_dots(SEXP Rstr){
   int n = std::strlen(str);
 
   if(n < 3) return false;
+  
+  // special case: "!a.."
+  if(str[0] == '!' && n < 4 ) return false;
 
   if(str[n - 1 ] != '.') return false;
 
@@ -2108,6 +2111,43 @@ LogicalVector cpp_equal_ignore_case(SEXP x_Rstr, SEXP y_Rstr, bool ignore_case =
   return res;
 }
 
+
+// [[Rcpp::export]]
+bool cpp_is_int_in_char(SEXP Rstr){
+  // we accept only regular integers: no non round numbers
+
+  if(Rf_length(Rstr) > 1) stop("Internal error in cpp_is_num_in_char: the vector must be of length 1.");
+
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+   
+  if(n < 1) return false;
+
+  int i = 0;
+
+  while(i < n && is_blank(str[i])) ++i;
+
+  if(i == n) return false;
+
+  bool is_negative = str[i] == '-';
+  if( !(is_negative || (str[i] >= '0' && str[i] <= '9')) ){
+    return false;
+  }
+
+  ++i;
+
+  while(i < n && is_blank(str[i])) ++i;
+
+  if(i == n && is_negative){
+    return false;
+  }
+
+  while(i < n && str[i] >= '0' && str[i] <= '9') ++i;
+
+  while(i < n && is_blank(str[i])) ++i;
+
+  return i == n;
+}
 
 
 

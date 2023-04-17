@@ -242,6 +242,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_is_int_in_char
+bool cpp_is_int_in_char(SEXP Rstr);
+RcppExport SEXP _stringmagick_cpp_is_int_in_char(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_is_int_in_char(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_to_integer
 IntegerVector cpp_to_integer(SEXP x);
 RcppExport SEXP _stringmagick_cpp_to_integer(SEXP xSEXP) {
@@ -298,6 +309,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_is_trailing_dots", (DL_FUNC) &_stringmagick_cpp_is_trailing_dots, 1},
     {"_stringmagick_cpp_is_variable_name", (DL_FUNC) &_stringmagick_cpp_is_variable_name, 1},
     {"_stringmagick_cpp_equal_ignore_case", (DL_FUNC) &_stringmagick_cpp_equal_ignore_case, 3},
+    {"_stringmagick_cpp_is_int_in_char", (DL_FUNC) &_stringmagick_cpp_is_int_in_char, 1},
     {"_stringmagick_cpp_to_integer", (DL_FUNC) &_stringmagick_cpp_to_integer, 1},
     {"_stringmagick_cpp_combine_clusters", (DL_FUNC) &_stringmagick_cpp_combine_clusters, 2},
     {"_stringmagick_cpp_create_pos", (DL_FUNC) &_stringmagick_cpp_create_pos, 1},

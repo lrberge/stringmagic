@@ -81,6 +81,10 @@ cpp_equal_ignore_case <- function(x_Rstr, y_Rstr, ignore_case = TRUE) {
     .Call(`_stringmagick_cpp_equal_ignore_case`, x_Rstr, y_Rstr, ignore_case)
 }
 
+cpp_is_int_in_char <- function(Rstr) {
+    .Call(`_stringmagick_cpp_is_int_in_char`, Rstr)
+}
+
 cpp_to_integer <- function(x) {
     .Call(`_stringmagick_cpp_to_integer`, x)
 }

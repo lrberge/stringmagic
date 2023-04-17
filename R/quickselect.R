@@ -220,38 +220,39 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       # But the user can summon variable expansion by using backtick quoted
       # expressions. These will be expanded and we need to find out if there are some.
       
+      expr_origin = expr
+      expr = flag_expansion_patterns(expr)
+
       expr_dp = deparse(expr, width.cutoff = 500L)
       if(length(expr_dp) > 1){
         stop_hook("Multi-line expressions are not supported in `...` ", 
                   "(it concerns: {'\\n'c, '20|...'k, bq ? expr_dp}).")
       }
 
-      # Condition for a variable being treated as an expansion pattern:
-      # - A) not be a variable from the data
-      # - B) be one of the special values (., .data_type)
-      # - C) not be formed like a regular variable name
-
-      # A) not variable names
-      expansions = setdiff(all.vars(expr), x)
-      is_expansion = FALSE
-      if(length(expansions) > 0){
-        # B) special data types
-        special_data_types = names(getSmagick_QS_data_types())
-        final_expansions = intersect(expansions, c(".", special_data_types))
-
-        # C) not regular variables (remember that these can be fetched from the frame!)
-        expansions = setdiff(expansions, final_expansions)
-        is_valid_var = grepl("^[.[:alpha:]][._[:alnum:]]*$", expansions)
-
-        final_expansions = c(final_expansions, expansions[!is_valid_var])
-
-        # Rewritting the expressions
-        is_expansion = length(final_expansions) > 0
-      }
+      is_expansion = grepl("_P_A_T_", expr_dp, fixed = TRUE)
 
       if(!is_expansion){
         # we move along after cleaning up & add it only if not already there
         if(!expr_dp %in% final_vars){
+
+          if(.ignore.case){
+            # we fix the case of regular variables if necessary
+            vars_expr = all.vars(expr)
+            var_pblm = setdiff(vars_expr, x)
+            for(v in var_pblm){
+              is_ok = cpp_equal_ignore_case(v, x)
+              if(any(is_ok)){
+                var_fixed = x[is_ok]
+                if(length(expr) == 1){
+                  expr_dp = var_fixed
+                } else {
+                  pat = paste0("(?<=^|[^[:alnum:]_])", v, "(?=$|[^[:alnum:]._])")
+                  expr_dp = gsub(pat, var_fixed, expr_dp, perl = TRUE)
+                }                
+              }
+            }
+          }
+
           new_vars = paste0(prefix_eval, expr_dp)
 
           if(nchar(dot_names[i]) == 0){
@@ -269,31 +270,28 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
         # we first find out:
         # - expr_dp_split
         # - values_to_expand
-        expr_dp_origin = expr_dp # => useful to report in errors
+
         if(length(expr) == 1 && inherits(expr, "name")){
           # special case: avoids the costly perl expression stuff
           values_to_expand = as.character(expr)
           expr_dp_split = c("", values_to_expand, "")
         } else {
-          # this is quite costly but should avoid any mistakes and edge cases
-          pat = cub("(?<![[:alnum:]._])`?({'|'c ! \\Q{final_expansions}\\E})`?(?![[:alnum:]._([])")
-          expr_dp = gsub(pat, "\"_P_A_T_\\1_P_A_T_\"", expr_dp, perl = TRUE)
-
           expr_dp_split = strsplit(expr_dp, '"?_P_A_T_"?')[[1]]
           values_to_expand = expr_dp_split[seq_along(expr_dp_split) %% 2 == 0]
-        }        
+        }
 
         all_list_equal = TRUE
         n_exp = length(values_to_expand)
 
         # we stop right away if inconsistencies in the new name wrt the `*` placeholder
-        find_stars = gregexpr("*", dot_names[i])[[1]]
+        find_stars = gregexpr("*", dot_names[i], fixed = TRUE)[[1]]
         n_stars = if(length(find_stars) == 1 && find_stars == -1) 0 else length(find_stars)
         if(!nchar(dot_names[i]) == 0 && !n_stars %in% c(0, n_exp)){
           
+          expr_dp_origin = deparse_long(expr_origin)
           stop_hook("The expression {bq, '50|...'k ? expr_dp_origin} evaluates {n_exp} variable{#s}. ",
-                    "The new name given in the `...` argument-name should have either 0, or {n_exp} `*` placeholders.",
-                    "\nPROBLEM: the new name contains {=n_exp > n_stars ; only }{n_stars} such placeholder{#s}.")
+                    "The new name given in the `...` argument-name should have either 0 or {n_exp} `*` placeholders.",
+                    "\nPROBLEM: the new name (here {bq?dot_names[i]}) contains {=n_exp > n_stars ; only }{n_stars} such placeholder{#s}.")
         }
 
         vars_expanded_list = vector("list", n_exp)
@@ -356,6 +354,7 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
           if(n_stars == 0){
             n_vars = length(new_expr_dp) 
             if(n_vars > 1){
+              expr_dp_origin = deparse_long(expr_origin)
               stop_hook("The expression {bq, '50|...'k ? expr_dp_origin} leads to {n_vars} variables. ",
                     "But the new name given in the `...` argument-name does not contain a `*` placeholder.",
                     "\nFIX: please provide a new name with {len ? vars_expanded} `*` placeholder{$s} in it.")
@@ -420,7 +419,6 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
   #### variable creation ####
   ####
   
-
   # Final step: creation of the data set
   # evaluation of the variables
   n_vars = length(final_vars)
@@ -449,7 +447,7 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       if(any(grepl("^\\.\\.", all_vars))){
         vars2eval = str_op(all_vars, "'^\\.\\.'get, '^\\.\\.'r")
         for(v in vars2eval){
-          if(exists(v, frame = .frame, inherits = TRUE)){
+          if(exists(v, envir = .frame, inherits = TRUE)){
             data_list[[paste0("..", v)]] = eval(str2lang(v), .frame)
           } else {
             stop_hook("The variable {bq?v} (prefixed with '..' in the call) must exist ",
@@ -463,7 +461,7 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       all_vars_no_prefix = str_get(all_vars, "!^\\.\\.")
       vars_doubt = setdiff(all_vars_no_prefix, data_names)
       for(v in vars_doubt){
-        if(!exists(v, frame = .frame, inherits = TRUE)){
+        if(!exists(v, envir = .frame, inherits = TRUE)){
           sugg = suggest_item(v, data_names)
           sugg_txt = cub("{$(;;\nMaybe you meant {$enum.bq.or}?) ? sugg}")
           stop_hook("All variables must be either in the data set, either in the environment.",
@@ -713,7 +711,7 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
                     "Maybe you could check that there are {info} variables in the data set?")
         }
 
-      } else if(is_numeric_in_char(p)){
+      } else if(cpp_is_int_in_char(p)){
         # this is an index
         # indexes ALWAYS refer to the original positionning
 
@@ -741,10 +739,16 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
         is_selected = logical(length(all_vars))
         is_selected[p_num] = TRUE
 
-      } else if(first_char %in% c("#", "@", "^", "$")){
+      } else if(first_char %in% c("#", "@", "^", "$") || cpp_is_trailing_dots(p)){
         # fixed char search
         fixed = first_char == "#"
-        p = substr(p, 2, nchar(p))
+        
+        if(!fixed && cpp_is_trailing_dots(p)){
+          first_char = "^"
+          p = substr(p, 1, nchar(p) - 2)
+        } else {
+          p = substr(p, 2, nchar(p))
+        }
 
         if(first_char == "^"){
           p_clean = p
@@ -1059,6 +1063,39 @@ getSmagick_QS_data_types = function(){
   getOption("stringmagick_QS_data_types")
 }
 
+
+
+flag_expansion_patterns = function(call){
+  # goes through a call and flags the variables to be expanded
+  # they are flagged by adding "_P_A_T_" on both ends (for pattern)
+  # example:
+  #  in: substr(.char, 1, 1) %in% c('a', 'b')
+  # out: substr("_P_A_T_.char_P_A_T_", 1, 1) %in% c('a', 'b')
+  #
+  #  in: `^petal`
+  # out: "_P_A_T_^petal_P_A_T_"
+
+  if(length(call) == 0) return(call)
+
+  if(length(call) == 1){
+    if(is.name(call)){
+      special_data_types = names(getSmagick_QS_data_types())
+      var = as.character(call)
+      if(var %in% c(".", ".prev", special_data_types) || 
+         !cpp_is_variable_name(var) ||
+         cpp_is_trailing_dots(var)){
+        call = paste0("_P_A_T_", var, "_P_A_T_")
+      }
+    }
+    return(call)
+  }
+
+  for(i in 2:length(call)){
+    call[[i]] = flag_expansion_patterns(call[[i]])
+  }
+
+  call
+}
 
 
 
