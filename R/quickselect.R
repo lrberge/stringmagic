@@ -70,20 +70,13 @@
 #' # selecting factor variables and variables starting with Sepal
 #' selvars(iris, ".fact, ^Sepal")
 #'
-selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = parent.frame(),
-                   .ignore.case = TRUE, .strict_eval = FALSE){
+selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = parent.frame(),
+                   .ignore.case = TRUE){
 
   mc = match.call(expand.dots = FALSE)
-  if("x" %in% names(mc) && mc$x == "."){
-    # this is a data table call
-    sc_all = sys.calls()
-    if(length(sc_all) >= 4 && as.character(sc_all[[length(sc_all) - 3]][1])[1] == "[.data.table"){
-      x = eval(quote(names_x), parent.frame(3))
-    }
-  }
 
-  if(missing(x)){
-    stop("Argument 'x' must be provided. PROBLEM: it is missing.")
+  if(missing(.x)){
+    stop("Argument '.x' must be provided. PROBLEM: it is missing.")
   }
   
   # we don't eval directly since the user is allowed to use NSE 
@@ -107,9 +100,9 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
   }
 
   n_dots = length(mcdots)
-  if(n_dots == 0 && missnull(.order) && missnull(.in)){
+  if(n_dots == 0 && missnull(.order) && missnull(.in) && missnull(.pattern)){
     stop_hook("Please provide at least one variable to select (`...` is empty) or provide",
-              " the argument `.order` or the argument `.in`.")
+              " the argument `.pattern`, `.order` or the argument `.in`.")
   }
 
   dot_names = names(mcdots)
@@ -124,6 +117,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
   # - a named vector
   # - a matrix
 
+  x = .x
   is_data_set = FALSE
   data = NULL
   old_class = oldClass(x)
@@ -194,6 +188,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
     }
 
     mcdots = list(paste(.pattern, collapse = ", "))
+    dot_names = rep("", length(mcdots))
     n_dots = 1
   }
 
@@ -207,7 +202,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
   
 
   # prefix for variables to be evaluated
-  prefix_eval = "eval:::"
+  prefix_eval = if(only_names) "" else "eval:::"
 
   for(i in seq_len(n_dots)){
     expr = mcdots[[i]]
@@ -255,7 +250,8 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
       }
 
       if(!is_expansion){
-        # we move along after cleaning up
+        # we move along after cleaning up & add it only if not already there
+        if(!expr_dp %in% final_vars){
         new_vars = paste0(prefix_eval, expr_dp)
 
         if(nchar(dot_names[i]) == 0){
@@ -266,6 +262,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
 
         final_vars = c(final_vars, new_vars)
         final_names = c(final_names, new_names)
+        }
       
       } else {
 
@@ -280,7 +277,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
         } else {
           # this is quite costly but should avoid any mistakes and edge cases
           pat = cub("(?<![[:alnum:]._])`?({'|'c ! \\Q{final_expansions}\\E})`?(?![[:alnum:]._([])")
-          expr_dp = gsub(pat, "\"_P_A_T_\\1\"_P_A_T_", expr_dp, perl = TRUE)
+          expr_dp = gsub(pat, "\"_P_A_T_\\1_P_A_T_\"", expr_dp, perl = TRUE)
 
           expr_dp_split = strsplit(expr_dp, '"?_P_A_T_"?')[[1]]
           values_to_expand = expr_dp_split[seq_along(expr_dp_split) %% 2 == 0]
@@ -290,7 +287,8 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
         n_exp = length(values_to_expand)
 
         # we stop right away if inconsistencies in the new name wrt the `*` placeholder
-        n_stars = str_op(dot_names[i], "* X.fixed, len")
+        find_stars = gregexpr("*", dot_names[i])[[1]]
+        n_stars = if(length(find_stars) == 1 && find_stars == -1) 0 else length(find_stars)
         if(!nchar(dot_names[i]) == 0 && !n_stars %in% c(0, n_exp)){
           
           stop_hook("The expression {bq, '50|...'k ? expr_dp_origin} evaluates {n_exp} variable{#s}. ",
@@ -365,15 +363,21 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
 
             names_expr = dot_names[i]
           } else {
-            names_expr = fill_the_placeholders(dots_names[i], names_expanded)            
+            names_expr = fill_the_placeholders(dot_names[i], names_expanded)            
           }
         }
 
+        # we only keep variables not already there
+        i_keep  = which(!new_expr_dp %in% final_vars)
+
+        if(length(i_keep) > 0){
         # we append 'eval:::' to diffenciate it from regular variables
         new_expr_dp = paste0(prefix_eval, new_expr_dp)
         
-        final_vars = c(final_vars, new_expr_dp)
-        final_names = c(final_names, names_expr)
+          final_vars = c(final_vars, new_expr_dp[i_keep])
+          final_names = c(final_names, names_expr[i_keep])
+        }
+        
       }
     }
   }
@@ -456,7 +460,7 @@ selvars = function(x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = 
       }
       
       # the remaining variables must be either in the data set or in the calling env
-      all_vars_no_prefix = str_get("!^\\.\\.", all_vars)
+      all_vars_no_prefix = str_get(all_vars, "!^\\.\\.")
       vars_doubt = setdiff(all_vars_no_prefix, data_names)
       for(v in vars_doubt){
         if(!exists(v, frame = .frame, inherits = TRUE)){
@@ -857,6 +861,142 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
 
   return(res)
 }
+
+####
+#### Aliases ####
+####
+
+selnames = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = parent.frame(),
+                   .ignore.case = TRUE){
+
+  mc = match.call(expand.dots = FALSE)
+  selvars(.x = .x, .order = .order, .in = .in, .pattern = .pattern, .frame = .frame, 
+          .ignore.case = .ignore.case, 
+          .is_internal = TRUE, .is_selnames = TRUE, .mc = mc)
+
+}
+
+selvalues = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = parent.frame(),
+                   .ignore.case = TRUE){
+  
+  mc = match.call(expand.dots = FALSE)
+  selvars(.x = .x, ..., .order = .order, .in = .in, .pattern = .pattern, .frame = .frame, 
+          .ignore.case = .ignore.case, 
+          .is_internal = TRUE, .is_selvalues = TRUE, .mc = mc)
+}
+
+####
+#### data.table utilities ####
+####
+
+data_table_quickselect = function(enable = TRUE){
+  if(isTRUE(enable)){
+    assign("[.data.table", data_table_QS_internal, parent.frame())
+  } else {
+    rm(list = "[.data.table", envir = parent.env())
+  }  
+}
+
+data_table_QS_internal = function(x, i, j, ...){
+  
+  mc = match.call()
+  if("j" %in% names(mc)){
+    
+    if(is.character(mc$j) || (is_operator(mc$j, "c") && is.character(j))){
+      vars = selnames(x, .pattern = j)
+
+      if(all(names(vars) == vars)){
+        mc$j = parse(text = capture.output(dput(j)))
+      } else {
+        nm_vars = names(vars)
+        new_mc_j = str2lang("list()")
+        for(i in seq_along(vars)){
+          if(nm_vars[i] != vars[i]){
+            new_mc_j[[nm_vars[i]]] = str2lang(vars[i])
+          } else {
+            new_mc_j[[length(new_mc_j) + 1]] = str2lang(vars[i])
+          }
+        }
+
+        mc$j = new_mc_j
+      }
+      
+
+    } else {
+      is_valid = FALSE
+
+      if(is_operator(mc$j, c(".", "list"))){
+        is_valid = TRUE
+        mc$j[[1]] = as.name("list")
+
+      } else if(is_operator(mc$j, ":=")){
+
+        nm = names(mc$j)
+        if(all(nchar(nm) == 0)){
+          # case left := right
+
+          # we only take care of the case "varname" := .(stuff)
+          # we convert it into ":="(new = fun(old)) format
+          if(length(mc$j[[2]] == 1) && length(mc$j[[3]]) == 2 && is.character(mc$j[[2]])){
+            is_valid = TRUE
+            new_mc_j = mc$j[c(1, 3)]
+            names(new_mc_j) = c("", mc$j[[2]])
+            if(is_operator(new_mc_j[[2]], c(".", "list"))){
+              new_mc_j[[2]] = mc$j[[3]][[1]]
+            }             
+            mc$j = new_mc_j
+          }
+        } else {
+          # case ":="(new = fun(old))
+          # => this is fine
+          is_valid = TRUE
+        }
+
+      }
+
+      if(is_valid){
+        selnames_call = str2lang("selnames(.x = x)")
+
+        mc_j = mc$j
+        nm_mc_j = names_xpd(mc_j)
+        is_nm = nchar(nm_mc_j) > 0
+        for(i in 2:length(mc_j)){
+          if(is_nm[i]){
+            selnames_call[[nm_mc_j[i]]] = mc_j[[i]]
+          } else {
+            selnames_call[[length(selnames_call) + 1]] = mc_j[[i]]
+          }
+        }
+
+        vars = eval(selnames_call)
+        nm_vars = names(vars)
+
+        # we reconstruct the call
+        new_mc_j = str2lang("list()")
+        new_mc_j[[1]] = mc$j[[1]]
+        for(i in seq_along(vars)){
+          if(nm_vars[i] != vars[i]){
+            new_mc_j[[nm_vars[i]]] = str2lang(vars[i])
+          } else {
+            new_mc_j[[length(new_mc_j) + 1]] = str2lang(vars[i])
+          }
+        }
+
+        mc$j = new_mc_j
+
+      }
+
+    }
+    
+  }
+  
+  mc[[1]] = as.name("sub_dt")
+  my_list = list(sub_dt = asNamespace("data.table")[["[.data.table"]])
+  
+  eval(mc, my_list, enclos = parent.frame())
+}
+
+
 
 ####
 #### Utilities ####

@@ -858,6 +858,14 @@ missnull = function(x){
   missing(x) || is.null(x)
 }
 
+names_xpd = function(x){
+  nm = names(x)
+  if(is.null(nm)){
+    nm = character(length(x))
+  }
+  nm
+}
+
 
 is_operator = function(x, op){
   # operators in formulas
@@ -865,7 +873,7 @@ is_operator = function(x, op){
   if(length(x) <= 1){
     res = FALSE
   } else {
-    res = x[[1]] == op
+    res = as.character(x[[1]]) %in% op
   }
 
   res
