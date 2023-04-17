@@ -207,6 +207,41 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_is_trailing_dots
+bool cpp_is_trailing_dots(SEXP Rstr);
+RcppExport SEXP _stringmagick_cpp_is_trailing_dots(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_is_trailing_dots(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_is_variable_name
+bool cpp_is_variable_name(SEXP Rstr);
+RcppExport SEXP _stringmagick_cpp_is_variable_name(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_is_variable_name(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_equal_ignore_case
+LogicalVector cpp_equal_ignore_case(SEXP x_Rstr, SEXP y_Rstr, bool ignore_case);
+RcppExport SEXP _stringmagick_cpp_equal_ignore_case(SEXP x_RstrSEXP, SEXP y_RstrSEXP, SEXP ignore_caseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x_Rstr(x_RstrSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type y_Rstr(y_RstrSEXP);
+    Rcpp::traits::input_parameter< bool >::type ignore_case(ignore_caseSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_equal_ignore_case(x_Rstr, y_Rstr, ignore_case));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_to_integer
 IntegerVector cpp_to_integer(SEXP x);
 RcppExport SEXP _stringmagick_cpp_to_integer(SEXP xSEXP) {
@@ -260,6 +295,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_parse_charselect", (DL_FUNC) &_stringmagick_cpp_parse_charselect, 1},
     {"_stringmagick_cpp_parse_conditions_in_pattern", (DL_FUNC) &_stringmagick_cpp_parse_conditions_in_pattern, 1},
     {"_stringmagick_cpp_parse_name_stars", (DL_FUNC) &_stringmagick_cpp_parse_name_stars, 1},
+    {"_stringmagick_cpp_is_trailing_dots", (DL_FUNC) &_stringmagick_cpp_is_trailing_dots, 1},
+    {"_stringmagick_cpp_is_variable_name", (DL_FUNC) &_stringmagick_cpp_is_variable_name, 1},
+    {"_stringmagick_cpp_equal_ignore_case", (DL_FUNC) &_stringmagick_cpp_equal_ignore_case, 3},
     {"_stringmagick_cpp_to_integer", (DL_FUNC) &_stringmagick_cpp_to_integer, 1},
     {"_stringmagick_cpp_combine_clusters", (DL_FUNC) &_stringmagick_cpp_combine_clusters, 2},
     {"_stringmagick_cpp_create_pos", (DL_FUNC) &_stringmagick_cpp_create_pos, 1},

@@ -69,6 +69,18 @@ cpp_parse_name_stars <- function(Rstr) {
     .Call(`_stringmagick_cpp_parse_name_stars`, Rstr)
 }
 
+cpp_is_trailing_dots <- function(Rstr) {
+    .Call(`_stringmagick_cpp_is_trailing_dots`, Rstr)
+}
+
+cpp_is_variable_name <- function(Rstr) {
+    .Call(`_stringmagick_cpp_is_variable_name`, Rstr)
+}
+
+cpp_equal_ignore_case <- function(x_Rstr, y_Rstr, ignore_case = TRUE) {
+    .Call(`_stringmagick_cpp_equal_ignore_case`, x_Rstr, y_Rstr, ignore_case)
+}
+
 cpp_to_integer <- function(x) {
     .Call(`_stringmagick_cpp_to_integer`, x)
 }

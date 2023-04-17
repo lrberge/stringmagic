@@ -1992,7 +1992,121 @@ List cpp_parse_name_stars(SEXP Rstr){
   return res;
 }
 
+// [[Rcpp::export]]
+bool cpp_is_trailing_dots(SEXP Rstr){
+  // simple function that finds out if a string ends with ..
+  // like in "sepal.."
+  // 3 times (only...) faster than grepl("\\.\\.$")
 
+  if(Rf_length(Rstr) > 1) stop("Internal error in cpp_is_trailing_dots: the vector must be of length 1.");
+
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+
+  if(n < 3) return false;
+
+  if(str[n - 1 ] != '.') return false;
+
+  if(str[n - 2 ] != '.') return false;
+
+  return true;
+}
+
+inline bool is_valid_char_var_start(char c){
+  return c == '.' || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+inline bool is_valid_char_var(char c){
+  return c == '.' || c == '|' || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+// [[Rcpp::export]]
+bool cpp_is_variable_name(SEXP Rstr){
+  // simple function that finds out if a string looks like a variable name
+  // - "sepal." => true
+  // - "^sepal" => false
+  // 1us instead of 50us using grepl regex
+
+  if(Rf_length(Rstr) > 1) stop("Internal error in cpp_is_variable_name: the vector must be of length 1.");
+
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+
+  if(n < 1) return false;
+
+  if(!is_valid_char_var_start(str[0])) return false;
+
+  for(int i=1 ; i<n ; ++i){
+    if(!is_valid_char_var(str[i])){
+      return false;
+    }
+  }
+
+  return true;
+}
+
+inline bool is_same_value_ignore_case(const char * &x_str, int nx, SEXP &y_Rstr, int index){
+
+  const char *y_str = CHAR(STRING_ELT(y_Rstr, index));
+  int ny = std::strlen(y_str);
+
+  if(nx != ny) return false;
+
+  for(int i=0 ; i<nx ; ++i){
+    if(x_str[i] != y_str[i]){
+      if(x_str[i] >= 'A' && x_str[i] <= 'Z'){
+        if(x_str[i] + 32 != y_str[i]){
+          return false;
+        }
+      } else if(x_str[i] >= 'a' && x_str[i] <= 'z'){
+        if(x_str[i] - 32 != y_str[i]){
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+// [[Rcpp::export]]
+LogicalVector cpp_equal_ignore_case(SEXP x_Rstr, SEXP y_Rstr, bool ignore_case = true){
+  // returns a TRUE/FALSE vector giving true if the element in y is equal to x
+  // it can ignore the case of x and y
+
+  int n = Rf_length(y_Rstr);
+  LogicalVector res(n);
+
+  // 1) we check exact equality (we just need to compare the pointers)
+  intptr_t * px = (intptr_t *) STRING_PTR(x_Rstr);
+  intptr_t x_val = px[0];
+  intptr_t * py = (intptr_t *) STRING_PTR(y_Rstr);
+
+  for(int i=0 ; i<n ; ++i){
+    if(x_val == py[i]){
+      res[i] = true;
+      return res;
+    }
+  }
+
+  if(!ignore_case) return res;
+
+  // 2) with ignore case
+
+  const char *x_str = CHAR(STRING_ELT(x_Rstr, 0));
+  int nx = std::strlen(x_str);
+
+  for(int i=0 ; i<n ; ++i){
+    if(is_same_value_ignore_case(x_str, nx, y_Rstr, i)){
+      res[i] = true;
+      return res;
+    }
+  }
+
+  return res;
+}
 
 
 

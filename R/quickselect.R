@@ -252,16 +252,16 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       if(!is_expansion){
         # we move along after cleaning up & add it only if not already there
         if(!expr_dp %in% final_vars){
-        new_vars = paste0(prefix_eval, expr_dp)
+          new_vars = paste0(prefix_eval, expr_dp)
 
-        if(nchar(dot_names[i]) == 0){
-          new_names = expr_dp
-        } else {
-          new_names = dot_names[i]
-        }
+          if(nchar(dot_names[i]) == 0){
+            new_names = expr_dp
+          } else {
+            new_names = dot_names[i]
+          }
 
-        final_vars = c(final_vars, new_vars)
-        final_names = c(final_names, new_names)
+          final_vars = c(final_vars, new_vars)
+          final_names = c(final_names, new_names)
         }
       
       } else {
@@ -371,9 +371,9 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
         i_keep  = which(!new_expr_dp %in% final_vars)
 
         if(length(i_keep) > 0){
-        # we append 'eval:::' to diffenciate it from regular variables
-        new_expr_dp = paste0(prefix_eval, new_expr_dp)
-        
+          # we append 'eval:::' to diffenciate it from regular variables
+          new_expr_dp = paste0(prefix_eval, new_expr_dp)
+          
           final_vars = c(final_vars, new_expr_dp[i_keep])
           final_names = c(final_names, names_expr[i_keep])
         }
@@ -782,7 +782,7 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
         }
 
         if(.ignore.case){
-          is_selected = tolower(all_vars) == tolower(p)
+          is_selected = cpp_equal_ignore_case(p, all_vars)
         } else {
           is_selected = all_vars == p
         }        
