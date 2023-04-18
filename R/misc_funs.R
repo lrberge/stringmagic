@@ -936,68 +936,112 @@ dsb2curb = function(x){
 }
 
 insert = function(x, y, i, replace = FALSE){
-    # x = list(a = 1, b = 2, c = 3) ; y = list(u = 33, v = 55) ; i = 2 ; insert(x, y, i)
-    # we insert y into x in location i
-    # we don't lose the names!
-    # replace: whether to erase the value at the index
+  # x = list(a = 1, b = 2, c = 3) ; y = list(u = 33, v = 55) ; i = 2 ; insert(x, y, i)
+  # we insert y into x in location i
+  # we don't lose the names!
+  # replace: whether to erase the value at the index
 
-    mode = mode(x)
-    if(!mode %in% c("list", "numeric", "logical", "character", "integer")){
-        stop("Internal error: the current mode (", mode, ") is node supported in insert().")
-    }
+  mode = mode(x)
+  if(!mode %in% c("list", "numeric", "logical", "character", "integer")){
+      stop("Internal error: the current mode (", mode, ") is node supported in insert().")
+  }
 
-    n_x = length(x)
+  n_x = length(x)
 
-    if(n_x == 0){
-        return(y)
-    }
+  if(n_x == 0){
+      return(y)
+  }
 
-    n_y = length(y)
-    res = vector(mode, n_x + n_y - replace)
+  n_y = length(y)
+  res = vector(mode, n_x + n_y - replace)
 
-    names_x = names(x)
-    if(is.null(names_x)) names_x = character(n_x)
-    names_y = names(y)
-    if(is.null(names_y)) names_y = character(n_y)
+  names_x = names(x)
+  if(is.null(names_x)) names_x = character(n_x)
+  names_y = names(y)
+  if(is.null(names_y)) names_y = character(n_y)
 
-    if(replace && i <= n_x && length(x) == 1){
-      # edge case of replacement
-      res = setNames(y, names_y)
-      return(res)
-    }
-
-    if(i > n_x){
-        res[1:n_x] = x
-        res[n_x + 1:n_y] = y
-        names(res) = c(names_x, names_y)
-
-    } else if(i == 1){
-        res[1:n_y] = y
-        if(replace){
-          res[n_y + 2:n_x] = x
-          names(res) = c(names_y, names_x[-1])
-        } else {
-          res[n_y + 1:n_x] = x
-          names(res) = c(names_y, names_x)
-        }      
-
-    } else {
-        res[1:(i-1)] = x[1:(i-1)]
-        res[(i-1) + 1:n_y] = y
-        if(replace){
-          if(i == n_x){
-            names(res) = c(names_x[1:(i-1)], names_y)
-          } else {
-            res[(i+n_y):(n_x + n_y - 1)] = x[(i + 1):n_x]
-            names(res) = c(names_x[1:(i-1)], names_y, names_x[(i + 1):n_x])
-          }
-        } else {
-          res[(i+n_y):(n_x + n_y)] = x[i:n_x]
-          names(res) = c(names_x[1:(i-1)], names_y, names_x[i:n_x])
-        }
-    }
-
+  if(replace && i <= n_x && length(x) == 1){
+    # edge case of replacement
+    res = setNames(y, names_y)
     return(res)
+  }
+
+  if(i > n_x){
+      res[1:n_x] = x
+      res[n_x + 1:n_y] = y
+      names(res) = c(names_x, names_y)
+
+  } else if(i == 1){
+      res[1:n_y] = y
+      if(replace){
+        res[n_y + 2:n_x] = x
+        names(res) = c(names_y, names_x[-1])
+      } else {
+        res[n_y + 1:n_x] = x
+        names(res) = c(names_y, names_x)
+      }      
+
+  } else {
+      res[1:(i-1)] = x[1:(i-1)]
+      res[(i-1) + 1:n_y] = y
+      if(replace){
+        if(i == n_x){
+          names(res) = c(names_x[1:(i-1)], names_y)
+        } else {
+          res[(i+n_y):(n_x + n_y - 1)] = x[(i + 1):n_x]
+          names(res) = c(names_x[1:(i-1)], names_y, names_x[(i + 1):n_x])
+        }
+      } else {
+        res[(i+n_y):(n_x + n_y)] = x[i:n_x]
+        names(res) = c(names_x[1:(i-1)], names_y, names_x[i:n_x])
+      }
+  }
+
+  return(res)
+}
+
+insert_at = function(x, y, index){
+  # x = list(a = 1, b = 2, c = 3) ; y = list(u = 33, v = 55) ; i = 2 ; insert(x, y, i)
+  # we insert y into x in location i
+  # we don't lose the names!
+
+  if(length(y) != length(index)){
+    stop("Internal error: the length of the object to be inserted must match the length of the indexes.")
+  }
+
+  if(max(index) > length(x)){
+    stop("Internal error: the value of the index cannot be greater than the length of the object in which ot insert.")
+  }
+
+  mode = mode(x)
+  if(!mode %in% c("list", "numeric", "logical", "character", "integer")){
+      stop("Internal error: the current mode (", mode, ") is node supported in insert().")
+  }
+
+  n_x = length(x)
+  n_y = length(y)
+  res = vector(mode, n_x + n_y)
+  names_res = character(n_x + n_y)
+
+  names_x = names(x)
+  if(is.null(names_x)) names_x = character(n_x)
+  names_y = names(y)
+  if(is.null(names_y)) names_y = character(n_y)
+
+  x_index = 1:n_x
+  is_insert = +(x_index %in% index)
+  x_index = x_index + c(0, cumsum(is_insert)[seq_len(n_x - 1)])
+
+  res[x_index] = x
+  names_res[x_index] = names_x
+
+  y_index = index + cumsum(rep(1, n_y))
+  res[y_index] = y
+  names_res[y_index] = names_y
+  
+  names(res) = names_res
+
+  return(res)
 }
 
 
@@ -1087,7 +1131,8 @@ fill_the_placeholders = function(pattern, varnames){
 
   new_names_list = vector("list", length(is_star))
   index_name = 0
-  for(j in seq_along(pattern_parsed_stars)){
+  n_elements = length(is_star)
+  for(j in 1:n_elements){
     if(!is_star[j]){
       new_names_list[[j]] = text[[j]]
     } else {
@@ -1101,6 +1146,12 @@ fill_the_placeholders = function(pattern, varnames){
   res  
 }
 
+
+duplicated_xy = function(x, y){
+  x_dup = duplicated(x)
+  y_dup = duplicated(y)
+  which(x_dup & y_dup)
+}
 
 
 
