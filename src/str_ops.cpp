@@ -2016,7 +2016,7 @@ bool cpp_is_trailing_dots(SEXP Rstr){
 }
 
 inline bool is_valid_char_var_start(char c){
-  return c == '.' || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+  return c == '.' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
 inline bool is_valid_char_var(char c){
