@@ -121,6 +121,7 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
   is_data_set = FALSE
   data = NULL
   old_class = oldClass(x)
+  old_attr = attributes(x)
   is_df = FALSE
   if(is_selvalues){
     # x must be a character vector!!!!
@@ -201,8 +202,9 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
   ####
   
 
-  # prefix for variables to be evaluated
-  prefix_eval = if(only_names) "" else "eval:::"
+  is_eval = logical(0)
+  previous_vars = previous_names = NULL
+  index_iprev = NULL
 
   for(i in seq_len(n_dots)){
     expr = mcdots[[i]]
@@ -213,8 +215,16 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       new_names = names(new_vars)
 
       i_keep = !new_vars %in% final_vars
-      final_vars = c(final_vars, new_vars[i_keep])
-      final_names = c(final_names, new_names[i_keep])
+
+      previous_vars = new_vars[i_keep]
+      previous_names = new_names[i_keep]
+      if(i < n_dots){
+        index_iprev = seq_along(previous_vars) + length(final_vars)
+      }
+
+      final_vars = c(final_vars, previous_vars)
+      final_names = c(final_names, previous_names)
+      is_eval = c(is_eval, logical(length(previous_vars)))
     } else {
       # Here expressions end up always evaluated.
       # But the user can summon variable expansion by using backtick quoted
@@ -253,7 +263,7 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
             }
           }
 
-          new_vars = paste0(prefix_eval, expr_dp)
+          new_vars = expr_dp
 
           if(nchar(dot_names[i]) == 0){
             new_names = expr_dp
@@ -263,6 +273,10 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
 
           final_vars = c(final_vars, new_vars)
           final_names = c(final_names, new_names)
+          is_eval = c(is_eval, TRUE)
+
+          # we do not accept .prev or .iprev following single variables
+          previous_vars = previous_names = NULL
         }
       
       } else {
@@ -294,11 +308,36 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
                     "\nPROBLEM: the new name (here {bq?dot_names[i]}) contains {=n_exp > n_stars ; only }{n_stars} such placeholder{#s}.")
         }
 
+        is_insert_previous = FALSE
+        is_prev = FALSE
         vars_expanded_list = vector("list", n_exp)
         names_expanded_list = vector("list", n_exp)
         for(k in 1:n_exp){
-          vars_expanded_list[[k]] = selvars_main_selection(x, data, values_to_expand[k], "", .ignore.case)
-          names_expanded_list[[k]] = names(vars_expanded_list[[k]])
+          if(values_to_expand[k] %in% c(".prev", ".iprev")){
+            is_prev = TRUE
+            val = values_to_expand[k]
+            if(is.null(previous_vars)){
+              stop_hook("The special variable {bq?val} is not used in the right context.",
+                        "\nIt should only be used in an expression that follows a previous expansion.",
+                        "\nExample: selvars(head(iris), `^petal`, \"*_mean\" = mean({val}))")
+            }
+            
+            if(val == ".iprev" && !all_list_equal){
+              stop_hook("The special variable {bq?val} is not used in the right context.",
+                        "\nIt should be used only in calls containing only one set of variables to be expanded.",
+                        "\nExample: - good: selvars(head(iris), `^petal`, \"*_2\" = {val} ^2 )",
+                        "\n         -  bad: selvars(head(iris), `^petal`, \"*_per_*\" = .iprev / `^sepal`))",
+                        "\n In the last case, use `.prev` instead of `.prev` and it should work.")
+            }
+
+            is_insert_previous = val == ".iprev"
+            vars_expanded_list[[k]] = previous_vars
+            names_expanded_list[[k]] = previous_names
+          } else {
+            vars_expanded_list[[k]] = selvars_main_selection(x, data, values_to_expand[k], "", .ignore.case)
+            names_expanded_list[[k]] = names(vars_expanded_list[[k]])
+          }
+          
           if(all_list_equal && k > 1){
             if(length(vars_expanded_list[[k]]) != length(vars_expanded_list[[k - 1]]) || 
                   any(vars_expanded_list[[k]] != vars_expanded_list[[k - 1]])){
@@ -306,6 +345,12 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
             }
           }
         }
+
+        # saving the expansions for later use
+        if(!is_prev && i < n_dots){
+          previous_vars = vars_expanded_list[[1]]
+          previous_names = names_expanded_list[[1]]
+        }        
 
         if(all_list_equal){
           vars_expanded = vars_expanded_list
@@ -366,19 +411,35 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
           }
         }
 
-        # we only keep variables not already there
-        i_keep  = which(!new_expr_dp %in% final_vars)
+        
 
-        if(length(i_keep) > 0){
-          # we append 'eval:::' to diffenciate it from regular variables
-          new_expr_dp = paste0(prefix_eval, new_expr_dp)
-          
-          final_vars = c(final_vars, new_expr_dp[i_keep])
-          final_names = c(final_names, names_expr[i_keep])
+        if(is_insert_previous){
+          final_vars = insert_at(final_vars, new_expr_dp, index_iprev)
+          final_names = insert_at(final_names, names_expr, index_iprev)
+          is_eval = insert_at(is_eval, rep(TRUE, length(new_expr_dp)), index_iprev)
+          index_iprev = index_iprev + 1:length(index_iprev)
+
+        } else {
+
+          if(i < n_dots){
+            index_iprev = seq_along(new_expr_dp) + length(final_vars)
+          }
+
+          final_vars = c(final_vars, new_expr_dp)
+          final_names = c(final_names, names_expr)
+          is_eval = c(is_eval, rep(TRUE, length(new_expr_dp)))
         }
         
       }
     }
+  }
+
+  # we remove duplicated variables
+  i_dup = duplicated_xy(final_vars, final_names)
+  if(length(i_dup) > 0){
+    final_vars = final_vars[-i_dup]
+    final_names = final_names[-i_dup]
+    is_eval = is_eval[-i_dup]
   }
 
   # we may need to uniquify the names
@@ -423,7 +484,6 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
   # evaluation of the variables
   n_vars = length(final_vars)
   new_values_list = vector("list", n_vars)
-  is_eval = grepl(paste0("^", prefix_eval), final_vars)
   data_names = names(data)
   data_list = convert_to_list(data)
   n_obs = length(data_list[[1]])
@@ -433,7 +493,7 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
     if(!is_eval[i]){
       new_values = data_list[[vi]]
     } else {
-      expr_dp = substr(vi, nchar(prefix_eval) + 1, nchar(vi))
+      expr_dp = vi
       expr = try(str2lang(expr_dp))
       if(inherits(expr, "try-error")){
         stop_hook("The values of the variables to be created must be valid R expressions.",
@@ -480,14 +540,13 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
     new_n_all = lengths(new_values_list)
     if(any(new_n_all != new_n_all[1])){
       # means there are at least two different numbers
-      qui_pblm = which(new_n != n_obs & new_n != 1)
+      qui_pblm = which(new_n_all != n_obs & new_n_all != 1)
 
       if(length(qui_pblm) > 0){
         i_pblm = qui_pblm[1]
         vi = final_vars[i_pblm]
-        var_pblm = str_clean(vi, cub("^{prefix_eval}"))
         new_n = new_n_all[i_pblm]
-        stop_hook("The evaluation of {bq?var_pblm} led to a vector of {n?new_n} observations.",
+        stop_hook("The evaluation of {bq?vi} led to a vector of {n?new_n} observations.",
                   "\nPROBLEM: there is a mismatch with the number of observations in the data set, equal to {n?n_obs}.")  
       }
 
@@ -520,6 +579,129 @@ selvars_main_selection = function(all_vars, data, pattern, dot_name = "", .ignor
   # dot_name: name given by the user in the ... argument
 
   current_vars = all_vars
+
+  ####
+  #### help ####
+  ####
+
+  first_char = substr(pattern, 1, 1)
+  if(any(first_char == "?")){
+    # The user requests help
+    # - +/-: order ascending/descending
+    # - #: the index of the variable
+    # - regex: search for patterns in the variables
+
+    p = pattern[first_char == "?"][1]
+
+    p = substr(p, 2, nchar(p))
+    first_char = substr(p, 1, 1)
+
+    if(first_char == "?"){
+      # generic quickselect help
+      msg = paste0("Quickselect (QS) cheat sheet. A QS pattern is a comma separated list of patterns. Here are possible patterns (example from iris data set):",
+                "\n - `petal.width`: selects the variable named 'Petal.Width' (case is ignored)",
+                "\n - `!petal.width`: starting with a `!` negates the pattern (works with all patterns), here it selects all variables but `Petal.Width`",
+                "\n - `^petal`: means starts with 'petal",
+                "\n - `$width`: means ends with 'width'",
+                "\n - `@\\d`: `@` is followed with a regular expression, here means 'contains a digit'",
+                "\n - `#.`: `#` is followed with a fixed pattern, here means contains a dot ",
+                "\n - `5`: variable in position 5",
+                "\n - `-1`: variable in last position (negative number: start from the end)",
+                "\n - `^petal & $width`: combine QS expressions with logical operators (here means starts with 'petal' and ends with 'width')",
+                "\n - `.`: means all remaining variables",
+                "\n - type-patterns: the following patterns select the variables based on their types: ",
+                "`.num`, `.log`, `.lnum`, `.fact`, `.char`, `.fchar`, `.date`, `.list`",
+                "\n - `2:species`: use ranges with the colon, here means from the second variable to the variable named Species. Each end of the range must point to only one element",
+                "\n Examples: a) selvars(head(iris), \"^spe, $width\") ", 
+                "\n           b) selvars(head(iris), \"-2:@pe.+len\")",
+                "\n           c) selvars(head(iris), \"!.num, .num & #wid, .\")",
+                "\n RENAMING:",
+                "\n - you can rename a variable with the syntax new_name = old_name",
+                "\n - when several variables are selected, you can use the placeholder `*`",
+                "\n - you can apply replacement patterns to variables names using the syntax `{*:old => new}`.",
+                " This transforms the `old` regular expression into `new`",
+                "\n Example: selvars(head(iris), \"species = ^spe, {*:.Width => _w} = $width\")",
+                "\n EXPRESSIONS:",
+                "\n In `selvars` and in data.table quickselect, you can use expressions to create new variables.",
+                "\n If you want to quickselect several variables, you can add a QS pattern in backticks, as in:",
+                "\n Ex: selvars(head(iris), \"*_mean\" = mean(`^petal`))",
+                "\n Note that special pattern variables don't require backticks:",
+                "\n Ex: selvars(head(iris), \"*_mean\" = mean(.num))",
+                "\n In this context, you have access to two special variables:",
+                "\n - `.prev`: refers to the previously selected variables, only works in expressions",
+                "\n - `.iprev`: like `.prev` but the new values are inserted in between the previous variables, only works in expressions",
+                '\n Example: a) selvars(head(iris), "{*:\\. => _} = .num & ^petal", "*_r0" = round(.prev))',
+                '\n          b) selvars(head(iris), "!.fchar", "*_r0" = round(.iprev))'
+                )
+      msg = fit_screen(msg, 0.8)
+      on.exit(message(msg))
+
+      stop("Quickselect help summoned. Here it is.")
+
+    }
+    
+    var_index = seq_along(all_vars)
+    if(first_char %in% c("+", "-")){
+      var_order = order(all_vars, decreasing = first_char == "-")
+      all_vars = all_vars[var_order]
+      var_index = var_index[var_order]
+      p = substr(p, 2, nchar(p))
+      first_char = substr(p, 1, 1)
+    }
+
+    is_index = first_char == "#"
+    if(is_index){
+      p = substr(p, 2, nchar(p))
+      first_char = substr(p, 1, 1)
+    }
+
+    # now the QS element
+    is_QS = first_char == "("
+    if(is_QS){
+      # the QS is the pattern in paren
+      pattern = gsub("\\).*", "", substr(p, 2, nchar(p)))
+    } else if(!first_char %in% c(" ",",")){
+      # the QS is the first item
+      is_QS = TRUE
+      pattern = gsub("[ ,].*", "", substr(p, 2, nchar(p)))
+    }
+
+    if(is_QS){
+      vars_selected = try(selvalues(all_vars, .pattern = pattern))
+      if("try-error" %in% class(vars_selected)){
+        warning("When summoning help, the following pattern {bq?pattern} led to an error. All variables are displayed.")
+        vars_selected = all_vars
+      }
+      i_keep = which(all_vars %in% vars_selected)
+      all_vars = all_vars[i_keep]
+      var_index = var_index[i_keep]
+    }
+
+    if(is_index){
+      if(is.unsorted(var_index)){
+        all_vars = cub("{all_vars}_=-=_({n.0 ? var_index})")
+      } else {
+        all_vars = cub("{n.0 ? var_index}:_=-=_{all_vars}")
+      }
+    }
+
+    msg = str_op(all_vars, "', 'c, 100 swidth.#>, '\n'app, '_=-=_ =>  'r.fixed")
+    extra = cub("\nNOTA: after `?`, you can add:", 
+              " a) `+` (resp `-`) to reorder the vars alphabetically (`-`: decreasing),", 
+              " b) `#` to add their index,",
+              " c) a quickselect pattern to pick subsets of variables (use paren. to use svl patterns).",
+              "\nEx: ?-@\\d or ?#(^pe & h$). Use `??` to trigger generic quickselect help.")
+    extra = fit_screen(extra, width = 0.8)
+
+    on.exit(message(msg, "\n", extra))
+
+    stop("Help from quickselect summoned. Here is the list of variables:\n")
+
+  }
+
+  ####
+  #### main loop ####
+  ####
   
   pat_parsed = cpp_parse_charselect(pattern)
 
@@ -680,6 +862,11 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
         }
 
         is_selected = rep(TRUE, length(all_vars))
+      } else if(p %in% c(".prev", ".iprev")){
+        stop_hook("The special variable {bq?p} is not used in the right context.",
+                  "\nIt should only be used in an *expression* that follows a previous expansion. It cannot be used in a character vector.",
+                  "\nExample: - good: selvars(head(iris), petal.., \"*_mean\" = mean({val}))", 
+                  "\n         -  bad: selvars(head(iris), \"^petal, {val}\")")
       } else if(p %in% names(special_data_types)){
 
         if(is_range){
@@ -766,13 +953,16 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
             p = paste0("\\Q", p, "\\E$")
           }
           
-        }
-        
-        if(fixed && .ignore.case){
-          fixed = FALSE
-          perl = TRUE
-          p = paste0("(?i)\\Q", p, "\\E")
-        }
+        } else if(fixed){
+          if(.ignore.case){
+            fixed = FALSE
+            perl = TRUE
+            p = paste0("(?i)\\Q", p, "\\E")
+          }
+        } else if(.ignore.case){
+          # => we're in the @ pattern
+          p = paste0("(?i)", p)
+        }        
 
         is_selected = grepl(p, all_vars, perl = !fixed, fixed = fixed)
 
@@ -1081,7 +1271,7 @@ flag_expansion_patterns = function(call){
     if(is.name(call)){
       special_data_types = names(getSmagick_QS_data_types())
       var = as.character(call)
-      if(var %in% c(".", ".prev", special_data_types) || 
+      if(var %in% c(".", ".prev", ".iprev", special_data_types) || 
          !cpp_is_variable_name(var) ||
          cpp_is_trailing_dots(var)){
         call = paste0("_P_A_T_", var, "_P_A_T_")
