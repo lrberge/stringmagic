@@ -326,7 +326,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
 }
 
 
-check_set_options = function(x, options, op, free = FALSE, case = FALSE){
+check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
   # x: always a character vector
   # options: the options to match
   if(length(x) == 0) return(x)
@@ -344,7 +344,7 @@ check_set_options = function(x, options, op, free = FALSE, case = FALSE){
     
     if(is.na(pm) && !free){
       # absence of a match
-      stop_hook("The option {bq?v} is not valid for the operator {bq?op}.\n",
+      stop_hook("The option {bq?v} is not valid {=is.null(op) ; for the current operation ; for the operator {bq?op}}.\n",
                 "FYI the option{$s ? options} available {$are, enum.bq}.")
     }
 
@@ -445,6 +445,13 @@ deparse_long = function(x){
 
 set_pblm_hook = function(){
   assign("STRINGOPS_HOOK", 1, parent.frame())
+}
+
+.stop_hook = function(..., msg = NULL, frame = parent.frame()){
+  # verbatim version
+  up = get_up_hook()
+
+  stop_up(..., up = up + 1, msg = msg, frame = frame, verbatim = TRUE)
 }
 
 stop_hook = function(..., msg = NULL, frame = parent.frame(), verbatim = FALSE){
@@ -549,7 +556,7 @@ fit_screen = function(msg, width = 0.9, leading_ws = TRUE, leader = ""){
 
   for(m in msg_split){
     if(nchar(m) <= MAX_WIDTH){
-      res = c(res, m)
+      res = c(res, paste0(leader, m))
     } else {
       # we apply a splitting algorithm
 
