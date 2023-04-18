@@ -1642,7 +1642,7 @@ sop_char2operator_old = function(x, fun_name){
 sop_char2operator = function(x, fun_name){
 
   op_parsed = cpp_parse_operator(x)
-  
+
   # LATER: use options set up at startup
   # users can add their own functions witht the same parsing ability
 
@@ -1744,7 +1744,7 @@ sop_char2operator = function(x, fun_name){
 
       msg = bespoke_msg(msg)
 
-      stop_hook("In ", fun_name, ", the operation is not valid, see below. ", msg = msg)
+      .stop_hook("In ", fun_name, ", the operation is not valid, see below. ", msg = msg)
     }
 
   }
@@ -1833,7 +1833,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     }
 
   } else if(op %in% c("r", "R", "get", "is", "which", "x", "X")){
-    # r, x, get, is, which ####
+    # R, X, get, is, which ####
     options = check_set_options(options, c("word", "ignore", "fixed"))
     is_word = "word" %in% options
     is_ignore = "ignore" %in% options
@@ -1958,7 +1958,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     
 
   } else if(op %in% c("each", "times")){
-    # times/each, X ####
+    # times/each ####
 
     if(!is_numeric_in_char(argument)){
       msg = paste0("In `dsb`: the operator `", op, "` must have numeric arguments, `",
@@ -1978,7 +1978,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     group_index = NULL
 
-   }else if(op == "U"){
+  } else if(op == "U"){
     # U, L, titles, Q, F, % ####
 
     res = toupper(x)
@@ -1994,12 +1994,14 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   } else if(op == "title"){
     # title case
 
-    if("f" %in% options){
+    options = check_set_options(options, c("force", "ignore"))
+
+    if("force" %in% options){
       # puts in lowercase first
       x = tolower(x)
     }
 
-    is_ignore = "i" %in% options
+    is_ignore = "ignore" %in% options
     if(is_ignore){
       # we add __IGNORE in front of the items so that upper casing won't proc
       IGNORE = c("a", "the", "in", "on", "in", "at", "of", 
@@ -2023,26 +2025,29 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   } else if(op == "bq"){
     res = paste0("`", x, "`")
 
-  } else if(op == "f"){
-    res = format(x, big.mark = ",")
+  } else if(op %in% c("f", "F")){
 
-    is_zero = opt_equal(options, c("0", "zero"))
+    options = check_set_options(options, c("0", "zero", "right"))
+
+    is_zero = any(options %in% c("0", "zero"))
+    is_right = "right" %in% options || op == "F" || is_zero
+    is_left = !is_right
+
+    if(is_right){
+      res = format(x, justify = "right", big.mark = ",")
+    } else {
+      res = format(x, big.mark = ",")
+    }   
 
     if(is.numeric(x)){
       if(is_zero){
         res = gsub(" ", "0", res, fixed = TRUE)
-      } else {
+      } else if(is_left){
         # we have to do that.... not sure the use cases need to be optimized
         res = format(cpp_normalize_ws(res))
       }
-    }
-
-  } else if(op == "F"){
-    res = format(x, justify = "right", big.mark = ",")
-
-    is_zero = opt_equal(options, c("0", "zero"))
-    if(is.numeric(x) && is_zero){
-        res = gsub(" ", "0", res, fixed = TRUE)
+    } else if(is_zero && is_numeric_in_char(x)){
+      res = gsub(" ", "0", res, fixed = TRUE)
     }
 
   } else if(op == "%"){
@@ -2446,6 +2451,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     
     if(op == "nth"){
       opt_default = c("letter", "upper", "compact")
+    } else if(op == "n"){
+      opt_default = c("letter", "upper", "0", "zero")
     } else {
       opt_default = c("letter", "upper")
     }
@@ -2464,6 +2471,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       res = n_times(x, letters = is_letter)
 
     } else if(op == "n"){
+      is_zero = any(options %in% c("0", "zero"))
       # we force the conversion to numeric
       if(is.numeric(x)){
         if(is_letter){
@@ -2481,7 +2489,11 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
           res_num = n_letter(num_val)
         } else {
           res_num = format(num_val, big.mark = ",")
-          res_num = cpp_trimws(res_num)
+          if(is_zero){
+            res_num = gsub(" ", "0", res_num, fixed = TRUE)
+          } else {            
+            res_num = cpp_trimws(res_num)
+          }
         }
 
         res = x
