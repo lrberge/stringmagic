@@ -1721,12 +1721,7 @@ sop_char2operator = function(x, fun_name){
       example = 'x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")'
       example = bespoke_msg(example)
 
-      sugg = suggest_item(op, OPERATORS)
-      sugg_txt = ""
-      if(length(sugg) > 0){
-        sugg_txt = cub(" Maybe you meant: {enum.or.bq.4 ? sugg}?")
-      }
-      # "{$(;; Maybe you meant: {enum.or.bq.4}) ? sugg}"
+      sugg_txt = suggest_item(op, OPERATORS)
 
       msg = c("The operation `", x, "` is not valid. It must be something quoted followed by a valid operator.",
               "\n `", op, "` is not a valid operator.", sugg_txt,

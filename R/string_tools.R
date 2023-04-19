@@ -340,7 +340,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
            " on the right the identifier).\nPROBLEM: it is currently only one sided.")
     }
 
-    x = try(eval(fml[[2]], data, enclos = parent.frame()))
+    x = try(eval(fml[[2]], data, enclos = parent.frame()), silent = TRUE)
 
     # error handling
     if(inherits(x, "try-error") || !is.atomic(x)){
@@ -374,7 +374,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
       term = terms_right[[i]]
       id_name = deparse_short(term)
 
-      val = try(eval(term, data, enclos = parent.frame()))
+      val = try(eval(term, data, enclos = parent.frame()), silent = TRUE)
 
       # error handling
       if(inherits(val, "try-error") || !is.atomic(val)){
