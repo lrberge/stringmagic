@@ -1101,7 +1101,9 @@ apply_star_operation = function(x, all_operations){
     } else if(op == "lower"){
       txt = tolower(txt)
     } else {
+      
       op = gsub("^'|'$", "", op)
+      op = gsub("\\\\", "\\", op, fixed = TRUE)
       if(grepl(" => ", op, fixed = TRUE)){
         op_split = strsplit(op, " => ", fixed = TRUE)[[1]]
       } else {
