@@ -234,7 +234,8 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       # expressions. These will be expanded and we need to find out if there are some.
       
       expr_origin = expr
-      expr = flag_expansion_patterns(expr)
+      # the function below adds flags to expansions + fixes the case of variables when appropriate
+      expr = flag_expansion_patterns(expr, .ignore.case, x)
 
       expr_dp = deparse(expr, width.cutoff = 500L)
       if(length(expr_dp) > 1){
@@ -247,24 +248,6 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       if(!is_expansion){
         # we move along after cleaning up & add it only if not already there
         if(!expr_dp %in% final_vars){
-
-          if(.ignore.case){
-            # we fix the case of regular variables if necessary
-            vars_expr = all.vars(expr)
-            var_pblm = setdiff(vars_expr, x)
-            for(v in var_pblm){
-              is_ok = cpp_equal_ignore_case(v, x)
-              if(any(is_ok)){
-                var_fixed = x[is_ok]
-                if(length(expr) == 1){
-                  expr_dp = var_fixed
-                } else {
-                  pat = paste0("(?<=^|[^[:alnum:]_])", v, "(?=$|[^[:alnum:]._])")
-                  expr_dp = gsub(pat, var_fixed, expr_dp, perl = TRUE)
-                }                
-              }
-            }
-          }
 
           new_vars = expr_dp
 
@@ -1424,7 +1407,7 @@ getSmagick_QS_data_types = function(){
 
 
 
-flag_expansion_patterns = function(call){
+flag_expansion_patterns = function(call, .ignore.case, all_vars){
   # goes through a call and flags the variables to be expanded
   # they are flagged by adding "_P_A_T_" on both ends (for pattern)
   # example:
@@ -1433,24 +1416,36 @@ flag_expansion_patterns = function(call){
   #
   #  in: `^petal`
   # out: "_P_A_T_^petal_P_A_T_"
+  #
+  # Note that we also correct the variables for the case if necessary
+  #
 
   if(length(call) == 0) return(call)
 
   if(length(call) == 1){
     if(is.name(call)){
-      special_data_types = names(getSmagick_QS_data_types())
       var = as.character(call)
-      if(var %in% c(".", ".prev", ".iprev", special_data_types) || 
-         !cpp_is_variable_name(var) ||
-         cpp_is_trailing_dots(var)){
-        call = paste0("_P_A_T_", var, "_P_A_T_")
+
+      if(!var %in% all_vars){
+        is_ok = if(.ignore.case) cpp_equal_ignore_case(var, all_vars) else FALSE
+
+        if(any(is_ok)){
+          call = as.name(all_vars[is_ok])
+        } else {
+          special_data_types = names(getSmagick_QS_data_types())
+          if(var %in% c(".", ".prev", ".iprev", special_data_types) || 
+            !cpp_is_variable_name(var) ||
+            cpp_is_trailing_dots(var)){
+            call = paste0("_P_A_T_", var, "_P_A_T_")
+          }
+        }  
       }
     }
     return(call)
   }
 
   for(i in 2:length(call)){
-    call[[i]] = flag_expansion_patterns(call[[i]])
+    call[[i]] = flag_expansion_patterns(call[[i]], .ignore.case, all_vars)
   }
 
   call
