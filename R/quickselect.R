@@ -146,6 +146,7 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       }
 
       # we convert matrix stuff to DF
+      data = convert_to_list(data)
       is_df = TRUE
       old_class = "data.frame"
     } else if(is.atomic(x)){
@@ -154,6 +155,8 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
         stop_hook("If the argument `x` is a vector, it must have names.",
                   "\nPROBLEM: it currently has no names.")
       }
+      # conversion
+      data = convert_to_list(data)
     } else if(is.list(x)){
       is_df = is.data.frame(x)
       x = names(x)
@@ -273,7 +276,8 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
 
           final_vars = c(final_vars, new_vars)
           final_names = c(final_names, new_names)
-          is_eval = c(is_eval, TRUE)
+          # length(expr) == 1 means it's a regular variable name
+          is_eval = c(is_eval, length(expr) != 1)
 
           # we do not accept .prev or .iprev following single variables
           previous_vars = previous_names = NULL
@@ -333,6 +337,10 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
             is_insert_previous = val == ".iprev"
             vars_expanded_list[[k]] = previous_vars
             names_expanded_list[[k]] = previous_names
+          } else if(k > 1 && values_to_expand[k] == "."){
+            vars_expanded_list[[k]] = vars_expanded_list[[k - 1]]
+            names_expanded_list[[k]] = names_expanded_list[[k - 1]]
+
           } else {
             vars_expanded_list[[k]] = selvars_main_selection(x, data, values_to_expand[k], "", .ignore.case)
             names_expanded_list[[k]] = names(vars_expanded_list[[k]])
@@ -411,8 +419,6 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
           }
         }
 
-        
-
         if(is_insert_previous){
           final_vars = insert_at(final_vars, new_expr_dp, index_iprev)
           final_names = insert_at(final_names, names_expr, index_iprev)
@@ -482,7 +488,20 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
   
   # Final step: creation of the data set
   # evaluation of the variables
+  
+  # Groups... what do we do with groups?
+  # - we first make the checking of the variables withtout evaluating
+  # - in a second step we evaluate:
+  #   a) first on a tiny subset to see if ALL the expressions are aggregations
+  #   b) depending on this first check, either we loop on groups, either not
+
   n_vars = length(final_vars)
+
+  is_group = "groups" %in% names(old_attr)
+  all_expr = NULL
+  if(is_group){
+    all_expr = vector("list", n_vars)
+  }
   new_values_list = vector("list", n_vars)
   data_names = names(data)
   data_list = convert_to_list(data)
@@ -491,6 +510,10 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
     vi = final_vars[i]
 
     if(!is_eval[i]){
+      if(is_group){
+        all_expr[[i]] = vi
+      }
+      
       new_values = data_list[[vi]]
     } else {
       expr_dp = vi
@@ -498,6 +521,10 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       if(inherits(expr, "try-error")){
         stop_hook("The values of the variables to be created must be valid R expressions.",
                   "\nPROBLEM: the value {bq?expr_dp} could not be parsed.")
+      }
+
+      if(is_group){
+        all_expr[[i]] = expr
       }
 
       all_vars = all.vars(expr)
@@ -530,11 +557,141 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
         }
       }
 
-      new_values = eval(expr, data_list, enclos = .frame) 
+      if(!is_group){
+        new_values = eval(expr, data_list, enclos = .frame) 
+      }      
     }
 
-    new_values_list[[i]] = new_values
+    if(!is_group){
+      new_values_list[[i]] = new_values 
+    }
+    
   }
+
+  ####
+  #### Grouping operations ####
+  ####
+  
+  # see explanation above the previous loop
+  if(is_group){
+    vars_small = character(0)
+    data_list_small = data_list
+    is_agg = logical(n_vars)
+
+    for(i in 1:n_vars){
+      expr = all_expr[[i]]
+      data_vars = intersect(data_names, all.vars(expr))
+
+      for(v in setdiff(data_vars, vars_small)){
+        vars_small = c(vars_small, v)
+        data_list_small[[v]] = head(data_list[[v]])
+      }
+
+      new_values = eval(expr, data_list_small, enclos = .frame) 
+      is_agg[i] = is.list(new_values) || length(new_values) == 1
+    }
+
+    # we always add the grouping variables if they're not there
+    groups = old_attr$groups
+    n_gvars = ncol(groups) - 1
+    gnames = names(groups)[1:n_gvars]
+
+    gvar_to_add = setdiff(gnames, final_vars)
+    offset = length(gvar_to_add)
+    final_names = c(gvar_to_add, final_names)
+    final_vars = c(gvar_to_add, final_names)    
+
+    new_values_list = vector("list", n_vars + offset)
+
+    all_agg = all(is_agg)
+    if(all_agg){
+      for(i in seq_len(offset)){
+        new_values_list[[i]] = groups[[gvar_to_add[i]]]
+      }
+    } else {
+      var_pblm = setdiff(gvar_to_add, data_names)
+      if(length(var_pblm) > 0){
+        stop_hook("The grouping variable{$s, enum.bq ? var_pblm} are not in the data set. That should not be the case.",
+                  "\nIf you think this is legitimate and this case should be handled: can you open a GH issue with an example?")
+      }
+
+      for(i in seq_len(offset)){
+        new_values_list[[i]] = data_list[[gvar_to_add[i]]]
+      }
+    }
+    
+    i_no_agg = which(!is_agg)
+    for(i in i_no_agg){
+      expr = all_expr[[i]]
+      if(is.character(expr)){
+        new_values = data_list[[expr]]
+      } else {
+        new_values = eval(expr, data_list, enclos = .frame)
+      }
+      
+      new_values_list[[i + offset]] = new_values
+    }
+
+    if(any(is_agg)){
+      # All this is super slow..... sigh...
+
+      # A) we find all the variables for which to subselect
+      
+      i_agg = which(is_agg)
+      data_vars = character(0)
+      for(i in i_agg){
+        expr = all_expr[[i]]
+        data_vars = c(data_vars, intersect(data_names, all.vars(expr)))
+      }
+      data_vars = unique(data_vars)
+
+      # B) group wise operations
+      
+      obs_list = groups[[n_gvars + 1]]
+      n_g = nrow(groups)
+      n_total = if(all_agg) n_g else n_obs
+      for(g in 1:n_g){
+        # subselection
+        obs_keep = obs_list[[g]]
+        for(v in data_vars){
+          data_list_small[[v]] = data_list[[v]][obs_keep]
+        }
+
+        for(i in i_agg){
+          expr = all_expr[[i]]
+          if(is.character(expr)){
+            new_values = data_list_small[[expr]]
+          } else {
+            new_values = eval(expr, data_list_small, enclos = .frame)
+          }
+
+          if(g == 1){
+            # not 100% sure it's worth it doing this initialization 
+            # (may be error prone if evals can be of != types -- but so be it)
+            vec = vector(mode(new_values), n_total)
+            if(all_agg){
+              vec[[1]] = new_values
+            } else {
+              vec[obs_keep] = new_values
+            }
+            
+            new_values_list[[i + offset]] = vec
+          } else {
+            if(all_agg){
+              new_values_list[[i + offset]][[g]] = new_values
+            } else {
+              if(is.list(new_values)){
+                new_values = list(new_values)
+              }
+              new_values_list[[i + offset]][obs_keep] = new_values
+            }
+          }
+        }
+      }
+    }
+
+  }
+
   
   if(is_df){
     new_n_all = lengths(new_values_list)
@@ -551,7 +708,8 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       }
 
       # we normalize the single unit values
-      for(i in which(n_new == 1)){
+      n_obs = max(new_n_all)
+      for(i in which(new_n_all == 1)){
         new_values_list[[i]] = rep(new_values_list[[i]], n_obs)
       }
     }
@@ -564,7 +722,18 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
   if(is_df){
     # should we keep the row names? No at 80%.
     attr(res, "row.names") = .set_row_names(length(res[[1]]))
+
+    if(is_group && all_agg){
+      old_class = str_get(old_class, "!group")
+      old_attr$groups = NULL
+    }
+
     oldClass(res) = old_class
+    # we copy the attributes
+    for(a in setdiff(names(old_attr), c("class", "row.names", "names"))){
+      attr(res, a) = old_attr[[a]]
+    }
+
     names(res) = final_names
   }
 
