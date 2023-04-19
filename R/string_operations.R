@@ -529,7 +529,7 @@ str_op = function(x, op, do_unik = NULL){
 #'
 #'
 dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-               string_as_box = TRUE, collapse = NULL, help = NULL){
+               string_as_box = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
 
 
   if(!missing(vectorize)) check_logical(vectorize, scalar = TRUE)
@@ -553,7 +553,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
   res = string_ops_internal(..., is_dsb = TRUE, frame = frame, sep = sep,
                             vectorize = vectorize, string_as_box = string_as_box,
-                            collapse = collapse, help = help,
+                            collapse = collapse, help = help, is_root = use_DT,
                             check = TRUE, fun_name = "dsb")
 
   if(inherits(res, "help")){
@@ -567,12 +567,12 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
 #' @describeIn dsb Like `dsb` but without nice error messages (leads to slightly faster run times).
 .dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-                check = FALSE, string_as_box = TRUE){
+                check = FALSE, string_as_box = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
   string_ops_internal(..., is_dsb = TRUE, frame = frame,
                       string_as_box = string_as_box, sep = sep,
-                      vectorize = vectorize,
+                      vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".dsb")
 }
 
@@ -655,7 +655,7 @@ dsb_c = function(..., frame = parent.frame(), vectorize = FALSE,
 ####
 
 cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-               string_as_box = TRUE, collapse = NULL){
+               string_as_box = TRUE, collapse = NULL, use_DT = TRUE){
 
 
   if(!missing(vectorize)) check_logical(vectorize, scalar = TRUE)
@@ -677,9 +677,11 @@ cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
   set_pblm_hook()
 
+  # is_root is only used to enable DT evaluation
+
   res = string_ops_internal(..., is_dsb = FALSE, frame = frame, sep = sep,
                             vectorize = vectorize, string_as_box = string_as_box,
-                            collapse = collapse,
+                            collapse = collapse, is_root = use_DT,
                             check = TRUE, fun_name = "cub")
 
   if(inherits(res, "help")){
@@ -692,13 +694,13 @@ cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
 
 .cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-                check = FALSE, string_as_box = TRUE){
+                check = FALSE, string_as_box = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
 
   string_ops_internal(..., is_dsb = FALSE, frame = frame,
                       string_as_box = string_as_box, sep = sep,
-                      vectorize = vectorize,
+                      vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".cub")
 }
 
@@ -1012,7 +1014,7 @@ setup_help = function(){
 string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
                                sep = "", vectorize = FALSE,
                                string_as_box = TRUE, collapse = NULL,
-                               help = NULL,
+                               help = NULL, is_root = FALSE,
                                check = FALSE, fun_name = "dsb", plural_value = NULL){
 
 
@@ -1029,6 +1031,45 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
     class(obj) = "help"
 
     return(obj)
+  }
+
+  if(is_root){
+    # we check for data table calls
+
+    sc = sys.calls()
+    n_sc = length(sc)
+    if(n_sc >= 4){
+      for(i in 2:(n_sc - 2)){
+        ls_i = ls(envir = parent.frame(i), all.names = TRUE)
+        is_dt = all(c(".SD", ".I", ".N") %in% ls_i)
+        if(is_dt){
+          break
+        }
+      }
+
+      if(is_dt){
+          is_by = ".BY" %in% ls_i && ".Random.seed" %in% ls(envir = parent.frame(i + 1), all.names = TRUE)
+
+          if(is_by){
+            # that's not great but it works somehow
+            dt_call = sc[[n_sc - i - 1]]
+            dt_name = dt_call[[2]]
+            dt_data = unclass(eval(dt_name, parent.frame(i + 1)))
+            for(v in c(".I", ".N", ".GRP", ".BY")){
+              dt_data[[v]] = get(v, parent.frame(i))
+            }
+          } else {
+            dt_data = unclass(get("x", parent.frame(i + 2)))
+            for(v in c(".N", ".GRP")){
+              dt_data[[v]] = get(v, parent.frame(i))
+            }
+          }
+
+          attr(frame, "dt_data") = dt_data
+      }
+    }
+  } else {
+    is_dt = "dt_data" %in% names(attributes(frame))
   }
 
   if(...length() == 0){
@@ -1175,7 +1216,14 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
               xi = string_ops_internal(xi_call, is_dsb = is_dsb, frame = frame, string_as_box = FALSE, check = check)
             }
           } else {
-            if(check){
+            if(is_dt){
+              if(check){
+                xi = error_sender(eval_dt(xi_call, frame), "The value `", xi,
+                                  "` could not be evaluated.")
+              } else {
+                xi = eval_dt(xi_call, frame)
+              }
+            } else if(check){
               xi = error_sender(eval(xi_call, frame), "The value `", xi,
                                 "` could not be evaluated.")
             } else {
@@ -1310,7 +1358,14 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
           } else if(!verbatim){
             # evaluation
-            if(check){
+            if(is_dt){
+              if(check){
+                xi = error_sender(eval_dt(xi_call, frame), "The value `", xi,
+                                  "` could not be evaluated.")
+              } else {
+                xi = eval_dt(xi_call, frame)
+              }
+            } else if(check){
               xi_call = error_sender(str2lang(xi), "The value `", xi,
                                      "` could not be parsed.")
               xi = error_sender(eval(xi_call, frame), "The value `", xi,
@@ -1360,8 +1415,18 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
                       ", requires at least one variable to be evaluated in the condition.",
                       " PROBLEM: no variable could be found.\n", example)
             }
-
-            xi_val = eval(str2lang(vars[1]), frame)
+            
+            xi_call = str2lang(vars[1])
+            if(is_dt){
+              if(check){
+                xi_val = error_sender(eval_dt(xi_call, frame), "The value `", xi,
+                                  "` could not be evaluated.")
+              } else {
+                xi_val = eval_dt(xi_call, frame)
+              }
+            } else {
+              xi_val = eval(xi_call, frame)
+            }
 
           }
 

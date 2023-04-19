@@ -1155,7 +1155,23 @@ duplicated_xy = function(x, y){
   which(x_dup & y_dup)
 }
 
+eval_dt = function(call, frame){
 
+  dt_data = attr(frame, "dt_data")
+
+  if(".BY" %in% names(dt_data)){
+    # we subset the data
+    all_vars = all.vars(call)
+    for(v in intersect(all_vars, names(dt_data))){
+      value = dt_data[[v]]
+      if(length(value) > 1){
+        dt_data[[v]] = value[dt_data[[".I"]]]
+      }
+    }
+  }
+
+  eval(call, dt_data, frame)
+}
 
 
 
