@@ -1294,7 +1294,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
           }
 
           # If split operator, we need to concatenate
-          concat_nested = length(operators) > 0 && grepl("(^|[^[:alpha:]])(s|S)$", operators[[1]])
+          concat_nested = length(operators) > 0 && grepl("(?:^|[^[:alpha:]])(?:s|S)$", operators[[1]])
         }
 
 
@@ -1649,8 +1649,8 @@ sop_char2operator = function(x, fun_name){
   OPERATORS = c("s", "S", "x", "X", "c", "C", "r", "R",
                 "times", "each",
                 "u", "U", "l", "L", "q", "Q", "bq", "f", "F", "%",
-                "e", "E", "app", "App", 
-                "k", "K", "d", "D", "last", "first",
+                "erase", "rm", "append", "Append", 
+                "k", "K", "last", "first",
                 "cfirst", "clast", "unik", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
                 "ws", "tws", "trim", "get", "is", "which",
@@ -1672,36 +1672,48 @@ sop_char2operator = function(x, fun_name){
   if(substr(op, 1, 1) %in% c("@", "&", "<", "~")){
     ok = TRUE
 
-  } else if(nchar(argument) == 0){
-    # no argument provided: we need to:
-    # - set default values if available
-    # - send error if operator requires argument
-    
-    # default values
-    argument = switch(op,
-                      s = " ", S = ",[ \t\n]*",
-                      x = "[[:alnum:]]+", X = "[[:alnum:]]+",
-                      c = " ", C = ", || and ",
-                      times = 1, each = 1,
-                      first = 1, last = 1,
-                      cfirst = 1, clast = 1,
-                      "")
-    
-    op_parsed$argument = argument
+  } else {
 
-    if(op %in% c("R", "r", "%", "k", "K", "a")){
-      ex = c("R" = 'x = "She loves me."; dsb("\'s\\b => d\'R ? x")',
-             "r" = 'x = "Amour"; dsb(".[\'ou => e\'R ? x]...")',
-             "%" = 'dsb("pi is: .[\'.3f\'% ? pi]")',
-             "k" = 'dsb("The first 8 letters of the longuest word are: .[8k, q ! the longuest word ]")',
-             "K" = 'x = 5:9; dsb("The first 2 elements of `x` are: .[2K, C ? x].")',
-             "a" = 'x = "those, words"; dsb("Let\'s emphasize .[S, \'**|**\'a, c ? x].")')
-
-      ex = bespoke_msg(ex[op])
-      stop_hook("The operator `", op,
-              "` has no default value, you must provide values explicitly.\n Example: ", ex)
+    # we partially match operators if needed
+    if(!op %in% OPERATORS){
+      op = check_set_options(op, OPERATORS, case = TRUE, free = TRUE)
+      op_parsed$operator = op
     }
 
+    if(nchar(argument) == 0){
+      # no argument provided: we need to:
+      # - set default values if available
+      # - send error if operator requires argument
+      
+      # default values
+      argument = switch(op,
+                        s = " ", S = ",[ \t\n]*",
+                        x = "[[:alnum:]]+", X = "[[:alnum:]]+",
+                        c = " ", C = ", || and ",
+                        times = 1, each = 1,
+                        first = 1, last = 1,
+                        cfirst = 1, clast = 1,
+                        trim = 1, 
+                        "")
+      
+      op_parsed$argument = argument
+
+      if(op %in% c("R", "r", "%", "k", "K", "append", "get", "is", "which")){
+        ex = c("R" = 'x = "She loves me."; dsb("\'s\\b => d\'R ? x")',
+              "r" = 'x = "Amour"; dsb(".[\'ou => e\'R ? x]...")',
+              "%" = 'dsb("pi is: .[%.03f ? pi]")',
+              "k" = 'dsb("The first 8 letters of the longuest word are: .[8k, q ! the longuest word].")',
+              "K" = 'x = 5:9; dsb("The first 2 elements of `x` are: .[2K, C ? x].")',
+              "get" = 'x = row.names(mtcars) ; dsb("My fav. cars are .[\'toy\'get.ignore, \'the \'app, enum ? x].")',
+              "is" = 'x = c("Bob", "Pam") ; dsb("\'am\'is ? x")',
+              "which" = 'x = c("Bob", "Pam") ; dsb("\'am\'which ? x")',
+              "append" = 'x = "those, words"; dsb("Let\'s emphasize .[S, \'**\'append.both, c ? x].")')
+
+        ex = bespoke_msg(ex[op])
+        stop_hook("The operator `", op,
+                "` has no default value, you must provide values explicitly.\n Example: ", ex)
+      }
+    }
   }
 
   if(op %in% c("Ko", "KO")){
@@ -1896,6 +1908,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
       if(conditional_flag == 1){
         group_index = group_index[res]
+        group_index = cpp_recreate_index(group_index)
       } else if(conditional_flag == 2){
         stop_hook("The operation `which` cannot be applied in ",
                   "conditionnal statements (inside `~()`).",
@@ -1904,38 +1917,14 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       
     } else {
       # default is str_is
-      # the user cannot use " || " nor " && "
-
-      items = strsplit(argument, " ([|]{2}|&&) ")[[1]]
-      res = NULL
-      for(i in seq_along(items)){
-
-        pattern = items[i]
-        if(is_ignore && i > 1){
-          pattern = paste0("(?i)", pattern)
-        }
-
-        value = grepl(pattern, x, fixed = is_fixed, perl = !is_fixed)
-
-        if(is.null(res)){
-          res = value
-        } else {
-          n_items = nchar(items)
-          i_prev = i - 1
-          index = sum(n_items[1:i_prev]) + 4*(i_prev - 1) + 3
-          logical_and = substr(argument, index, index) == "&"
-          if(logical_and){
-            res = res & value
-          } else {
-            res = res | value
-          }          
-        }
-      }
+      # the user cannot use " | " nor " & "
+      res = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
 
       if(op %in% c("get", "which")){
 
         if(conditional_flag == 1){
           group_index = group_index[res]
+          group_index = cpp_recreate_index(group_index)
         } else if(conditional_flag == 2){
           stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
                     "conditionnal statements (inside `~()`).",
@@ -2055,10 +2044,12 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     # p: punct
     # d: digits
     # i: isolated
+    
+    options = check_set_options(options, c("punct", "digit", "isolated"))
 
-    clean_punct = any(grepl("p", options, fixed = TRUE))
-    clean_digit = any(grepl("d", options, fixed = TRUE))
-    clean_isolated = any(grepl("i", options, fixed = TRUE))
+    clean_punct = "punct" %in% options
+    clean_digit = "digit" %in% options
+    clean_isolated = "isolated" %in% options
 
     res = cpp_normalize_string(x, clean_punct, clean_digit, clean_isolated)
     
@@ -2152,7 +2143,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       } else {
         res = if(nb < length(x)) x[1:nb] else x
 
-        if(any(grepl(":(n|N|rest|REST):", add))){
+        if(any(grepl(":(?:n|N|rest|REST):", add))){
           n = length(x)
           N = ""
           if(grepl(":N:", add, fixed = TRUE)){
@@ -2273,7 +2264,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       res = sort(x, decreasing = op == "dsort")
     }
 
-  } else if(op %in% c("app", "App", "insert")){
+  } else if(op %in% c("append", "Append", "insert")){
     # Appends at the beginning/end of all strings
 
     #
@@ -2297,7 +2288,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     if(nchar(argument) == 0){
       res = x
 
-    } else if(op == "app"){
+    } else if(op == "append"){
 
       if(length(x) == 0){
         res = x
@@ -2376,12 +2367,12 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
         res = c(x, right)
       }
 
-    } else if(op %in% "App"){
+    } else if(op %in% "Append"){
       # appends **implicitly** at the beginning of the first/last string
 
       res = x
 
-      if(any(grepl(":(n|N):", c(left, right)))){
+      if(any(grepl(":(?:n|N):", c(left, right)))){
         n = length(x)
         n_letter = ""
         if(any(grepl(":N:", c(left, right), fixed = TRUE))){
@@ -2551,47 +2542,119 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   } else if(op == "dtime"){
     res = format_difftime(x)
 
-  } else if(op == "e"){
+  } else if(op == "erase"){
 
     #
-    # e, E, d, D, num ####
+    # erase, rm, num ####
     #
 
-    if(!is.null(group_index) && conditional_flag == 2){
-      qui = which(x != "")
-      res = x[qui]
-      group_index = group_index[qui]
-      group_index = cpp_recreate_index(group_index)
+    options = check_set_options(options, c("fixed", "ignore", "word"))
+
+    if(argument == ""){
+      res = character(length(x))
     } else {
-      res = x[x != ""]
+      is_fixed = "fixed" %in% options
+      is_word = "word" %in% options
+      is_ignore = "ignore" %in% options
+
+      qui = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+
+      res[qui] = ""
     }
 
-  } else if(op == "E"){
+  } else if(op == "rm"){
+    options = check_set_options(options, c("empty", "blank", "noalpha", "noalnum", "all", 
+                                           "fixed", "ignore", "word"))
+    
+    res = NULL
+    if(argument != ""){
+      is_fixed = "fixed" %in% options
+      is_word = "word" %in% options
+      is_ignore = "ignore" %in% options
 
-    qui = cpp_which_empty(x)
-    if(length(qui) == 0){
-      res = x
+      qui = !str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
 
     } else {
-      res = x[-qui]
+      options = setdiff(options, c("fixed", "ignore", "word"))
+      if(length(options) == 0){
+        opt = "empty"
+      } else {
+        opt = options[1]
+      }
 
-      if(!is.null(group_index) && conditional_flag == 2){
-        group_index = group_index[-qui]
-        group_index = cpp_recreate_index(group_index)
+      # beware I define here the ones we should keep, **not* the ones we should drop
+
+      if(opt == "empty"){
+        qui = x != ""
+      } else if(opt == "blank"){
+        # 10 times faster than grepl("\\S", x, perl = TRUE)
+        qui = cpp_which_empty(x)
+        if(length(qui) == 0){
+          qui = seq_along(x)
+        } else {
+          qui = -qui
+        }
+      } else if(opt == "noalpha"){
+        qui = grepl("[\\p{L}]", x, perl = TRUE)
+      } else if(opt == "noalnum"){
+        qui = grepl("[\\p{L}[:digit:]]", x, perl = TRUE)
+      } else if(opt == "all"){
+        qui = integer(0) 
       }
     }
 
-  } else if(op == "d"){
-    res = character(length(x))
+    if(is.logical(qui)){
+      qui = which(qui)
+    }
 
-  } else if(op == "D"){
-    res = character(0)
+    res = x[qui]
+    if(!is.null(group_index) && conditional_flag != 0){
+      group_index = group_index[qui]
+      group_index = cpp_recreate_index(group_index)
+    }
 
   } else if(op == "num"){
-    res = suppressWarnings(as.numeric(x))
+    options = check_set_options(options, c("warn", "soft", "rm", "clean"))
+
+    is_warn = "warn" %in% options
+    is_soft = "soft" %in% options
+    is_rm = "rm" %in% options
+    is_clean = "clean" %in% options
+
+    is_valid_num = TRUE
+    if(is_warn || is_soft){
+      is_valid_num = is_numeric_in_char(x)
+      if(!is_valid_num && is_warn){
+        msg = if(!is_soft) "" else " No conversion is performed"
+        warning("In operation `num`: when trying to convert to numeric, NAs were created.", msg)
+      }
+    }
+
+    if(is_valid_num || !is_soft){
+      res = suppressWarnings(as.numeric(x))
+      if(is_rm || is_clean){
+        if(anyNA(res)){
+          qui_na = which(is.na(res))
+          if(is_rm){
+            res = res[-qui_na]
+            if(!is.null(group_index) && conditional_flag != 0){
+              group_index = group_index[-qui_na]
+              group_index = cpp_recreate_index(group_index)
+            }
+          } else { 
+            # is_clean
+            res[qui_na] = ""
+          }
+        }
+      }
+    } else {
+      res = x
+    }
 
   } else if(substr(op, 1, 1) %in% c("@", "&", "<")){
+    #
     # Conditions: @, &, < ####
+    #
 
     # These aren't really useful and are really complicated 
     # => maybe I should drop them????
@@ -2629,19 +2692,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     if(code == "<"){
       regex = str_trim(cond, 1, 1)
 
-      first_char = substr(regex, 1, 1)
-      do_negate = first_char == "!" && nchar(regex) > 1
-      if(do_negate){
-        regex = str_trim(regex, 1)
-        first_char = substr(regex, 1, 1)
-      }
-
-      fixed = first_char == "#"
-      if(fixed){
-        regex = str_trim(regex, 1)
-      }
-
-      qui = grepl(regex, x, perl = !fixed, fixed = fixed)
+      qui = str_is(x, pattern = regex)
 
       qui[is.na(qui)] = FALSE
 
@@ -2940,11 +2991,11 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
 
   if(!plural_len){
     # xi should be a number
-    is_pblm = length(xi) != 1 || !is.atomic(xi) || is.na(xi)
+    is_pblm = length(xi) != 1 || !is.atomic(xi) || any(is.na(xi))
 
     if(!is_pblm && !is.numeric(xi)){
       xi = suppressWarnings(as.numeric(xi))
-      is_pblm = is.na(x)
+      is_pblm = any(is.na(xi))
     }
 
     if(!is_pblm){
