@@ -221,7 +221,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value = deparse_short(mc_dots[[i]])
 
       # really, this is gibberish: who can understand the code?
-      nm = dsb(" (.[@<4(d) ! .[nm] = ].[value])")
+      nm = cub(" ({@<4(erase) ! {nm} = }{value})")
 
       if(grepl("try(...", elem, fixed = TRUE)){
         elem = gsub("^[^:]+:", "", elem)
@@ -259,7 +259,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
       # really, this is gibberish: who can understand the code?
-      info_call = dsb("`.[@<4(d) ! .[nm_pblm] = ].[value_all]`")
+      info_call = cub("`{@<4(erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up("In the argument `...`, all elements must be scalars (i.e. of length 1).\nPROBLEM: ",
               "{'\n'c ! The {nth ? i_pblm} element ({info_call}) is ",
@@ -268,8 +268,9 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
   }
 
   if(character){
-    if(!all(sapply(dots, is.character))){
-      i_pblm = which(!sapply(dots, is.character))
+    # we convert to character => requirement is atomicity
+    if(!all(sapply(dots, is.atomic))){      
+      i_pblm = which(!sapply(dots, is.atomic))
 
       # We try to give as much info as possible
       n_pblm = length(i_pblm)
@@ -286,12 +287,17 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
       # really, this is gibberish: who can understand the code?
-      info_call = dsb("`.[@<4(d) ! .[nm_pblm] = ].[value_all]`")
+      info_call = cub("`{@<4(erase) ! {nm_pblm} = }{value_all}`")
 
       cls_pblm = sapply(dots[i_pblm], function(x) dsb("bq ! .[enum ? class(x)]"))
-      stop_up(dsb("In the argument `...`, all elements must be character strings.\nPROBLEM: ",
+      stop_up(dsb("In the argument `...`, all elements must be atomic (i.e. convertible to a character string).\nPROBLEM: ",
                   ".['\n'c ! The .[Nth ? i_pblm] element (.[info_call]) is not character",
                   " (instead it is of class: .[cls_pblm]).]"))
+    }
+
+    i_no_char = which(!sapply(dots, is.character))
+    for(i in i_no_char){
+      dots[[i]] = as.character(dots[[i]])
     }
   }
 
@@ -314,13 +320,15 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
       # really, this is gibberish: who can understand the code?
-      info_call = dsb("`.[@<4(d) ! .[nm_pblm] = ].[value_all]`")
+      info_call = cub("`{@<4(erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up(dsb("In the argument `...`, all elements must be without NA.\nPROBLEM: ",
                   "The .[nth, enum ? i_pblm] element.[$s] (.[C ? info_call])",
                   " .[$contain] NA values"))
     }
   }
+
+  names(dots) = dots_nm
 
   return(dots)
 }
@@ -356,11 +364,53 @@ check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
   res
 }
 
+warn_no_named_dots = function(dots){
+  if(!is.null(names(dots))){
+    args_fun = names(formals(sys.function(sys.parent())))
+    args_fun = setdiff(args_fun, "...")
+
+    dot_names = names(dots)
+    dot_names = dot_names[nchar(dot_names) > 0]
+    sugg_txt = suggest_item(dot_names[1], args_fun, info = "argument")
+
+    warn_up("The arguments in `...` shall not have names. The name{$s, enum.bq ? dot_names}",
+            " may refer to {$(an;some)} argument{$s}?", sugg_txt)
+
+  }
+}
+
+warn_up = function (..., up = 1, immediate. = FALSE, verbatim = FALSE){
+
+  if(verbatim){
+    message = paste0(...)
+  } else {
+    message = cub(..., frame = parent.frame())
+  }
+  
+  mc = match.call()
+
+  if (!"up" %in% names(mc)) {
+      up_value = mget("DREAMERR__UP", parent.frame(), ifnotfound = 1)
+
+      up = up_value[[1]]
+  }
+
+  my_call = deparse(sys.calls()[[max(1, sys.nframe() - (1 + up))]])[1]
+  
+  nmax = 50
+  if (nchar(my_call) > nmax){
+    my_call = paste0(substr(my_call, 1, nmax - 1), "...")
+  }
+      
+  warning("In ", my_call, ":\n ", fit_screen(message),
+          call. = FALSE, immediate. = immediate.)
+}
+
 ####
 #### utilities ####
 ####
 
-suggest_item = function(x, items, write_msg = TRUE, newline = TRUE){
+suggest_item = function(x, items, write_msg = TRUE, newline = TRUE, info = "variable"){
   # typical use: x is not in items
   #              we want to suggest possible values
   # returns vector of length 0 if no suggestion
@@ -423,9 +473,9 @@ suggest_item = function(x, items, write_msg = TRUE, newline = TRUE){
   if(write_msg){
     if(length(res) == 0){
       if(length(items) <= 5){
-        res = cub("FYI the variable{$s, are, enum.bq ? items_origin}.")
+        res = cub("FYI the {info}{$s, are, enum.bq ? items_origin}.")
       } else {
-        res = cub("FYI the first 5 variables are {enum.bq ? items_origin}.")
+        res = cub("FYI the first 5 {info}s are {enum.bq ? items_origin}.")
       }
     } else {
       res = cub("Maybe you meant {enum.bq.or ? res}?")
@@ -433,6 +483,10 @@ suggest_item = function(x, items, write_msg = TRUE, newline = TRUE){
 
     if(newline){
       res = paste0("\n", res)
+    }
+  } else {
+    if(length(res) == 0){
+      res = head(items_origin, 5)
     }
   }
 

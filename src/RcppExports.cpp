@@ -253,6 +253,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_parse_str_is_pattern
+List cpp_parse_str_is_pattern(SEXP Rstr, bool parse_logical);
+RcppExport SEXP _stringmagick_cpp_parse_str_is_pattern(SEXP RstrSEXP, SEXP parse_logicalSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    Rcpp::traits::input_parameter< bool >::type parse_logical(parse_logicalSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_parse_str_is_pattern(Rstr, parse_logical));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_to_integer
 IntegerVector cpp_to_integer(SEXP x);
 RcppExport SEXP _stringmagick_cpp_to_integer(SEXP xSEXP) {
@@ -310,6 +322,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_is_variable_name", (DL_FUNC) &_stringmagick_cpp_is_variable_name, 1},
     {"_stringmagick_cpp_equal_ignore_case", (DL_FUNC) &_stringmagick_cpp_equal_ignore_case, 3},
     {"_stringmagick_cpp_is_int_in_char", (DL_FUNC) &_stringmagick_cpp_is_int_in_char, 1},
+    {"_stringmagick_cpp_parse_str_is_pattern", (DL_FUNC) &_stringmagick_cpp_parse_str_is_pattern, 2},
     {"_stringmagick_cpp_to_integer", (DL_FUNC) &_stringmagick_cpp_to_integer, 1},
     {"_stringmagick_cpp_combine_clusters", (DL_FUNC) &_stringmagick_cpp_combine_clusters, 2},
     {"_stringmagick_cpp_create_pos", (DL_FUNC) &_stringmagick_cpp_create_pos, 1},

@@ -60,7 +60,8 @@
 #' str_which(x, "e", "o")
 #'
 #'
-str_is = function(x, ..., or = FALSE, pattern = NULL){
+str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
+                  or = FALSE, pattern = NULL){
 
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
   if(length(x) == 0){
@@ -72,69 +73,66 @@ str_is = function(x, ..., or = FALSE, pattern = NULL){
 
   if(missnull(pattern)){
     dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
+    warn_no_named_dots(dots)
     pattern = unlist(dots)
   }
 
   or_origin = or
   negate = FALSE
-  do_negate = function(z) if(negate) !z else z
-  logical_op = function(a, b) if(or) a | b else a & b
+  logical_op = function(a, b, or) if(or) a | b else a & b
 
+  res = NULL
   for(i in seq_along(pattern)){
     pat = pattern[i]
-
     first_char = substr(pat, 1, 1)
-
-    if(i > 1){
-      if(first_char == "|"){
-        # the | cannot be escaped because it makes no sense
-        or = TRUE
-        pat = substr(pat, 2, nchar(pat))
-        first_char = substr(pat, 1, 1)
-      } else {
-        or = or_origin
-      }
+    negate = first_char == "!"
+    if(negate){
+      pat = substr(pat, 2, nchar(pat))
     }
+    
+    pat_parsed = parse_str_is_pattern(pat, c("fixed", "word", "ignore", "verbatim"))
+    is_or = pat_parsed$is_or
+    flags = pat_parsed$flags
+    all_patterns = pat_parsed$patterns
 
-    if(first_char == "\\"){
-      # if either ! or # is escaped:
-      # no negation and no fixed
+    is_fixed   = fixed || "fixed" %in% flags
+    is_word    = word  || "word" %in% flags
+    is_ignore  = ignore.case || "ignore" %in% flags
+    
+    res_current = NULL
+    for(j in seq_along(all_patterns)){
+      p = all_patterns[j]
 
-      second_char = substr(pat, 2, 2)
-      if(second_char %in% c("!", "#")){
-        # we trim if needed
-        pat = substr(pat, 2, nchar(pat))
-      }
-
-      negate = FALSE
-      fixed = FALSE
-    } else {
-      # no escape
-
-      negate = first_char == "!"
-      if(negate){
-        pat = substr(pat, 2, nchar(pat))
-        first_char = substr(pat, 1, 1)
-      }
-
-      if(negate && substr(pat, 1, 2) == "\\#"){
-        # => not fixed
-        pat = substr(pat, 2, nchar(pat))
-        fixed = FALSE
-      } else {
-        fixed = first_char == "#"
-        if(fixed){
-          pat = substr(pat, 2, nchar(pat))
+      if(is_word){
+        items = strsplit(p, ",[ \t\n]+")[[1]]
+        if(is_fixed){
+          items = paste0("\\Q", items, "\\E")
+          is_fixed = FALSE
         }
+        p = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
+      }
+
+      if(is_ignore){
+        is_fixed = FALSE
+        p = paste0("(?i)", p)
+      }
+
+      res_tmp = grepl(p, x, perl = !is_fixed, fixed = is_fixed)
+      if(is.null(res_current)){
+        res_current = res_tmp
+      } else {
+        res_current = logical_op(res_current, res_tmp, is_or[j])
       }
     }
 
-    value = do_negate(grepl(pat, x, perl = !fixed, fixed = fixed))
+    if(negate){
+      res_current = !res_current
+    }
 
-    if(i == 1){
-      res = value
+    if(is.null(res)){
+      res = res_current
     } else {
-      res = logical_op(res, value)
+      res = logical_op(res, res_current, or)
     }
   }
 
@@ -142,16 +140,18 @@ str_is = function(x, ..., or = FALSE, pattern = NULL){
 }
 
 #' @describeIn str_is
-str_which = function(x, ..., or = FALSE, pattern = NULL){
+str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
+                     or = FALSE, pattern = NULL){
 
   check_character(pattern, null = TRUE, no_na = TRUE)
 
   if(missnull(pattern)){
     dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
+    warn_no_named_dots(dots)
     pattern = unlist(dots)
   }
 
-  which(str_is(x, or = or, pattern = pattern))
+  which(str_is(x, fixed = fixed, ignore.case = ignore.case, word = word, or = or, pattern = pattern))
 }
 
 #' Gets elements of a character vector
@@ -198,7 +198,8 @@ str_which = function(x, ..., or = FALSE, pattern = NULL){
 #'
 #'
 #'
-str_get = function(x, ..., or = FALSE, seq = FALSE, seq.unik = FALSE, pattern = NULL){
+str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
+                   or = FALSE, seq = FALSE, seq.unik = FALSE, pattern = NULL){
 
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
   if(length(x) == 0){
@@ -212,6 +213,7 @@ str_get = function(x, ..., or = FALSE, seq = FALSE, seq.unik = FALSE, pattern = 
 
   if(missnull(pattern)){
     dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
+    warn_no_named_dots(dots)
     pattern = unlist(dots)
   }
 
@@ -236,7 +238,7 @@ str_get = function(x, ..., or = FALSE, seq = FALSE, seq.unik = FALSE, pattern = 
     return(res)
   }
 
-  index = str_is(x, pattern = pattern, or = or)
+  index = str_is(x, fixed = fixed, ignore.case = ignore.case, word = word, pattern = pattern, or = or)
   x[index]
 }
 
@@ -660,6 +662,46 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+"){
 
 
 
+####
+#### dedicated utilities ####
+####
+
+parse_str_is_pattern = function(pattern, authorized_flags){
+  # in: "fw/hey!, bonjour, a[i]"
+  # common authorized_flags: c("fixed", "word", "ignore")
+
+  info_pattern = cpp_parse_str_is_pattern(pattern, TRUE)
+
+  flags = info_pattern$flags
+  if(length(flags) == 1){
+    if(!flags %in% authorized_flags){
+      # is it a flag made only of initials?
+      flag_split = strsplit(flags, "")[[1]]
+      authorized_initials = substr(authorized_flags, 1, 1)
+      if(all(flag_split %in% authorized_initials)){
+        flags = authorized_flags[authorized_initials %in% flag_split]
+      }
+    }
+  }
+
+  flags = check_set_options(flags, authorized_flags, free = TRUE)
+
+  flag_pblm = setdiff(flags, authorized_flags)
+  if(length(flag_pblm) > 0){
+    info = setdiff(authorized_flags, flags)
+    stop_hook("In the pattern {'20||...'k, bq?pattern} the flag {enum.bq?flag_pblm} is not authorized.",
+              "\nFYI the authorized flags are: {enum.bq?authorized_flags}.",
+              "\nNOTA: The syntax is \"flag1, flag2 / regex\". To remove the parsing of flags, start with a '/'.")
+  }
+
+  if("verbatim" %in% flags){
+    info_pattern = cpp_parse_str_is_pattern(pattern, FALSE)
+  }
+
+  res = list(flags = flags, patterns = info_pattern$patterns, is_or = info_pattern$is_or)
+
+  res
+}
 
 
 

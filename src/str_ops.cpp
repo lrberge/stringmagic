@@ -2149,6 +2149,125 @@ bool cpp_is_int_in_char(SEXP Rstr){
   return i == n;
 }
 
+inline bool is_valid_flag_pattern(char c){
+  return (c >= 'a' && c <= 'z') || c == ',' || c == ' ';
+}
+
+// [[Rcpp::export]]
+List cpp_parse_str_is_pattern(SEXP Rstr, bool parse_logical){
+  // Limitation: multibyte strings are not handled properly
+  //  in: "fixed, word/test"
+  // out: -    flags: c("fixed", "word")
+  //      - patterns: "test"
+  //      -    is_or: FALSE
+  //
+  //  in: "test & wordle"
+  // out: -    flags: ""
+  //      - patterns: c("test", "wordle")
+  //      -    is_or: c(FALSE, FALSE)
+  //
+  //  in: "fiw / test | wordle"
+  // out: -    flags: "fiw"
+  //      - patterns: c("test", "wordle")
+  //      -    is_or: c(FALSE, TRUE)
+
+   if(Rf_length(Rstr) != 1) stop("Internal error in cpp_parse_str_is_pattern: the vector must be of length 1.");
+
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+
+  List res;
+  std::vector<std::string> flags;
+  std::string flag_tmp;
+
+  int i = 0;
+
+  //
+  // flags
+  //
+
+  bool is_flag = true;
+  while(i < n){
+    while(i < n && is_blank(str[i])) ++i;
+    while(i < n && str[i] >= 'a' && str[i] <= 'z'){
+      flag_tmp += str[i++];
+    }
+    while(i < n && is_blank(str[i])) ++i;
+
+    if(!flag_tmp.empty()){
+      flags.push_back(flag_tmp);
+      flag_tmp = "";
+    }
+
+    if(i == n || (str[i] != '/' && str[i] != ',')){
+      is_flag = false;
+      flags.clear();
+      break;
+    } else if(str[i] == '/'){
+      break;
+    } else if(str[i] == ','){
+      ++i;
+      continue;
+    }
+  }
+
+  // saving the flags
+  res["flags"] = flags;
+
+  if(!is_flag){
+    // we start over again
+    i = 0;
+  } else {
+    if(i > 1 && i + 1 < n && str[i - 1] == ' ' && str[i + 1] == ' '){
+      // "fixed / test" => "fixed/test"
+      ++i;
+    }
+    ++i;
+  }
+
+  //
+  // logical operators
+  //
+
+  // now we go for the " & " and the " | "
+
+  std::vector<std::string> patterns;
+  std::string pat_tmp;
+  std::vector<bool> is_or_all;
+  bool is_or_tmp = false;
+
+  while(i < n){
+    while(i < n && (!parse_logical || (str[i] != '&' && str[i] != '|'))){
+      pat_tmp += str[i++];
+    }
+
+    if(i == n){
+      patterns.push_back(pat_tmp);
+      is_or_all.push_back(is_or_tmp);
+    } else {
+      if(i > 1 && str[i - 1] == ' ' && i + 2 < n && str[i + 1] == ' '){
+        //                                 \-> not a typo (we expect stuff after the operator)
+        // this is a logical operator
+        
+        // we flush
+        pat_tmp.pop_back();
+        patterns.push_back(pat_tmp);
+        is_or_all.push_back(is_or_tmp);
+
+        pat_tmp = "";
+        is_or_tmp = str[i] == '|';
+        i += 2;
+      } else {
+        pat_tmp += str[i++];
+      }
+    }
+  }
+
+  res["patterns"] = patterns;
+  res["is_or"] = is_or_all;
+
+  return res;
+}
 
 
 

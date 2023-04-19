@@ -85,6 +85,10 @@ cpp_is_int_in_char <- function(Rstr) {
     .Call(`_stringmagick_cpp_is_int_in_char`, Rstr)
 }
 
+cpp_parse_str_is_pattern <- function(Rstr, parse_logical) {
+    .Call(`_stringmagick_cpp_parse_str_is_pattern`, Rstr, parse_logical)
+}
+
 cpp_to_integer <- function(x) {
     .Call(`_stringmagick_cpp_to_integer`, x)
 }
