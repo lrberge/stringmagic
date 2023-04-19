@@ -71,7 +71,7 @@
 #' selvars(iris, ".fact, ^Sepal")
 #'
 selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = parent.frame(),
-                   .ignore.case = TRUE){
+                   .ignore.case = TRUE, .no_char_pattern = FALSE, .error_on_missing = FALSE){
 
   mc = match.call(expand.dots = FALSE)
 
@@ -214,6 +214,17 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
 
     if(is.character(expr)){
       # This is the standard variable selection
+
+      if(.no_char_pattern){
+        # typical case of dt[, new_var := "stuff"]
+        # => we don't want variable expansion here!
+        previous_vars = previous_names = NULL
+        final_vars = c(final_vars, paste0("'", expr, "'"))
+        final_names = c(final_names, dot_names[i])
+        is_eval = c(is_eval, TRUE)
+        next
+      }
+
       new_vars = selvars_main_selection(x, data, expr, dot_names[i], .ignore.case)
       new_names = names(new_vars)
 
@@ -257,10 +268,24 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
             new_names = dot_names[i]
           }
 
+          if(.error_on_missing && !all(all.vars(expr) %in% x)){
+            # we send an error message if requested
+            vars_doubt = setdiff(all.vars(expr), x)
+            vars_doubt = vars_doubt[!grepl("^\\.\\.", vars_doubt)]
+            for(v in vars_doubt){
+              if(!exists(v, envir = .frame, inherits = TRUE)){
+                sugg_txt = suggest_item(v, x)
+                stop_hook("All variables must be either in the data set, either in the environment.",
+                          "\nPROBLEM: the variable {bq?v} is not in the data set nor in the environment.", 
+                          sugg_txt)
+              }
+            }
+          }
+
           final_vars = c(final_vars, new_vars)
           final_names = c(final_names, new_names)
-          # length(expr) == 1 means it's a regular variable name
-          is_eval = c(is_eval, length(expr) != 1)
+          # length(expr) == 1 means it's a regular variable name, but we need to check it's in the DS!
+          is_eval = c(is_eval, (length(expr) != 1 || !as.character(expr) %in% x))
 
           # we do not accept .prev or .iprev following single variables
           previous_vars = previous_names = NULL
@@ -437,7 +462,6 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
   #
   # final ordering ####
   #
-  
 
   if(!missnull(.order)){
     if(length(.order) > 1){
@@ -500,10 +524,11 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       new_values = data_list[[vi]]
     } else {
       expr_dp = vi
-      expr = try(str2lang(expr_dp))
+      expr = try(str2lang(expr_dp), silent = TRUE)
       if(inherits(expr, "try-error")){
         stop_hook("The values of the variables to be created must be valid R expressions.",
-                  "\nPROBLEM: the value {bq?expr_dp} could not be parsed.")
+                  "\nPROBLEM: the value {bq?expr_dp} could not be parsed. See below:\n",
+                  expr)
       }
 
       if(is_group){
@@ -532,8 +557,7 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
       vars_doubt = setdiff(all_vars_no_prefix, data_names)
       for(v in vars_doubt){
         if(!exists(v, envir = .frame, inherits = TRUE)){
-          sugg = suggest_item(v, data_names)
-          sugg_txt = cub("{$(;;\nMaybe you meant {$enum.bq.or}?) ? sugg}")
+          sugg_txt = suggest_item(v, data_names)
           stop_hook("All variables must be either in the data set, either in the environment.",
                     "\nPROBLEM: the variable {bq?v} is not in the data set nor in the environment.", 
                     sugg_txt)
@@ -819,7 +843,7 @@ selvars_main_selection = function(all_vars, data, pattern, dot_name = "", .ignor
     }
 
     if(is_QS){
-      vars_selected = try(selvalues(all_vars, .pattern = pattern))
+      vars_selected = try(selvalues(all_vars, .pattern = pattern), silent = TRUE)
       if("try-error" %in% class(vars_selected)){
         warning("When summoning help, the following pattern {bq?pattern} led to an error. All variables are displayed.")
         vars_selected = all_vars
@@ -1146,7 +1170,7 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
 
         p_info = if(p != p_raw) paste0("(raw is `", p_raw, "`) ") else ""
         
-        sugg = suggest_item(p, all_vars)
+        sugg = suggest_item(p, all_vars, write_msg = FALSE)
 
         consequence = "led to no variable being selected."
         extra = ""
@@ -1213,21 +1237,23 @@ selvars_internal = function(x, data, pattern, is_order, .ignore.case = TRUE){
 ####
 
 selnames = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = parent.frame(),
-                   .ignore.case = TRUE){
+                   .ignore.case = TRUE, .no_char_pattern = FALSE, .error_on_missing = FALSE){
 
   mc = match.call(expand.dots = FALSE)
   selvars(.x = .x, .order = .order, .in = .in, .pattern = .pattern, .frame = .frame, 
-          .ignore.case = .ignore.case, 
+          .ignore.case = .ignore.case, .no_char_pattern = .no_char_pattern, 
+          .error_on_missing = .error_on_missing, 
           .is_internal = TRUE, .is_selnames = TRUE, .mc = mc)
 
 }
 
 selvalues = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame = parent.frame(),
-                   .ignore.case = TRUE){
+                   .ignore.case = TRUE, .no_char_pattern = FALSE, .error_on_missing = FALSE){
   
   mc = match.call(expand.dots = FALSE)
   selvars(.x = .x, ..., .order = .order, .in = .in, .pattern = .pattern, .frame = .frame, 
-          .ignore.case = .ignore.case, 
+          .ignore.case = .ignore.case, .no_char_pattern = .no_char_pattern, 
+          .error_on_missing = .error_on_missing, 
           .is_internal = TRUE, .is_selvalues = TRUE, .mc = mc)
 }
 
@@ -1243,97 +1269,114 @@ data_table_quickselect = function(enable = TRUE){
   }  
 }
 
-data_table_QS_internal = function(x, i, j, ...){
+data_table_QS_internal = function(x, i, j, by, keyby, ...){
+
+  set_pblm_hook()
   
   mc = match.call()
-  if("j" %in% names(mc)){
+  for(arg in c("j", "by", "keyby")){
     
-    if(is.character(mc$j) || (is_operator(mc$j, "c") && is.character(j))){
-      vars = selnames(x, .pattern = j)
+    if(arg %in% names(mc)){
+      mc_arg_origin = mc_arg = mc[[arg]]
 
-      if(all(names(vars) == vars)){
-        mc$j = parse(text = capture.output(dput(j)))
-      } else {
-        nm_vars = names(vars)
-        new_mc_j = str2lang("list()")
-        for(i in seq_along(vars)){
-          if(nm_vars[i] != vars[i]){
-            new_mc_j[[nm_vars[i]]] = str2lang(vars[i])
-          } else {
-            new_mc_j[[length(new_mc_j) + 1]] = str2lang(vars[i])
-          }
+      do_negate = is_operator(mc_arg, c("-", "!"))
+      if(do_negate){
+        mc_arg = mc_arg[[2]]
+      }
+
+      if(is_operator(mc_arg, ":")){
+        # we can safely convert to character
+        mc_arg = deparse_long(mac_arg)
+      }
+
+      if(is_operator(mc_arg, "c")){
+        arg_value = try(eval(mc_arg), silent = TRUE)
+        if("try-error" %in% class(arg_value)){
+          stop_hook("The argument {bq?arg} could not be evaluated. PROBLEM: ", arg_value)
         }
-
-        mc$j = new_mc_j
+        mc_arg = as.character(arg_value)
       }
       
+      if(is.character(mc_arg)){
+        arg_value = mc_arg
+        vars = selnames(x, .pattern = arg_value)
 
-    } else {
-      is_valid = FALSE
-
-      if(is_operator(mc$j, c(".", "list"))){
-        is_valid = TRUE
-        mc$j[[1]] = as.name("list")
-
-      } else if(is_operator(mc$j, ":=")){
-
-        nm = names(mc$j)
-        if(all(nchar(nm) == 0)){
-          # case left := right
-
-          # we only take care of the case "varname" := .(stuff)
-          # we convert it into ":="(new = fun(old)) format
-          if(length(mc$j[[2]] == 1) && length(mc$j[[3]]) == 2 && is.character(mc$j[[2]])){
-            is_valid = TRUE
-            new_mc_j = mc$j[c(1, 3)]
-            names(new_mc_j) = c("", mc$j[[2]])
-            if(is_operator(new_mc_j[[2]], c(".", "list"))){
-              new_mc_j[[2]] = mc$j[[3]][[1]]
-            }             
-            mc$j = new_mc_j
+        if(do_negate){
+          vars = setdiff(vars, names(x))
+          if(length(vars) == 0){
+            stop_hook("The argument {bq?arg} (equal to {bq?deparse_short(mc_arg_origin)})",
+                      " led to no variable being selected. Revise your variable selection?")
           }
-        } else {
-          # case ":="(new = fun(old))
-          # => this is fine
+          names(vars) = vars
+        }
+
+        mc_arg = create_call_from_values("list", vars)
+
+        # saving 
+        mc[[arg]] = mc_arg
+        
+      } else {
+        is_valid = FALSE
+
+        if(is_operator(mc_arg, c(".", "list"))){
           is_valid = TRUE
-        }
+          mc_arg[[1]] = as.name("list")
 
-      }
+        } else if(is_operator(mc_arg, ":=")){
 
-      if(is_valid){
-        selnames_call = str2lang("selnames(.x = x)")
+          nm = names(mc_arg)
+          if(all(nchar(nm) == 0)){
+            # case left := right
 
-        mc_j = mc$j
-        nm_mc_j = names_xpd(mc_j)
-        is_nm = nchar(nm_mc_j) > 0
-        for(i in 2:length(mc_j)){
-          if(is_nm[i]){
-            selnames_call[[nm_mc_j[i]]] = mc_j[[i]]
+            # we only take care of the case "varname" := .(stuff)
+            # we convert it into ":="(new = fun(old)) format
+            if(length(mc_arg[[2]] == 1) && length(mc_arg[[3]]) == 2 && is.character(mc_arg[[2]])){
+              is_valid = TRUE
+              new_mc_j = mc_arg[c(1, 3)]
+              names(new_mc_j) = c("", mc_arg[[2]])
+              if(is_operator(new_mc_j[[2]], c(".", "list"))){
+                new_mc_j[[2]] = mc_arg[[3]][[1]]
+              }             
+              mc_arg = new_mc_j
+            }
           } else {
-            selnames_call[[length(selnames_call) + 1]] = mc_j[[i]]
+            # case ":="(new = fun(old))
+            # => this is fine
+            is_valid = TRUE
           }
+
         }
 
-        vars = eval(selnames_call)
-        nm_vars = names(vars)
-
-        # we reconstruct the call
-        new_mc_j = str2lang("list()")
-        new_mc_j[[1]] = mc$j[[1]]
-        for(i in seq_along(vars)){
-          if(nm_vars[i] != vars[i]){
-            new_mc_j[[nm_vars[i]]] = str2lang(vars[i])
-          } else {
-            new_mc_j[[length(new_mc_j) + 1]] = str2lang(vars[i])
+        if(is_valid){
+          selnames_call = str2lang("selnames(.x = x, .error_on_missing = TRUE)")
+          if(is_operator(mc_arg, ":=")){
+            # in variable creation, we don't expand pure character strings
+            selnames_call[[".no_char_pattern"]] = TRUE
           }
-        }
+          selnames_call = complete_call_with_call(selnames_call, mc_arg)
 
-        mc$j = new_mc_j
+          vars = eval(selnames_call)
+
+          if(do_negate){
+            vars = setdiff(vars, names(x))
+            if(length(vars) == 0){
+              stop_hook("The argument {bq?arg} (equal to {bq?deparse_short(mc_arg_origin)})",
+                        " led to no variable being selected. Revise your variable selection?")
+            }
+            names(vars) = vars
+          }
+
+          # we reconstruct the call
+          mc_arg = create_call_from_values(mc_arg[[1]], vars)
+          
+          # saving 
+          mc[[arg]] = mc_arg
+
+        }
 
       }
 
     }
-    
   }
   
   mc[[1]] = as.name("sub_dt")
@@ -1451,6 +1494,41 @@ flag_expansion_patterns = function(call, .ignore.case, all_vars){
   call
 }
 
+
+create_call_from_values = function(fun, values){
+  # values is a (possibly) named character vector
+
+  nm_values = names_xpd(values)
+  new_call = str2lang("fun()")
+  if(is.character(fun)){
+    fun = as.name(fun)
+  }
+  new_call[[1]] = fun
+  for(i in seq_along(values)){
+    val = str2lang(values[i])
+
+    if(nm_values[i] != "" && nm_values[i] != values[i]){
+      new_call[[nm_values[i]]] = val
+    } else {
+      new_call[[length(new_call) + 1]] = val
+    }
+  }
+  
+  new_call
+}
+
+complete_call_with_call = function(call, extra_call){
+
+  nm_extra_call = names_xpd(extra_call)
+  is_nm = nchar(nm_extra_call) > 0
+  for(i in 2:length(extra_call)){
+    index = if(is_nm[i]) nm_extra_call[i] else length(call) + 1
+    call[[index]] = extra_call[[i]]
+  }
+
+  call
+}
+          
 
 
 

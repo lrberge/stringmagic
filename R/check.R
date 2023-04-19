@@ -360,11 +360,12 @@ check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
 #### utilities ####
 ####
 
-suggest_item = function(x, items){
+suggest_item = function(x, items, write_msg = TRUE, newline = TRUE){
   # typical use: x is not in items
   #              we want to suggest possible values
   # returns vector of length 0 if no suggestion
   
+  items_origin = items
 
   # 1: with case
   nx = nchar(x)
@@ -372,51 +373,68 @@ suggest_item = function(x, items){
 
   qui = items_nx == x
   if(any(qui)){
-    return(items[qui])
+    res = items[qui]
+
+  } else {
+    # 2: without case
+
+    x = tolower(x)
+    items_nx = tolower(items_nx)
+
+    qui = items_nx == x
+    if(any(qui)){
+      res = items[qui]
+    } else {
+      # 3: with spelling mistakes, keeping the order
+      # only if x > 3 characters
+
+      if(nx < 3) return(character(0))
+
+      # lazy algorithm
+      score = numeric(length(items))
+      for(i in 1:nx){
+        score = score + (substr(items_nx, i, i) == substr(x, i, i))
+      }
+
+      if(any(score > (nx / 2))){
+        s_order = order(score, decreasing = TRUE)
+        score = score[s_order]
+        items = items[s_order]
+        
+        res = items[score > nx / 2]
+        
+      } else {
+        # 4: with spelling mistakes, ignoring the order
+        x_letters = strsplit(x, "")[[1]]
+        score = numeric(length(items))
+        for(i in 1:nx){
+          score = score + (substr(items_nx, i, i) %in% x_letters)
+        }
+
+        s_order = order(score, decreasing = TRUE)
+        score = score[s_order]
+        items = items[s_order]
+        
+        res = items[score > (nx * 3 / 4)]
+      }
+    }
+  }  
+
+  if(write_msg){
+    if(length(res) == 0){
+      if(length(items) <= 5){
+        res = cub("FYI the variable{$s, are, enum.bq ? items_origin}.")
+      } else {
+        res = cub("FYI the first 5 variables are {enum.bq ? items_origin}.")
+      }
+    } else {
+      res = cub("Maybe you meant {enum.bq.or ? res}?")
+    }
+
+    if(newline){
+      res = paste0("\n", res)
+    }
   }
-
-  # 2: without case
-
-  x = tolower(x)
-  items_nx = tolower(items_nx)
-
-  qui = items_nx == x
-  if(any(qui)){
-    return(items[qui])
-  }
-
-  # 3: with spelling mistakes, keeping the order
-  # only if x > 3 characters
-
-  if(nx < 3) return(character(0))
-
-  # lazy algorithm
-  score = numeric(length(items))
-  for(i in 1:nx){
-    score = score + (substr(items_nx, i, i) == substr(x, i, i))
-  }
-
-  if(any(score > (nx / 2))){
-    s_order = order(score, decreasing = TRUE)
-    score = score[s_order]
-    items = items[s_order]
-    
-    res = items[score > 0]
-    return(res)
-  }
-
-  # 4: with spelling mistakes, ignoring the order
-  x_letters = strsplit(x, "")[[1]]
-  score = numeric(length(items))
-  for(i in 1:nx){
-    score = score + (substr(items_nx, i, i) %in% x_letters)
-  }
-
-  s_order = order(score, decreasing = TRUE)
-  score = score[s_order]
-  items = items[s_order]
-  
-  res = items[score > (nx / 2)]
 
   res
 }
