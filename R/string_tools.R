@@ -68,6 +68,9 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     return(logical(0))
   }
 
+  check_logical(ignore.case, scalar = TRUE)
+  check_logical(fixed, scalar = TRUE)
+  check_logical(word, scalar = TRUE)
   check_logical(or, scalar = TRUE)
   check_character(pattern, null = TRUE, no_na = TRUE)
 
@@ -85,8 +88,11 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   for(i in seq_along(pattern)){
     pat = pattern[i]
     first_char = substr(pat, 1, 1)
-    negate = first_char == "!"
-    if(negate){
+    main_negate = FALSE
+    if(first_char == "\\" && substr(pat, 2, 2) == "!"){
+      pat = substr(pat, 2, nchar(pat))
+    } else if(first_char == "!" && nchar(pat) > 1){
+      main_negate = TRUE
       pat = substr(pat, 2, nchar(pat))
     }
     
@@ -103,6 +109,15 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     for(j in seq_along(all_patterns)){
       p = all_patterns[j]
 
+      first_char = substr(pat, 1, 1)
+      sub_negate = FALSE
+      if(first_char == "\\" && substr(p, 2, 2) == "!"){
+        p = substr(p, 2, nchar(p))
+      } else if(first_char == "!" && nchar(p) > 1){
+        sub_negate = TRUE
+        p = substr(p, 2, nchar(p))
+      }
+
       if(is_word){
         items = strsplit(p, ",[ \t\n]+")[[1]]
         if(is_fixed){
@@ -118,6 +133,9 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
       }
 
       res_tmp = grepl(p, x, perl = !is_fixed, fixed = is_fixed)
+      if(sub_negate){
+        res_tmp = !res_tmp
+      }
       if(is.null(res_current)){
         res_current = res_tmp
       } else {
@@ -125,7 +143,7 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
       }
     }
 
-    if(negate){
+    if(main_negate){
       res_current = !res_current
     }
 
@@ -609,12 +627,22 @@ to_integer_single = function(x){
 #' str_clean(x, c("o(?= )", "@wpi"))
 #'
 #'
-str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+"){
+str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+", 
+                     ignore.case = FALSE, fixed = FALSE, word = FALSE, total = FALSE){
 
   x = check_set_character(x, l0 = TRUE)
   if(length(x) == 0){
     return(x)
   }
+
+  check_character(rep, scalar = TRUE)
+  check_character(pipe, scalar = TRUE)
+  check_character(sep, scalar = TRUE)
+
+  check_logical(ignore.case, scalar = TRUE)
+  check_logical(fixed, scalar = TRUE)
+  check_logical(word, scalar = TRUE)
+  check_logical(total, scalar = TRUE)
 
   rep_main = rep
 
@@ -623,37 +651,108 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+"){
   res = x
   for(i in seq_along(dots)){
     di = dots[[i]]
+    
+    first_char = substr(di, 1, 1)
+    is_str_op = FALSE
+    if(first_char == "\\" && substr(di, 2, 2) == "@"){
+      di = substr(di, 2, nchar(di))
+    } else if(first_char == "@" && nchar(di) > 1){
+      is_str_op = TRUE
+      di = substr(di, 2, nchar(di))
+    }
+
+    if(is_str_op){
+      res = str_op(res, di)
+      next
+    }
 
     if(grepl(pipe, di)){
       # application du pipe
       di_split = strsplit(di, pipe)[[1]]
-      rep = di_split[2]
+      replacement = di_split[2]
       di = di_split[1]
-    }
-
-    all_op = strsplit(di, split = sep)[[1]]
-
-    if(grepl("^@", all_op[1])){
-      stop("Not yet available.")
-      # SPECIAL
-      all_op[1] = substr(all_op[1], 2, nchar(all_op[1]))
-
-      for(op in all_op){
-        res = str_op(res, op)
-      }
-
     } else {
-      # normal
+      replacement = rep_main
+    }
+    
+    # we parse the special flags
+    is_total = total
+    di_parsed = parse_str_is_pattern(di, c("ignore", "fixed", "word", "total"), 
+                                     parse_logical = FALSE)
+    flags = di_parsed$flags
+    patterns = di_parsed$patterns
 
-      for(pat in all_op){
-        fixed = grepl("^#", pat)
-        if(fixed){
-          pat = substr(pat, 2, nchar(pat))
-        }
-        res = gsub(pat, rep, res, perl = TRUE)
+    is_total = total || "total" %in% flags
+    is_fixed = fixed || "fixed" %in% flags
+    is_ignore = ignore.case || "ignore" %in% flags
+    is_word = word || "word" %in% flags
+
+    all_patterns = strsplit(patterns, split = sep)[[1]]
+    
+    for(j in seq_along(all_patterns)){
+      pat = all_patterns[j]
+
+      if(is_total){
+        # we allow logical operations when the replacement is in full
+        pat_parsed = parse_str_is_pattern(pat, c("ignore", "fixed", "word", "total"), 
+                                          parse_logical = TRUE)
+        pat = pat_parsed$patterns
+        is_or = pat_parsed$is_or
       }
 
+      who_current = NULL
+      for(k in seq_along(pat)){
+        p = pat[k]
+
+        if(is_total){
+          negate = FALSE
+          first_char = substr(p, 1, 1)
+          if(first_char == "\\" && substr(p, 2, 2) == "!"){
+            p = substr(p, 2, nchar(p))
+          } else if(first_char == "!" && nchar(p) > 1){
+            negate = TRUE
+            p = substr(p, 2, nchar(p))
+          }
+        }
+
+        if(is_word){
+          items = strsplit(p, ",[ \t\n]+")[[1]]
+          if(is_fixed){
+            items = paste0("\\Q", items, "\\E")
+            is_fixed = FALSE
+          }
+          p = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
+        }
+
+        if(is_ignore){
+          is_fixed = FALSE
+          p = paste0("(?i)", p)
+        }
+
+        if(is_total){
+          who_tmp = grepl(p, res, perl = !is_fixed, fixed = is_fixed)
+          if(negate){
+            who_tmp = !who_tmp
+          }
+          if(is.null(who_current)){
+            who_current = who_tmp
+          } else {
+            if(is_or[k]){
+              who_current = who_tmp | who_current
+            } else {
+              who_current = who_tmp & who_current
+            }
+          }
+        } else {
+          res = gsub(p, replacement, res, perl = !is_fixed, fixed = is_fixed)
+        }
+      }
+      
+      if(is_total){
+        res[who_current] = replacement
+      }
     }
+
   }
 
   res
@@ -666,11 +765,11 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+"){
 #### dedicated utilities ####
 ####
 
-parse_str_is_pattern = function(pattern, authorized_flags){
+parse_str_is_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
   # in: "fw/hey!, bonjour, a[i]"
   # common authorized_flags: c("fixed", "word", "ignore")
 
-  info_pattern = cpp_parse_str_is_pattern(pattern, TRUE)
+  info_pattern = cpp_parse_str_is_pattern(pattern, parse_logical = parse_logical)
 
   flags = info_pattern$flags
   if(length(flags) == 1){
