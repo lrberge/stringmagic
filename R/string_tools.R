@@ -439,7 +439,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
       n_id = unique(lengths(id))
       if(length(n_id) != 1 || max(n_id) != n){
         extra = ""
-        if(max(n_id) != n) extra = dsb("\nPROBELM: len x: .[$$n ? n] len id: .[$$n ? max(n_id)].")
+        if(max(n_id) != n) extra = dsb("\nPROBELM: len x: .[#n ? n] len id: .[#n ? max(n_id)].")
         stop("The argument `id` must be either a vector of identifiers or a data.frame ",
              "of identifiers of the same length as `x`.",
              extra)
@@ -460,7 +460,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
       if(n != n_id){
         stop("The argument `id` must be either a vector of identifiers or a data.frame ",
              "of identifiers of the same length as `x`.",
-             dsb("\nPROBELM: len x: .[$$n ? n] len id: .[$$n ? n_id]."))
+             dsb("\nPROBELM: len x: .[#n ? n] len id: .[#n ? n_id]."))
       }
       if(!is.atomic(id)){
         stop("The argument `id` must be either a vector of identifiers or a data.frame ",
@@ -519,7 +519,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
     if(requireNamespace("data.table", quietly = TRUE)){
       setDT(res)
     } else {
-      stop("To return a `data.table`, you need the `data.table` package to be installed. This is not the case.",
+      stop("To return a `data.table`, you need the `data.table` package to be installed. Currently this is not the case.",
            "\nUse install.packages('data.table')?")
     }
   }

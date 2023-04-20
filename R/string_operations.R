@@ -83,9 +83,6 @@ str_op = function(x, op, do_unik = NULL){
 #### ... dsb ####
 ####
 
-
-
-
 #' Simple and powerful string manipulation with the dot square bracket operator
 #'
 #' Compactly performs many low level string operations. Advanced support for pluralization.
@@ -434,17 +431,17 @@ str_op = function(x, op, do_unik = NULL){
 #'
 #' # Two ways to enable pluralization:
 #' # .[$ command]: means the plural refers to the length of the object
-#' # .[$$ commands]: means the plural refers to a number
+#' # .[# commands]: means the plural refers to a number
 #' # You must start with a dollar sign: this signals pluralization
 #'
 #' # Explanatory example
 #' x = c("Eschyle", "Sophocle", "Euripide")
 #' n = 37
-#' dsb("The author.[$s, enum, have ? x] written .[$$N ? n] play.[$$s].")
+#' dsb("The author.[$s, enum, have ? x] written .[#N ? n] play.[#s].")
 #'
 #' x = "Laurent Berge"
 #' n = 0
-#' dsb("The author.[$s, enum, have ? x] written .[$$N ? n] play.[$$s].")
+#' dsb("The author.[$s, enum, have ? x] written .[#N ? n] play.[#s].")
 #'
 #' # How does it work?
 #' # First is .[$s, enum, have ? x].
@@ -452,11 +449,11 @@ str_op = function(x, op, do_unik = NULL){
 #' #    => there the plural (whether an s is added and how to conjugate the verb have) depends
 #' #       on the **length** of the vector `x`
 #' #
-#' # Second comes .[$$N ? n].
+#' # Second comes .[#N ? n].
 #' # The double dollar sign means that the command `N` will be applied to the **value** n.
 #' # The value must come after the `?`
 #' #
-#' # Third is .[$$s].
+#' # Third is .[#s].
 #' # The object to which `s` should be applied is missing (there is no `? n`).
 #' # The default is to apply the command to the previous object. In this case,
 #' #  this is `n`.
