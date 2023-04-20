@@ -1569,7 +1569,7 @@ sop_char2operator = function(x, fun_name){
       # default values
       argument = switch(op,
                         s = " ", S = ",[ \t\n]*",
-                        x = "[[:alnum:]]+", X = "[[:alnum:]]+",
+                        x = "[[:alnum:]]+", X = "[[:alnum:]]+", extract = "[[:alnum:]]+",
                         c = " ", C = ", || and ",
                         times = 1, each = 1,
                         first = 1, last = 1,
@@ -1720,12 +1720,25 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     }
 
-  } else if(op %in% c("r", "R", "get", "is", "which", "x", "X")){
+  } else if(op %in% c("r", "R", "get", "is", "which", "x", "X", "extract")){
     # R, X, get, is, which ####
-    options = check_set_options(options, c("word", "ignore", "fixed"))
+
+    valid_options = c("word", "ignore", "fixed")
+    if(op == "extract"){
+      valid_options = c(valid_options, "first")
+    }
+    options = check_set_options(options, valid_options)
     is_word = "word" %in% options
     is_ignore = "ignore" %in% options
     is_fixed = "fixed" %in% options
+
+    if(op == "extract"){
+      if("first" %in% options){
+        op = "x"
+      } else {
+        op = "X"
+      }
+    }
 
     if(is_word){
       items = strsplit(argument, ",[ \t\n]+")[[1]]
