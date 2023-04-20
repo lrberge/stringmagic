@@ -647,6 +647,7 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+",
   rep_main = rep
 
   dots = list(...)
+  warn_no_named_dots(dots)
 
   res = x
   for(i in seq_along(dots)){
