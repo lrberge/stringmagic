@@ -1367,7 +1367,7 @@ setNA = function(x, pattern, replacement, force = FALSE){
 
   all_vars = selnames(x, .pattern = pattern)
 
-  is_dt = inherits(x, "data.table")
+  is_dt = inherits(x, "data.table") && requireNamespace("data.table", quietly = TRUE)
   
   if(length(all_vars) == 0){
     if(is_dt){
@@ -1391,7 +1391,7 @@ setNA = function(x, pattern, replacement, force = FALSE){
       }
 
       if(is_dt){
-        set(x, NULL, v, new_value)
+        data.table::set(x, NULL, v, new_value)
       } else {
         x[[v]] = new_value
       }
@@ -1402,7 +1402,7 @@ setNA = function(x, pattern, replacement, force = FALSE){
         new_value = as.character(value)
         new_value[which(is.na(value))] = replacement
         if(is_dt){
-          set(x, NULL, v, new_value)
+          data.table::set(x, NULL, v, new_value)
         } else {
           x[[v]] = new_value
         }
@@ -1412,7 +1412,7 @@ setNA = function(x, pattern, replacement, force = FALSE){
       }
     } else {
       if(is_dt){
-        set(x, which(is.na(x[[v]])), v, replacement)
+        data.table::set(x, which(is.na(x[[v]])), v, replacement)
       } else {
         x[[v]][which(is.na(x[[v]]))] = replacement
       }
