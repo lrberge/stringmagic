@@ -1798,7 +1798,7 @@ List cpp_parse_charselect(SEXP Rstr){
   std::string tmp, name_tmp, patterns_tmp, order_tmp;
   bool cond = false;
 
-  int i=0;
+  int i = 0;
   while(i < n){
     name_tmp = "";
     patterns_tmp = "";
@@ -1807,9 +1807,37 @@ List cpp_parse_charselect(SEXP Rstr){
 
     // first we get the variable + find out if there is a condition
     while(i < n && !is_select_separator(str, i)){
-      if(is_cond_operator(str, i)){
+      if(str[i] == '{' && i + 2 < n && str[i + 1] == '*'){
+        // special case of variable renaming: {*:bon => jour}
+        // we allow the use of curly brackets in regular expressions, that's why we ount them
+        int n_open = 1;
+        std::string name_operation = "{*";
+        int i_start = i;
+        i += 2;
+
+        while(i < n && n_open > 0){
+          if(str[i] == '{' && str[i - 1] != '\\'){
+            ++n_open;
+          } else if(str[i] == '}' && str[i - 1] != '\\'){
+            --n_open;
+          }
+          name_operation += str[i++];
+        }
+
+        if(i == n){
+          // we have a problem
+          i = i_start;
+        } else {
+          // we're OK (we remove the last item not to add conditions at the last line of the loop)
+          name_operation.pop_back();
+          --i;
+          patterns_tmp += name_operation;
+        }
+
+      } else if(is_cond_operator(str, i)){
         cond = true;
       }
+      
       patterns_tmp += str[i++];
     }
 
