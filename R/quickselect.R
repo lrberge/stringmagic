@@ -812,56 +812,11 @@ selvars_main_selection = function(all_vars, data, pattern, dot_name = "", .ignor
       msg = fit_screen(msg, 0.8)
       on.exit(message(msg))
 
-      stop("Quickselect help summoned. Here it is.")
+      stop("Quickselect help summoned. Here it is.", call. = FALSE)
 
     }
-    
-    var_index = seq_along(all_vars)
-    if(first_char %in% c("+", "-")){
-      var_order = order(all_vars, decreasing = first_char == "-")
-      all_vars = all_vars[var_order]
-      var_index = var_index[var_order]
-      p = substr(p, 2, nchar(p))
-      first_char = substr(p, 1, 1)
-    }
 
-    is_index = first_char == "#"
-    if(is_index){
-      p = substr(p, 2, nchar(p))
-      first_char = substr(p, 1, 1)
-    }
-
-    # now the QS element
-    is_QS = first_char == "("
-    if(is_QS){
-      # the QS is the pattern in paren
-      pattern = gsub("\\).*", "", substr(p, 2, nchar(p)))
-    } else if(!first_char %in% c(" ",",")){
-      # the QS is the first item
-      is_QS = TRUE
-      pattern = gsub("[ ,].*", "", substr(p, 2, nchar(p)))
-    }
-
-    if(is_QS){
-      vars_selected = try(selvalues(all_vars, .pattern = pattern), silent = TRUE)
-      if("try-error" %in% class(vars_selected)){
-        warning("When summoning help, the following pattern {bq?pattern} led to an error. All variables are displayed.")
-        vars_selected = all_vars
-      }
-      i_keep = which(all_vars %in% vars_selected)
-      all_vars = all_vars[i_keep]
-      var_index = var_index[i_keep]
-    }
-
-    if(is_index){
-      if(is.unsorted(var_index)){
-        all_vars = cub("{all_vars}_=-=_({n.0 ? var_index})")
-      } else {
-        all_vars = cub("{n.0 ? var_index}:_=-=_{all_vars}")
-      }
-    }
-
-    msg = str_op(all_vars, "', 'c, 100 swidth.#>, '\n'app, '_=-=_ =>  'r.fixed")
+    msg = display_list_of_variables(all_vars, p, "When summoning help", FALSE)
     extra = cub("\nNOTA: after `?`, you can add:", 
               " a) `+` (resp `-`) to reorder the vars alphabetically (`-`: decreasing),", 
               " b) `#` to add their index,",
@@ -869,9 +824,9 @@ selvars_main_selection = function(all_vars, data, pattern, dot_name = "", .ignor
               "\nEx: ?-@\\d or ?#(^pe & h$). Use `??` to trigger generic quickselect help.")
     extra = fit_screen(extra, width = 0.8)
 
-    on.exit(message(msg, "\n", extra))
+    on.exit(message("\n", msg, "\n", extra))
 
-    stop("Help from quickselect summoned. Here is the list of variables:\n")
+    stop("Help from quickselect summoned. Here is the list of variables:\n", call. = FALSE)
 
   }
 

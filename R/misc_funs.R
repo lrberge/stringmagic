@@ -1068,6 +1068,10 @@ uniquify = function(x){
   x_int = to_integer(x)
   n = length(x)
 
+  if(n == 0){
+    return(x)
+  }
+
   if(max(x_int) == n){
     return(x)
   }
@@ -1174,6 +1178,61 @@ eval_dt = function(call, frame){
 }
 
 
+display_list_of_variables = function(all_vars, flags, warn_msg, remaining_QS = FALSE){
 
+  first_char = substr(flags, 1, 1)
+
+  var_index = seq_along(all_vars)
+  if(first_char %in% c("+", "-")){
+    var_order = order(all_vars, decreasing = first_char == "-")
+    all_vars = all_vars[var_order]
+    var_index = var_index[var_order]
+    flags = substr(flags, 2, nchar(flags))
+    first_char = substr(flags, 1, 1)
+  }
+
+  is_index = first_char == "#"
+  if(is_index){
+    flags = substr(flags, 2, nchar(flags))
+    first_char = substr(flags, 1, 1)
+  }
+
+  # now the QS element
+  is_QS = first_char == "("
+  if(is_QS){
+    # the QS is the pattern in paren
+    pattern = gsub("\\).*", "", substr(flags, 2, nchar(flags)))
+  } else if(remaining_QS){
+    pattern = flags
+    is_QS = pattern != ""
+  } else if(!first_char %in% c(" ",",")){
+    # the QS is the first item
+    is_QS = TRUE
+    pattern = gsub("[ ,].*", "", flags)
+    is_QS = pattern != ""
+  }
+
+  if(is_QS){
+    vars_selected = try(selvalues(all_vars, .pattern = pattern), silent = TRUE)
+    if("try-error" %in% class(vars_selected)){
+      warn_up("{warn_msg}, the following pattern {bq?pattern} led to an error. All variables are displayed.")
+      vars_selected = all_vars
+    }
+    i_keep = which(all_vars %in% vars_selected)
+    all_vars = all_vars[i_keep]
+    var_index = var_index[i_keep]
+  }
+
+  if(is_index){
+    if(is.unsorted(var_index)){
+      all_vars = cub("{all_vars}_=-=_({n.0 ? var_index})")
+    } else {
+      all_vars = cub("{n.0 ? var_index}:_=-=_{all_vars}")
+    }
+  }
+
+  msg = str_op(all_vars, "', 'c, 100 swidth.#>, '_=-=_ =>  'r.fixed")
+  msg
+}
 
 

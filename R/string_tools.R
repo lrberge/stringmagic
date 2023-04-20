@@ -760,6 +760,27 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+",
 }
 
 
+fnames = function(x, flags = ""){
+  if(is.matrix(x)){
+    all_vars = colnames(x)
+  } else {
+    all_vars = names(x)
+  }
+
+  if(is.null(all_vars)){
+    message("The argument `x` has no names attribute.")
+    return(invisible(NULL))
+  }
+
+  # Below is a copy paste from selvars_main_selection => write a function
+  msg = display_list_of_variables(all_vars, flags, warn_msg = "When selecting variables", 
+                                  remaining_QS = TRUE)
+  
+  message(msg)
+  invisible(NULL)
+}
+
+
 
 
 ####

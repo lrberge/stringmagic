@@ -65,7 +65,7 @@ str_op = function(x, op, do_unik = NULL){
     res = res_small[x_int]
   } else {
     operation = paste0(op, " ? x")
-    res = .dsb(operation)
+    res = .dsb(operation, string_as_box = TRUE)
   }
 
   # Note that I don't need to use string_ops_internal
@@ -77,8 +77,6 @@ str_op = function(x, op, do_unik = NULL){
 
   res
 }
-
-
 
 
 ####
