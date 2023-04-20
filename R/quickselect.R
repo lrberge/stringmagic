@@ -1386,6 +1386,88 @@ data_table_QS_internal = function(x, i, j, by, keyby, ...){
 }
 
 
+setNA = function(x, pattern, replacement, force = FALSE){
+
+  if(missing(x)){
+    stop("The argument `x` must be provided. PROBLEM: it is currently missing.")
+  }
+
+  if(missing(replacement)){
+    stop("The argument `replacement` must be provided. PROBLEM: it is currently missing.")
+  }
+
+  if(!is.data.frame(x)){
+    stop_hook("The argument `x` must be a data.frame. PROBLEM: it is not a ",
+              "data.frame, instead it is of class {enum.bq?class(x)}.")
+  }
+
+  if(length(replacement) != 1){
+    stop_hook("The argument `replacement` must be of length 1. ",
+              "\nPROBLEM: it is not a scalar, instead it is of length {len?replacement}.")
+  }
+
+  set_pblm_hook()
+
+  check_character(pattern, mbt = TRUE, no_na = TRUE)
+
+  all_vars = selnames(x, .pattern = pattern)
+
+  is_dt = inherits(x, "data.table")
+  
+  if(length(all_vars) == 0){
+    if(is_dt){
+      return(invisible(NULL))
+    } else {
+      return(invisible(x))
+    }    
+  }
+
+  is_na_var = sapply(all_vars, function(v) anyNA(x[[v]]))
+  all_vars = all_vars[is_na_var]
+  
+  for(v in all_vars){
+
+    # factors are a pain
+    if(is.factor(x[[v]])){
+      new_value = value = x[[v]]
+      if(!replacement %in% levels(value)){
+        new_value = factor(value, levels = c(levels(value), replacement))
+        new_value[is.na(value)] = replacement
+      }
+
+      if(is_dt){
+        set(x, NULL, v, new_value)
+      } else {
+        x[[v]] = new_value
+      }
+    } else if(is.character(replacement) && !is.character(x[[v]])){
+      if(force){
+        # we force the conversion
+        value = x[[v]]
+        new_value = as.character(value)
+        new_value[which(is.na(value))] = replacement
+        if(is_dt){
+          set(x, NULL, v, new_value)
+        } else {
+          x[[v]] = new_value
+        }
+      } else {
+        stop_hook("The type{$s?class(v)} of the variable {bq?v} ({$enum.bq ? class(v)}}) ",
+                 "{$don't} match the type of the replacement which is character.")
+      }
+    } else {
+      if(is_dt){
+        set(x, which(is.na(x[[v]])), v, replacement)
+      } else {
+        x[[v]][which(is.na(x[[v]]))] = replacement
+      }
+    }    
+  }
+
+  invisible(x)
+}
+
+
 
 ####
 #### Utilities ####
