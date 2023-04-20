@@ -983,6 +983,7 @@ setup_help = function(){
     "    - enum: enumerates the elements (see help for the regular enum)",
     "    - (s1;s2): adds verbatim 's1' if singular and 's2' if plural",
     "    - (s1;s2;s3): adds verbatim 's1' if zero, 's2' if singular and 's3' if plural",
+    "    - (s1;;s3): adds verbatim 's1' if zero, 's3' if singular or plural",
     "    - is, or any verb: conjugates the verb appropriately",
     "    - n, N: add the number of elements as a number (n) or in letters (N)",
     "  You can chain operations, in that case a whitespace is automatically added between them.",
@@ -1035,10 +1036,11 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
   if(is_root){
     # we check for data table calls
-
+    is_dt = FALSE
     sc = sys.calls()
     n_sc = length(sc)
     if(n_sc >= 4){
+
       for(i in 2:(n_sc - 2)){
         ls_i = ls(envir = parent.frame(i), all.names = TRUE)
         is_dt = all(c(".SD", ".I", ".N") %in% ls_i)
@@ -1534,193 +1536,12 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
   return(res)
 }
 
-sop_char2operator_old = function(x, fun_name){
-
-  quote = substr(x, 1, 1)
-
-  # NOTES 2022-08-02
-  # - I remove all operators dealing with pluralization: v, v, *s, *s_, *A, I
-  #   This is because now I have proper pluralization support with the .[$op] operator
-  #   Those were clumsy anyway, not a big loss
-  # - I remove all the conditional operators if, *if, IF
-  #   Now I handle it in a much better way with @<3(), #() and <regex>()
-
-  OPERATORS = c("s", "S", "x", "X", "c", "C", "r", "R",
-                "*", "*c", "**", "**c",
-                "u", "U", "l", "L", "q", "Q", "bq", "f", "F", "%",
-                "e", "E", "a", "ar", "da", "A", "Ar",
-                "k", "K", "d", "D", "last", "first",
-                "cfirst", "clast", "num", "enum",
-                "rev", "sort", "dsort", "ascii", "title",
-                "w", "W", "stop", "i", "ir", "nth", "Nth")
-
-  ok = do_eval = FALSE
-
-  if(quote %in% c("'", "\"", "`")){
-    op_abbrev = sub(paste0(".+", quote), "", x)
-    in_quote = cpp_extract_quote_from_op(x)
-
-    do_eval = quote == "`"
-
-    if(do_eval && substr(in_quote, 1, 1) == "!"){
-      # special case: back ticks used as extra quote
-      # => enables to use ' and " freely in arguments
-      do_eval = FALSE
-      in_quote = str_trim(in_quote, 1)
-    }
-
-    if(nchar(op_abbrev) == 0){
-      stop_hook("In ", fun_name, ", if a quoted value is present, the operators must always be of the form 'value'op, ",
-              "with 'op' an operator. Problem: In `", x, "` the operator is missing.")
-    }
-
-  } else if(quote %in% c("@", "#", "<", "~", "w", "W")){
-    # conditions: @, #, <
-    # conditional actions: ~
-    # w, W, wp, wd, wpd, wi etc. Character string cleaning.
-
-    op_abbrev = x
-    in_quote = ""
-    ok = TRUE
-
-  } else if(x %in% OPERATORS){
-    # default values
-    in_quote = switch(x,
-                      s = " ", S = ",[ \t\n]*",
-                      x = "[[:alnum:]]+", X = "[[:alnum:]]+",
-                      c = " ", C = ", || and ",
-                      "*" = "1", "*c" = "1",
-                      "**" = "1", "**c" = "1",
-                      first = 1, last = 1,
-                      cfirst = 1, clast = 1,
-                      "")
-    op_abbrev = x
-
-    if(op_abbrev %in% c("R", "r", "%", "k", "K", "a")){
-      ex = c("R" = 'x = "She loves me."; dsb("\'s\\b => d\'R ? x")',
-             "r" = 'x = "Amour"; dsb(".[\'ou => e\'R ? x]...")',
-             "%" = 'dsb("pi is: .[\'.3f\'% ? pi]")',
-             "k" = 'dsb("The first 8 letters of the longuest word are: .[8k, q ! the longuest word ]")',
-             "K" = 'x = 5:9; dsb("The first 2 elements of `x` are: .[2K, C ? x].")',
-             "a" = 'x = "those, words"; dsb("Let\'s emphasize .[S, \'**|**\'a, c ? x].")')
-
-      ex = bespoke_msg(ex[op_abbrev])
-      stop_hook("The operator `", op_abbrev,
-              "` has no default value, you must provide values explicitly.\n Example: ", ex)
-    }
-
-  } else if((quote == "l" && str_x(x, 4) == "last") ||
-            (quote == "f" && str_x(x, 5) == "first") ||
-            (quote == "c" && (str_x(x, 6) == "cfirst" || str_x(x, 5) == "clast"))
-            ){
-
-    # default is 'last' (4 chars)
-    n = 4
-    if(quote == "c"){
-      n = 5 + (str_x(x, 2) == "cf")
-    } else if(quote == "f"){
-      n = 5
-    }
-
-    in_quote = str_trim(x, n)
-    if(str_x(in_quote, 1) == "."){
-      in_quote = str_trim(in_quote, 1)
-    }
-
-    op_abbrev = str_x(x, n)
-
-  } else if(quote == "e" && str_x(x, 4) == "enum"){
-
-    in_quote = str_trim(x, 4)
-    op_abbrev = str_x(x, 4)
-
-  } else {
-    last1 = str_x(x, -1)
-    if(last1 %in% c("*", "k", "K")){
-      in_quote = str_trim(x, -1)
-
-      op_abbrev = last1
-
-      if(op_abbrev == "*"){
-        if(str_x(in_quote, 1) == "*"){
-          op_abbrev = "**"
-          in_quote = str_trim(in_quote, -1)
-        } else if(str_x(in_quote, -1) == "*"){
-          op_abbrev = "**"
-          in_quote = str_trim(in_quote, -1)
-        }
-      }
-
-    } else {
-      last2 = str_x(x, -2)
-      if(last2 %in% c("*c", "Ko", "KO")){
-        in_quote = str_trim(x, -2)
-        op_abbrev = last2
-
-        if(op_abbrev == "*c" && str_x(in_quote, -1) == "*"){
-          op_abbrev = "**c"
-          in_quote = str_trim(in_quote, -1)
-        }
-
-        if(op_abbrev %in% c("Ko", "KO")){
-          # special case
-          text = if(op_abbrev == "Ko") "||:rest: others" else "||:REST: others"
-          in_quote = paste0(in_quote, text)
-          op_abbrev = "K"
-        }
-
-      } else {
-        op_abbrev = "problem"
-      }
-    }
-  }
-
-  if(!ok && !op_abbrev %in% OPERATORS){
-
-    example = 'x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")'
-    example = bespoke_msg(example)
-
-
-    msg = c("The operation `", x, "` is not valid. It must be something quoted followed by a valid operator.",
-            "\n  Valid operators (limited list, see help): ",
-            "\n                   to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
-            "\n                   to replicate: times, each / to replicate and collapse with the empty string: times.c",
-            "\n                   to upper/lower case: u, U, L / to single/double quote: q, Q",
-            "\n                   to format f, F / to apply sprintf format: %",
-            "\n                   to format whitespaces: ws / to append: app",
-            "\n                   to keep: k (#characters), K (#items) / to delete: d, D",
-            "\n                   to remove stopwords: stop ",
-            "\n------------------------------",
-            "\n  type dsb('--help') for more help.",
-            "\n  Example: .[', *'S, 'a => b'r? var] first splits the variable var by commas then replaces every 'a' with a 'b'.")
-
-    stop_hook("In ", fun_name, ", the operation is not valid, see below. ", msg = msg)
-
-  }
-
-  res = list(quoted = in_quote, do_eval = do_eval, op = op_abbrev)
-  res
-}
-
-
 
 sop_char2operator = function(x, fun_name){
 
   op_parsed = cpp_parse_operator(x)
 
-  # LATER: use options set up at startup
-  # users can add their own functions witht the same parsing ability
-
-  OPERATORS = c("s", "S", "x", "X", "c", "C", "r", "R",
-                "times", "each",
-                "u", "U", "l", "L", "q", "Q", "bq", "f", "F", "%",
-                "erase", "rm", "append", "Append", 
-                "k", "K", "last", "first",
-                "cfirst", "clast", "unik", "num", "enum",
-                "rev", "sort", "dsort", "ascii", "title",
-                "ws", "tws", "trim", "get", "is", "which",
-                "n", "N", "len", "Len", "swidth", "dtime",
-                "stop", "insert", "nth", "Nth", "ntimes", "Ntimes")
+  OPERATORS = getOption("smagick_operations")
   
   ok = FALSE
   op = op_parsed$operator
@@ -1804,14 +1625,14 @@ sop_char2operator = function(x, fun_name){
               "\n `", op, "` is not a valid operator.", sugg_txt,
               "\n  Valid operators (limited list, see help): ",
               "\n                   to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
-              "\n                   to replicate: * / to replicate and collapse with the empty string: *c",
-              "\n                   to upper/lower case: u, U, L / to single/double quote: q, Q",
+              "\n                   to replicate: times, each / to replicate and collapse with the empty string: times.c",
+              "\n                   to upper/lower case: u, U, L / to single, double, back quote: q, Q, bq",
               "\n                   to format f, F / to apply sprintf format: %",
-              "\n                   to format whitespaces: w, tws / to append: a, A / to insert: i, I",
-              "\n                   to keep: k (#characters), K (#items) / to delete: d, D",
+              "\n                   to format whitespaces: ws, tws / to append: append, Append / to insert: insert",
+              "\n                   to keep: k (#characters), K (#items) / to delete: rm",
               "\n                   to remove stopwords: stop ",
               "\n------------------------------",
-              "\n  type dsb('--help') for more help.",
+              "\n  type dsb('--help') for more help or dsb(help = 'word').",
               "\n  Example: .[', *'S, 'a => b'r ? var] first splits the variable var by commas then replaces every 'a' with a 'b'.")
 
       msg = bespoke_msg(msg)
@@ -3032,9 +2853,35 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
 
   } else {
-    msg = paste0("In `dsb`: the operator `", op, "` is not recognized. ",
-                 "Internal error: this problem should have been spotted beforehand.")
-    stop_hook(bespoke_msg(msg))
+    user_ops = getOption("smagick_user_ops")
+    if(op %in% names(user_ops)){
+      fun = user_ops[[op]]
+      valid_options = attr(fun, "valid_options")
+
+      if(!is.null(valid_options)){
+        options = check_set_options(options, valid_options, free = any(valid_options == ""))
+      }
+
+      tmp = fun(x = x, argument = argument, options = options, group = group_index, 
+                conditional_flag = conditional_flag)
+      if(is.list(tmp)){
+        if(!all(c("x", "group") %in% names(tmp))){
+          pblm  = setdiff(c("x", "group") %in% names(tmp))
+          stop_hook("The user-defined operation {bq?alias} is not well formed. The function should",
+                    " return either a vector, either a list of exactly two elements 'x' and 'group'.",
+                    "\nPROBLEM: it returns a list but the item{$s, are ? pblm} missing.")
+        }
+        res = tmp$x
+        group_index = tmp$group
+      } else {
+        res = tmp
+      }
+
+    } else {
+      msg = paste0("In `dsb`: the operator `", op, "` is not recognized. ",
+                  "Internal error: this problem should have been spotted beforehand.")
+      stop_hook(bespoke_msg(msg))
+    }
   }
 
   if(length(extra) > 0){
@@ -3259,4 +3106,78 @@ sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
   }
 
   res
+}
+
+
+
+setup_operations = function(){
+  OPERATORS = c("s", "S", "x", "X", "extract", "c", "C", "r", "R",
+                "times", "each",
+                "u", "U", "l", "L", "q", "Q", "bq", "f", "F", "%",
+                "erase", "rm", "append", "Append", 
+                "k", "K", "last", "first",
+                "cfirst", "clast", "unik", "num", "enum",
+                "rev", "sort", "dsort", "ascii", "title",
+                "ws", "tws", "trim", "get", "is", "which",
+                "n", "N", "len", "Len", "swidth", "dtime",
+                "stop", "insert", "nth", "Nth", "ntimes", "Ntimes")
+  options("smagick_operations" = sort(OPERATORS))
+}
+
+
+
+smagick_register = function(fun, alias, valid_options = NULL){
+  # fun: must be a function with x and ... as arguments
+  # the argument names must be in:
+  # x, argument, options, group, conditonnal_flag
+
+  if(missing(fun)){
+    stop("The argument `fun` must be provided. PROBLEM: it is missing.")
+  }
+
+  if(!is.function(fun)){
+    stop_hook("The argument `fun` must be a function. ",
+              "PROBLEM: it is not a function, instead it is of class {enum.bq?class(fun)}.")
+  }
+
+  check_character(alias, scalar = TRUE, mbt = TRUE)
+  check_character(valid_options, no_na = TRUE, null = TRUE)
+
+  fun_args = names(formals(fun))
+  
+  arg_must = c("...", "x")
+  arg_missing = setdiff(arg_must, fun_args)
+  if(length(arg_missing) > 0){
+    stop_hook("The argument `fun` must be a function with {enum.bq?arg_missing} in its arguments.",
+              "\nPROBLEM: it has no argument {enum.bq.or?arg_missing}.")
+  }
+
+  valid_args = dsb("/x, argument, options, group, conditionnal_flag")
+  arg_pblm = setdiff(setdiff(fun_args, "..."), valid_args)
+  if(length(arg_pblm) > 0){
+    stop_hook("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
+              "\nPROBLEM: the argument{$s, enum.bq, are?arg_pblm} invalid.")
+  }
+
+  OPERATORS = getOption("smagick_operations")
+
+  if(alias %in% OPERATORS){
+    stop_hook("The argument `alias` must not be equal to an existing internal argument.",
+              "\nPROBLEM: the operation {bq?alias} is already an internal operation.")
+  }
+
+  user_operators = getOption("smagick_user_ops")
+  if(is.null(user_operators)){
+    user_operators = list()
+  }
+
+  if(!is.null(valid_options)){
+    attr(fun, "valid_options") = valid_options
+  }
+
+  user_operators[[alias]] = fun
+
+  options("smagick_user_ops" = user_operators)
+  options("smagick_operations" = c(OPERATORS, names(user_operators)))
+
 }
