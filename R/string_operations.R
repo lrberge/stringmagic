@@ -21,22 +21,29 @@ print.string_ops = function(x, ...){
 #### ... str_op ####
 ####
 
-#' Applies manifold operations to character vectors
+#' Chains basic operations to character vectors
 #'
 #' Simple tool to perform multiple operations to character vectors.
 #'
-#' @param x A character vector. If not a character vector but atomistic (i.e. not a list), it will be converted to a character vector.
-#' @param op Character **scalar**. Character scalar containing the comma separated values of operations to perform to the vector. For help type `dsb("--help")`.
-#' @param do_unik Logical scalar, default is `NULL`. Whether to first unique the vector before applying the possibly costly string operations, and merging back the result. For very large vectors with repeated values the time gained can be substantial. By default, this is `TRUE` for vector of length 1M or more.
+#' @param x A character vector. If not a character vector but atomistic (i.e. not a list), 
+#' it will be converted to a character vector.
+#' @param op Character **scalar**. Character scalar containing the comma separated values 
+#' of operations to perform to the vector. For help type `dsb("--help")`.
+#' @param pre_unik Logical scalar, default is `NULL`. Whether to first unique the vector 
+#' before applying the possibly costly string operations, and merging back the result. 
+#' For very large vectors with repeated values the time gained can be substantial. By 
+#' default, this is `TRUE` for vector of length 1M or more.
 #'
 #' @return
-#' It returns a character vector.
+#' In general it returns a character vector. It may ba of a length different from the original
+#'  one, depending on the operations performed. 
 #'
 #' @author
 #' Laurent Berge
 #'
 #' @examples
-str_op = function(x, op, do_unik = NULL){
+#' 
+str_op = function(x, op, pre_unik = NULL){
 
   if(missing(x)){
     stop("Argument `x` must be provided. PROBLEM: it is currently missing.")
@@ -51,25 +58,22 @@ str_op = function(x, op, do_unik = NULL){
   }
 
   check_character(op, mbt = TRUE, scalar = TRUE)
-  check_logical(do_unik, null = TRUE, scalar = TRUE)
+  check_logical(pre_unik, null = TRUE, scalar = TRUE)
 
   # For very large vectors, we unique
   n = length(x)
-  if(is.null(do_unik)) do_unik = n > 1e6
+  if(is.null(pre_unik)) pre_unik = n > 1e6
 
-  if(do_unik){
+  if(pre_unik){
     x_int = to_integer(x)
     x_small = x[!duplicated(x_int)]
 
-    res_small = str_op(x_small, op, do_unik = FALSE)
+    res_small = str_op(x_small, op, pre_unik = FALSE)
     res = res_small[x_int]
   } else {
     operation = paste0(op, " ? x")
     res = .dsb(operation, string_as_box = TRUE)
   }
-
-  # Note that I don't need to use string_ops_internal
-  # I could simply parse + evaluate in here
 
   if("group_index" %in% names(attributes(res))){
     attr(res, "group_index") = NULL
@@ -89,17 +93,29 @@ str_op = function(x, op, do_unik = NULL){
 #'
 #'
 #'
-#' @param ... Character scalars that will be collapsed with the argument `sep`. You can use `".[x]"` within each character string to insert the value of `x` in the string. You can add string operations in each `".[]"` instance with the syntax `"'arg'op ? x"` (resp. `"'arg'op ! x"`) to apply the operation `'op'` with the argument `'arg'` to `x` (resp. the verbatim of `x`). Otherwise, what to say? Ah, nesting is enabled, and since there's over 30 operators, it's a bit complicated to sort you out in this small space. But type `dsb("--help")` to prompt an (almost) extensive help, or use the argument help.
+#' @param ... Character scalars that will be collapsed with the argument `sep`. You can 
+#' use `".[x]"` within each character string to insert the value of `x` in the string. 
+#' You can add string operations in each `".[]"` instance with the syntax `"'arg'op ? x"` 
+#' (resp. `"'arg'op ! x"`) to apply the operation `'op'` with the argument `'arg'` to `x`
+#'  (resp. the verbatim of `x`). Otherwise, what to say? Ah, nesting is enabled, and since 
+#' there's over 30 operators, it's a bit complicated to sort you out in this small space. 
+#' But type `dsb("--help")` to prompt an (almost) extensive help, or use the argument help.
 #' @param frame An environment used to evaluate the variables in `".[]"`.
 #' @param sep Character scalar, default is `""`. It is used to collapse all the elements in `...`.
-#' @param vectorize Logical, default is `FALSE`. If `TRUE`, Further, elements in `...` are NOT collapsed together, but instead vectorised.
-#' @param string_as_box Logical, default is `TRUE`. Whether the original character strings should be nested into a `".[]"`. If `TRUE`, then things like `dsb("S!one, two")` are equivalent to `dsb(".[S!one, two]")` and hence create the vector `c("one", "two")`.
-#' @param collapse Character scalar or `NULL` (default). If provided, the resulting character vector will be collapsed into a character scalar using this value as a separator.
+#' @param vectorize Logical, default is `FALSE`. If `TRUE`, Further, elements in `...` are 
+#' NOT collapsed together, but instead vectorised.
+#' @param string_as_box Logical, default is `TRUE`. Whether the original character strings 
+#' should be nested into a `".[]"`. If `TRUE`, then things like `dsb("S!one, two")` 
+#' are equivalent to `dsb(".[S!one, two]")` and hence create the vector `c("one", "two")`.
+#' @param collapse Character scalar or `NULL` (default). If provided, the resulting 
+#' character vector will be collapsed into a character scalar using this value as a separator.
 #'
 #'
-#' There are over 30 basic string operations, it supports pluralization, string operations can be nested (it may be the most powerful feature), operators have sensible defaults.
+#' There are over 30 basic string operations, it supports pluralization, string operations can be 
+#' nested (it may be the most powerful feature), operators have sensible defaults.
 #'
-#' See detailed help on the console with `dsb("--help")` or use the argument `help`. The real help is in fact in the "Examples" section.
+#' See detailed help on the console with `dsb("--help")` or use the argument `help`. The real
+#'  help is in fact in the "Examples" section.
 #'
 #'
 #' @return

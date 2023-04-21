@@ -7,26 +7,41 @@
 
 #' Detects whether a pattern is in a character string
 #'
-#' Function that detects if patterns are in a string. The patterns can be chained, by default this is a regex search but fixed search can be triggered with a special syntax, supports negation.
+#' Function that detects if one or more patterns are in a string. The patterns can be 
+#' chained, by default this is a regex search but special flags be triggered with a 
+#' specific syntax, supports negation.
 #'
 #' @param x A character vector.
-#' @param ... Character scalars representing the patterns to be found. By default a (perl) regular-expression 
-#' search is triggered. To use a fixed search instead, use an `#` first (ex: `"#.["` will search for `".["`). 
-#' You can negate by adding a `!` first (ex: `"!sepal$"` will return `TRUE` for strings 
-#' that do not end with `"sepal"`). If there are two or more patterns, the results are combined with 
-#' a logical "and". To combine with an "or", use the argument `or`. The tag `!` 
-#' has precedence over `#`. You can escape the meaning of the first `!` or `#` with a double backslash `\\\\`.
+#' @param ... Character scalars representing the patterns to be found. By default they are (perl) regular-expressions.
+#' Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: '[[:alpha:]] & \\d' gets strings
+#' containing both letters and numbers). You can negate by adding a `!` first (ex: `"!sepal$"` will 
+#' return `TRUE` for strings that do not end with `"sepal"`).
+#' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
+#' Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore'). 
+#' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT[i = 5]" (flags 'ignore' + 'fixed').
+#' The flag 'verbatim' does not parse logical operations. For 'word', see the documentation of this argument.
 #' @param or Logical, default is `FALSE`. In the presence of two or more patterns, 
 #' whether to combine them with a logical "or" (the default is to combine them with a logical "and").
 #' @param pattern (If provided, elements of `...` are ignored.) A character vector representing the 
 #' patterns to be found. By default a (perl) regular-expression search is triggered. 
-#' To use a fixed search instead, use an `#` first (ex: `"#.["` will search for `".["`). 
-#' You can negate by adding a `!` first (ex: `"!sepal$"` will return `TRUE` for strings 
-#' that do not end with `"sepal"`). If there are two or more patterns, the results are combined 
-#' with a logical "and". To combine with an "or", use the argument `or`. The tag  `!`  has precedence 
-#' over `#`. You can escape the meaning of the first `!` or `#` with a double backslash `\\\\`.
+#' Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: '[[:alpha:]] & \\d' gets strings
+#' containing both letters and numbers). You can negate by adding a `!` first (ex: `"!sepal$"` will 
+#' return `TRUE` for strings that do not end with `"sepal"`).
+#' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
+#' Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore'). 
+#' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT[i = 5]" (flags 'ignore' + 'fixed').
+#' The flag 'verbatim' does not parse logical operations. For 'word', see the documentation of this argument.
+#' @param fixed Logical scalar, default is `FALSE`. Whether to trigger a fixed search instead of a 
+#' regular expression search (default).
+#' @param word Logical scalar, default is `FALSE`. If `TRUE` then a) word boundaries are added to the pattern, 
+#' and b) patterns can be chained by separating them with a comma, they are combined with an OR logical operation.
+#' Example: if `word = TRUE`, then pattern = "The, mountain" will select strings containing either the word
+#' 'The' or the word 'mountain'.
+#' @param ignore.case Logical scalar, default is `FALSE`. If `TRUE`, then case insensitive search is triggered. 
+#' 
 #' @details
-#' Note that fixed search is much faster than regular expression search, so for large vectors it should be used whenever possible.
+#' Note that the parser of the patterns may lead to problems with some multibyte encodings. This is a limitation.
+#' If such encodings should be in the pattern, then this function cannot be used, there is no workaround.
 #'
 #' @return
 #' It returns a logical vector of the same length as `x`.
@@ -35,21 +50,45 @@
 #'
 #' x = dsb("/one, two, one... two, microphone, check")
 #'
-#' # Default is regular expression search
+#' # default is regular expression search
+#' # => 3 character items
 #' str_is(x, "^...$")
 #'
-#' # to trigger fixed search use #
-#' str_is(x, "#...")
+#' # to trigger fixed search use the flag 'fixed'
+#' str_is(x, "fixed/...")
+#' # you can just use the first letter
+#' str_is(x, "f/...")
 #'
 #' # to negate, use '!'
-#' str_is(x, "!#...")
+#' str_is(x, "!f/...")
+#' # or directly in the pattern
+#' str_is(x, "f/!...")
 #'
-#' # you can combine several patterns
-#' # default combination is a logical "and"
-#' str_is(x, "one", "c")
-#'
-#' # to combine with a logical "or"
-#' str_is(x, "one", "!o", or = TRUE)
+#' # you can combine several patterns with "&" or "|"
+#' str_is(x, "one & c")
+#' str_is(x, "one | c")
+#' 
+#' #
+#' # word: adds word boundaries
+#' #
+#' 
+#' # compare
+#' str_is(x, "one")
+#' # with
+#' str_is(x, "w/one")
+#' 
+#' # words can be chained with commas (it is like an OR logical operation)
+#' str_is(x, "w/one, two")
+#' # compare with
+#' str_is(x, "w/one & two")
+#' # remember that you can still negate
+#' str_is(x, "w/one & !two")#' 
+#' 
+#' # you can combine the flags
+#' # compare
+#' str_is(x, "w/ONE")
+#' # with
+#' str_is(x, "wi/ONE")
 #'
 #' #
 #' # str_which
@@ -58,6 +97,8 @@
 #' # it works exactly the same way as str_is
 #' # Which are the items containing an 'e' and an 'o'?
 #' str_which(x, "e", "o")
+#' # equivalently
+#' str_which(x, "e & o")
 #'
 #'
 str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
@@ -106,17 +147,23 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     is_ignore  = ignore.case || "ignore" %in% flags
     
     res_current = NULL
-    for(j in seq_along(all_patterns)){
+    n_pat = length(all_patterns)
+    for(j in 1:n_pat){
       p = all_patterns[j]
 
-      first_char = substr(pat, 1, 1)
-      sub_negate = FALSE
-      if(first_char == "\\" && substr(p, 2, 2) == "!"){
-        p = substr(p, 2, nchar(p))
-      } else if(first_char == "!" && nchar(p) > 1){
-        sub_negate = TRUE
-        p = substr(p, 2, nchar(p))
-      }
+      if(n_pat > 1 && main_negate && length(flags) == 0){
+        main_negate = FALSE
+        sub_negate = TRUE        
+      } else {
+        first_char = substr(p, 1, 1)
+        sub_negate = FALSE
+        if(first_char == "\\" && substr(p, 2, 2) == "!"){
+          p = substr(p, 2, nchar(p))
+        } else if(first_char == "!" && nchar(p) > 1){
+          sub_negate = TRUE
+          p = substr(p, 2, nchar(p))
+        }
+      }      
 
       if(is_word){
         items = strsplit(p, ",[ \t\n]+")[[1]]
@@ -174,7 +221,7 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 
 #' Gets elements of a character vector
 #'
-#' Convenient way to get elements from a character vector
+#' Convenient way to get elements from a character vector.
 #'
 #' @inheritParams str_is
 #'
@@ -194,11 +241,18 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #'
 #' x = rownames(mtcars)
 #'
-#' # Finds all Mazda cars
+#' # find all Mazda cars
 #' str_get(x, "Mazda")
+#' # same with ignore case flag
+#' str_get(x, "i/mazda")
+#' 
+#' # all cars containing a single digit (we use the 'word' flag)
+#' str_get(x, "w/\\d")
 #'
-#' # Finds car names without numbers AND containing `u`
+#' # finds car names without numbers AND containing `u`
 #' str_get(x, "!\\d", "u")
+#' # equivalently
+#' str_get(x, "!\\d & u")
 #'
 #' # Stacks all Mazda and Volvo cars. Mazda first
 #' str_get(x, "Mazda", "Volvo", seq = TRUE)
@@ -207,11 +261,27 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' str_get(x, "Volvo", "Mazda", seq = TRUE)
 #'
 #' # let's get the first word of each car name
-#' car_first = str_op(x, "x")
+#' car_first = str_op(x, "extract.first")
 #' # we select car brands ending with 'a', then ending with 'i'
 #' str_get(car_first, "a$", "i$", seq = TRUE)
 #' # seq.unik is similar to seq but applies unique()
 #' str_get(car_first, "a$", "i$", seq.unik = TRUE)
+#' 
+#' #
+#' # flags
+#' #
+#' 
+#' # you can combine the flags
+#' x = dsb("/One, two, one... Two!, Microphone, check")
+#' # regular
+#' str_get(x, "one")
+#' # ignore case
+#' str_get(x, "i/one")
+#' # + word boundaries
+#' str_get(x, "iw/one")
+#' 
+#' # you can escape the meaning of ! with backslashes
+#' str_get(x, "\\!")
 #'
 #'
 #'
@@ -597,34 +667,56 @@ to_integer_single = function(x){
 
 #' Cleans a character vector from multiple patterns
 #'
-#' Recursively cleans a character vector from several patterns.
-#' Has shortcuts for common cleaning cases (normalizing white spaces, punctuation, etc)
+#' Recursively cleans a character vector from several patterns. Quickly handle the 
+#' tedious task of data cleaning by taking advantage of the syntax.
+#' You can also apply all sorts of cleaning operations by summoning [[str_op]] operations.
 #'
 #' @param x A character vector.
-#' @param ... Character scalars representing patterns. The function `gsub` with `replace = ""` is applied recursively to each of the patterns. By default regular expressions are used. To used fixed-search instead, you can add `#` as the first element of your pattern. Ex: `#.` will clean all the points. You can include the special pattern `@w` to normalize white spaces (trims + concatenate multiple WS). To `@w` you can add any of the following codes in any order: `p` for punctuation, `d` for digits, and `i` for isolated. Ex: `@wpi` will clean punctuation, isolated letters and will normalize white spaces. It must always start with `@W`.
+#' @param ... Character scalars representing patterns. A pattern is of the form
+#' "flags/pat1, pat2 => replacement". This means that patterns 'pat1' and 'pat2' will be replaced
+#' with the string 'replacement'. By default patterns are comma separated and the replacement comes 
+#' after a ' => ' (see args `sep` and `pipe` to change this). By default the replacement is the empty string 
+#' (so "pat1, pat2" *removes* the patterns).
+#' Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), and 'total'. 
+#' The flag `total` leads to a *total replacement* of the string if the pattern is found. Use flags
+#' with comma separation ("word, total/pat") or use only their initials ("wt/pat").
+#' Starting with an '@' leads to operations in [[str_op]]. Ex: "@ascii, l, ws" leads to turning
+#' the string into ASCII, lower the case and normalize white spaces (see help of [[str_ops]]).
 #'
 #' @return
-#' It returns a character vector of the same length as the vector in input.
+#' The main usage returns a character vector of the same length as the vector in input.
+#' Note, however, that since you can apply arbitrary [[str_op]] operations, the length and type
+#' of the final vector may depend on those (if they are used).
 #'
 #' @examples
 #'
-#'
 #' x = c("hello world  ", "it's 5 am....")
 #'
-#' # we clean the o's and the points (we use # to trigger fixed-search)
-#' str_clean(x, c("o", "#."))
-#'
-#' # equivalent regex
-#' str_clean(x, "o|\\.")
-#'
+#' # we clean the o's and the points (we use 'fixed' to trigger fixed-search)
+#' str_clean(x, c("o", "f/."))
+#' # equivalently
+#' str_clean(x, "fixed / o, .")
+#' # equivalently
+#' str_clean(x, "o, .", fixed = TRUE)
+#' # equivalently
+#' str_clean(x, "o", ".", fixed = TRUE)
+#' 
 #' #
-#' # using the special values @w
-#'
-#' # trim
-#' str_clean(x, "@w")
-#'
-#' # regex + WS + punct + isolated
-#' str_clean(x, c("o(?= )", "@wpi"))
+#' # chaining operations: example using cars
+#' #
+#' 
+#' cars = row.names(mtcars)
+#' new = str_clean(cars, 
+#'            # replace strings containing "Maz" with Mazda
+#'            "total / Maz => Mazda", 
+#'            # replace the word 'Merc' with Mercedes
+#'            "wi/merc => Mercedes",
+#'            # replace strings containing "Merc" and a digit followed with an 'S'
+#'            "t/Merc & \\dS => Mercedes S!",
+#'            # put tolower case, remove isolated characters and normalize white spaces
+#'            "@l, ws.isolated")
+#' 
+#' cbind(cars, new)
 #'
 #'
 str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+", 
@@ -648,6 +740,8 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+",
 
   dots = list(...)
   warn_no_named_dots(dots)
+
+  dots = unlist(dots)
 
   res = x
   for(i in seq_along(dots)){
@@ -760,6 +854,45 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+",
 }
 
 
+#' Display formatted names
+#' 
+#' Simple function to display the names of a data.frame, or anything with names, 
+#' in a human readable way. You can control the formatting with the flags.
+#' 
+#' @param x An object that can have names. Generally a `data.frame`.
+#' @param flags A character scalar (default is the empty string). Add a `+` (resp `-`) to 
+#' sort the names in alphabetical order (`-`: decreasing). Then you can add a `#` to request 
+#' the display of the position of the variables. You must respect this order. 
+#' Finally the rest is a *quickselect* pattern
+#' which can be used to select only subsets of variables. See the help of [[selvars]] to get 
+#' more information on how *quickselect* works.
+#' 
+#' @details 
+#' If the position of the variables is requested but the variables are not in sequential
+#' positions (due to sorting or subselecting), then the position is displayed in parentheses
+#' just after the variable name. Otherwise, it is displayed on the left.
+#' 
+#' @return 
+#' This function is for display only and does not return anything.
+#' 
+#' @examples 
+#' 
+#' # display the variables of a data set
+#' fnames(iris)
+#' 
+#' # data set with many names
+#' base_many = t(mtcars)
+#' fnames(base_many)
+#' 
+#' # adding the position
+#' fnames(base_many, "#")
+#' 
+#' # selecting only a subset: the ones containing two digits
+#' fnames(base_many, "#@\\d\\d")
+#' 
+#' # same but selecting volvo + mazda
+#' fnames(base_many, "-#^vol, ^maz")
+#' 
 fnames = function(x, flags = ""){
   if(is.matrix(x)){
     all_vars = colnames(x)
@@ -768,8 +901,12 @@ fnames = function(x, flags = ""){
   }
 
   if(is.null(all_vars)){
-    message("The argument `x` has no names attribute.")
-    return(invisible(NULL))
+    if(is.character(x)){
+      all_vars = x
+    } else {
+      message("The argument `x` has no names attribute.")
+      return(invisible(NULL))
+    }    
   }
 
   # Below is a copy paste from selvars_main_selection => write a function

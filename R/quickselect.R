@@ -8,11 +8,11 @@
 
 
 
-#' select values from a character vector or variables names from a data frame
+#' Select, and create, variables from a data frame
 #'
 #' multi-faceted pattern-based selection of variables
 #'
-#' @param x Either a character vector or a data frame. In both cases, only a character 
+#' @param .x Either a character vector or a data frame. In both cases, only a character 
 #' vector will be returned.
 #' @param ... Character scalar. A **comma separated** list of patterns to select the variables. Ex: "var1, var2".
 #' Let `var1` be an element of this pattern. By default, the variable exactly named `var1` is selected, and 
@@ -21,7 +21,7 @@
 #' as first character to enable regular expression (resp. fixed pattern) matching. For example `"@al$"` selects 
 #' all variables ending with `"al"`. Use `!` as first character to select all 
 #' variables **not matching** the pattern. The value `"!#petal"` selects only the variables **not** containing 
-#' `"petal": and this works retroactively! Hence *all variables previously selected 
+#' `"petal"`: and this works retroactively! Hence *all variables previously selected 
 #' that do not pass the negation are dropped*. To *only include variables* through the negation, use the tag
 #' `+` as first character. For example : `"petal.length, +!#petal"` selects the variable `petal.length`
 #' and *adds* all variables not containing the term "petal". Not using the "+" would have dropped the first variable.
@@ -30,7 +30,8 @@
 #' starting with "petal" place the ones containing the term length first. To sort only the variables in a single
 #' pattern, use the double pipe `||`: `"^petal, ^sepal | #length"` selects the variables starting with 
 #' "petal" and "sepal" and within the "sepal" variables places the ones containing the term length first. 
-#' After the pipes, use a comma separated list of values which work in the same way as the selection previously described. 
+#' After the pipes, use a comma separated list of values which work in the same way as the selection 
+#' previously described. 
 #' In case the argument `x` is a data set, you can use the special values `.num`, `.log`, `.lnum` (logical or numeric), 
 #' `.fact`, `.char`, `.fchar` (factor or character), `.date` to select variables base on their types.
 #' @param .order Optional, default is `NULL`. A character scalar. A comma separated list of patterns to 
@@ -41,7 +42,7 @@
 #' @details
 #' This function is tailored to select a list of variables from a data set. It also works for character strings.
 #'
-#' For character strings, this is a variation of [`str_get`].
+#' For character strings, you may also be interested in [`str_get`].
 #'
 #' @return
 #' Returns a character vector.
@@ -1341,6 +1342,57 @@ data_table_QS_internal = function(x, i, j, by, keyby, ...){
 }
 
 
+#' Fill NA values using quickselect patterns to select the variables
+#' 
+#' Fills variables from a data.frame containing misssing values.
+#' The selection of the variables is done with `quickselect`.
+#' 
+#' @param x A data.frame. Note that if a `data.table` is provided, the variables are changed in
+#' place and nothing is returned. Otherwise the data frame will be returned.
+#' @param pattern A character scalar representing patterns of variables to select.
+#' This should be a comma separated list of patterns. Case is ignored. A pattern can be: 
+#' a) the full name of the variable, b) '^pat' selects variables starting with 'pat', c) '$pat' selects
+#' variables ending with 'pat', d) '@regex' selects variables containing the regular expression 'regex', 
+#' e) a number giving the position of the variable (negative numbers start from the end), f) a special pattern:
+#' '.' means all variables, '.num', '.log', '.lnum', '.char', '.fact', '.fchar', '.list', '.date' to select
+#' the variables based on their types. 
+#' Patterns can be negated: start with a '!'. Two patterns can be logically combined with '&' or '|'.
+#' Use a colon to create ranges, like in 'pat1:pat2'.
+#' @param replacement A scalar that will fill the missing values. Note that if the replacement is 
+#' of type character but the data is not of type character, an error will be raised unless you 
+#' set the argument `force = TRUE` to convert the data to character before replacement.
+#' @param force Logical scalar, default is `FALSE`. If the `replacement` is 
+#' of type character but the data is not of type character, an error will be raised unless 
+#' `force = TRUE` which will convert the data to character before replacement.
+#' 
+#' @return 
+#' If the data set in input is a `data.table`, the changes are in place and nothing is returned.
+#' Otherwise, the data set is returned.
+#' 
+#' @author 
+#' Laurent Berge
+#' 
+#' @examples 
+#' 
+#' base = head(iris)
+#' for(i in 1:5) base[i, i] = NA
+#' 
+#' # set NAs for all numeric values to 0
+#' setNA(base, ".num", 0)
+#' 
+#' # set NAs of factor variables to "hmm"
+#' setNA(base, ".fact", "hmm")
+#' 
+#' # set NAs of variables ending with "width" to -1
+#' setNA(base, "$width", -1)
+#' 
+#' # replacing a numeric with a character raises an error
+#' try(setNA(base, "petal..", "hmm"))
+#' 
+#' # same with forced conversion
+#' setNA(base, "petal..", "hmm", TRUE)
+#' 
+#' 
 setNA = function(x, pattern, replacement, force = FALSE){
 
   if(missing(x)){
@@ -1373,7 +1425,7 @@ setNA = function(x, pattern, replacement, force = FALSE){
     if(is_dt){
       return(invisible(NULL))
     } else {
-      return(invisible(x))
+      return(x)
     }    
   }
 
@@ -1407,8 +1459,10 @@ setNA = function(x, pattern, replacement, force = FALSE){
           x[[v]] = new_value
         }
       } else {
-        stop_hook("The type{$s?class(v)} of the variable {bq?v} ({$enum.bq ? class(v)}}) ",
-                 "{$don't} match the type of the replacement which is character.")
+        value = x[[v]]
+        stop_hook("The type{$s?class(value)} of the variable {bq?v} ({$enum.bq ? class(value)}) ",
+                 "{$don't} match the type of the replacement which is character.",
+                 "\nFIX: use `force = TRUE` to force the conversion to character.")
       }
     } else {
       if(is_dt){
@@ -1419,7 +1473,11 @@ setNA = function(x, pattern, replacement, force = FALSE){
     }    
   }
 
-  invisible(x)
+  if(is_dt){
+    return(invisible(x))
+  } else {
+    return(x)
+  }
 }
 
 
