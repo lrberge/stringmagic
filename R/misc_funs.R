@@ -538,9 +538,9 @@ enum_main = function(x, options){
   }
 
   # or
-  if("or" %in% options){
-    or = TRUE
-    options = options[!options == "or"]
+  if("or" %in% options || "nor" %in% options){
+    or = intersect(c("or", "nor"), options)
+    options = setdiff(options, c("or", "nor"))
   }
 
   # i, a, etc
@@ -735,7 +735,7 @@ enumerate_items = function (x, or = FALSE, quote = NULL,
     } else if(enum == "a"){
       enum_all = enum_letter(n)
     } else if(enum == "A"){
-      enum_all = to_upper(enum_letter(n))
+      enum_all = toupper(enum_letter(n))
     } else if(enum == "1"){
       enum_all = 1:n
     }
@@ -754,7 +754,13 @@ enumerate_items = function (x, or = FALSE, quote = NULL,
   if (n == 1) {
     res = x
   } else {
-    and_or = ifelse(or, " or ", " and ")
+    
+    and_or = " and "
+    if(identical(or, "or") || isTRUE(or)){
+      and_or = " or "
+    } else if(identical(or, "nor")){
+      and_or = " nor "
+    }
 
     if(is_enum){
       res = paste0(paste0(enum_all[-n], x[-n], collapse = ", "), enum_comma, and_or, enum_all[n], x[n])
@@ -1224,7 +1230,7 @@ display_list_of_variables = function(all_vars, flags, warn_msg, remaining_QS = F
   }
 
   if(is_index){
-    if(is.unsorted(var_index)){
+    if(is.unsorted(var_index) || (abs(max(diff(var_index))) != 1 && !all(diff(var_index)[1] == diff(var_index)))){
       all_vars = cub("{all_vars}_=-=_({n.0 ? var_index})")
     } else {
       all_vars = cub("{n.0 ? var_index}:_=-=_{all_vars}")
