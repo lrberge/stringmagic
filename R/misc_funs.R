@@ -296,7 +296,7 @@ bespoke_msg = function(x, fun_name = NULL){
   is_dsb = grepl("dsb", fun_name, fixed = TRUE)
 
   res = gsub("dsb(", paste0(fun_name, "("), x, fixed = TRUE)
-  res = gsub("dsb`", paste0(fun_name, "`"), x, fixed = TRUE)
+  res = gsub("dsb`", paste0(fun_name, "`"), res, fixed = TRUE)
 
   if(is_dsb) return(res)
 
