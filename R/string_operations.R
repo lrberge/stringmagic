@@ -1327,7 +1327,8 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
       n = length(dots)
       res = vector("list", n)
       for(i in 1:n){
-        res[[i]] = string_ops_internal(dots[[i]], is_dsb = is_dsb, string_as_box = string_as_box, frame = frame, check = check)
+        res[[i]] = string_ops_internal(dots[[i]], is_dsb = is_dsb, string_as_box = string_as_box, 
+                                       frame = frame, check = check)
       }
 
       return(unlist(res))
@@ -1832,13 +1833,11 @@ sop_char2operator = function(x, fun_name){
     op_parsed$operator = op
 
     if(!op %in% OPERATORS){
-      example = 'x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")'
-      example = bespoke_msg(example)
 
-      sugg_txt = suggest_item(op, OPERATORS)
+      sugg_txt = suggest_item(op, OPERATORS, newline = FALSE)
 
-      msg = c("The operation `", x, "` is not valid. It must be something quoted followed by a valid operator.",
-              "\n `", op, "` is not a valid operator.", sugg_txt,
+      msg = c("Operations on interpolated strings must be of the form .['arg'op ? x], with `arg` the (optional) argument and `op` an operator.",
+              "\nProblem: `", op, "` is not a valid operator. ", sugg_txt,
               "\n  Valid operators (limited list, see help): ",
               "\n                   to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
               "\n                   to replicate: times, each / to replicate and collapse with the empty string: times.c",
@@ -1849,11 +1848,12 @@ sop_char2operator = function(x, fun_name){
               "\n                   to remove stopwords: stop ",
               "\n------------------------------",
               "\n  type dsb('--help') for more help or dsb(help = 'word').",
-              "\n  Example: .[', *'S, 'a => b'r ? var] first splits the variable var by commas then replaces every 'a' with a 'b'.")
+              "\n  Examples: .[', *'S, 'a => b'r ? var] first splits the variable var by commas then replaces every 'a' with a 'b'",
+              '\n            x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")')
 
       msg = bespoke_msg(msg)
 
-      .stop_hook("In ", fun_name, ", the operation is not valid, see below. ", msg = msg)
+      .stop_hook(msg = msg)
     }
 
   }
