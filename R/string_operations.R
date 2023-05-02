@@ -1907,32 +1907,43 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   } else if(op %in% c("c", "C")){
     # collapse
 
-    if(!is.null(group_index) && conditional_flag == 2){
-
-      if(grepl("||", argument, fixed = TRUE)){
-        argument_split = strsplit(argument, "||", fixed = TRUE)[[1]]
-        sep = argument_split[[1]]
-        sep_last = argument_split[[2]]
-      } else {
-        sep = sep_last = argument
+    # argument of the form: 'main_sep|last_sep'
+    sep_last = ""
+    is_last = FALSE
+    if(length(x) > 1 && grepl("|", argument, fixed = TRUE)){
+      is_last = TRUE
+      arg_split = strsplit(argument, "(?<!\\|)\\|", perl = TRUE)[[1]]
+      if(grepl("\\", argument, fixed = TRUE)){
+        arg_split = gsub("\\|", "|", arg_split, fixed = TRUE)
       }
 
+      argument = arg_split[[1]]
+      if(length(arg_split) == 1){
+        sep_last = arg_split[[2]]
+      } else {
+        args_paste = arg_split[-1]
+        args_paste["sep"] = "|"
+        sep_last = do.call(paste, args_paste)
+      }
+    }
+    sep = argument
+
+    if(!is.null(group_index) && conditional_flag == 2){
       res = cpp_paste_conditional(x, group_index, sep, sep_last)
       group_index = seq_along(group_index)
 
     } else {
       n_x = length(x)
-      if(n_x > 1 && grepl("||", argument, fixed = TRUE)){
+      if(is_last){
         # This is the "last" operator
-        argument_split = strsplit(argument, "||", fixed = TRUE)[[1]]
         if(n_x == 2){
-          res = paste(x, collapse = argument_split[[2]])
+          res = paste(x, collapse = sep_last)
         } else {
-          res = paste(x[-n_x], collapse = argument_split[[1]])
-          res = paste0(res, argument_split[[2]], x[n_x])
+          res = paste(x[-n_x], collapse = sep)
+          res = paste0(res, sep_last, x[n_x])
         }
       } else {
-        res = paste(x, collapse = argument)
+        res = paste(x, collapse = sep)
       }
 
       if(conditional_flag == 1){
@@ -1947,7 +1958,10 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     valid_options = c("word", "ignore", "fixed")
     if(op == "extract"){
       valid_options = c(valid_options, "first")
+    } else if(op %in% c("r", "R")){
+      valid_options = c(valid_options, "total")
     }
+
     options = check_set_options(options, valid_options)
     is_word = "word" %in% options
     is_ignore = "ignore" %in% options
@@ -1961,13 +1975,25 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       }
     }
 
+    if(op %in% c("X", "x", "extract")){
+      # otherwise => dealt with in str_is or str_clean
+      
+      pat_parsed = parse_str_is_pattern(argument, c("word", "ignore", "fixed"), parse_logical = FALSE)
+      flags = pat_parsed$flags
+      argument = pat_parsed$patterns
+
+      is_fixed = is_fixed || "fixed" %in% flags
+      is_ignore = is_ignore || "ignore" %in% flags
+      is_word = is_word || "word" %in% flags
+    } 
+
     if(is_word){
       items = strsplit(argument, ",[ \t\n]+")[[1]]
       if(is_fixed){
         items = paste0("\\Q", items, "\\E")
         is_fixed = FALSE
       }
-      argument = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
+      argument = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
     }
 
     if(is_ignore){
@@ -1976,23 +2002,22 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       argument = paste0("(?i)", argument)
     }
 
-    if(op %in% c("r", "R")){
-      new = ""
-      if(grepl("=>", argument, fixed = TRUE)){
-        pat = "=>"
+    #
+    # now the operations
+    #
 
-        if(grepl("_=>_", argument, fixed = TRUE)){
-          pat = "_=>_"
-        } else if(grepl(" => ", argument, fixed = TRUE)){
-          pat = " => "
+    if(op %in% c("r", "R")){
+      is_total = "total" %in% options
+
+      pipe = "=>"
+      if(grepl(" => ", argument, fixed = TRUE)){
+        pipe = " => "
         }
         
-        argument_split = strsplit(argument, pat, fixed = TRUE)[[1]]
-        argument = argument_split[[1]]
-        new = argument_split[[2]]
-      }
+      res = str_clean(x, argument, pipe = pipe, sep = "", 
+                      ignore.case = is_ignore, fixed = is_fixed, word = is_word, 
+                      total = is_total)
 
-      res = gsub(argument, new, x, fixed = is_fixed, perl = !is_fixed)
     } else if(op == 'x'){
       x_pat = regexpr(argument, x, fixed = is_fixed, perl = !is_fixed)
 
@@ -2032,7 +2057,6 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       
     } else {
       # default is str_is
-      # the user cannot use " | " nor " & "
       res = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
 
       if(op %in% c("get", "which")){
