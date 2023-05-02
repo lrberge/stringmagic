@@ -665,6 +665,211 @@ dsb_c = function(..., frame = parent.frame(), vectorize = FALSE,
 #### ... cub ####
 ####
 
+#' @section Interpolation and string operations: principle:
+#' 
+#' To interpolate a variable, say `x`, simply use `{x}`. For example `x = "world"; cub("hello {x}")` leads 
+#' to "hello world".
+#' 
+#' To any interpolation you can add operations. Taking the previous example, say we want to display
+#'  "hello W O R L D"; that
+#' is upper casing all letters of the interpolated variable and adding a space between 
+#' each of them. Do you think we can do that? Of course yes: cub("hello {U, ''s, c ? x}"). And that's it.
+#' 
+#' Now let's explain what happened. Within the `{}` *box*, we first write a set of 
+#' operations, here "U, ''s, c", then add "?" and finally write 
+#' the variable to interpolate, "x".  The operations (explained in more details 
+#' below) are U: upper casing all letters, ''s: splitting
+#' with the empty string, 'c': concatenating with spaces the vector of string that was just split.
+#' The question mark means that the expression coming after it is to be evaluated 
+#' (this is opposed to the exclamation mark presented next).
+#' 
+#' The syntax is always the same: {operations ? expression}, where the operations 
+#' is a *comma separated* list of operations.
+#' These operations are of the form `'arg'op`, with `arg` the argument to the operator 
+#' code `op`. These operations are performed sequantially from left to right.
+#' 
+#' @section  Verbatim interpolation and nesting: principle:
+#' 
+#' Instead of interpolating a variable, say `x`, with `{x}`, you can use an exclamation 
+#' mark to trigger varbatim evaluation.
+#' For example `cub("hello {!x}")` would lead to "hello x". Tadaa... Well that's a
+#'  bit disappointing, right? What's the point of doing that? Wait until the next two paragraphs.
+#' 
+#' Verbatim evaluation is a powerful way to apply operations to plain text. For example:
+#'  `cub("hello {U, ''s, c ! world}")` leads to "hello W O R L D".
+#' 
+#' A note in passing. The spaces surrounding the exclamation mark are non necessary,
+#'  but when one space is present on both sides of the !, then the verbatim
+#' expression only begins after it. Ex: "{U! hi}" leads to " HI" while "{U ! hi}" 
+#' leads to "HI" and "{U !  hi}" leads to " HI".
+#' 
+#' The second advantage of verbatim evaluations is *nesting*. Anything in a verbatim 
+#' expression is evaluated with the function `cub`.
+#' This means that any *box* will be evaluated as previously described. Let's
+#'  give an example. You want to write the expression of a polynomial of order n: a + bx + cx^2 + etc.
+#' You can do that very easily with nesting. Assume we have `n = 2`.
+#' 
+#' Then `cub("poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}")` leads to 
+#' "poly(2): ax^0 + bx^1 + cx^2".
+#' 
+#' How does it work? The verbatim expression (the one following the exclamation mark),
+#'  here "{letters[1 + 0:n]}x^{0:n}", is evaluated with `cub`.
+#' `cub("{letters[1 + 0:n]}x^{0:n}")` leads to the vector c("ax^0", "bx^1", "cx^2").
+#' 
+#' The operation `' + 'c` then concatenates (or collapses) that vector with ' + '.
+#'  This value is then appended to the previous string.
+#' 
+#' We could refine by adding a cleaning operation in which we replace "x^0" and "^1" 
+#' by the empty string. Let's do it:
+#' 
+#' `cub("poly({n}): {' + 'c, 'x\\^0|\\^1'r ! {letters[1 + 0:n]}x^{0:n}}")` leads to 
+#' "poly(2): a + bx + cx^2", what we wanted.
+#' 
+#' You can try to write a function to express the polynomial as before: although it is 
+#' a simple task, my guess is that it will require more typing.
+#' 
+#' @section Main string as a box:
+#' 
+#' As just seen, within a box you can add a set of operations to be performed. The thing is,
+#'  by default the main string is considered to be, when appropriate, within a box.
+#' This means that you can perform operations right from the start: `cub("U, ''s, c ! yes!")` leads to "Y E S !".
+#' 
+#' This is in fact equivalent to `cub("{U, ''s, c ! yes!}")`. Note that this behavior 
+#' is triggered only when appropriate.
+#' However in some instances it may interfere with what the user really wants. You can 
+#' disable this feature with `string_as_box = FALSE`.
+#' 
+#' @section Operations without arguments:
+#' 
+#' As seen in the previous sections, within a *box* (i.e. `"{}"`), multiple operations
+#'  can be performed.
+#' We can do so by stacking the operations codes and in a comma separated enumeration.
+#' There are two types of operations, with and without arguments. Here we cover the later.
+#' 
+#' + l, u, U, title: to modify the case of the string. l: all letters to lowercase, u: 
+#' first letter to uppercase, U: all letters to uppercase, title: title case.
+#' + w: to normalize the whitespaces (WS). It trims the whitespaces and transform any succession 
+#' of whitespaces into a single one.
+#'   + you can append d, i, p to this operation code in any order to: d: clean alll digits,
+#'  i: clean isolated letters, p: clean punctuation.
+#'     This means that wp cleans all punctuation and normalizes WS. And wpi cleans 
+#' all punctuation, removes all isolated letters and normalizes WS.
+#'     **Important note:** punctuation (or digits) are replaced with WS and **not** 
+#' the empty string. This means that `cub("wp ! Meg's car")` will become "Meg s car".
+#' + q, Q, bq: to add quotes to the strings. q: single quotes, Q: double quotes, bq: 
+#' back quotes. `x = c("Mark", "Pam"); cub("Hello {q,C?x}!")` leads to "Hello 'Mark' and 'Pam'!".
+#' + f, F: applies the base R's function format to the string. f: format with left
+#'  alignment, F: format with right alignment.
+#'   Ex: `x = c(1, 12345); cub("left: {f,q,C?x}, right: {F,q,C?x}")` 
+#' leads to "left: '1     ' and '12,345', right: '     1' and '12,345'".
+#' + d: replaces the content with the empty string (useful in conditions, see section below).
+#' + D: deletes all content (useful in conditions, see section below). Ex: we want 
+#' to display only elements with digits. x = c("Flora", "62", "James", "32"); 
+#' cub("Ages: {<\\d>(:D),C?x}.") leads to "Ages: 62 and 32.".
+#' + e: removes empty strings. Ex: x = c("", "hello", "!"); cub("Non-empty: {e,c?x}") 
+#' leads to "Non-empty: hello !".
+#' + E: removes strings containing only whitespaces or punctuation. x = c("", "hello", "!"); 
+#' cub("Non-Empty: {E,c?x}") leads to "Non-Empty: hello".
+#' + stop: removes basic English stopwords (the snowball list is used). 
+#' The stopwords are replaced with an empty space but the left and right WS are 
+#' untouched. So WS normalization may be needed (see operation w).
+#'   `x = c("He is tall", "He isn't young"); cub("Is he {stop,w,C?x}?")` leads to "Is he tall and young?".
+#' + ascii: turns all letters into ascii with transliteration. Non ascii elements
+#'  are transformed into question marks.
+#' + sort, dsort: sorts the elements. sort: sorts increasingly, dsort: sorts by decreasing order.
+#' + rev: reverses the elements.
+#' + num: converts to numeric silently (without warning).
+#' + enum: enumerates the elements. It creates a single string containing the comma 
+#' separated list of elements.
+#'   If there are more than 7 elements, only the first 6 are shown and the number of
+#'  items left is written.
+#'   For example cub("enum ? 1:5") leads to "1, 2, 3, 4, and 5".
+#'   You can add the following options by appending the letter to enum after a dot:
+#'   + q, Q, or bq: to quote the elements
+#'   + or: to finish with an 'or' instead of an 'and'
+#'   + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two
+#'   + a number: to tell the number of items to display
+#'   Ex1: x = c("Marv", "Nancy"); cub("The main characters are {enum ? x}.") leads to 
+#' "The main characters are Marv and Nancy.".
+#'   Ex2: x = c("orange", "milk", "rice"); cub("Shopping list: {enum.i.q ? x}.") leads to
+#'  "Shopping list: i) 'orange', ii) 'milk', and iii) 'rice'."
+#' + nth, Nth: when applied to a number, these operators write them as a rank.
+#'   Example: n = c(3, 7); cub("They finished {nth, enum ? n}!") leads to
+#'   "They finished 3rd and 7th!". The upper case Nth operator tries to write
+#'   the numbers in letters, but note that it stops at 20 (then numbers are used, as in nth).
+#'   In the previous example, Nth would lead to "They finished third and seventh!".
+#' 
+#' @section Operations with arguments:
+#' For operations with arguments, the syntax is (in general) of the form 'arg'op with arg the
+#'  value of the argument and op the operation code.
+#' Here is the list of operations with arguments:
+#' + s, S: to split a string. s: default is ' ' and uses fixed pattern, S: default is 
+#' ',[ \t\n}*' and uses regular expression patterns.
+#' + c, C: to concatenate multiple strings into a single one. The two operations are 
+#' identical, only their default change. c: default is ' ', C: default is ', || and '.
+#'   The syntax of the argument is 's1' or 's1||s2'. s1 is the string used to concatenate 
+#' (think paste(x, collapse = s1)). If an argument of the form 's1||s2' is used,
+#'   then s2 will be used to concatenate the last two elements. Ex1: x = 1:4; 
+#' cub("Et {' et 'c?x}!") leads to "Et 1 et 2 et 3 et 4!".
+#'   Ex2: cub("Choose: {', || or '?2:4}?") leads to "Choose: 2, 3 or 4?".
+#' + x, X: extracts patterns from a string. The pattern must be a regular expression. 
+#' Both have the same default: '[[:alnum:]]+'. x: extracts the first match, X: extracts **all** the matches.
+#'   Ex1: x = c("6 feet under", "mahogany") ; cub("'\\w{3}'x ? x") leads to the vector c("fee", "mah").
+#'   Ex2: x = c("6 feet under", "mahogany") ; cub("'\\w{3}'X ? x") leads to the
+#'  vector c("fee", "und", "mah", "oga").
+#' + r, R: replacement within a string. r: uses fixed search, R: uses regular expressions.
+#'  The syntax is 'old', 'old => new', 'old_=>_new', or 'old=>new'
+#'   with old the pattern to find and new the replacement. If new is missing, it is 
+#' considered the empty string. Ex1: cub("'e'r ! the letter e is gone") leads to "th lttr  is gon".
+#'   Ex2: cub("'(?<!\\b)e => a'R ! the letter e is gone") leads to "tha lattar e is gona".
+#' + `*`, `*c`, `**`, `**c`: replicate the elements. These operations replicate the elements 
+#' a certain number of times given as argument.
+#'   The c means that after the replication the elments are collapsed with the empty string.
+#'  If n is the argument: two stars means that each element
+#'   is repeated n times while one star means that the entire vector is repeated n times.
+#'  For this operation you can omit the single quotes: `"'5'*"` is similar to `"5*"`
+#'   Ex1: cub("yes{10 times.c ! !}") leads to yes!!!!!!!!!!. Ex2: n = 2; cub("', 'c ! {2* ? 
+#' letters[1:n]}{`n`** ? 1:2}") leads to "a1, b1, a2, b2".
+#' + first, last: to select the firs/last elements. The syntax is 'n'first or firstn or 
+#' first.n with n a number (same for last).
+#'   Ex: cub("'15'first, last3 ? letters") leads to the vector "m", "n", "o".
+#' + cfirst, clast: to select the first/last characters of each element. The syntax is
+#'  'n'cfirst, cfirstn, cfirst.n with n a number (same for clast).
+#'   Ex: cub("cfirst.20, '9'clast! This is a very long sentence") leads to "very long".
+#' + %: applies sprintf formatting. The syntax is 'arg'% with arg an sprintf formatting,
+#'  e.g. '.3f' (float with 3 digits), or '5s' (string of width 5).
+#'   Ex: cub("pi = {'.3f'% ? pi}")
+#' + k: to keep only the first n characters (like cfirst but with more options). The
+#'  syntax is nk, 'n'k, 'n|s'k or 'n||s'k with n a number and s a string.
+#'   n provides the number of characters to keep. Optionnaly, only for strings whose
+#'  length is greater than n, after truncation, the string s can be appended at the end.
+#'   The differenc e between 'n|s' and 'n||s' is that in the second case the strings
+#'  will always be of maximum size n, while in the first case they can be of length n + nchar(s).
+#'   Ex: cub("4k ! long sentence") leads to "long",  cub("'4|..'k ! long sentence") 
+#' leads to "long..", cub("4k||.. ! long sentence") leads to "lo..".
+#' + K, Ko, KO: to keep only the first n elements (like first but with more options). 
+#' The syntax is nK, 'n'K, 'n|s'K, 'n||s'K. The values Ko and KO only accept the two first syntax (with n only).
+#'   n provides the number of elements to keep. If s is provided and the number of 
+#' elements are greater than n, then in 'n|s' the string s is added at the end, and
+#'  if 'n||s' the string s replaces the nth element.
+#'   The string s accepts specials values:
+#'   + :n: or :N: which give the total number of items in digits or letters (N)
+#'   + :rest: or :REST: which give the number of elements that have been truncated in digits or letters (REST)
+#'   Ex: cub("'3|:rest: others'K ? 1:200") leads to the vector "1", "2", "3", "197 others".
+#'   + The operator 'n'Ko is like 'n||:rest: others'K and 'n'KO is like 'n||:REST: others'K.
+#' +
+#' 
+#' @section Group-wise operations:
+#' 
+#' 
+#' 
+#' @section Pluralization:
+#' 
+#' 
+#' 
+#' 
+#' ** conditions
+#' 
 cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                string_as_box = TRUE, collapse = NULL, use_DT = TRUE){
 
