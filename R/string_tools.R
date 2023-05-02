@@ -171,7 +171,7 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
           items = paste0("\\Q", items, "\\E")
           is_fixed = FALSE
         }
-        p = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
+        p = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
       }
 
       if(is_ignore){
@@ -335,13 +335,24 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #'
 #' Splits a character vector and formats the resulting substrings into a data.frame
 #'
-#' @param x A character vector or a two-sided formula. If a two-sided formula, then the argument `data` must be provided since the variables will be fetched in there. A formula is of the form `char_var ~ id1 + id2` where `char_var` on the left is a character variable and on the right `id1` and `id2` are identifiers which will be included in the resulting table. Alternatively, you can provide identifiers via the argument `id`.
-#' @param data Optional, only used if the argument `x` is a formula. It should contain the variables of the formula.
-#' @param split A character scalar. Used to split the character vectors. By default this is a regular expression.
-#' @param id Optional. A character vector or a list of vectors. If provided, the values of `id` are considered as identifiers that will be included in the resulting table.
+#' @param x A character vector or a two-sided formula. If a two-sided formula, then the 
+#' argument `data` must be provided since the variables will be fetched in there. 
+#' A formula is of the form `char_var ~ id1 + id2` where `char_var` on the left is a 
+#' character variable and on the right `id1` and `id2` are identifiers which will be 
+#' included in the resulting table. Alternatively, you can provide identifiers via 
+#' the argument `id`.
+#' @param data Optional, only used if the argument `x` is a formula. It should 
+#' contain the variables of the formula.
+#' @param split A character scalar. Used to split the character vectors. By default 
+#' this is a regular expression.
+#' @param id Optional. A character vector or a list of vectors. If provided, the 
+#' values of `id` are considered as identifiers that will be included in the resulting table.
 #' @param add.pos Logical, default is `FALSE`. Whether to include the position of each split element.
-#' @param id_unik Logical, default is `TRUE`. In the case identifiers are provided, whether to trigger a message if the identifiers are not unique. Indeed, if the identifiers are not unique, it is not possible to reconstruct the texts based only on them.
-#' @param fixed Logical, default is `FALSE`. Whether to consider the argument `split` as fixed (and not as a regular expression).
+#' @param id_unik Logical, default is `TRUE`. In the case identifiers are provided, 
+#' whether to trigger a message if the identifiers are not unique. Indeed, if
+#'  the identifiers are not unique, it is not possible to reconstruct the original texts.
+#' @param fixed Logical, default is `FALSE`. Whether to consider the argument `split` 
+#' as fixed (and not as a regular expression).
 #' @param dt Logical, default is `FALSE`. Whether to return a `data.table`. See also the function `str_split2dt`.
 #' @param ... Not currently used.
 #'
@@ -380,7 +391,7 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' # we have a message because the identifiers are not unique
 #' str_split2df(carname ~ am + gear + carb, base, " +")
 #'
-#' #
+#' # adding the position of the words & removing the message
 #' str_split2df(carname ~ am + gear + carb, base, " +", id_unik = FALSE, add.pos = TRUE)
 #'
 #'
@@ -597,6 +608,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
   res
 }
 
+#' @describeIn str_split2df Splits a string vector and returns a `data.table`
 str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE,
                         id_unik = TRUE, fixed = FALSE){
 
@@ -677,15 +689,42 @@ to_integer_single = function(x){
 #' with the string 'replacement'. By default patterns are comma separated and the replacement comes 
 #' after a ' => ' (see args `sep` and `pipe` to change this). By default the replacement is the empty string 
 #' (so "pat1, pat2" *removes* the patterns).
+#' 
 #' Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), and 'total'. 
 #' The flag `total` leads to a *total replacement* of the string if the pattern is found. Use flags
 #' with comma separation ("word, total/pat") or use only their initials ("wt/pat").
-#' Starting with an '@' leads to operations in [[str_op]]. Ex: "@ascii, l, ws" leads to turning
-#' the string into ASCII, lower the case and normalize white spaces (see help of [[str_ops]]).
+#' 
+#' Starting with an '@' leads to operations in [str_op]. Ex: "@ascii, l, ws" turns
+#' the string into ASCII, lowers the case and normalizes white spaces (see help of [str_ops]).
+#' @param pipe Character scalar, default is `" => "`. If thevalue of `pipe` is found in a pattern,
+#' then the string is split w.r.t. the pipe and anything after the pipe becomes the replacement.
+#' 
+#' For example in `str_clean(x, "e => a")` the default pipe is found in "e => a", so the pattern 
+#' "e" will be replaced with "a". In other terms, this is equivalent to `str_clean(x, "e", replacement = "a")`.
+#' Example changing the pipe: you can obtain the previous result with `str_clean(x, "e|>a", pipe = "|>")`.
+#' @param sep Character scalar, default is `",[ \t\n]+"` (which means a comma followed with spaces 
+#' and/or new lines). By default the patterns to be replaced are comma separated, that is 
+#' the pattern is split w.r.t. the argument `sep` and a replacement is done for each sub-pattern.
+#' 
+#' Use `NULL` or the empty string to disable pattern separation.
+#' 
+#' For example: let's look at `str_clean(x, "w/one, two => three")`. First the flag "word" is extracted from
+#' the pattern (see arg. `...`) as well as the replacement (see arg. `pipe`), leading to "one, two" the 
+#' pattern to be replaced. Then the pattern is split w.r.t. `sep`, leading 
+#' to two patterns "one" and "two". Hence the words (thanks to the flag "w") "one" and "two" from
+#' the string `x` will be replaced with "three".
+#' @param replacement Character scalar, default is the empty string. It represents the default 
+#' value by which the patterns found in the character strings will be replaced. For example
+#' `str_clean(x, "e", replacement = "a")` turn all letters "e" in `x` into "a".
+#' @param total Logical scalar, default is `FALSE`. If `TRUE`, then when a pattern is found 
+#' in a string, the full string is replaced (instead of just the pattern). Note, *importantly*, 
+#' that when `total = TRUE` you can use logical operators in the patterns.
+#' 
+#' Example: `str_clean(x, "wi/ & two, three & !four => ", total = TRUE)`
 #'
 #' @return
 #' The main usage returns a character vector of the same length as the vector in input.
-#' Note, however, that since you can apply arbitrary [[str_op]] operations, the length and type
+#' Note, however, that since you can apply arbitrary [str_op] operations, the length and type
 #' of the final vector may depend on those (if they are used).
 #'
 #' @examples
@@ -713,13 +752,13 @@ to_integer_single = function(x){
 #'            "wi/merc => Mercedes",
 #'            # replace strings containing "Merc" and a digit followed with an 'S'
 #'            "t/Merc & \\dS => Mercedes S!",
-#'            # put tolower case, remove isolated characters and normalize white spaces
+#'            # put to lower case, remove isolated characters and normalize white spaces
 #'            "@l, ws.isolated")
 #' 
 #' cbind(cars, new)
 #'
 #'
-str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+", 
+str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+", 
                      ignore.case = FALSE, fixed = FALSE, word = FALSE, total = FALSE){
 
   x = check_set_character(x, l0 = TRUE)
@@ -727,16 +766,19 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+",
     return(x)
   }
 
-  check_character(rep, scalar = TRUE)
+  check_character(replacement, scalar = TRUE)
   check_character(pipe, scalar = TRUE)
-  check_character(sep, scalar = TRUE)
+  check_character(sep, scalar = TRUE, null = TRUE)
+
+  is_sep = length(sep) > 0 && nchar(sep) > 0
+  is_pipe = length(pipe) > 0 && nchar(pipe) > 0
 
   check_logical(ignore.case, scalar = TRUE)
   check_logical(fixed, scalar = TRUE)
   check_logical(word, scalar = TRUE)
   check_logical(total, scalar = TRUE)
 
-  rep_main = rep
+  rep_main = replacement
 
   dots = list(...)
   warn_no_named_dots(dots)
@@ -761,7 +803,7 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+",
       next
     }
 
-    if(grepl(pipe, di)){
+    if(is_pipe && grepl(pipe, di)){
       # application du pipe
       di_split = strsplit(di, pipe)[[1]]
       replacement = di_split[2]
@@ -782,8 +824,12 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+",
     is_ignore = ignore.case || "ignore" %in% flags
     is_word = word || "word" %in% flags
 
-    all_patterns = strsplit(patterns, split = sep)[[1]]
-    
+    if(is_sep){
+      all_patterns = strsplit(patterns, split = sep)[[1]]
+    } else {
+      all_patterns = patterns
+    }
+
     for(j in seq_along(all_patterns)){
       pat = all_patterns[j]
 
@@ -816,7 +862,7 @@ str_clean = function(x, ..., rep = "", pipe = " => ", sep = ",[ \n\t]+",
             items = paste0("\\Q", items, "\\E")
             is_fixed = FALSE
           }
-          p = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
+          p = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
         }
 
         if(is_ignore){
