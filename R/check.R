@@ -406,6 +406,16 @@ warn_up = function (..., up = 1, immediate. = FALSE, verbatim = FALSE){
           call. = FALSE, immediate. = immediate.)
 }
 
+
+
+setDreamerr_show_stack = function(show_full_stack = FALSE){
+
+  check_logical(show_full_stack, scalar = TRUE, mbt = TRUE)
+
+  options("dreamerr_show_full_stack" = show_full_stack)
+
+}
+
 ####
 #### utilities ####
 ####
@@ -584,12 +594,25 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
     up = up_value[[1]]
   }
 
-  # The original call
-  my_call = deparse(sys.calls()[[max(1, sys.parent(1 + up))]])[1] # call can have svl lines
-  nmax = 50
-  if(nchar(my_call) > nmax) my_call = paste0(substr(my_call, 1, nmax - 1), "...")
+  show_full_stack = isTRUE(getOption("dreamerr_show_full_stack"))
 
-  intro = paste0("in ", my_call)
+  sc = sys.calls()
+  
+  if(show_full_stack){
+    # The user requests the full stack
+    my_call = sapply(sc, function(x) deparse(x, width.cutoff = 200L, nlines = 1))
+    my_call = cub("'\n'c ! [{f.0 ? 1:length(sc)}] {'100|...'k ? my_call}")
+
+    intro = paste0("the full stack is shown (set this off with setDreamerr_show_stack(FALSE))\n", my_call)
+
+  } else {
+    # only the original call
+    my_call = deparse(sc[[max(1, sys.parent(1 + up))]])[1] # call can have svl lines
+    nmax = 50
+    if(nchar(my_call) > nmax) my_call = paste0(substr(my_call, 1, nmax - 1), "...")
+
+    intro = paste0("in ", my_call)
+  }  
 
   main_msg = fit_screen(main_msg)
 
@@ -609,6 +632,8 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
 fit_screen = function(msg, width = 0.9, leading_ws = TRUE, leader = ""){
   # makes a message fit the current screen, by cutting the text at the appropriate location
   # msg must be a character string of length 1
+  
+  if(length(msg) == 0) return(msg)
 
   # Note that \t are NOT handled
 
