@@ -8,8 +8,6 @@
 
   setup_operations()
 
-  setup_QS_data_types()
-
   invisible()
 }
 
