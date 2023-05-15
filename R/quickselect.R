@@ -497,12 +497,6 @@ selvars = function(.x, ..., .order = NULL, .in = NULL, .pattern = NULL, .frame =
   # Final step: creation of the data set
   # evaluation of the variables
   
-  # Groups... what do we do with groups?
-  # - we first make the checking of the variables withtout evaluating
-  # - in a second step we evaluate:
-  #   a) first on a tiny subset to see if ALL the expressions are aggregations
-  #   b) depending on this first check, either we loop on groups, either not
-
   n_vars = length(final_vars)
 
   is_group = "groups" %in% names(old_attr)
