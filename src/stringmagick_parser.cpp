@@ -309,8 +309,15 @@ void extract_paren_operator(const int box_type, bool &is_pblm, const char * str,
 
     extract_r_expression(is_pblm, str, i, n, operator_tmp, ';');
     if(is_pblm) return;
+    
+    bool is_decorative_space = str[i - 1] == ' ' && i + 1 < n && str[i + 1] == ' ';
+    if(is_decorative_space){
+      // we skip the decorative space
+      ++i;
+    }
 
-    operator_tmp += str[i++];
+    ++i;
+    operator_tmp += "_;;;_";
     
     // if  => simple operators
     // vif => verbatim
@@ -322,18 +329,25 @@ void extract_paren_operator(const int box_type, bool &is_pblm, const char * str,
     }
     
     if(is_pblm) return;
-    operator_tmp += str[i++];
-
+    ++i;
+    
     if(str[i - 1] == ';'){
+      
+      operator_tmp += "_;;;_";
       // last round
       if(op == 'i'){
         extract_simple_ops_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")");  
       } else {
+        if(is_decorative_space && str[i] == ' '){
+          ++i;
+        }
         extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")", false);
       }
       
       if(is_pblm) return;
       operator_tmp += str[i++];
+    } else {
+      operator_tmp += ")";
     }
     
   }
@@ -618,7 +632,7 @@ void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &
 
 void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int n,
                       std::vector<std::string> &operator_vec, std::string &expr_value,
-                      bool &any_plural){
+                      bool &any_plural, bool nest = false){
   // modifies the operator and gives the updated i
   // the i should start where to evaluate post separator (if present)
 
@@ -651,9 +665,8 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     ++i;
     
     // this is a simple verbatim extraction without any reparsing
-    while(i < n && !is_box_close(box_type, str, i, true)){
-      expr_value += str[i++];
-    }
+    std::string closing_box = get_closing_box_string(box_type);
+    extract_verbatim(box_type, is_pblm, str, i, n, expr_value, closing_box, true);
     
     if(i == n){
       is_pblm = true;
@@ -958,7 +971,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
 }
 
 // [[Rcpp::export]]
-List cpp_string_ops_new(SEXP Rstr, bool is_dsb){
+List cpp_string_ops(SEXP Rstr, bool is_dsb){
   // Rstr: string from R of length 1
 
   List res;
@@ -973,7 +986,7 @@ List cpp_string_ops_new(SEXP Rstr, bool is_dsb){
 
   int n = std::strlen(str);
 
-  int i = 0;
+  int i = 0;  
   while(i < n){
 
     // if not currently open => we check until open
@@ -1031,6 +1044,58 @@ List cpp_string_ops_new(SEXP Rstr, bool is_dsb){
   return res;
 }
 
+// [[Rcpp::export]]
+List cpp_string_ops_nested(SEXP Rstr, bool is_dsb){
+  // Rstr: string from R of length 1
+  // we consider the full string to be in a box
+
+  List res;
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+
+  const int box_type = is_dsb ? DSB : CUB;
+
+  // pluralization flag
+  bool any_plural = false;
+
+  std::string sop_value = "";
+
+  int n = std::strlen(str);
+  int i = 0;
+
+  bool is_pblm = false;      
+
+  List sop_element;
+  std::vector<std::string> operator_vec;
+  std::string expr_value;
+
+  // modifies i, expr_value and operator_vec "in place"
+  parse_box(box_type, is_pblm, str, i, n, operator_vec, expr_value, any_plural, true);
+
+  // if we end up at the end of the string: fine
+  if(i == n) is_pblm = false;
+
+  if(is_pblm){
+    // there is a parsing error
+    // => we send the full string to be evaluated (it will very likely lead to an error in R)
+    // not sure how to cleanly deal with this
+    std::vector<std::string> empty_vec;
+    sop_element.push_back(empty_vec);
+    
+    while(i < n) expr_value += str[i++];
+    sop_element.push_back(expr_value);   
+  } else {
+    sop_element.push_back(operator_vec);
+    sop_element.push_back(expr_value);
+  }
+
+  res.push_back(sop_element);
+
+  res.attr("plural") = any_plural;
+
+  return res;
+}
+
+
 //
 // END PARSER
 //
@@ -1060,6 +1125,14 @@ std::string cpp_extract_quote_from_op(SEXP Rstr){
   return res;
 }
 
+// detects 'if(' or 'vif('
+inline bool is_if_operator(const char * str, int i, int n){
+  if(n - i < 4) return false;
+  
+  bool offset = str[i] == 'v';
+  
+  return str[i + offset] == 'i' && str[i + offset + 1] == 'f' && str[i + offset + 2] == '(';
+}
 
 // [[Rcpp::export]]
 List cpp_parse_operator(SEXP Rstr){
@@ -1122,10 +1195,16 @@ List cpp_parse_operator(SEXP Rstr){
 
   std::string op, op_raw;
     
-  if(str[i] == '~' || str[i] == '@' || str[i] == '&' || str[i] == '<'){
-    // special case => everything in the operator
-    while(i < n){
+  if(str[i] == '~' || is_if_operator(str, i, n)){
+    // special case
+    while(i < n && str[i] != '('){
       op += str[i++];
+    }
+    
+    ++i;
+    argument = "";
+    while(i < n - 1){
+      argument += str[i++];
     }
 
   } else if(str[i] == '%' && argument.empty()){
@@ -1210,6 +1289,75 @@ List cpp_parse_operator(SEXP Rstr){
   return res;
 }
 
+// [[Rcpp::export]]
+std::vector<std::string> cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
+  // "'-'S, title, C" => c("'-'S", "title", "C")
+  
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+
+  const int box_type = is_dsb ? DSB : CUB;
+  
+  std::vector<std::string> operator_vec;
+  std::string operator_tmp;
+  bool is_pblm = false;
+  
+  int i = 0;
+  while(i < n && !is_separator(str, i)){
+    
+    // stripping the WS
+    while(i < n && is_blank(str[i])) ++i;
+
+    if(is_box_close(box_type, str, i)){
+      // normal operations cannot end with a closing box
+      // we'll throw an error
+      break;
+
+    } else {
+
+      if(is_paren_operator(str, i, n)){
+        // paren-like operations: if(cond;op;op), ~(ops), vif(cond;veb;verb)
+        extract_paren_operator(box_type, is_pblm, str, i, n, operator_tmp);
+        if(i == n && str[n - 1] != ')'){
+          i = 0;
+          operator_vec.push_back(operator_tmp);  
+          break;
+        }
+      } else {
+        // regular, simple operation
+        extract_single_simple_operation(box_type, is_pblm, str, i, n, operator_tmp, "?!");
+      }
+
+      if(!operator_tmp.empty()){
+        operator_vec.push_back(operator_tmp);  
+        operator_tmp = "";
+      }
+
+      if(is_pblm && i < n){
+        // we'll throw an error only if not gone until the end
+        break;
+      }
+      
+      if(i < n && str[i] == ','){
+        ++i;
+        while(i < n && is_blank(str[i])) ++i;
+      }
+
+    }
+  }
+  
+  if(i < n){
+    // we must go until the end otherwise this means there is an error
+    if(is_separator(str, i)){
+      std::string op;
+      op += str[i];
+      operator_vec.push_back(op);
+    }
+    operator_vec.insert(operator_vec.begin(), "_ERROR_");
+  }
+
+  return operator_vec;
+}
 
 
 

@@ -72,7 +72,7 @@ str_op = function(x, op, pre_unik = NULL){
     res = res_small[x_int]
   } else {
     operation = paste0(op, " ? x")
-    res = .dsb(operation, string_as_box = TRUE)
+    res = .dsb(operation, slash = TRUE)
   }
 
   if("group_index" %in% names(attributes(res))){
@@ -104,7 +104,7 @@ str_op = function(x, op, pre_unik = NULL){
 #' @param sep Character scalar, default is `""`. It is used to collapse all the elements in `...`.
 #' @param vectorize Logical, default is `FALSE`. If `TRUE`, Further, elements in `...` are 
 #' NOT collapsed together, but instead vectorised.
-#' @param string_as_box Logical, default is `TRUE`. Whether the original character strings 
+#' @param slash Logical, default is `TRUE`. Whether the original character strings 
 #' should be nested into a `".[]"`. If `TRUE`, then things like `dsb("S!one, two")` 
 #' are equivalent to `dsb(".[S!one, two]")` and hence create the vector `c("one", "two")`.
 #' @param collapse Character scalar or `NULL` (default). If provided, the resulting 
@@ -476,7 +476,7 @@ str_op = function(x, op, pre_unik = NULL){
 #'
 #' # Another similar example illustrating that we need not express the object several times:
 #' x = c("Eschyle", "Sophocle", "Euripide")
-#' dsb("The .[$n ? x] classic author.[$s, are, enum].")
+#' dsb("The .[len ? x] classic author.[$s, are, enum].")
 #'
 #'
 #' #
@@ -540,11 +540,11 @@ str_op = function(x, op, pre_unik = NULL){
 #'
 #'
 dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-               string_as_box = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
+               slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
 
 
   if(!missing(vectorize)) check_logical(vectorize, scalar = TRUE)
-  if(!missing(string_as_box)) check_logical(string_as_box, scalar = TRUE)
+  if(!missing(slash)) check_logical(slash, scalar = TRUE)
   if(!missing(collapse)) check_character(collapse, null = TRUE, scalar = TRUE)
   if(!missing(sep)) check_character(sep, scalar = TRUE)
   if(!missing(frame)) check_envir(frame)
@@ -563,7 +563,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
   set_pblm_hook()
 
   res = string_ops_internal(..., is_dsb = TRUE, frame = frame, sep = sep,
-                            vectorize = vectorize, string_as_box = string_as_box,
+                            vectorize = vectorize, slash = slash,
                             collapse = collapse, help = help, is_root = use_DT,
                             check = TRUE, fun_name = "dsb")
 
@@ -578,11 +578,11 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
 #' @describeIn dsb Like `dsb` but without nice error messages (leads to slightly faster run times).
 .dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-                check = FALSE, string_as_box = FALSE, use_DT = FALSE){
+                check = FALSE, slash = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
   string_ops_internal(..., is_dsb = TRUE, frame = frame,
-                      string_as_box = string_as_box, sep = sep,
+                      slash = slash, sep = sep,
                       vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".dsb")
 }
@@ -594,17 +594,17 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' @param ...
 #' @param sep
 #' @param frame
-#' @param string_as_box
+#' @param slash
 #'
 #' @return
 #' @export
 #'
 #' @examples
-dsb_cat = function(..., sep = "", frame = parent.frame(), string_as_box = FALSE){
+dsb_cat = function(..., sep = "", frame = parent.frame(), slash = FALSE){
   set_pblm_hook()
 
   res = string_ops_internal(..., is_dsb = TRUE, frame = frame,
-                            string_as_box = string_as_box,
+                            slash = slash,
                             sep = sep, vectorize = FALSE, check = TRUE,
                             collapse = "", fun_name = "dsb_cat")
 
@@ -613,12 +613,12 @@ dsb_cat = function(..., sep = "", frame = parent.frame(), string_as_box = FALSE)
 
 
 #' @describeIn dsb_cat
-dsb_msg = function(..., sep = "", frame = parent.frame(), string_as_box = FALSE,
+dsb_msg = function(..., sep = "", frame = parent.frame(), slash = FALSE,
                    appendLF = TRUE){
   set_pblm_hook()
 
   res = string_ops_internal(..., is_dsb = TRUE, frame = frame,
-                            string_as_box = string_as_box,
+                            slash = slash,
                             sep = sep, vectorize = FALSE, check = TRUE,
                             collapse = "", fun_name = "dsb_msg")
 
@@ -632,14 +632,14 @@ dsb_msg = function(..., sep = "", frame = parent.frame(), string_as_box = FALSE,
 #' @param ...
 #' @param frame
 #' @param vectorize
-#' @param string_as_box
+#' @param slash
 #'
 #' @return
 #' @export
 #'
 #' @examples
 dsb_c = function(..., frame = parent.frame(), vectorize = FALSE,
-                 string_as_box = TRUE){
+                 slash = TRUE){
   set_pblm_hook()
 
   dots = error_sender(list(...), "Some elements in `...` could not be evaluated.")
@@ -653,7 +653,7 @@ dsb_c = function(..., frame = parent.frame(), vectorize = FALSE,
   res = vector("list", n_dots)
   for(i in 1:n_dots){
     res[[i]] = string_ops_internal(dots[[i]], is_dsb = TRUE, frame = frame,
-                                   string_as_box = string_as_box,
+                                   slash = slash,
                                    sep = sep, vectorize = TRUE, check = TRUE,
                                    collapse = NULL, fun_name = "dsb_c")
   }
@@ -737,7 +737,7 @@ dsb_c = function(..., frame = parent.frame(), vectorize = FALSE,
 #' This is in fact equivalent to `cub("{U, ''s, c ! yes!}")`. Note that this behavior 
 #' is triggered only when appropriate.
 #' However in some instances it may interfere with what the user really wants. You can 
-#' disable this feature with `string_as_box = FALSE`.
+#' disable this feature with `nest = FALSE`.
 #' 
 #' @section Operations without arguments:
 #' 
@@ -871,11 +871,11 @@ dsb_c = function(..., frame = parent.frame(), vectorize = FALSE,
 #' ** conditions
 #' 
 cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-               string_as_box = TRUE, collapse = NULL, use_DT = TRUE){
+               slash = TRUE, collapse = NULL, use_DT = TRUE){
 
 
   if(!missing(vectorize)) check_logical(vectorize, scalar = TRUE)
-  if(!missing(string_as_box)) check_logical(string_as_box, scalar = TRUE)
+  if(!missing(slash)) check_logical(slash, scalar = TRUE)
   if(!missing(collapse)) check_character(collapse, null = TRUE, scalar = TRUE)
   if(!missing(sep)) check_character(sep, scalar = TRUE)
   if(!missing(frame)) check_envir(frame)
@@ -896,7 +896,7 @@ cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
   # is_root is only used to enable DT evaluation
 
   res = string_ops_internal(..., is_dsb = FALSE, frame = frame, sep = sep,
-                            vectorize = vectorize, string_as_box = string_as_box,
+                            vectorize = vectorize, slash = slash,
                             collapse = collapse, is_root = use_DT,
                             check = TRUE, fun_name = "cub")
 
@@ -910,22 +910,22 @@ cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
 
 .cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-                check = FALSE, string_as_box = FALSE, use_DT = FALSE){
+                check = FALSE, slash = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
 
   string_ops_internal(..., is_dsb = FALSE, frame = frame,
-                      string_as_box = string_as_box, sep = sep,
+                      slash = slash, sep = sep,
                       vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".cub")
 }
 
 
-cub_cat = function(..., sep = "", frame = parent.frame(), string_as_box = FALSE){
+cub_cat = function(..., sep = "", frame = parent.frame(), slash = FALSE){
   set_pblm_hook()
 
   res = string_ops_internal(..., is_dsb = FALSE, frame = frame,
-                            string_as_box = string_as_box,
+                            slash = slash,
                             sep = sep, vectorize = FALSE, check = TRUE,
                             collapse = "", fun_name = "cub_cat")
 
@@ -933,12 +933,12 @@ cub_cat = function(..., sep = "", frame = parent.frame(), string_as_box = FALSE)
 }
 
 
-cub_msg = function(..., sep = "", frame = parent.frame(), string_as_box = FALSE,
+cub_msg = function(..., sep = "", frame = parent.frame(), slash = FALSE,
                    appendLF = TRUE){
   set_pblm_hook()
 
   res = string_ops_internal(..., is_dsb = FALSE, frame = frame,
-                            string_as_box = string_as_box,
+                            slash = slash,
                             sep = sep, vectorize = FALSE, check = TRUE,
                             collapse = "", fun_name = "cub_msg")
 
@@ -948,7 +948,7 @@ cub_msg = function(..., sep = "", frame = parent.frame(), string_as_box = FALSE,
 
 
 cub_c = function(..., frame = parent.frame(), vectorize = FALSE,
-                 string_as_box = TRUE){
+                 slash = TRUE){
   set_pblm_hook()
 
   dots = error_sender(list(...), "Some elements in `...` could not be evaluated.")
@@ -962,7 +962,7 @@ cub_c = function(..., frame = parent.frame(), vectorize = FALSE,
   res = vector("list", n_dots)
   for(i in 1:n_dots){
     res[[i]] = string_ops_internal(dots[[i]], is_dsb = FALSE, frame = frame,
-                                   string_as_box = string_as_box,
+                                   slash = slash,
                                    sep = sep, vectorize = TRUE, check = TRUE,
                                    collapse = NULL, fun_name = "cub_c")
   }
@@ -1011,7 +1011,7 @@ setup_help = function(){
     "    Ex: x = c(\"Doe\", \"Smith\")",
     "        dsb(\"Hi .[' and 'c!John .[x]]\") -> \"Hi John Doe and John Smith\"",
     "",
-    "    If string_as_box = TRUE (default), the initial string is implicitly embedded in .[] ",
+    "    If nest = TRUE (default), the initial string is implicitly embedded in .[] ",
     "  and considered as verbatim. This means that operations can be applied from the start.",
     "    Ex: dsb(\"', 's!a1, b3, d8\") -> c(\"a1\", \"b3\", \"d8\")",
     "",
@@ -1228,9 +1228,9 @@ setup_help = function(){
 #### Internal ####
 ####
 
-string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
+string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(), 
                                sep = "", vectorize = FALSE,
-                               string_as_box = TRUE, collapse = NULL,
+                               slash = TRUE, collapse = NULL,
                                help = NULL, is_root = FALSE,
                                check = FALSE, fun_name = "dsb", plural_value = NULL){
 
@@ -1299,7 +1299,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
     if(length(x) > 1){
       stop_hook("`", fun_name, "` can only be applied to character scalars. ",
                 "Problem: the argument is of length ",
-           length(qui), "")
+           length(x), "")
     }
 
   } else {
@@ -1327,8 +1327,8 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
       n = length(dots)
       res = vector("list", n)
       for(i in 1:n){
-        res[[i]] = string_ops_internal(dots[[i]], is_dsb = is_dsb, string_as_box = string_as_box, 
-                                       frame = frame, check = check)
+        res[[i]] = string_ops_internal(dots[[i]], is_dsb = is_dsb, slash = slash, 
+                                       frame = frame, check = check, fun_name = fun_name)
       }
 
       return(unlist(res))
@@ -1341,14 +1341,14 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
   BOX_OPEN = if(is_dsb) ".[" else "{"
 
-  if(string_as_box){
-    x_parsed = list(cpp_string_ops_full_string(x, is_dsb))
-
-    if(identical(x_parsed[[1]][[2]], "")){
-      x_parsed = cpp_string_ops(x, is_dsb)
-    }
-
-  } else if(!grepl(BOX_OPEN, x, fixed = TRUE)){
+  if(slash && substr(x, 1, 1) == "/"){
+    # we apply the "slash" operation
+    x = sop_operators(substr(x, 2, nchar(x)), "/", NULL, "", check = check, frame = frame, 
+                      conditional_flag = 0, is_dsb = is_dsb, fun_name = fun_name)
+    return(x)
+  } 
+  
+  if(!grepl(BOX_OPEN, x, fixed = TRUE)){
     return(x)
 
   } else {
@@ -1400,7 +1400,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
       if(i == 1){
         res = xi
-      } else {
+      } else if(nchar(xi) > 0){
         res = paste0(res, xi)
       }
 
@@ -1414,40 +1414,33 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
       if(length(operators) == 0){
 
-        if(string_as_box){
-          # means verbatim => no evaluation
-          if(grepl(BOX_OPEN, xi, fixed = TRUE)){
-            xi = string_ops_internal(xi, is_dsb = is_dsb, frame = frame, string_as_box = FALSE, check = check)
-          }
-
+        # we need to evaluate xi
+        if(check){
+          xi_call = error_sender(str2lang(xi), "The value `", xi,
+                                  "` could not be parsed.")
         } else {
-          # we need to evaluate xi
-          if(check){
-            xi_call = error_sender(str2lang(xi), "The value `", xi,
-                                   "` could not be parsed.")
-          } else {
-            xi_call = str2lang(xi)
-          }
+          xi_call = str2lang(xi)
+        }
 
-          if(is.character(xi_call)){
-            # if a string literal => it's nesting
-            if(grepl(BOX_OPEN, xi_call, fixed = TRUE)){
-              xi = string_ops_internal(xi_call, is_dsb = is_dsb, frame = frame, string_as_box = FALSE, check = check)
-            }
-          } else {
-            if(is_dt){
-              if(check){
-                xi = error_sender(eval_dt(xi_call, frame), "The value `", xi,
-                                  "` could not be evaluated.")
-              } else {
-                xi = eval_dt(xi_call, frame)
-              }
-            } else if(check){
-              xi = error_sender(eval(xi_call, frame), "The value `", xi,
+        if(is.character(xi_call)){
+          # if a string literal => it's nesting
+          if(grepl(BOX_OPEN, xi_call, fixed = TRUE)){
+            xi = string_ops_internal(xi_call, is_dsb = is_dsb, frame = frame, 
+                                     slash = FALSE, check = check, fun_name = fun_name)
+          }
+        } else {
+          if(is_dt){
+            if(check){
+              xi = error_sender(eval_dt(xi_call, frame), "The value `", xi,
                                 "` could not be evaluated.")
             } else {
-              xi = eval(xi_call, frame)
+              xi = eval_dt(xi_call, frame)
             }
+          } else if(check){
+            xi = error_sender(eval(xi_call, frame), "The value `", xi,
+                              "` could not be evaluated.")
+          } else {
+            xi = eval(xi_call, frame)
           }
         }
 
@@ -1548,13 +1541,13 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
         if(!is_plural) {
           # regular operators
 
-          if(operators[1] %in% c("=", "==")){
+          if(operators[1] %in% c("&", "&&")){
             # if else operator
             is_ifelse = TRUE
             xi_raw = xi = operators[2]
             verbatim = FALSE
           } else if(operators[n_op] == "/"){
-            operators = "',[ \t\n\r]*'S"
+            operators = "/"
           } else {
             operators = operators[-n_op]
             # The two separators ? and ! have no default operation
@@ -1572,8 +1565,8 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
         if(!is_xi_done){
           if(verbatim && grepl(BOX_OPEN, xi, fixed = TRUE)){
-            xi = string_ops_internal(xi, is_dsb = is_dsb, frame = frame, string_as_box = FALSE,
-                                     vectorize = concat_nested, check = check)
+            xi = string_ops_internal(xi, is_dsb = is_dsb, frame = frame, slash = FALSE,
+                                     vectorize = concat_nested, check = check, fun_name = fun_name)
 
           } else if(!verbatim){
             # evaluation
@@ -1681,12 +1674,13 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
             if(check){
               xi = error_sender(sop_operators(xi, op_parsed$operator, op_parsed$options, argument,
-                                              check = check,
-                                              frame = frame, conditional_flag = conditional_flag),
-                                "The operation `", opi, "` failed. Please revise your call.")
+                                              check = check, frame = frame, conditional_flag = conditional_flag,
+                                              is_dsb = is_dsb, fun_name = fun_name),
+                                "The operation {bq, '_;;;_ => ;'R ? opi} failed. Please revise your call.")
             } else {
               xi = sop_operators(xi, op_parsed$operator, op_parsed$options, argument, check = check,
-                                 frame = frame, conditional_flag = conditional_flag)
+                                 frame = frame, conditional_flag = conditional_flag,
+                                 is_dsb = is_dsb, fun_name = fun_name)
             }
           }
         }
@@ -1772,50 +1766,44 @@ sop_char2operator = function(x, fun_name){
   argument = op_parsed$argument
   do_eval = op_parsed$eval
   
-  if(substr(op, 1, 1) %in% c("@", "&", "<", "~")){
-    ok = TRUE
+  # we partially match operators if needed
+  if(!op %in% OPERATORS){
+    op = check_set_options(op, OPERATORS, case = TRUE, free = TRUE)
+    op_parsed$operator = op
+  }
 
-  } else {
+  if(nchar(argument) == 0){
+    # no argument provided: we need to:
+    # - set default values if available
+    # - send error if operator requires argument
+    
+    # default values
+    argument = switch(op,
+                      s = " ", S = ",[ \t\n]*",
+                      x = "[[:alnum:]]+", X = "[[:alnum:]]+", extract = "[[:alnum:]]+",
+                      c = " ", C = ", | and ",
+                      times = 1, each = 1,
+                      first = 1, last = 1,
+                      cfirst = 1, clast = 1,
+                      trim = 1, 
+                      "")
+    
+    op_parsed$argument = argument
 
-    # we partially match operators if needed
-    if(!op %in% OPERATORS){
-      op = check_set_options(op, OPERATORS, case = TRUE, free = TRUE)
-      op_parsed$operator = op
-    }
+    if(op %in% c("R", "r", "%", "k", "K", "append", "get", "is", "which")){
+      ex = c("R" = 'x = "She loves me."; dsb("\'s\\b => d\'R ? x")',
+            "r" = 'x = "Amour"; dsb(".[\'ou => e\'r ? x]...")',
+            "%" = 'dsb("pi is: .[%.03f ? pi]")',
+            "k" = 'dsb("The first 8 letters of the longuest word are: .[8k, q ! the longuest word].")',
+            "K" = 'x = 5:9; dsb("The first 2 elements of `x` are: .[2K, C ? x].")',
+            "get" = 'x = row.names(mtcars) ; dsb("My fav. cars are .[\'toy\'get.ignore, \'the \'app, enum ? x].")',
+            "is" = 'x = c("Bob", "Pam") ; dsb("\'am\'is ? x")',
+            "which" = 'x = c("Bob", "Pam") ; dsb("\'am\'which ? x")',
+            "append" = 'x = "those, words"; dsb("Let\'s emphasize .[S, \'**\'append.both, c ? x].")')
 
-    if(nchar(argument) == 0){
-      # no argument provided: we need to:
-      # - set default values if available
-      # - send error if operator requires argument
-      
-      # default values
-      argument = switch(op,
-                        s = " ", S = ",[ \t\n]*",
-                        x = "[[:alnum:]]+", X = "[[:alnum:]]+", extract = "[[:alnum:]]+",
-                        c = " ", C = ", || and ",
-                        times = 1, each = 1,
-                        first = 1, last = 1,
-                        cfirst = 1, clast = 1,
-                        trim = 1, 
-                        "")
-      
-      op_parsed$argument = argument
-
-      if(op %in% c("R", "r", "%", "k", "K", "append", "get", "is", "which")){
-        ex = c("R" = 'x = "She loves me."; dsb("\'s\\b => d\'R ? x")',
-              "r" = 'x = "Amour"; dsb(".[\'ou => e\'R ? x]...")',
-              "%" = 'dsb("pi is: .[%.03f ? pi]")',
-              "k" = 'dsb("The first 8 letters of the longuest word are: .[8k, q ! the longuest word].")',
-              "K" = 'x = 5:9; dsb("The first 2 elements of `x` are: .[2K, C ? x].")',
-              "get" = 'x = row.names(mtcars) ; dsb("My fav. cars are .[\'toy\'get.ignore, \'the \'app, enum ? x].")',
-              "is" = 'x = c("Bob", "Pam") ; dsb("\'am\'is ? x")',
-              "which" = 'x = c("Bob", "Pam") ; dsb("\'am\'which ? x")',
-              "append" = 'x = "those, words"; dsb("Let\'s emphasize .[S, \'**\'append.both, c ? x].")')
-
-        ex = bespoke_msg(ex[op])
-        stop_hook("The operator `", op,
-                "` has no default value, you must provide values explicitly.\n Example: ", ex)
-      }
+      ex = bespoke_msg(ex[op])
+      stop_hook("The operator `", op,
+              "` has no default value, you must provide values explicitly.\n Example: ", ex)
     }
   }
 
@@ -1862,49 +1850,51 @@ sop_char2operator = function(x, fun_name){
 }
 
 
-sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, conditional_flag = 0){
+sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
+                         conditional_flag = 0, is_dsb = FALSE, fun_name = "cub"){
 
   # conditional_flag:  0 nothing
   #                    1 keep track of conditional things
   #                    2 apply conditional
+  
+  message("Operation: ", op)
+
 
   extra = attr(x, "extra")
   group_index = attr(x, "group_index")
 
-  if(op %in% c("s", "S")){
-    # S, C ####
-    # Split is always applied on verbatim stuff => length 1
-
-    is_ignore = opt_equal(options, "ignore")
-    is_fixed = opt_equal(options, "fixed")
-
-    # fixed = op == "s"
-    if(is_ignore){
-      # ignore case
-      is_fixed = FALSE
-      argument = paste0("(?i)", argument)
-    }
-
-    x_split = strsplit(x, argument, fixed = is_fixed, perl = !is_fixed)
-
-    if(conditional_flag != 0){
-      # we keep track of the group index
-      x_len_all = lengths(x_split)
-      # I could avoid the last line... later
-      group_index = rep(seq_along(x_len_all), x_len_all)
-      group_index = cpp_recreate_index(group_index)
-    }
-
-    # NOTA:
-    # strsplit returns stg of length 0 for empty strings, my algo then removes these elements
-    # should I drop them or keep them????
-    # ex: strsplit("", "m")
-
-    res = unlist(x_split)
-
-    res = res[nchar(res) > 0]
-
+  if(op == "/"){
+    # slash ####
+    
+    # What happens:
+    # - string is split wrt commas
+    # - any interpolation is vectorized
+    
+    res = strsplit(x, split = ",[ \t\n\r]*")[[1]]
+    
+    box = if(is_dsb) ".[" else "{"
+    
+    is_open = grepl(box, res, fixed = TRUE)
+    n_open = sum(is_open)
+    if(n_open > 0){
+      n_res = length(res)
+      all_elements = vector("list", n_res)
+      
+      for(i in 1:n_res){
+        if(is_open[i]){
+          all_elements[[i]] = string_ops_internal(res[i], is_dsb = is_dsb, frame = frame,
+                                                  check = check, fun_name = fun_name)  
+        } else {
+          all_elements[[i]] = res[i]
+        }        
+      }
+      
+      res = do.call(base::c, all_elements)      
+    }    
+    
+    
   } else if(op %in% c("c", "C")){
+    # C ####
     # collapse
 
     # argument of the form: 'main_sep|last_sep'
@@ -1912,17 +1902,25 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     is_last = FALSE
     if(length(x) > 1 && grepl("|", argument, fixed = TRUE)){
       is_last = TRUE
-      arg_split = strsplit(argument, "(?<!\\|)\\|", perl = TRUE)[[1]]
+      arg_split = strsplit(argument, "(?<!\\\\)\\|", perl = TRUE)[[1]]
       if(grepl("\\", argument, fixed = TRUE)){
         arg_split = gsub("\\|", "|", arg_split, fixed = TRUE)
       }
 
       argument = arg_split[[1]]
       if(length(arg_split) == 1){
+        # case qith escape \\|
+        is_last = grepl("(?<!\\\\)\\|$", argument, perl = TRUE)
+        if(is_last){
+          sep_last = ""
+        }
+      } else if(length(arg_split) == 2){
+        # regular case
         sep_last = arg_split[[2]]
       } else {
+        arg_split = as.list(arg_split)
         args_paste = arg_split[-1]
-        args_paste["sep"] = "|"
+        args_paste[["sep"]] = "|"
         sep_last = do.call(paste, args_paste)
       }
     }
@@ -1951,9 +1949,9 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       }
 
     }
-
-  } else if(op %in% c("r", "R", "get", "is", "which", "x", "X", "extract")){
-    # R, X, get, is, which ####
+    
+  } else if(op %in% c("s", "S", "r", "R", "get", "is", "which", "x", "X", "extract")){
+    # S, R, X, get, is, which ####
 
     valid_options = c("word", "ignore", "fixed")
     if(op == "extract"){
@@ -1975,10 +1973,10 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       }
     }
 
-    if(op %in% c("X", "x", "extract")){
+    if(op %in% c("s", "S", "X", "x", "extract")){
       # otherwise => dealt with in str_is or str_clean
       
-      pat_parsed = parse_str_is_pattern(argument, c("word", "ignore", "fixed"), parse_logical = FALSE)
+      pat_parsed = parse_regex_pattern(argument, c("word", "ignore", "fixed"), parse_logical = FALSE)
       flags = pat_parsed$flags
       argument = pat_parsed$patterns
 
@@ -2006,14 +2004,34 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     # now the operations
     #
 
-    if(op %in% c("r", "R")){
+    if(op %in% c("s", "S")){
+      x_split = strsplit(x, argument, fixed = is_fixed, perl = !is_fixed)
+
+      if(conditional_flag != 0){
+        # we keep track of the group index
+        x_len_all = lengths(x_split)
+        # I could avoid the last line... later
+        group_index = rep(seq_along(x_len_all), x_len_all)
+        group_index = cpp_recreate_index(group_index)
+      }
+
+      # NOTA:
+      # strsplit returns stg of length 0 for empty strings, my algo then removes these elements
+      # should I drop them or keep them????
+      # ex: strsplit("", "m")
+
+      res = unlist(x_split)
+
+      res = res[nchar(res) > 0]
+      
+    } else if(op %in% c("r", "R")){
       is_total = "total" %in% options
 
       pipe = "=>"
       if(grepl(" => ", argument, fixed = TRUE)){
         pipe = " => "
-        }
-        
+      }
+
       res = str_clean(x, argument, pipe = pipe, sep = "", 
                       ignore.case = is_ignore, fixed = is_fixed, word = is_word, 
                       total = is_total)
@@ -2101,17 +2119,23 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     group_index = NULL
 
-  } else if(op == "U"){
-    # U, L, titles, Q, F, % ####
-
-    res = toupper(x)
-
-  } else if(op == "u"){
-    # First letter only, if relevant
-    res = x
-    substr(res, 1, 1) = toupper(substr(x, 1, 1))
-
-  } else if(op %in% c("l", "L")){
+  } else if(op == "upper"){
+    # upper, lower, title, Q, F, % ####
+    
+    options = check_set_options(options, c("first", "sentence"))
+    
+    if("first" %in% options){
+      # First letter only, if relevant
+      res = x
+      substr(res, 1, 1) = toupper(substr(x, 1, 1))  
+    } else if("sentence" %in% options){
+      # we add upper case like in sentences
+      res = gsub("(^|[.?!])(\\s*)([\\p{L}])", "\\1\\2\\U\\3", x, perl = TRUE)
+    } else {
+      res = toupper(x)  
+    }
+    
+  } else if(op == "lower"){
     res = tolower(x)
 
   } else if(op == "title"){
@@ -2578,6 +2602,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       opt_default = c("letter", "upper", "compact")
     } else if(op == "n"){
       opt_default = c("letter", "upper", "0", "zero")
+    } else if(op == "len"){
+      opt_default = c("letter", "upper", "format")
     } else {
       opt_default = c("letter", "upper")
     }
@@ -2641,6 +2667,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
       if(is_letter){
         res = n_letter(res)
+      } else if(opt_equal(option, "format")){
+        res = format(res, big.mark = ",")
       }
     }
 
@@ -2684,7 +2712,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
   } else if(op == "erase"){
 
     #
-    # erase, rm, num ####
+    # erase, rm, nuke, num ####
     #
 
     options = check_set_options(options, c("fixed", "ignore", "word"))
@@ -2701,9 +2729,14 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       res[qui] = ""
     }
 
-  } else if(op == "rm"){
+  } else if(op %in% c("rm", "nuke")){
     options = check_set_options(options, c("empty", "blank", "noalpha", "noalnum", "all", 
                                            "fixed", "ignore", "word"))
+                                           
+    if(op == "nuke"){
+      res = character(0)
+      return(res)
+    }
     
     res = NULL
     if(argument != ""){
@@ -2790,84 +2823,93 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
       res = x
     }
 
-  } else if(substr(op, 1, 1) %in% c("@", "&", "<")){
+  } else if(op %in% c("if", "vif")){
     #
-    # Conditions: @, &, < ####
+    # Conditions: if, vif ####
     #
-
-    # These aren't really useful and are really complicated 
-    # => maybe I should drop them????
-
-    code = substr(op, 1, 1)
-    operators_TF = cpp_string_op_if_extract(op)
-
-    if(isFALSE(operators_TF[[1]])){
-      if(code == ">"){
-        cond = gsub(">\\(.+", ">", op)
-      } else {
-        cond = gsub("\\(.+", "", op)
-      }
-
-      example = c("@" = 'x = c("Mark", "Ben", "Laetitia"); dsb("And the long names are .[@<=3(D), Q, C ? x]!")',
-                  "&" = 'x = c("mother", "in", "law"); dsb("She stings like my .[&(\'-\'c) ? x].")',
-                  "<" = 'x = c("5", "five"); dsb(".[u ? x] is a .[< ^\\d+$ >(d, \'number\'a ; d, \'word\'a) ? x].")')
-                  # {=is.numeric(x) ; number ; word}
-
-      example = bespoke_msg(example[code])
-
-      # means error
-      stop_hook("Parsing error in the operators of the `", op, "` statement. ",
-           "It must be of the form: ", cond, "(true ; false) with `true` and `false` chains of valid operations (although you cannot use other 'if's).",
-           "\nExample:", example)
+    
+    info = strsplit(argument, "_;;;_", fixed = TRUE)[[1]]
+    
+    cond_raw = info[[1]]
+    true_section = info[[2]]
+    is_false_section = length(info) == 3
+    if(is_false_section){
+      false_section = info[[3]]  
+    } else {
+      false_section = NULL
     }
 
-    cond = operators_TF[[1]]
-    true = operators_TF[[2]]
-    false = operators_TF[[3]]
-
-    # We compute the condition
-    is_len = code == "#"
-    len_true = FALSE
-    if(code == "<"){
-      regex = str_trim(cond, 1, 1)
-
-      qui = str_is(x, pattern = regex)
-
-      qui[is.na(qui)] = FALSE
-
-      if(do_negate){
-        qui = !qui
-      }
-
-      x_true = x[qui]
-      x_false = x[!qui]
-
-    } else if(code == "@"){
-
-      if(cond == "@"){
-        cond = "@>0"
-      }
-
-      nc = nchar(x)
-      cond = gsub("@", "nc", cond, fixed = TRUE)
-      qui = eval(str2lang(cond))
-
-      qui[is.na(qui)] = FALSE
-
-      x_true = x[qui]
-      x_false = x[!qui]
-
+    # computing the condition
+    # a) parsing
+    if(check){
+      cond_parsed = error_sender(str2lang(cond_raw), "The string operation `", op, "` should be of the form ",
+                                 op, "(condition ; true ; false). \nPROBLEM: the condition could not be parsed.")
     } else {
-
-      if(cond == "&"){
-        cond = "&>1"
+      cond_parsed = str2lang(cond_raw)
+    }
+    
+    # b) evaluating
+    if(is.character(cond_parsed)){
+      # REGEX
+      
+      if(check){
+        cond = error_sender(str_is(x, cond_parsed), "The operation is of the form {bq?op}(cond ; true ; false). ",
+                            "When `cond` is a pure character string, the function `str_is` is applied with `cond` being the searched pattern.",
+                            "\nPROBLEM: in {bq ! {op}({'_;;;_ => ;'R ? argument})}, the condition {bq?cond_raw} led to an error.")
+      } else {
+        cond = str_is(x, cond_parsed)
+      }      
+      
+    } else {
+      vars = all.vars(cond_parsed)
+      my_data = list()
+      for(v in vars){
+        if(v %in% c(".N", ".len")){
+          my_data[[v]] = length(x)
+        } else if(v %in% c(".nchar", ".C")){
+          my_data[[v]] = nchar(x)
+        } else if(v == "."){
+          my_data[[v]] = x
+        }
       }
-
-      lx = length(x)
-      cond = gsub("&", "lx", cond, fixed = TRUE)
-      len_true = eval(str2lang(cond))
-
-      if(len_true){
+      
+      if(check){
+        cond = error_sender(eval(cond_parsed, my_data, frame), "The string operation `", op, "` should be of the form ",
+                                  op, "(condition ; true ; false). \nPROBLEM: the condition `", cond_parsed, 
+                                  "`could not be evaluated.")  
+      } else {
+        cond = eval(cond_parsed, my_data, frame)
+      }
+    }
+    
+    # further error checking
+    if(!length(cond) %in% c(1, length(x))){
+      stop_hook("In {bq?op} operations, the condition (here {bq?cond_raw}) must be either of length 1 (applying to the full string), ",
+                "either of the length of the interpolated value.", 
+                "\nPROBLEM: the condition is of length {len?cond} while the interpolated value is of length {len?x}.")
+    }
+    
+    if(!is.logical(cond)){
+      stop_hook("In {bq?op} operations, the condition (here {bq?cond_raw}) must be logical.",
+                "\nPROBLEM: the condition is not logical, instead it is of class {enum.bq ? class(cond)}.")
+    }
+    
+    # NA = FALSE
+    if(anyNA(cond)){
+      cond[is.na(cond)] = FALSE
+    }
+    
+    #
+    # Computing the operations
+    #    
+    
+    is_elementwise = length(cond) > 1
+    
+    if(is_elementwise){
+      x_true = x[cond]
+      x_false = x[!cond]
+    } else {
+      if(cond){
         x_true = x
         x_false = character(0)
       } else {
@@ -2875,69 +2917,86 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
         x_false = x
       }
     }
-
-
-    # All operators that change the length of the element:
-    # FORBIDDEN = c("c", "C", "times", "each", "s", "S", "i", "I", "A", "v", "V")
-    FORBIDDEN = c()
+    
+    # All operations that change the length of the element should be forbidden
+    # we check that on the fly
 
     for(state in c("true", "false")){
 
       if(state == "true"){
-        if(is_len && !len_true) next
         xi = x_true
       } else {
-        if(is_len && len_true) next
         xi = x_false
       }
-
-      index = 2 + (state == "false")
-      op_all = operators_TF[[index]]
-
-      for(i in seq_along(op_all)){
-        opi = op_all[i]
-
-        op_parsed = sop_char2operator(opi, fun_name)
-
-        if(!is_len && op_parsed$operator %in% FORBIDDEN){
-          stop_hook("In the `", op, "` statement, you cannot use operators that would change the length of the vector, hence `",
-                  op_parsed$operator, "` is forbidden.")
-        }
-
-        if(op_parsed$eval){
-          if(check){
-            argument_call = error_sender(up = 1, str2lang(op_parsed$argument),
-                                       "In operation `", opi, "`, the value `",
-                                       op_parsed$argument, "` could not be parsed.")
-
-            argument = error_sender(up = 1, eval(argument_call, frame),
-                                  "In operation `", opi, "`, the value `",
-                                  op_parsed$argument, "` could not be evaluated.")
-          } else {
-            argument = eval(str2lang(op_parsed$argument), frame)
-          }
-
-        } else {
-          argument = op_parsed$argument
-        }
-
-        if(check){
-          xi = error_sender(up = 1, sop_operators(xi, op_parsed$operator, op_parsed$options, argument),
-                            "The operation `", opi, "` failed. Please revise your call.")
-        } else {
-          xi = sop_operators(xi, op_parsed$operator, op_parsed$options, argument)
-        }
+      
+      if(length(xi) == 0){
+        next
       }
-
+      
+      if(state == "false" && !is_false_section){
+        break
+      }
+      
+      instruction = if(state == "true") true_section else false_section
+      
+      if(op == "if"){
+        n_old = length(xi)
+        xi = apply_simple_operations(xi, op, instruction, check, frame, conditional_flag, is_dsb, fun_name)
+        
+        if(is_elementwise && !length(xi) %in% c(0, n_old)){
+          stop_hook("In {bq?op} operations, when conditions are of length > 1, the operations either a) can ",
+                   "remove the string completely (e.g. with `nuke`), or b) must not change the length of the element.",
+                "\nPROBLEM: the original vector is of length {n?n_old} while after ",
+                "the operations it becomes of length {len.f ? xi}")
+        }
+      } else {
+        # verbatim if
+        xi = string_ops_internal(instruction, is_dsb = is_dsb, frame = frame, check = check, 
+                                fun_name = fun_name)
+      }
+      
       if(state == "true"){
         x_true = xi
       } else {
         x_false = xi
       }
     }
-
-    if(is_len){
-      res = if(len_true) x_true else x_false
+    
+    if(is_elementwise){
+      
+      if(length(x_true) == 0 && length(x_false) == 0){
+        res = character(0)
+        if(conditional_flag != 0){
+          group_index = NULL
+        }
+      } else if(length(x_true) == 0){
+        if(length(x_false) == 1){
+          res = rep(x_false, length(cond))
+        } else {
+          res = x_false
+        }
+        
+        if(conditional_flag != 0){
+          group_index = group_index[!cond]
+        }
+      } else if(length(x_false) == 0){
+        if(length(x_true) == 1){
+          res = rep(x_true, length(cond))
+        } else {
+          res = x_true
+        }
+        
+        if(conditional_flag != 0){
+          group_index = group_index[cond]
+        }
+      } else {
+        res = x
+        res[cond] = x_true
+        res[!cond] = x_false
+      }
+    } else {
+      
+      res = if(cond) x_true else x_false
 
       # we can add extra stuff, if needed
 
@@ -2963,91 +3022,11 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
           extra$str_add_last = paste0(extra$str_add_last, extra_if$str_add_last)
         }
       }
-
-    } else {
-      # extra is not touched
-
-      res = x
-
-      if(length(x_true) == 0 && length(x_false) == 0){
-        res = character(0)
-        if(conditional_flag != 0){
-          group_index = NULL
-        }
-      } else if(length(x_true) == 0){
-        res[!qui] = x_false
-        res = res[!qui]
-        if(conditional_flag != 0){
-          group_index = group_index[!qui]
-        }
-      } else if(length(x_false) == 0){
-        res[qui] = x_true
-        res = res[qui]
-        if(conditional_flag != 0){
-          group_index = group_index[qui]
-        }
-      } else {
-        res[qui] = x_true
-        res[!qui] = x_false
-      }
     }
 
-  } else if(substr(op, 1, 1) == "~"){
+  } else if(op == "~"){
     # Conditional: ~ ####
-
-    operators_cond = cpp_string_op_if_extract(op)
-
-    if(length(operators_cond[[3]]) != 0 || isFALSE(operators_cond[[1]])){
-      example = 'x = c("dear", "that\'s uncle Pegotty"); dsb("Hello .[\' \'s, ~(last1), c, u ? x].")'
-      example = bespoke_msg(example)
-
-      stop_hook("The conditional operator `~` must be of the form `~(operations)`. PROBLEM: `", op,
-                "` does not lead to a valid chain of operations.\nExample: ", example)
-    }
-
-    op_all = operators_cond[[2]]
-
-    # All operators that change the length of the element:
-    FORBIDDEN = c("K", "A", "Ar", "I", "Ir", "i", "ir")
-
-    xi = x
-
-    for(i in seq_along(op_all)){
-      opi = op_all[i]
-
-      op_parsed = sop_char2operator(opi, fun_name)
-
-      if(op_parsed$operator %in% FORBIDDEN){
-        stop_hook("In the conditional statement `", op, "` some oprators are forbiden. ",
-                  "PROBLEM: this is the case for `", op_parsed$operator, "`.")
-      }
-
-      if(op_parsed$eval){
-        if(check){
-          argument_call = error_sender(str2lang(op_parsed$argument),
-                                     "In operation `", opi, "`, the value `",
-                                     op_parsed$argument, "` could not be parsed.")
-
-          argument = error_sender(eval(argument_call, frame),
-                                "In operation `", opi, "`, the value `",
-                                op_parsed$argument, "` could not be evaluated.")
-        } else {
-          argument = eval(str2lang(op_parsed$argument), frame)
-        }
-
-      } else {
-        argument = op_parsed$argument
-      }
-
-      if(check){
-        xi = error_sender(sop_operators(xi, op_parsed$operator, op_parsed$options, argument, conditional_flag = 2),
-                          "The operation `", opi, "` failed. Please revise your call.")
-      } else {
-        xi = sop_operators(xi, op_parsed$operator, op_parsed$options, argument, conditional_flag = 2)
-      }
-    }
-
-    res = xi
+    res = apply_simple_operations(x, op, argument, check, frame, conditional_flag = 2, is_dsb, fun_name)
 
   } else if(op == "ascii"){
     # ascii, stop ####
@@ -3057,6 +3036,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
 
     # current limitation: does not work for quoted words
     #                     but quoted words are not stopwords usually
+    # + the algo is quite inefficient
 
     # Snowball stopwords
     # These come from http://snowballstem.org/algorithms/english/stop.txt
@@ -3103,7 +3083,6 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
     id = id[-qui_drop]
 
     res = cpp_paste_conditional(x_vec, id)
-
 
   } else {
     user_ops = getOption("smagick_user_ops")
@@ -3264,7 +3243,7 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
          (op == "singular" && !IS_PLURAL && !(any(grepl("zero$", operators)) && IS_ZERO)) || 
          (op == "plural" && IS_PLURAL)){
           value = string_ops_internal(argument, is_dsb = is_dsb, frame = frame,
-                                      string_as_box = FALSE, check = check, 
+                                      slash = FALSE, check = check, fun_name = fun_name,
                                       plural_value = xi)
         if(value != ""){
           res[i] = value
@@ -3355,19 +3334,100 @@ sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
   # we allow nestedness only for single values
   if(length(res) == 1){
     res = string_ops_internal(res, is_dsb = is_dsb, frame = frame,
-                                string_as_box = FALSE, check = check)
+                                slash = FALSE, check = check, fun_name = fun_name)
   }
 
   res
 }
 
 
+apply_simple_operations = function(x, op, operations_string, check = FALSE, frame = NULL, 
+                                 conditional_flag = 0, is_dsb = FALSE, fun_name = "cub"){
+                                  
+  op_all = cpp_parse_simple_operations(operations_string, is_dsb)
+    
+  if(length(op_all) == 0){
+    return(x)
+  }
+  
+  if(identical(op_all[1], "_ERROR_")){
+    op_msg = if(op =='~') "~(op1, op2)" else "if(cond ; op1, op2 ; op3, op4)"
+    last = gsub("_;;;_", ";", tail(op_all, 1))
+    extra = ""
+    if(last %in% c("!", "?")){
+      extra = cub("The character {bq?last} is forbidden in operations.")
+    } else if(last != "_ERROR_"){
+      extra = cub("Operations must be of the form `'arg'operator.option` but the value {bq?last} is ill formed.")
+    } else {
+      extra = cub("The value {bq?operations} could not be parsed.")
+    }
+      
+    msg = cub("The operator {bq?op} expects a suite of valid operations (format: {bq?op_msg}). ",
+               "\nPROBLEM: the operations were not formatted correctly. ", extra)
+    msg = bespoke_msg(msg)
+    
+    stop_hook(msg)
+  }
+  
+  #
+  # applying the operations
+  #
+  
+  xi = x
+
+  for(i in seq_along(op_all)){
+    opi = op_all[i]
+
+    op_parsed = sop_char2operator(opi, fun_name)
+
+    if(op_parsed$eval){
+      if(check){
+        argument_call = error_sender(str2lang(op_parsed$argument), 
+                                     "In the operation `{op}()`, the ",
+                                     "{&length(op_all) == 1 ; operation ; chain of operations} ",
+                                     " {bq?operations_string} led to a problem.", 
+                                     "In operation {bq?opi}, the argument in backticks ", 
+                                     "(equal to {bq?op_parsed$argument}) is evaluated from the calling frame.",
+                                     "\nPROBLEM: the argument could not be parsed.")
+
+        argument = error_sender(eval(argument_call, frame),
+                              "In the operation `{op}()`, the ",
+                              "{&length(op_all) == 1 ; operation ; chain of operations} ",
+                              " {bq?operations_string} led to a problem.", 
+                              "In operation {bq?opi}, the argument in backticks ", 
+                              "(equal to {bq?op_parsed$argument}) is evaluated from the calling frame.",
+                              "\nPROBLEM: the argument could not be evaluated.")
+      } else {
+        argument = eval(str2lang(op_parsed$argument), frame)
+      }
+
+    } else {
+      argument = op_parsed$argument
+    }
+
+    if(check){
+      xi = error_sender(sop_operators(xi, op_parsed$operator, op_parsed$options, argument, 
+                                      conditional_flag = conditional_flag, is_dsb = is_dsb, fun_name = fun_name),
+                                     "In the operation `{op}()`, the ",
+                                     "{&length(op_all) == 1 ; operation ; chain of operations} ",
+                                     " {bq?operations_string} led to a problem.", 
+                                     "\nPROBLEM: the operation {opi} failed. Look up the doc?")
+    } else {
+      xi = sop_operators(xi, op_parsed$operator, op_parsed$options, argument, 
+                         conditional_flag = conditional_flag, is_dsb = is_dsb, fun_name = fun_name)
+    }
+  }
+
+  res = xi
+
+}
 
 setup_operations = function(){
   OPERATORS = c("s", "S", "x", "X", "extract", "c", "C", "r", "R",
                 "times", "each",
-                "u", "U", "l", "L", "q", "Q", "bq", "f", "F", "%",
-                "erase", "rm", "append", "Append", 
+                "~", "if", "vif",
+                "upper", "lower", "q", "Q", "bq", "f", "F", "%",
+                "erase", "rm", "nuke",  "append", "Append", 
                 "k", "K", "last", "first",
                 "cfirst", "clast", "unik", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",

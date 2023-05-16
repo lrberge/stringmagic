@@ -10,85 +10,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// cpp_parse_charselect
-List cpp_parse_charselect(SEXP Rstr);
-RcppExport SEXP _stringmagick_cpp_parse_charselect(SEXP RstrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_parse_charselect(Rstr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_parse_conditions_in_pattern
-List cpp_parse_conditions_in_pattern(SEXP Rstr);
-RcppExport SEXP _stringmagick_cpp_parse_conditions_in_pattern(SEXP RstrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_parse_conditions_in_pattern(Rstr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_equal_ignore_case
-LogicalVector cpp_equal_ignore_case(SEXP x_Rstr, SEXP y_Rstr, bool ignore_case);
-RcppExport SEXP _stringmagick_cpp_equal_ignore_case(SEXP x_RstrSEXP, SEXP y_RstrSEXP, SEXP ignore_caseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type x_Rstr(x_RstrSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type y_Rstr(y_RstrSEXP);
-    Rcpp::traits::input_parameter< bool >::type ignore_case(ignore_caseSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_equal_ignore_case(x_Rstr, y_Rstr, ignore_case));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_is_int_in_char
-bool cpp_is_int_in_char(SEXP Rstr);
-RcppExport SEXP _stringmagick_cpp_is_int_in_char(SEXP RstrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_is_int_in_char(Rstr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_is_trailing_dots
-bool cpp_is_trailing_dots(SEXP Rstr);
-RcppExport SEXP _stringmagick_cpp_is_trailing_dots(SEXP RstrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_is_trailing_dots(Rstr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_is_variable_name
-bool cpp_is_variable_name(SEXP Rstr);
-RcppExport SEXP _stringmagick_cpp_is_variable_name(SEXP RstrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_is_variable_name(Rstr));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_parse_name_stars
-List cpp_parse_name_stars(SEXP Rstr);
-RcppExport SEXP _stringmagick_cpp_parse_name_stars(SEXP RstrSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_parse_name_stars(Rstr));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_paste_conditional
 StringVector cpp_paste_conditional(StringVector x, IntegerVector id, std::string sep, std::string sep_last);
 RcppExport SEXP _stringmagick_cpp_paste_conditional(SEXP xSEXP, SEXP idSEXP, SEXP sepSEXP, SEXP sep_lastSEXP) {
@@ -185,27 +106,39 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_parse_str_is_pattern
-List cpp_parse_str_is_pattern(SEXP Rstr, bool parse_logical);
-RcppExport SEXP _stringmagick_cpp_parse_str_is_pattern(SEXP RstrSEXP, SEXP parse_logicalSEXP) {
+// cpp_parse_regex_pattern
+List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical);
+RcppExport SEXP _stringmagick_cpp_parse_regex_pattern(SEXP RstrSEXP, SEXP parse_logicalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
     Rcpp::traits::input_parameter< bool >::type parse_logical(parse_logicalSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_parse_str_is_pattern(Rstr, parse_logical));
+    rcpp_result_gen = Rcpp::wrap(cpp_parse_regex_pattern(Rstr, parse_logical));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_string_ops_new
-List cpp_string_ops_new(SEXP Rstr, bool is_dsb);
-RcppExport SEXP _stringmagick_cpp_string_ops_new(SEXP RstrSEXP, SEXP is_dsbSEXP) {
+// cpp_string_ops
+List cpp_string_ops(SEXP Rstr, bool is_dsb);
+RcppExport SEXP _stringmagick_cpp_string_ops(SEXP RstrSEXP, SEXP is_dsbSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
     Rcpp::traits::input_parameter< bool >::type is_dsb(is_dsbSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_string_ops_new(Rstr, is_dsb));
+    rcpp_result_gen = Rcpp::wrap(cpp_string_ops(Rstr, is_dsb));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_string_ops_nested
+List cpp_string_ops_nested(SEXP Rstr, bool is_dsb);
+RcppExport SEXP _stringmagick_cpp_string_ops_nested(SEXP RstrSEXP, SEXP is_dsbSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_dsb(is_dsbSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_string_ops_nested(Rstr, is_dsb));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -228,6 +161,18 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_parse_operator(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_parse_simple_operations
+std::vector<std::string> cpp_parse_simple_operations(SEXP Rstr, bool is_dsb);
+RcppExport SEXP _stringmagick_cpp_parse_simple_operations(SEXP RstrSEXP, SEXP is_dsbSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_dsb(is_dsbSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_parse_simple_operations(Rstr, is_dsb));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -267,13 +212,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_stringmagick_cpp_parse_charselect", (DL_FUNC) &_stringmagick_cpp_parse_charselect, 1},
-    {"_stringmagick_cpp_parse_conditions_in_pattern", (DL_FUNC) &_stringmagick_cpp_parse_conditions_in_pattern, 1},
-    {"_stringmagick_cpp_equal_ignore_case", (DL_FUNC) &_stringmagick_cpp_equal_ignore_case, 3},
-    {"_stringmagick_cpp_is_int_in_char", (DL_FUNC) &_stringmagick_cpp_is_int_in_char, 1},
-    {"_stringmagick_cpp_is_trailing_dots", (DL_FUNC) &_stringmagick_cpp_is_trailing_dots, 1},
-    {"_stringmagick_cpp_is_variable_name", (DL_FUNC) &_stringmagick_cpp_is_variable_name, 1},
-    {"_stringmagick_cpp_parse_name_stars", (DL_FUNC) &_stringmagick_cpp_parse_name_stars, 1},
     {"_stringmagick_cpp_paste_conditional", (DL_FUNC) &_stringmagick_cpp_paste_conditional, 4},
     {"_stringmagick_cpp_normalize_ws", (DL_FUNC) &_stringmagick_cpp_normalize_ws, 1},
     {"_stringmagick_cpp_normalize_string", (DL_FUNC) &_stringmagick_cpp_normalize_string, 4},
@@ -282,10 +220,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_find_first_index", (DL_FUNC) &_stringmagick_cpp_find_first_index, 3},
     {"_stringmagick_cpp_group_rev_index", (DL_FUNC) &_stringmagick_cpp_group_rev_index, 1},
     {"_stringmagick_cpp_recreate_index", (DL_FUNC) &_stringmagick_cpp_recreate_index, 1},
-    {"_stringmagick_cpp_parse_str_is_pattern", (DL_FUNC) &_stringmagick_cpp_parse_str_is_pattern, 2},
-    {"_stringmagick_cpp_string_ops_new", (DL_FUNC) &_stringmagick_cpp_string_ops_new, 2},
+    {"_stringmagick_cpp_parse_regex_pattern", (DL_FUNC) &_stringmagick_cpp_parse_regex_pattern, 2},
+    {"_stringmagick_cpp_string_ops", (DL_FUNC) &_stringmagick_cpp_string_ops, 2},
+    {"_stringmagick_cpp_string_ops_nested", (DL_FUNC) &_stringmagick_cpp_string_ops_nested, 2},
     {"_stringmagick_cpp_extract_quote_from_op", (DL_FUNC) &_stringmagick_cpp_extract_quote_from_op, 1},
     {"_stringmagick_cpp_parse_operator", (DL_FUNC) &_stringmagick_cpp_parse_operator, 1},
+    {"_stringmagick_cpp_parse_simple_operations", (DL_FUNC) &_stringmagick_cpp_parse_simple_operations, 2},
     {"_stringmagick_cpp_to_integer", (DL_FUNC) &_stringmagick_cpp_to_integer, 1},
     {"_stringmagick_cpp_combine_clusters", (DL_FUNC) &_stringmagick_cpp_combine_clusters, 2},
     {"_stringmagick_cpp_create_pos", (DL_FUNC) &_stringmagick_cpp_create_pos, 1},

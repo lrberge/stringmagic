@@ -309,7 +309,7 @@ IntegerVector cpp_recreate_index(IntegerVector id){
 }
 
 // [[Rcpp::export]]
-List cpp_parse_str_is_pattern(SEXP Rstr, bool parse_logical){
+List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   // Limitation: multibyte strings are not handled properly
   //  in: "fixed, word/test"
   // out: -    flags: c("fixed", "word")
@@ -326,7 +326,7 @@ List cpp_parse_str_is_pattern(SEXP Rstr, bool parse_logical){
   //      - patterns: c("test", "wordle")
   //      -    is_or: c(FALSE, TRUE)
 
-   if(Rf_length(Rstr) != 1) stop("Internal error in cpp_parse_str_is_pattern: the vector must be of length 1.");
+   if(Rf_length(Rstr) != 1) stop("Internal error in cpp_parse_regex_pattern: the vector must be of length 1.");
 
   const char *str = CHAR(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
@@ -401,7 +401,8 @@ List cpp_parse_str_is_pattern(SEXP Rstr, bool parse_logical){
       is_or_all.push_back(is_or_tmp);
     } else {
       if(i > 1 && str[i - 1] == ' ' && i + 2 < n && str[i + 1] == ' '){
-        //                                 \-> not a typo (we expect stuff after the operator)
+        //                                 v
+        //                                 not a typo (we expect stuff after the operator)
         // this is a logical operator
         
         // we flush

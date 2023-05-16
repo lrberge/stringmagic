@@ -137,7 +137,7 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
       pat = substr(pat, 2, nchar(pat))
     }
     
-    pat_parsed = parse_str_is_pattern(pat, c("fixed", "word", "ignore", "verbatim"))
+    pat_parsed = parse_regex_pattern(pat, c("fixed", "word", "ignore", "verbatim"))
     is_or = pat_parsed$is_or
     flags = pat_parsed$flags
     all_patterns = pat_parsed$patterns
@@ -293,6 +293,19 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   if(length(x) == 0){
     return(character(0))
   }
+  
+  # data caching in interactive mode
+  is_caching = FALSE
+  if(interactive() && identical(parent.frame(), .GlobalEnv)){
+    mc = match.call()
+    if(is.character(mc$x) && !is.null(getOption("stringmagick_str_get_cache"))){
+      is_caching = TRUE
+      x_pattern = x
+      x = getOption("stringmagick_str_get_cache")
+    } else if(length(x) > 1){
+      options(stringmagick_str_get_cache = x)
+    }
+  }
 
   check_character(pattern, null = TRUE, no_na = TRUE)
   check_logical(or, scalar = TRUE)
@@ -300,7 +313,13 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   check_logical(seq.unik, scalar = TRUE)
 
   if(missnull(pattern)){
-    dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
+    if(is_caching){
+      dots = check_set_dots(..., mbt = FALSE, character = TRUE, scalar = TRUE, no_na = TRUE)
+      dots = append(dots, x_pattern, 0)
+    } else {
+      dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)  
+    }
+    
     warn_no_named_dots(dots)
     pattern = unlist(dots)
   }
@@ -814,7 +833,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
     
     # we parse the special flags
     is_total = total
-    di_parsed = parse_str_is_pattern(di, c("ignore", "fixed", "word", "total"), 
+    di_parsed = parse_regex_pattern(di, c("ignore", "fixed", "word", "total"), 
                                      parse_logical = FALSE)
     flags = di_parsed$flags
     patterns = di_parsed$patterns
@@ -835,7 +854,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 
       if(is_total){
         # we allow logical operations when the replacement is in full
-        pat_parsed = parse_str_is_pattern(pat, c("ignore", "fixed", "word", "total"), 
+        pat_parsed = parse_regex_pattern(pat, c("ignore", "fixed", "word", "total"), 
                                           parse_logical = TRUE)
         pat = pat_parsed$patterns
         is_or = pat_parsed$is_or
@@ -970,11 +989,11 @@ fnames = function(x, flags = ""){
 #### dedicated utilities ####
 ####
 
-parse_str_is_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
+parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
   # in: "fw/hey!, bonjour, a[i]"
   # common authorized_flags: c("fixed", "word", "ignore")
 
-  info_pattern = cpp_parse_str_is_pattern(pattern, parse_logical = parse_logical)
+  info_pattern = cpp_parse_regex_pattern(pattern, parse_logical = parse_logical)
 
   flags = info_pattern$flags
   if(length(flags) == 1){
@@ -999,7 +1018,7 @@ parse_str_is_pattern = function(pattern, authorized_flags, parse_logical = TRUE)
   }
 
   if("verbatim" %in% flags){
-    info_pattern = cpp_parse_str_is_pattern(pattern, FALSE)
+    info_pattern = cpp_parse_regex_pattern(pattern, FALSE)
   }
 
   res = list(flags = flags, patterns = info_pattern$patterns, is_or = info_pattern$is_or)
