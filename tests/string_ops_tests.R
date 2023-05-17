@@ -161,7 +161,7 @@ txt = cub("mots: {x ? x}")
 test(txt, c("mots: Blanche", "mots: Bla"))
 
 # alias
-test(cub("mots: {'iw/bla'extract.single ? x}"), 
+test(cub("mots: {'iw/bla'extract.first ? x}"), 
      c("mots: ", "mots: Bla"))
 
 
@@ -195,10 +195,10 @@ test(txt, "info: 57-26, 32-7, 29-8 and 55")
 #
 
 x = c("Hi Mary.", "Hi Charles!", "Are you OK?", "I think so Charles.", "Great to hear, Mary!")
-txt = cub("A few quotes:\n{Q, 'mary | charles & !'get.i, '  'app, '\n'c ? x}")
+txt = cub("A few quotes:\n{Q, 'mary | charles & !'get.i, '  'paste, '\n'c ? x}")
 test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
 
-txt = cub("A few quotes:\n{Q, 'i/mary | charles & !'get, '  'app, '\n'c ? x}")
+txt = cub("A few quotes:\n{Q, 'i/mary | charles & !'get, '  'paste, '\n'c ? x}")
 test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
 
 x = c("It's me again.", "What do you mean a gain?", "Yes, again!", "Ah AGAIN, I thought A GAIN!")
@@ -250,7 +250,7 @@ test(txt, "Where Is Bryan? Bryan Is In The KITCHEN.")
 
 x = "results from a new estimator: a new hope"
 txt = dsb(".[title.i ? x]")
-test(txt, "Results from a New Estimator: A New Hope")
+test(txt, "Results From a New Estimator: A New Hope")
 
 #
 # quotes ####
@@ -435,7 +435,7 @@ test(txt, "23")
 # conditional
 x = c("123", "abc", "a1b2")
 txt = cub("{''S, ~(first), ' ; 'c ? x}")
-test(txt, "1 ;a ; a")
+test(txt, "1 ; a ; a")
 
 txt = cub("{''S, ~(last), ' ; 'c ? x}")
 test(txt, "3 ; c ; 2")
@@ -515,8 +515,7 @@ test(txt, "120")
 
 # conditional
 x = c("521", "aebc")
-txt = cub("{''S, ~('0'append, ''c), ' ; 'c ? x}")
-test(txt, "err")
+test(cub("{''S, ~('0'append, ''c), ' ; 'c ? x}"), "err")
 
 #
 # unik ####
@@ -685,8 +684,7 @@ test(dsb("laurent .[ascii ! bergé]"), "laurent berge")
 
 x = "Hi I'm Laurent and I'm trying to remove stop-words."
 txt = cub("Before: {x}\nAfter: {stop, ws ? x}")
-test(txt, "Before: Hi I'm Laurent and I'm trying to remove stop-words.
-After: Hi Laurent trying remove stop-words.")
+test(txt, "Before: Hi I'm Laurent and I'm trying to remove stop-words.\nAfter: Hi Laurent trying remove stop-words.")
 
 #
 # if-else ####

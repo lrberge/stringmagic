@@ -333,8 +333,12 @@ void extract_paren_operator(const int box_type, bool &is_pblm, const char * str,
     
     if(str[i - 1] == ';'){
       
-      if(is_decorative_space){
-        operator_tmp.pop_back();
+      if(is_decorative_space && str[i] == ' ' && str[i - 2] == ' '){
+        if(op == 'v'){
+          // there is no trailing WS for regular operations 
+          operator_tmp.pop_back();
+        }
+        ++i;
       }
       
       operator_tmp += "_;;;_";
@@ -342,9 +346,6 @@ void extract_paren_operator(const int box_type, bool &is_pblm, const char * str,
       if(op == 'i'){
         extract_simple_ops_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")");  
       } else {
-        if(is_decorative_space && str[i] == ' '){
-          ++i;
-        }
         extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")", false);
       }
       
@@ -497,7 +498,8 @@ void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, i
   bool check_separator = false;
 
   if(str[i] == '/'){
-    while(i < n && is_box_close_verbatim(box_type, str, i)){
+    
+    while(i < n && !is_box_close_verbatim(box_type, str, i)){
       operator_tmp += str[i++];
     }
 
@@ -636,7 +638,7 @@ void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &
 
 void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int n,
                       std::vector<std::string> &operator_vec, std::string &expr_value,
-                      bool &any_plural, bool nest = false){
+                      bool &any_plural){
   // modifies the operator and gives the updated i
   // the i should start where to evaluate post separator (if present)
 
@@ -645,7 +647,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
   // - ".['arg1'op1, 'arg2'op2 ? x]": argument + operator
   // - ".[op1, op2, ? x]": operator without argument
   // - if(cond;ops_true;ops_false), vif(cond;verbatim_true;verbatim_false): if special operator. Can be chained.
-  // - ~(simple_ops): conditionnal operations
+  // - ~(simple_ops): conditional operations
   // - .[& i %% 3 == 0;':'] ifelse operator
   //   .[& condition ; verbatim1 : verbatim2]
   // - .[$op1, op2, (singular:plural)]: pluralisation
@@ -1085,7 +1087,7 @@ List cpp_string_ops_nested(SEXP Rstr, bool is_dsb){
   std::string expr_value;
 
   // modifies i, expr_value and operator_vec "in place"
-  parse_box(box_type, is_pblm, str, i, n, operator_vec, expr_value, any_plural, true);
+  parse_box(box_type, is_pblm, str, i, n, operator_vec, expr_value, any_plural);
 
   // if we end up at the end of the string: fine
   if(i == n) is_pblm = false;

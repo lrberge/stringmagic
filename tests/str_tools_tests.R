@@ -17,34 +17,59 @@ x = dsb("/one, two, one... two, microphone, check")
 val = str_is(x, "^...$")
 test(val, c(TRUE, TRUE, FALSE, FALSE, FALSE))
 
-val = str_is(x, "#...")
+
+val = str_is(x, "f/...")
 test(val, c(FALSE, FALSE, TRUE, FALSE, FALSE))
 
-val = str_is(x, "!#...")
+val = str_is(x, "...", fixed = TRUE)
+test(val, c(FALSE, FALSE, TRUE, FALSE, FALSE))
+
+
+val = str_is(x, "!f/...")
 test(val, c(TRUE, TRUE, FALSE, TRUE, TRUE))
 
-val = str_is(x, c("#one", "#c"))
+val = str_is(x, "!...", fixed = TRUE)
+test(val, c(TRUE, TRUE, FALSE, TRUE, TRUE))
+
+
+val = str_is(x, "iw/one")
+test(val, c(TRUE, FALSE, TRUE, FALSE, FALSE))
+
+val = str_is(x, "one", ignore.case = TRUE, word = TRUE)
+test(val, c(TRUE, FALSE, TRUE, FALSE, FALSE))
+
+
+val = str_is(x, "!iw/one")
+test(val, c(FALSE, TRUE, FALSE, TRUE, TRUE))
+
+val = str_is(x, "!one", ignore.case = TRUE, word = TRUE)
+test(val, c(FALSE, TRUE, FALSE, TRUE, TRUE))
+
+
+val = str_is(x, "i/one & .{5,}")
+test(val, c(FALSE, FALSE, TRUE, TRUE, FALSE))
+
+
+val = str_is(x, "one", "c", fixed = TRUE)
 test(val, c(FALSE, FALSE, FALSE, TRUE, FALSE))
 
-val = str_is(x, c("#one", "|#c"))
+val = str_is(x, "one & c", fixed = TRUE)
+test(val, c(FALSE, FALSE, FALSE, TRUE, FALSE))
+
+val = str_is(x, "one | c", fixed = TRUE)
 test(val, c(TRUE, FALSE, TRUE, TRUE, TRUE))
 
-
 # escaping
+x = dsb("/hey!, /twitter, !##!")
 
-x = dsb("/hey!, #twitter, !##!")
+val = str_is(x, "\\/t")
+test(val, c(FALSE, TRUE, FALSE))
 
-val = str_is(x, "\\#")
-test(val, c(FALSE, TRUE, TRUE))
-
-val = str_is(x, "!\\#")
-test(val, c(TRUE, FALSE, FALSE))
+val = str_is(x, "!\\/")
+test(val, c(TRUE, FALSE, TRUE))
 
 val = str_is(x, "\\!")
 test(val, c(TRUE, FALSE, TRUE))
-
-val = str_is(x, "\\!#")
-test(val, c(FALSE, FALSE, TRUE))
 
 
 ####
@@ -57,39 +82,53 @@ x = rownames(mtcars)
 val = str_get(x, "Mazda")
 test(val, c("Mazda RX4", "Mazda RX4 Wag"))
 
-val = str_get(x, c("!\\d", "u"))
+val = str_get(x, "!\\d & u")
 test(val, c("Hornet Sportabout", "Lotus Europa"))
 
-val = str_get(x, c("Mazda", "Volvo"), seq = TRUE)
+val = str_get(x, "Mazda", "Volvo", seq = TRUE)
 test(val, c("Mazda RX4", "Mazda RX4 Wag", "Volvo 142E"))
 
-val = str_get(x, c("Volvo", "Mazda"), seq = TRUE)
+val = str_get(x, "volvo", "mazda", seq = TRUE, ignore.case = TRUE)
 test(val, c("Volvo 142E", "Mazda RX4", "Mazda RX4 Wag"))
 
+cars = str_clean(rownames(mtcars)," .+")
+val = str_get(cars, "i/^h", "i/^m", seq = TRUE)
+test(val, c("Hornet", "Hornet", "Honda", "Mazda", 
+            "Mazda", "Merc", "Merc", 
+            "Merc", "Merc", "Merc", "Merc", "Merc", "Maserati"))
+
+val = str_get(cars, "i/^h", "i/^m", seq.unik = TRUE)
+test(val, c("Hornet", "Honda", "Mazda", "Merc", "Maserati"))
 
 ####
-#### selvars ####
+#### str_clean ####
 ####
 
+x = c("hello world  ", "it's 5 am....")
 
-x = rownames(mtcars)
+val = str_clean(x, "o", "f/.")
+test(val, c("hell wrld  ", "it's 5 am"))
 
-val = selvars(x, "^Maz")
-test(val, c("Mazda RX4", "Mazda RX4 Wag")
+val = str_clean(x, "f/o, .")
+test(val, c("hell wrld  ", "it's 5 am"))
 
-val = selvars(x, "^Mer, !#450")
-test(val, c("Merc 240D", "Merc 230", "Merc 280", "Merc 280C")
+val = str_clean(x, "@ws")
+test(val, c("hello world", "it's 5 am...."))
 
-val = selvars(x, "^Maz, &!@\\d")
-test(val, c("Mazda RX4", "Mazda RX4 Wag", "Hornet Sportabout", "Valiant",
-            "Cadillac Fleetwood", "Lincoln Continental", "Chrysler Imperial",
-            "Honda Civic", "Toyota Corolla", "Toyota Corona", "Dodge Challenger",
-            "AMC Javelin", "Pontiac Firebird", "Lotus Europa", "Ford Pantera L",
-            "Ferrari Dino", "Maserati Bora"))
+val = str_clean(x, "o(?= )", "@ws.p.i")
+test(val, c("hell world", "it am"))
 
-val = selvars(x, "@\\d, !^Merc || ^Fiat, !^Maz")
-test(val, c("Fiat 128", "Fiat X1-9", "Datsun 710", "Hornet 4 Drive", "Duster 360",
-            "Camaro Z28", "Porsche 914-2", "Volvo 142E", "Mazda RX4", "Mazda RX4 Wag"))
+# replacement
+val = str_clean(x, "o => a", "f/. => !")
+test(val, c("hella warld  ", "it's 5 am!!!!"))
+
+val = str_clean(x, "w/hello, it => _")
+test(val, c("_ world  ", "_'s 5 am...."))
+
+# total + str_op
+val = str_clean(x, "it/Hell => Heaven", "@'f/...'rm")
+test(val, "Heaven")
+
 
 ####
 #### str_split2df ####
@@ -118,26 +157,9 @@ base = data.frame(text = x, my_id = id)
 val = str_split2df(text ~ my_id, base, "[[:punct:] ]+", add.pos = TRUE)
 test(val$pos, c(1L, 2L, 3L, 1L, 2L, 3L))
 
-####
-#### str_clean ####
-####
-
-x = c("hello world  ", "it's 5 am....")
-
-val = str_clean(x, c("o", "#."))
-test(val, c("hell wrld  ", "it's 5 am"))
-
-val = str_clean(x, "o|\\.")
-test(val, c("hell wrld  ", "it's 5 am"))
-
-val = str_clean(x, "@w")
-test(val, c("hello world", "it's 5 am...."))
-
-val = str_clean(x, c("o(?= )", "@wpi"))
-test(val, c("hell world", "it am"))
-
-
-
+x = c("One two, one two", "Microphone check")
+val = str_split2df(x, "w/one")
+test(val$x, c("One two, ", " two", "Microphone check"))
 
 
 

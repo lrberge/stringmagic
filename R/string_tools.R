@@ -330,7 +330,8 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 
   if(seq){
     for(i in seq_along(pattern)){
-      value = str_get(x, pattern = pattern[i], or = or, seq = FALSE)
+      value = str_get(x, pattern = pattern[i], or = or, seq = FALSE, 
+                      fixed = fixed, ignore.case = ignore.case, word = word)
       if(i == 1){
         res = value
       } else {
@@ -415,7 +416,8 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #'
 #'
 str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE,
-                        id_unik = TRUE, fixed = FALSE, dt = FALSE, ...){
+                        id_unik = TRUE, fixed = FALSE, ignore.case = FALSE,
+                        word = FALSE, dt = FALSE, ...){
 
   if(missing(x)){
     stop("Argument 'x' must be provied. PROBLEM: it is missing.")
@@ -583,6 +585,33 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
     }
 
   }
+  
+  # flags
+  pat_parsed = parse_regex_pattern(split, c("word", "ignore", "fixed"), 
+                                   parse_logical = FALSE)
+  flags = pat_parsed$flags
+  split = pat_parsed$patterns
+  
+  is_fixed = fixed || "fixed" %in% flags
+  is_ignore = ignore.case || "ignore" %in% flags
+  is_word = word || "word" %in% flags
+  
+  if(is_word){
+    items = strsplit(split, ",[ \t\n]+")[[1]]
+    if(is_fixed){
+      items = paste0("\\Q", items, "\\E")
+      is_fixed = FALSE
+    }
+    split = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
+  }
+
+  if(is_ignore){
+    # ignore case
+    is_fixed = FALSE
+    split = paste0("(?i)", split)
+  }
+
+  
 
   x_split = strsplit(x, split, fixed = fixed, perl = !fixed)
 
@@ -917,72 +946,6 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 
   res
 }
-
-
-#' Display formatted names
-#' 
-#' Simple function to display the names of a data.frame, or anything with names, 
-#' in a human readable way. You can control the formatting with the flags.
-#' 
-#' @param x An object that can have names. Generally a `data.frame`.
-#' @param flags A character scalar (default is the empty string). Add a `+` (resp `-`) to 
-#' sort the names in alphabetical order (`-`: decreasing). Then you can add a `#` to request 
-#' the display of the position of the variables. You must respect this order. 
-#' Finally the rest is a *quickselect* pattern
-#' which can be used to select only subsets of variables. See the help of [[selvars]] to get 
-#' more information on how *quickselect* works.
-#' 
-#' @details 
-#' If the position of the variables is requested but the variables are not in sequential
-#' positions (due to sorting or subselecting), then the position is displayed in parentheses
-#' just after the variable name. Otherwise, it is displayed on the left.
-#' 
-#' @return 
-#' This function is for display only and does not return anything.
-#' 
-#' @examples 
-#' 
-#' # display the variables of a data set
-#' fnames(iris)
-#' 
-#' # data set with many names
-#' base_many = t(mtcars)
-#' fnames(base_many)
-#' 
-#' # adding the position
-#' fnames(base_many, "#")
-#' 
-#' # selecting only a subset: the ones containing two digits
-#' fnames(base_many, "#@\\d\\d")
-#' 
-#' # same but selecting volvo + mazda
-#' fnames(base_many, "-#^vol, ^maz")
-#' 
-fnames = function(x, flags = ""){
-  if(is.matrix(x)){
-    all_vars = colnames(x)
-  } else {
-    all_vars = names(x)
-  }
-
-  if(is.null(all_vars)){
-    if(is.character(x)){
-      all_vars = x
-    } else {
-      message("The argument `x` has no names attribute.")
-      return(invisible(NULL))
-    }    
-  }
-
-  # Below is a copy paste from selvars_main_selection => write a function
-  msg = display_list_of_variables(all_vars, flags, warn_msg = "When selecting variables", 
-                                  remaining_QS = TRUE)
-  
-  message(msg)
-  invisible(NULL)
-}
-
-
 
 
 ####

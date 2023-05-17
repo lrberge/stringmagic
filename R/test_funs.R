@@ -231,8 +231,15 @@ run_test = function(chunk, from){
   all_files = list.files("tests", pattern = ".R$", full.names = TRUE)
 
   test_code = c()
+  offset = 2
   for(f in all_files){
-    test_code = c(test_code, test_code = readLines(f))
+    my_file = paste0("MY_FILE = '", f, "'")
+    my_offset = paste0("MY_OFFSET = ", offset)
+    f_open = file(f, encoding = "UTF-8")
+    new_code = readLines(f_open)
+    close(f_open)
+    test_code = c(test_code, my_file, my_offset, new_code)
+    offset = offset + length(new_code) + 2
   }
 
   pkg = gsub(".+/", "", normalizePath(".", "/"))
@@ -241,145 +248,160 @@ run_test = function(chunk, from){
   i_pkg = grepl(paste0("library(", pkg, ")"), test_code, fixed = TRUE)
   test_code[i_pkg] = ""
 
-    # A) adding the line numbers
+  # A) adding the line numbers
 
-    lines = paste0("LINE_COUNTER = ", seq_along(test_code))
+  lines = paste0("LINE_COUNTER = ", seq_along(test_code))
 
-    code_LINE = rep(lines, each = 2)
-    code_LINE[seq_along(test_code)  * 2] = test_code
+  code_LINE = rep(lines, each = 2)
+  code_LINE[seq_along(test_code)  * 2] = test_code
 
-    # We remove the counters for the lines with open parenthesis, like in
-    # sum(x,
-    #     y)
-    # since this leads to parsing errors
+  # We remove the counters for the lines with open parenthesis, like in
+  # sum(x,
+  #     y)
+  # since this leads to parsing errors
 
-    i_open = which(grepl(",[[:blank:]]*$", code_LINE))
+  i_open = which(grepl(",[[:blank:]]*$", code_LINE))
 
-    if(length(i_open)) i_open = i_open + 1
+  if(length(i_open)) i_open = i_open + 1
 
-    # We remove the counters just before closing brackets => otherwise equivalent to a return statement!
-    i_closing_bracket = which(grepl("^[[:blank:]]*\\}", code_LINE))
+  # We remove the counters just before closing brackets => otherwise equivalent to a return statement!
+  i_closing_bracket = which(grepl("^[[:blank:]]*\\}", code_LINE))
 
-    if(length(i_closing_bracket)) i_closing_bracket = i_closing_bracket - 1
+  if(length(i_closing_bracket)) i_closing_bracket = i_closing_bracket - 1
 
-    # removing
-    i_rm = c(i_open, i_closing_bracket)
-    if(length(i_rm) > 0){
-        code_LINE = code_LINE[-(i_rm)]
-    }
+  # removing
+  i_rm = c(i_open, i_closing_bracket)
+  if(length(i_rm) > 0){
+      code_LINE = code_LINE[-(i_rm)]
+  }
 
-    # B) Adding the FOR loops
+  # B) Adding the FOR loops
 
-    bracket_close = which(grepl("^\\}", code_LINE))
-    for_start = which(grepl("^for\\(", code_LINE))
-    for_end = c()
-    for(i in for_start){
-        for_end = c(for_end, bracket_close[which.max(bracket_close > i)])
-    }
+  bracket_close = which(grepl("^\\}", code_LINE))
+  for_start = which(grepl("^for\\(", code_LINE))
+  for_end = c()
+  for(i in for_start){
+      for_end = c(for_end, bracket_close[which.max(bracket_close > i)])
+  }
 
-    n = length(code_LINE)
-    my_rep = rep(1, n)
-    my_rep[c(for_start, for_end)] = 2
+  n = length(code_LINE)
+  my_rep = rep(1, n)
+  my_rep[c(for_start, for_end)] = 2
 
-    code_LINE_FOR = rep(code_LINE, my_rep)
-    n_loop = length(for_start)
-    code_LINE_FOR[for_start + 2 * (0:(n_loop - 1))] = "INSIDE_LOOP = TRUE ; INDEX_LOOP = list()"
-    code_LINE_FOR[for_end + 2 * 1:n_loop] = "INSIDE_LOOP = FALSE"
+  code_LINE_FOR = rep(code_LINE, my_rep)
+  n_loop = length(for_start)
+  code_LINE_FOR[for_start + 2 * (0:(n_loop - 1))] = "INSIDE_LOOP = TRUE ; INDEX_LOOP = list()"
+  code_LINE_FOR[for_end + 2 * 1:n_loop] = "INSIDE_LOOP = FALSE"
 
-    qui_for = which(grepl("\\bfor\\(", code_LINE_FOR))
-    index = gsub("^.*for\\(([^ ]+).+", "\\1", code_LINE_FOR[qui_for])
+  qui_for = which(grepl("\\bfor\\(", code_LINE_FOR))
+  index = gsub("^.*for\\(([^ ]+).+", "\\1", code_LINE_FOR[qui_for])
 
-    n = length(code_LINE_FOR)
-    my_rep = rep(1, n)
-    my_rep[qui_for] = 2
+  n = length(code_LINE_FOR)
+  my_rep = rep(1, n)
+  my_rep[qui_for] = 2
 
-    code_LINE_FOR = rep(code_LINE_FOR, my_rep)
-    n_loop = length(qui_for)
-    code_LINE_FOR[qui_for + 1 + (0:(n_loop - 1))] = paste0("INDEX_LOOP[[\"", index, "\"]] = ", index)
+  code_LINE_FOR = rep(code_LINE_FOR, my_rep)
+  n_loop = length(qui_for)
+  code_LINE_FOR[qui_for + 1 + (0:(n_loop - 1))] = paste0("INDEX_LOOP[[\"", index, "\"]] = ", index)
 
-    test_code = code_LINE_FOR
+  test_code = code_LINE_FOR
 
-    # C) Chunk selection
+  # C) Chunk selection
 
-    if(!missing(chunk) || !missing(from)){
+  if(!missing(chunk) || !missing(from)){
 
-        qui = which(grepl("^chunk\\(", test_code))
-        all_chunks = test_code[qui]
-        chunk_names = tolower(gsub(".+\\(\"|\".*", "", all_chunks))
-        n_chunks = length(qui)
+      qui = which(grepl("^chunk\\(", test_code))
+      all_chunks = test_code[qui]
+      chunk_names = tolower(gsub(".+\\(\"|\".*", "", all_chunks))
+      n_chunks = length(qui)
 
-        if(!missing(from)){
-            check_value_plus(from, "match | integer scalar no na", .choices = chunk_names)
+      if(!missing(from)){
+          check_value_plus(from, "match | integer scalar no na", .choices = chunk_names)
 
-            if(is.numeric(from)){
-                if(any(from > n_chunks)){
-                    stop("There are maximum ", n_chunks, " chunks.")
-                }
-                chunk_select = from:n_chunks
-            } else {
-                chunk_select = which(chunk_names %in% from):n_chunks
-            }
+          if(is.numeric(from)){
+              if(any(from > n_chunks)){
+                  stop("There are maximum ", n_chunks, " chunks.")
+              }
+              chunk_select = from:n_chunks
+          } else {
+              chunk_select = which(chunk_names %in% from):n_chunks
+          }
 
-        } else {
-            check_value_plus(chunk, "multi match | integer vector no na", .choices = chunk_names)
+      } else {
+          check_value_plus(chunk, "multi match | integer vector no na", .choices = chunk_names)
 
-            if(is.numeric(chunk)){
-                if(any(chunk > n_chunks)){
-                    stop("There are maximum ", n_chunks, " chunks.")
-                }
-                chunk_select = sort(unique(chunk))
-            } else {
-                chunk_select = which(chunk_names %in% chunk)
-            }
-        }
+          if(is.numeric(chunk)){
+              if(any(chunk > n_chunks)){
+                  stop("There are maximum ", n_chunks, " chunks.")
+              }
+              chunk_select = sort(unique(chunk))
+          } else {
+              chunk_select = which(chunk_names %in% chunk)
+          }
+      }
 
-        qui = c(qui, length(test_code))
+      qui = c(qui, length(test_code))
 
-        new_test_code = c()
-        for(i in chunk_select){
-            new_test_code = c(new_test_code, test_code[qui[i] : (qui[i + 1] - 1)])
-        }
+      new_test_code = c()
+      for(i in chunk_select){
+          new_test_code = c(new_test_code, test_code[qui[i] : (qui[i + 1] - 1)])
+      }
 
-        # We add the preamble
-        preamble = test_code[1:(qui[1] - 1)]
+      # We add the preamble
+      preamble = test_code[1:(qui[1] - 1)]
 
-        test_code = c(preamble, new_test_code)
-    }
+      test_code = c(preamble, new_test_code)
+  }
 
-    # D) Evaluation
+  # D) Evaluation
 
-    test_code = c("devtools::load_all(export_all = FALSE)", test_code)
+  test_code = c("devtools::load_all(export_all = FALSE)", test_code)
 
-    parsed_code = parse(text = test_code)
+  parsed_code = parse(text = test_code)
 
-    env = new.env()
-    assign("INSIDE_LOOP", FALSE, env)
+  env = new.env()
+  assign("INSIDE_LOOP", FALSE, env)
 
-    my_eval = try(eval(parsed_code, env))
+  my_eval = try(eval(parsed_code, env))
 
-    # E) Message
+  # E) Message
 
-    if("try-error" %in% class(my_eval)){
-        line_fail = get("LINE_COUNTER", env)
-        inside_loop = get("INSIDE_LOOP", env)
+  if("try-error" %in% class(my_eval)){
+      line_fail = get("LINE_COUNTER", env)
+      inside_loop = get("INSIDE_LOOP", env)
+      
+      file_info = ""
+      if(length(all_files) > 0){
+        my_file = get("MY_FILE", env)
+        file_info = cub("In file {'.+/'r, Q ? my_file}\n==> ")
+      }
+      
+      offset = get("MY_OFFSET", env)
+      
+      message("\n---------------------------\n")
 
-        message("Test failed at line: ", line_fail)
-        if(inside_loop){
-            index_loop = get("INDEX_LOOP", env)
-            index_names = names(index_loop)
-            index_values = unlist(index_loop)
-            msg = paste0(index_names, ":", index_values, collapse = ", ")
-            message("Loop values: ", msg, ".")
-        }
+      message(file_info, "Test failed at line: ", line_fail - offset)
+      
+      i = which(test_code == paste0("LINE_COUNTER = ", line_fail))
+      my_line = test_code[i + 1]
+      message("\nHere is the line:\n", my_line, "\n")
+      if(inside_loop){
+          index_loop = get("INDEX_LOOP", env)
+          index_names = names(index_loop)
+          index_values = unlist(index_loop)
+          msg = paste0(index_names, ":", index_values, collapse = ", ")
+          message("Loop values: ", msg, ".")
+      }
 
-        # We assign the variables to the global env to facilitate debugging
-        for(var in names(env)){
-            assign(var, get(var, env), parent.frame())
-        }
+      # We assign the variables to the global env to facilitate debugging
+      for(var in names(env)){
+          assign(var, get(var, env), parent.frame())
+      }
 
-    } else {
-        print("tests performed successfully")
-    }
+  } else {
+    n_tests = sum(grepl("^test\\(", test_code))
+    print(paste0("tests performed successfully (", n_tests, ")"))
+  }
 }
 
 

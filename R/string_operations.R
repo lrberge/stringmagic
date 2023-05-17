@@ -2067,8 +2067,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         group_index = cpp_recreate_index(group_index)
       } else if(conditional_flag == 2){
         stop_hook("The operation `which` cannot be applied in ",
-                  "conditionnal statements (inside `~()`).",
-                  "\nFIX: simply put this operation after the conditionnal statement.")
+                  "conditional statements (inside `~()`).",
+                  "\nFIX: simply put this operation after the conditional statement.")
       }
       
     } else {
@@ -2082,8 +2082,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
           group_index = cpp_recreate_index(group_index)
         } else if(conditional_flag == 2){
           stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
-                    "conditionnal statements (inside `~()`).",
-                    "\nFIX: simply put this operation after or before the conditionnal statement.")
+                    "conditional statements (inside `~()`).",
+                    "\nFIX: simply put this operation after or before the conditional statement.")
         }
 
         if(op == "get"){
@@ -2307,8 +2307,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         
         if(conditional_flag == 2){
           stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
-                    "conditionnal statements (inside `~()`).",
-                    "\nFIX: simply put this operation after or before the conditionnal statement.")
+                    "conditional statements (inside `~()`).",
+                    "\nFIX: simply put this operation after or before the conditional statement.")
         }
 
         if(any(grepl(":(?:n|N|rest|REST):", add))){
@@ -2542,8 +2542,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       
       if(conditional_flag == 2){
         stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
-                  "conditionnal statements (inside `~()`).",
-                  "\nFIX: simply put this operation after or before the conditionnal statement.")
+                  "conditional statements (inside `~()`).",
+                  "\nFIX: simply put this operation after or before the conditional statement.")
       }
 
       if(nchar(left) > 0){
@@ -2864,6 +2864,62 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       res = x
     }
 
+  } else if(op == "ascii"){
+    # ascii, stop ####
+    res = str_to_ascii(x, options)
+
+  } else if(op == "stop"){
+
+    # current limitation: does not work for quoted words
+    #                     but quoted words are not stopwords usually
+    # + the algo is quite inefficient
+
+    # Snowball stopwords
+    # These come from http://snowballstem.org/algorithms/english/stop.txt
+    stopwords = c("i", "me", "my", "myself", "we", "our", "ours", "ourselves",
+                  "you", "your", "yours", "yourself", "yourselves", "he", "him",
+                  "his", "himself", "she", "her", "hers", "herself", "it", "its",
+                  "itself", "they", "them", "their", "theirs", "themselves", "what",
+                  "which", "who", "whom", "this", "that", "these", "those", "am", "is",
+                  "are", "was", "were", "be", "been", "being", "have", "has", "had",
+                  "having", "do", "does", "did", "doing", "would", "should",
+                  "could", "ought", "i'm", "you're", "he's", "she's", "it's",
+                  "we're", "they're", "i've", "you've", "we've", "they've",
+                  "i'd", "you'd", "he'd", "she'd", "we'd", "they'd", "i'll",
+                  "you'll", "he'll", "she'll", "we'll", "they'll", "isn't",
+                  "aren't", "wasn't", "weren't", "hasn't", "haven't", "hadn't",
+                  "doesn't", "don't", "didn't", "won't", "wouldn't", "shan't",
+                  "shouldn't", "can't", "cannot", "couldn't", "mustn't", "let's",
+                  "that's", "who's", "what's", "here's", "there's", "when's", "where's",
+                  "why's", "how's", "a", "an", "the", "and", "but", "if", "or",
+                  "because", "as", "until", "while", "of", "at", "by", "for",
+                  "with", "about", "against", "between", "into", "through",
+                  "during", "before", "after", "above", "below", "to", "from",
+                  "up", "down", "in", "out", "on", "off", "over", "under",
+                  "again", "further", "then", "once", "here", "there", "when",
+                  "where", "why", "how", "all", "any", "both", "each", "few",
+                  "more", "most", "other", "some", "such", "no", "nor", "not",
+                  "only", "own", "same", "so", "than", "too", "very")
+
+    n = length(x)
+    x_split = strsplit(x, "(?<=[[:alnum:]])(?=[^[:alnum:]'])|(?<=[^[:alnum:]'])(?=[[:alnum:]])", perl = TRUE)
+    x_len = lengths(x_split)
+    x_vec = unlist(x_split)
+
+    id = rep(1:n, x_len)
+
+    # Lowering is costly, checking costs a bit less
+    if(any(grepl("[[:upper:]]", x))){
+      qui_drop = which(tolower(x_vec) %in% stopwords)
+    } else {
+      qui_drop = which(x_vec %in% stopwords)
+    }
+
+    x_vec = x_vec[-qui_drop]
+    id = id[-qui_drop]
+
+    res = cpp_paste_conditional(x_vec, id)
+
   } else if(op %in% c("if", "vif")){
     #
     # Conditions: if, vif ####
@@ -3076,62 +3132,6 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
                                   
     group_index = attr(res, "group_index")
 
-  } else if(op == "ascii"){
-    # ascii, stop ####
-    res = str_to_ascii(x, options)
-
-  } else if(op == "stop"){
-
-    # current limitation: does not work for quoted words
-    #                     but quoted words are not stopwords usually
-    # + the algo is quite inefficient
-
-    # Snowball stopwords
-    # These come from http://snowballstem.org/algorithms/english/stop.txt
-    stopwords = c("i", "me", "my", "myself", "we", "our", "ours", "ourselves",
-                  "you", "your", "yours", "yourself", "yourselves", "he", "him",
-                  "his", "himself", "she", "her", "hers", "herself", "it", "its",
-                  "itself", "they", "them", "their", "theirs", "themselves", "what",
-                  "which", "who", "whom", "this", "that", "these", "those", "am", "is",
-                  "are", "was", "were", "be", "been", "being", "have", "has", "had",
-                  "having", "do", "does", "did", "doing", "would", "should",
-                  "could", "ought", "i'm", "you're", "he's", "she's", "it's",
-                  "we're", "they're", "i've", "you've", "we've", "they've",
-                  "i'd", "you'd", "he'd", "she'd", "we'd", "they'd", "i'll",
-                  "you'll", "he'll", "she'll", "we'll", "they'll", "isn't",
-                  "aren't", "wasn't", "weren't", "hasn't", "haven't", "hadn't",
-                  "doesn't", "don't", "didn't", "won't", "wouldn't", "shan't",
-                  "shouldn't", "can't", "cannot", "couldn't", "mustn't", "let's",
-                  "that's", "who's", "what's", "here's", "there's", "when's", "where's",
-                  "why's", "how's", "a", "an", "the", "and", "but", "if", "or",
-                  "because", "as", "until", "while", "of", "at", "by", "for",
-                  "with", "about", "against", "between", "into", "through",
-                  "during", "before", "after", "above", "below", "to", "from",
-                  "up", "down", "in", "out", "on", "off", "over", "under",
-                  "again", "further", "then", "once", "here", "there", "when",
-                  "where", "why", "how", "all", "any", "both", "each", "few",
-                  "more", "most", "other", "some", "such", "no", "nor", "not",
-                  "only", "own", "same", "so", "than", "too", "very")
-
-    n = length(x)
-    x_split = strsplit(x, "(?<=[[:alnum:]])(?=[^[:alnum:]'])|(?<=[^[:alnum:]'])(?=[[:alnum:]])", perl = TRUE)
-    x_len = lengths(x_split)
-    x_vec = unlist(x_split)
-
-    id = rep(1:n, x_len)
-
-    # Lowering is costly, checking costs a bit less
-    if(any(grepl("[[:upper:]]", x))){
-      qui_drop = which(tolower(x_vec) %in% stopwords)
-    } else {
-      qui_drop = which(x_vec %in% stopwords)
-    }
-
-    x_vec = x_vec[-qui_drop]
-    id = id[-qui_drop]
-
-    res = cpp_paste_conditional(x_vec, id)
-
   } else {
     # user-defined operations ####
     
@@ -3279,7 +3279,7 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
     } else if(op %in% c("nth", "Nth")){
       is_compact = opt_equal(options, "compact") 
       is_letter = opt_equal(options, c("letter", "upper")) || substr(op, 1, 1) == "N"
-      val = n_th(n, letters = is_letter, is_compact = is_compact)
+      val = n_th(n, letters = is_letter, compact = is_compact)
       if(opt_equal(options, "upper")){
         val = gsub("^(.)", "\\U\\1", val, perl = TRUE)
       }
@@ -3474,7 +3474,7 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
 }
 
 setup_operations = function(){
-  OPERATORS = c("s", "S", "x", "X", "extract", "c", "C", "r", "R",
+  OPERATORS = c("/", "s", "S", "x", "X", "extract", "c", "C", "r", "R",
                 "times", "each",
                 "~", "if", "vif",
                 "upper", "lower", "q", "Q", "bq", 
@@ -3517,7 +3517,7 @@ smagick_register = function(fun, alias, valid_options = NULL){
               "\nPROBLEM: it has no argument {enum.bq.or?arg_missing}.")
   }
 
-  valid_args = dsb("/x, argument, options, group, conditionnal_flag")
+  valid_args = dsb("/x, argument, options, group, conditional_flag")
   arg_pblm = setdiff(setdiff(fun_args, "..."), valid_args)
   if(length(arg_pblm) > 0){
     stop_hook("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",

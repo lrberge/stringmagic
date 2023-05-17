@@ -216,7 +216,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value = deparse_short(mc_dots[[i]])
 
       # really, this is gibberish: who can understand the code?
-      nm = cub(" ({@<4(erase) ! {nm} = }{value})")
+      nm = cub(" ({if(.C<4 ; erase) ! {nm} = }{value})")
 
       if(grepl("try(...", elem, fixed = TRUE)){
         elem = gsub("^[^:]+:", "", elem)
@@ -228,7 +228,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
 
     dots[[i]] = elem
   }
-
+  
   # now we catch type problems
   if(scalar){
     if(any(lengths(dots) != 1)){
@@ -254,11 +254,11 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
       # really, this is gibberish: who can understand the code?
-      info_call = cub("`{@<4(erase) ! {nm_pblm} = }{value_all}`")
+      info_call = .cub("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up("In the argument `...`, all elements must be scalars (i.e. of length 1).\nPROBLEM: ",
               "{'\n'c ! The {nth ? i_pblm} element ({info_call}) is ",
-              "of length {format, ws ? len_pblm}.")
+              "of length {format, ws ? len_pblm}.}")
     }
   }
 
@@ -282,7 +282,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
       # really, this is gibberish: who can understand the code?
-      info_call = cub("`{@<4(erase) ! {nm_pblm} = }{value_all}`")
+      info_call = cub("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       cls_pblm = sapply(dots[i_pblm], function(x) dsb(".[bq ! .[enum ? class(x)]]"))
       stop_up(dsb("In the argument `...`, all elements must be atomic (i.e. convertible to a character string).\nPROBLEM: ",
@@ -315,11 +315,11 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
       # really, this is gibberish: who can understand the code?
-      info_call = cub("`{@<4(erase) ! {nm_pblm} = }{value_all}`")
+      info_call = cub("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up(dsb("In the argument `...`, all elements must be without NA.\nPROBLEM: ",
                   "The .[nth, enum ? i_pblm] element.[$s] (.[C ? info_call])",
-                  " .[$contain] NA values"))
+                  " .[$contain] NA values."))
     }
   }
 
