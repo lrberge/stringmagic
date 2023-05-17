@@ -418,6 +418,11 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
       }
     }
   }
+  
+  if(patterns.empty()){
+    patterns.push_back("");
+    is_or_all.push_back(false);
+  }
 
   res["patterns"] = patterns;
   res["is_or"] = is_or_all;

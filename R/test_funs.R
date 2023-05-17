@@ -112,21 +112,23 @@ test = function(x, y, type = "=", tol = 1e-6){
         if(!"try-error" %in% class(m)){
             stop("Expected an error that did not occur.")
         } else if(IS_Y && !grepl(tolower(y), tolower(m), fixed = TRUE)){
-            stop("This is an error, but the messages don't match:\nEXPECTED: \n", y, "\nACTUAL: \n", x)
+            stop("This is an error, but the messages don't match:\nEXPECTED: \n", y, "\n..ACTUAL: \n", x)
         }
     } else if(length(x) == 0){
         stop("Argument 'x' is of length 0. This is not allowed.")
 
     } else if(type %in% c("equal", "=")){
         if(length(x) != length(y)){
-            stop("Lengths differ: EXPECTED: ", length(y), "\n",
-                 "                    ACTUAL: ", length(x))
+            stop("Lengths differ: ", 
+                 "\nEXPECTED: ", length(y), "\n",
+                 "\n..ACTUAL: ", length(x))
 
         } else if(anyNA(x)){
             if(!all(is.na(x) == is.na(y))){
                 if(sum(is.na(x)) != sum(is.na(y))){
-                    stop("Number of NA values differ: EXPECTED: ", sum(is.na(y)), "\n",
-                         "                                ACTUAL: ", sum(is.na(x)))
+                    stop("Number of NA values differ: ",
+                    "\nEXPECTED: ", sum(is.na(y)), "\n",
+                    "\n..ACTUAL: ", sum(is.na(x)))
                 }
 
                 i = which(is.na(x) != is.na(y))[1]
@@ -134,57 +136,65 @@ test = function(x, y, type = "=", tol = 1e-6){
                 na_y = 1 + is.na(y)[i]
                 info = c("none", "one NA")
 
-                stop("Position of the NA values differ. EXPECTED: ", info[na_y], " in position ", i, "\n",
-                     "                                      ACTUAL: ", info[3 - na_y], ".")
+                stop("Position of the NA values differ. ", 
+                     "\nEXPECTED: ", info[na_y], " in position ", i, "\n",
+                     "\n..ACTUAL: ", info[3 - na_y], ".")
 
             } else if(!all(is_na <- is.na(x)) && any(qui_pblm <- x[!is_na] != y[!is_na])){
 
                 if(all(qui_pblm)){
                     if(length(x) == 1){
-                        stop("Non-NA values differ: EXPECTED: ", y[!is_na], "\n",
-                             "                          ACTUAL: ", x[!is_na])
+                        stop("Non-NA values differ: ", 
+                             "\nEXPECTED: ", y[!is_na], "\n",
+                             "\n..ACTUAL: ", x[!is_na])
                     } else {
-                        stop("All non-NA values differ: 1st elem.: EXPECTED: ", y[!is_na][1], "\n",
-                             "                                         ACTUAL: ", x[!is_na][1])
+                        stop("All non-NA values differ: 1st elem.: ", 
+                             "\nEXPECTED: ", y[!is_na][1], "\n",
+                             "\n..ACTUAL: ", x[!is_na][1])
                     }
                 } else {
                     n = sum(qui_pblm)
                     i = which(qui_pblm)[1]
-                    stop(n, " non-NA value", plural(n, "s.differ"), ": ", n_th(i), " elem.: \nEXPECTED: ", y[!is_na][i], "\nACTUAL: ", x[!is_na][i])
+                    stop(n, " non-NA value", plural(n, "s.differ"), ": ", n_th(i), " elem.: \nEXPECTED: ", y[!is_na][i], "\n..ACTUAL: ", x[!is_na][i])
                 }
             }
 
         } else if(anyNA(y)){
-            stop("Number of NA values differ: EXPECTED: ", sum(is.na(y)), "\n",
-                 "                                ACTUAL: ", sum(is.na(x)))
+            stop("Number of NA values differ: ", 
+                 "\nEXPECTED: ", sum(is.na(y)), "\n",
+                 "\n..ACTUAL: ", sum(is.na(x)))
 
         } else if(!all(x == y)){
             qui_pblm = x != y
 
             if(all(qui_pblm)){
                 if(length(x) == 1){
-                    stop("Values differ: EXPECTED: ", y, "\n",
-                         "                   ACTUAL: ", x)
+                    stop("Values differ: ", 
+                         "\nEXPECTED: ", y, "\n",
+                         "\n..ACTUAL: ", x)
                 } else {
-                    stop("All values differ: 1st elem.: EXPECTED: ", y[1], "\n",
-                         "                                  ACTUAL: ", x[1])
+                    stop("All values differ: 1st elem.: ", 
+                         "\nEXPECTED: ", y[1], "\n",
+                         "\n..ACTUAL: ", x[1])
                 }
             } else {
                 n = sum(qui_pblm)
                 i = which(qui_pblm)[1]
-                stop(n, " value", plural(n, "s.differ"), ": ", n_th(i), " elem.: \nEXPECTED: ", y[i], "\nACTUAL: ", x[i])
+                stop(n, " value", plural(n, "s.differ"), ": ", n_th(i), " elem.: \nEXPECTED: ", y[i], "\n..ACTUAL: ", x[i])
             }
         }
     } else if(type %in% c("~", "approx")){
         if(length(x) != length(y)){
-            stop("Lengths differ: EXPECTED: ", length(y), "\n",
-                 "                    ACTUAL: ", length(x))
+            stop("Lengths differ: ", 
+                 "\nEXPECTED: ", length(y), "\n",
+                 "\n..ACTUAL: ", length(x))
 
         } else if(anyNA(x)){
             if(!all(is.na(x) == is.na(y))){
                 if(sum(is.na(x)) != sum(is.na(y))){
-                    stop("Number of NA values differ: EXPECTED: ", sum(is.na(y)), "\n",
-                         "                                ACTUAL: ", sum(is.na(x)))
+                    stop("Number of NA values differ: ", 
+                         "\nEXPECTED: ", sum(is.na(y)), "\n",
+                         "\n..ACTUAL: ", sum(is.na(x)))
                 }
 
                 i = which(is.na(x) != is.na(y))[1]
@@ -192,16 +202,18 @@ test = function(x, y, type = "=", tol = 1e-6){
                 na_y = 1 + is.na(y)[i]
                 info = c("none", "one NA")
 
-                stop("Position of the NA values differ. EXPECTED: ", info[na_y], " in position ", i, "\n",
-                     "                                      ACTUAL: ", info[3 - na_y], ".")
+                stop("Position of the NA values differ. ", 
+                     "\nEXPECTED: ", info[na_y], " in position ", i, "\n",
+                     "\n..ACTUAL: ", info[3 - na_y], ".")
 
             } else if(max(abs(x - y), na.rm = TRUE) > tol){
 
                 stop("Difference > tol: Max abs. diff: ", max(abs(x - y), na.rm = TRUE), " (in position ", which.max(abs(x - y)), ")")
             }
         } else if(anyNA(y)){
-            stop("Number of NA values differ: EXPECTED: ", sum(is.na(y)), "\n",
-                 "                                ACTUAL: ", sum(is.na(x)))
+            stop("Number of NA values differ: ", 
+                 "\nEXPECTED: ", sum(is.na(y)), "\n",
+                 "\n..ACTUAL: ", sum(is.na(x)))
 
         } else if(max(abs(x - y)) > tol){
             stop("Difference > tol: Max abs. diff: ", max(abs(x - y)), " (in position ", which.max(abs(x - y)), ")")

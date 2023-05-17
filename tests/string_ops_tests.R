@@ -4,86 +4,169 @@
 # ~: string.ops tests
 #----------------------------------------------#
 
-
-
-####
-#### dsb ####
-####
-
-
-####
-#### ... regular operators ####
-####
-
-#
-# split
-#
-
-x = "Cogito...Ergo...Sum"
-txt = cub("He said: {'...'s.f ? x}")
-test(txt, c("He said: Cogito", "He said: Ergo", "He said: Sum"))
-
-txt = cub("He said: {'c|s's.ignor ? x}")
-test(txt, c("He said: ogito...Ergo...", "He said: um"))
+# Tests all string operations
+# - should go through all the branches
+# - I test the conditional operations inside the operators when relevant
 
 
 #
-# collapse
+# slash ####
 #
 
+# regular
+x = cub("/bon, jour, les gens, 
+          je suis, la bas")
+test(x, c("bon", "jour", "les gens", "je suis", "la bas"))
+
+# with nesting
+y = c("Ana", "Charles")
+z = c("Romeo Montaigu", "Juliette Capulet")
+x = cub("/Jules, {y}, Francis, {'\\s+'S, ~(cfirst, ''c) ? z}")
+test(x, c("Jules", "Ana", "Charles", "Francis", "RM", "JC"))
+
+#
+# collapse ####
+#
+
+# regular
 x = 1:3
 test(cub("win = {'-'c ? x}"), "win = 1-2-3")
 
 test(cub("win = {c ? x}"), "win = 1 2 3")
 
+# with last element
 test(cub("win = {C ? x}"), "win = 1, 2 and 3")
 
-test(cub("win = {'||/'c ? x}"), "win = 12/3")
+test(cub("win = {'|/'c ? x}"), "win = 12/3")
+
+# default behavior
+test(cub("win = {c ? x}"), "win = 1 2 3")
+
+# empty collapse
+test(cub("win = {''c ? x}"), "win = 123")
+
+# conditional collapse
+x = cub("/bonjour les gens., comment ca va?, bien?, bien.")
+txt = cub("{' 'S, ~(cfirst.3, '.'c) ? x}")
+test(txt, c("bon.les.gen", "com.ca.va?", "bie", "bie"))
+
+#
+# split ####
+#
+
+x = "Cogito...Ergo...Sum"
+txt = cub("He said: {'f/...'s ? x}")
+test(txt, c("He said: Cogito", "He said: Ergo", "He said: Sum"))
+
+txt = cub("He said: {'i / [cs]'s ? x}")
+test(txt, c("He said: ogito...Ergo...", "He said: um"))
+
 
 
 #
-# replace
+# replace ####
 #
 
 x = c("Blanche dit 'Bla bla blanc'.")
 txt = cub("She said: {'bla'r, ws ? x}")
-test(x, "She said: Blanche dit 'Bla nc'.")
+test(txt, "She said: Blanche dit 'Bla nc'.")
 
-txt = cub("She said: {'bla'r.i, ws ? x}")
-test(x, "She said: nche dit ' nc'.")
+txt = cub("She said: {'bla'r.ignore, ws ? x}")
+test(txt, "She said: nche dit ' nc'.")
 
-txt = cub("She said: {'bla'r.w, ws ? x}")
-test(x, "She said: Blanche dit 'Bla blanc'.")
+txt = cub("She said: {'i / bla'r, ws ? x}")
+test(txt, "She said: nche dit ' nc'.")
 
-txt = cub("She said: {'bla'r.w.i, ws ? x}")
-test(x, "She said: Blanche dit ' blanc'.")
+txt = cub("She said: {'bla'r.word, ws ? x}")
+test(txt, "She said: Blanche dit 'Bla blanc'.")
 
-txt = cub("She said: {'.'r.f, ws ? x}")
-test(x, "She said: Blanche dit 'Bla bla blanc'")
+txt = cub("She said: {'w / bla'r, ws ? x}")
+test(txt, "She said: Blanche dit 'Bla blanc'.")
 
-txt = cub("She said: {'Bla, blanc => ??'r.w, ws ? x}")
-test(x, "She said: Blanche dit '?? bla ??'.")
+txt = cub("She said: {'bla'r.word.ignore, ws ? x}")
+test(txt, "She said: Blanche dit ' blanc'.")
+
+txt = cub("She said: {'wi / bla'r, ws ? x}")
+test(txt, "She said: Blanche dit ' blanc'.")
+
+txt = cub("She said: {'.'r.fixed, ws ? x}")
+test(txt, "She said: Blanche dit 'Bla bla blanc'")
+
+txt = cub("She said: {'fixed / .'r, ws ? x}")
+test(txt, "She said: Blanche dit 'Bla bla blanc'")
+
+txt = cub("She said: {'Bla, blanc => ??'r.word, ws ? x}")
+test(txt, "She said: Blanche dit '?? bla ??'.")
+
+txt = cub("She said: {'word / Bla, blanc => ??'r, ws ? x}")
+test(txt, "She said: Blanche dit '?? bla ??'.")
 
 txt = cub("She said: {'Bla, blanc => \\1\\1'r.w, ws ? x}")
-test(x, "She said: Blanche dit 'BlaBla bla blancblanc'.")
+test(txt, "She said: Blanche dit 'BlaBla bla blancblanc'.")
+
+txt = cub("She said: {'w / Bla, blanc => \\1\\1'r, ws ? x}")
+test(txt, "She said: Blanche dit 'BlaBla bla blancblanc'.")
+
+# total replacement
+x = cub("/jingle bells, jingle bells, jingle, all the way")
+txt = cub("{', 'c ! {'t / jing => [sound]'r ? x}}")
+test(txt, "[sound], [sound], [sound], all the way")
+
+txt = cub("{', 'c ! {'jing => [sound]'r.total ? x}}")
+test(txt, "[sound], [sound], [sound], all the way")
+
+# default
+test(cub("a = {r ? 1:5}"), "err")
+test(cub("a = {R ? 1:5}"), "err")
+
+# other with replacement
+
+x = c("[]", "Moon", "Sun")
+
+txt = dsb("Stare at the .['f / []'r ? x]")
+test(txt, c("Stare at the ", "Stare at the Moon", "Stare at the Sun"))
+
+txt = dsb("Stare at the .['f / [] => ...'r ? x]")
+test(txt, c("Stare at the ...", "Stare at the Moon", "Stare at the Sun"))
+
+txt = dsb("Stare at the .['[[:upper:]]'R ? x]")
+test(txt, c("Stare at the []", "Stare at the oon", "Stare at the un"))
+
+txt = dsb("Stare at the .['[[:upper:]] => P'R ? x]")
+test(txt, c("Stare at the []", "Stare at the Poon", "Stare at the Pun"))
+
 
 #
-# x: single extraction
+# x: single extraction ####
 #
 
 x = c("Blanche dit", " 'Bla bla blanc'.")
 txt = cub("mots: {'bla'x ? x}")
 test(txt, c("mots: ", "mots: bla"))
-test(cub("mots: {'bla'x.i ? x}"), 
+
+test(cub("mots: {'bla'x.ignore ? x}"), 
      c("mots: Bla", "mots: Bla"))
+     
+test(cub("mots: {'i/bla'x ? x}"), 
+     c("mots: Bla", "mots: Bla"))
+
 test(cub("mots: {'bla'x.i.w ? x}"), 
      c("mots: ", "mots: Bla"))
 
+test(cub("mots: {'iw/bla'x ? x}"), 
+     c("mots: ", "mots: Bla"))
+
+# default
 txt = cub("mots: {x ? x}")
 test(txt, c("mots: Blanche", "mots: Bla"))
 
+# alias
+test(cub("mots: {'iw/bla'extract.single ? x}"), 
+     c("mots: ", "mots: Bla"))
+
+
 #
-# X: multiple extractions
+# X: multiple extractions ####
 #
 
 x = c("Blanche dit", " 'Bla bla blanc'.")
@@ -93,79 +176,104 @@ test(txt, c("bla", "bla"))
 txt = cub("{'bla'X.i ? x}")
 test(txt, c("Bla", "Bla", "bla", "bla"))
 
-txt = cub("mots: {'bla'X.i.w ? x}")
+txt = cub("{'i / bla'X ? x}")
+test(txt, c("Bla", "Bla", "bla", "bla"))
+
+txt = cub("{'bla'X.i.w ? x}")
 test(txt, c("Bla", "bla"))
 
+txt = cub("{'ignore, word / bla'X ? x}")
+test(txt, c("Bla", "bla"))
+
+# conditional
+x = cub("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+txt = cub("info: {'\\d+'X, ~('-'c), C ? x}")
+test(txt, "info: 57-26, 32-7, 29-8 and 55")
+
 #
-# is, get, which
+# is, get, which ####
 #
 
 x = c("Hi Mary.", "Hi Charles!", "Are you OK?", "I think so Charles.", "Great to hear, Mary!")
-txt = cub("A few quotes:\n{Q, 'mary || charles && !'get.i, '  'app, '\n'c ? x}")
+txt = cub("A few quotes:\n{Q, 'mary | charles & !'get.i, '  'app, '\n'c ? x}")
+test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
+
+txt = cub("A few quotes:\n{Q, 'i/mary | charles & !'get, '  'app, '\n'c ? x}")
 test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
 
 x = c("It's me again.", "What do you mean a gain?", "Yes, again!", "Ah AGAIN, I thought A GAIN!")
 index = str_op(x, "'gain'which.w.i")
 test(index, c(2, 4))
 
-index = str_op(x, "'gain && .'is.fixed")
+index = str_op(x, "'gain & .'is.fixed")
 test(index, c(TRUE, FALSE, FALSE, FALSE))
+
+# conditional
+x = cub("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+txt = cub("info: {' 'S, '!\\d'get, ~('-'c), C ? x}")
+test(txt, "info: laura-and, charles-and, charly-and and june")
 
 
 #
-# each/times
+# each/times ####
 #
 
 test(cub("I like {5 times.c ! ?} marks!"), "I like ????? marks!")
 
 x = c("mary", "richard")
 y = c("yes", "no")
-txt = cub("The discussion: {', 'c ! {u, 2 times ? x}: '{2 times ? y}'}...")
+txt = cub("The discussion: {', 'c ! {upper.first, 2 times ? x}: '{2 times ? y}'}...")
 test(txt, "The discussion: Mary: 'yes', Richard: 'no', Mary: 'yes', Richard: 'no'...")
 
 test(cub("values: {2 each.c ? c('a', 'b')}"), "values: aabb")
 
-
-
 #
-# Case
+# case ####
+#
 
 x = "where is bryan? Bryan is in the KITCHEN."
 
-txt = dsb("l ? x")
+txt = dsb(".[lower ? x]")
 test(txt, "where is bryan? bryan is in the kitchen.")
 
-txt = dsb("u ? x")
+txt = dsb(".[upper.first ? x]")
 test(txt, "Where is bryan? Bryan is in the KITCHEN.")
 
-txt = dsb("U ? x")
+txt = dsb(".[upper ? x]")
 test(txt, "WHERE IS BRYAN? BRYAN IS IN THE KITCHEN.")
 
-txt = dsb("title ? x")
+txt = dsb(".[lower, upper.sentence ? x]")
+test(txt, "Where is bryan? Bryan is in the kitchen.")
+
+txt = dsb(".[title ? x]")
 test(txt, "Where Is Bryan? Bryan Is In The KITCHEN.")
 
 x = "results from a new estimator: a new hope"
-txt = dsb("title.i ? x")
+txt = dsb(".[title.i ? x]")
 test(txt, "Results from a New Estimator: A New Hope")
 
 #
-# quotes
+# quotes ####
 #
 
 x = "siren"
-txt = cub("Is is the song of the {q ? x}, of the {Q ? x} or of the {bq ? x}?")
-test(txt, "Is is the song of the 'siren', of the \"siren\" or of the `siren`?")
+txt = cub("Is it the song of the {q ? x}, of the {Q ? x} or of the {bq ? x}?")
+test(txt, "Is it the song of the 'siren', of the \"siren\" or of the `siren`?")
 
 #
-# format
+# format ####
 #
 
 x = c(1, 123, 123456)
-txt = cub("The numbers are:\n{'\n'c ! - {f ? x} | {rev, F ? x}}")
+txt = cub("The numbers are:\n{'\n'c ! - {format ? x} | {rev, Format ? x}}")
 test(txt, "The numbers are:\n- 1       | 123,456\n- 123     |     123\n- 123,456 |       1")
 
+txt = cub("The numbers are:\n{'\n'c ! - {format.0 ? x} | {rev, Format.zero ? x}}")
+test(txt, "The numbers are:\n- 0000001 | 123,456\n- 0000123 | 0000123\n- 123,456 | 0000001")
+
+
 #
-# sprintf
+# sprintf ####
 #
 
 txt = cub("pi = {%.3f ? pi}")
@@ -182,284 +290,292 @@ txt = cub("The winners are:\n{'\n'c ! - {%- 10s ? x}!}")
 test(txt, "The winners are:\n- michael   !\n- ana       !")
 
 #
-# ws & co
+# ws ####
 #
 
 x = " &Hej! Welcome!! A\t\n 6-feet wide bed awaits!\t."
 
-txt = dsb("ws ? x")
+txt = dsb(".[ws ? x]")
 test(txt, "&Hej! Welcome!! A 6-feet wide bed awaits! .")
 
-txt = dsb("ws.p ? x")
+txt = dsb(".[ws.p ? x]")
 test(txt, "Hej Welcome A 6 feet wide bed awaits")
 
-txt = dsb("ws.d ? x")
+txt = dsb(".[ws.d ? x]")
 test(txt, "&Hej! Welcome!! A -feet wide bed awaits! .")
 
-txt = dsb("ws.i ? x")
+txt = dsb(".[ws.i ? x]")
 test(txt, "&Hej! Welcome!! 6-feet wide bed awaits!")
 
-txt = dsb("ws.pd ? x")
+txt = dsb(".[ws.p.d ? x]")
 test(txt, "Hej Welcome A feet wide bed awaits")
 
-txt = dsb("ws.pi ? x")
+txt = dsb(".[ws.punct.isolated ? x]")
 test(txt, "Hej Welcome feet wide bed awaits")
 
-txt = dsb("ws.di ? x")
+txt = dsb(".[ws.d.i ? x]")
 test(txt, "&Hej! Welcome!! -feet wide bed awaits!")
 
-txt = dsb("ws.pdi ? x")
+txt = dsb(".[ws.p.d.i ? x]")
 test(txt, "Hej Welcome feet wide bed awaits")
 
 #
-# tws, trim
+# tws ####
 #
 
-x = c("  bonjour les gens", "ahem
-   ", NA)
-
-txt = dsb("tws ? x")
+x = c("  bonjour les gens", "ahem \n  ", NA)
+txt = dsb(".[tws ? x]")
 test(txt, c("bonjour les gens", "ahem", NA))
 
+#
+# trim ####
+#
+
 x = c("bonjour", "ahem")
-txt = dsb("4 trim ? x")
+txt = dsb(".[4 trim ? x]")
 test(txt, c("our", ""))
 
-txt = dsb("-2 trim ? x")
+txt = dsb(".[-2 trim ? x]")
 test(txt, c("bonjo", "ah"))
 
-txt = dsb("5 trim.r ? x")
+txt = dsb(".[5 trim.r ? x]")
 test(txt, c("bo", ""))
 
-txt = dsb("1 trim.b ? x")
+txt = dsb(".[1 trim.b ? x]")
 test(txt, c("onjou", "he"))
 
-# 
-# ascii
-
-test(dsb("laurent .[ascii ! bergé]"), "laurent berge")
-
-
-
 #
-# r, R
-
-x = c("[]", "Moon", "Sun")
-
-txt = dsb("Stare at the .['[]'r ? x]")
-test(txt, c("Stare at the ", "Stare at the Moon", "Stare at the Sun"))
-
-txt = dsb("Stare at the .['[] => ...'r ? x]")
-test(txt, c("Stare at the ...", "Stare at the Moon", "Stare at the Sun"))
-
-txt = dsb("Stare at the .['[[:upper:]]'R ? x]")
-test(txt, c("Stare at the []", "Stare at the oon", "Stare at the un"))
-
-txt = dsb("Stare at the .['[[:upper:]] => P'R ? x]")
-test(txt, c("Stare at the []", "Stare at the Poon", "Stare at the Pun"))
-
-#
+# k, keep char ####
 #
 
+x = c("this is a long sentence", "a short one")
+txt = cub("{11k, ' and 'c ? x}")
+test(txt, "this is a l and a short one")
+
+txt = cub("{11 k, ' and 'c ? x}")
+test(txt, "this is a l and a short one")
+
+txt = cub("{'11|..'k, ' and 'c ? x}")
+test(txt, "this is a l.. and a short one")
+
+txt = cub("{'11||..'k, ' and 'c ? x}")
+test(txt, "this is a.. and a short one")
 
 #
-# e, E
-
-x = c("55", "bonjour", "", " \t\n")
-
-txt = dsb("Those are the texts: .[e ? x]")
-test(txt, c("Those are the texts: 55", "Those are the texts: bonjour",
-            "Those are the texts:  \t\n"))
-
-txt = dsb("Those are the texts: .[E ? x]")
-test(txt, c("Those are the texts: 55", "Those are the texts: bonjour"))
-
-
-# app
-x = c("Sir Eustace", "Anne", "Suzanne")
-txt = dsb("Names emph: .['*'app.b, C ? x].")
-test(txt, "Names emph: *Sir Eustace*, *Anne* and *Suzanne*.")
-
-txt = dsb("Names emph: .[* app.b, C ? x].")
-test(txt, "Names emph: *Sir Eustace*, *Anne* and *Suzanne*.")
-
-txt = dsb("Here comes .[<#Eustace>('man'app.d ; 'woman'app.d), 'a 'a, C ? x].")
-test(txt, "Here comes a man, a woman and a woman.")
-
-
-# App
-
-x = c("Saint Estephe", "Saint Julien")
-
-txt = dsb("My fav. wine.[&('s are 'A ; ' is 'A), C ? x].")
-test(txt, "My fav. wines are Saint Estephe and Saint Julien.")
-
-
-####
-#### ... pluralization ####
-####
-
-# With numbers
-x = 5
-txt = dsb("There .[#is, N ? x] cat.[#s] in the room.")
-test(txt, "There are five cats in the room.")
-
-x = 1
-txt = dsb("There .[#is, N] cat.[#s ? x] in the room.")                  # + afterwards
-test(txt, "There is one cat in the room.")
-
-x = 7953
-txt = dsb(".[#n ? x] observation.[#s, are] missing.")
-test(txt, "7,953 observations are missing.")
-
-x = 1
-txt = dsb(".[#n ? x] observation.[#s, are] missing.")
-test(txt, "1 observation is missing.")
-
-# With 0 in ()
-
-x = 0
-txt = dsb("There .[#(are no;;.[#is, N]) ? x] director.[#(ies;y;ies)].")
-test(txt, "There are no directories.")
-
-x = 1
-txt = dsb("There .[#(are no;;.[#is, N]) ? x] director.[#(ies;y;ies)].")
-test(txt, "There is one directory.")
-
-x = 5
-txt = dsb("There .[#(are no;;.[#is, N]) ? x] director.[#(ies;y;ies)].")
-test(txt, "There are five directories.")
-
+# K, keep elements ####
 #
-# plural (s, ies)
 
-# without 0 option
-n = 0
-txt = cub("There {#is, n ? n} file{#s} and {#N} director{#y}.")
-test(txt, "There is 0 file and zero directory.")
-
-n = 1
-txt = cub("There {#is, n ? n} file{#s} and {#N} director{#y}.")
-test(txt, "There is 1 file and one directory.")
-
-n = 5
-txt = cub("There {#is, n ? n} file{#s} and {#N} director{#y}.")
-test(txt, "There are 5 files and five directories.")
-
-# with 0 option
-n = 0
-txt = cub("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
-test(txt, "There are no files and zero directories.")
-
-n = 1
-txt = cub("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
-test(txt, "There is 1 file and one directory.")
-
-n = 5
-txt = cub("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
-test(txt, "There are 5 files and five directories.")
-
-#
-# plural: nested evaluation
-
-x = character(0)
-txt = cub("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
-test(txt, "The value `a` does not exist.")
-
-x = "append"
-txt = cub("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
-test(txt, "The value `a` does not exist. Maybe you meant: `append`?")
-
-x = c("append", "array")
-txt = cub("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
-test(txt, "The value `a` does not exist. Maybe you meant: `append` or `array`?")
-
-
-# With length
-x = c("Charles", "Alice")
-txt = dsb(".[$Is, enum ? x] crazy? Hmm... no .[$(he;they), aren't].")
-test(txt, "Are Charles and Alice crazy? Hmm... no they aren't.")
-
-txt = dsb(".[$Is, enum] crazy? Hmm... no .[$(he;they), aren't ? x[1]].")  # + afterwards
-test(txt, "Is Charles crazy? Hmm... no he isn't.")
-
-#
-# enum, full force
-txt = dsb("I like the letter.[$s, enum.1.q ! .[/u, v, w]].")
-test(txt, "I like the letters 1) 'u', 2) 'v', and 3) 'w'.")
-
-txt = dsb("I like the letter.[$s, enum.1.Q ! u].")
-test(txt, 'I like the letter "u".')
-
-txt = dsb("Choose one: .[$enum.bq.or ? 1:3]")
-test(txt, "Choose one: `1`, `2` or `3`")
-
-# multiple values
-a = 577
-b = c("x", "y")
-txt = dsb(".[#n ? a] observation.[#s, are] missing. It concerns the variable.[$s, enum.bq ? b].")
-test(txt, "577 observations are missing. It concerns the variables `x` and `y`.")
-
-a = 1
-txt = dsb(".[#n ? a] observation.[#s, are] missing. It concerns the variable.[$s, enum.bq ? b].")
-test(txt, "1 observation is missing. It concerns the variables `x` and `y`.")
-
-txt = dsb(".[#n.u ? a] observation.[#s, are] missing. It concerns the variable.[$s, enum.bq ? b[1]].")
-test(txt, "One observation is missing. It concerns the variable `x`.")
-
-# combining the two
 x = 1:5
-txt = cub("{$n.u ? x} observation{$s}. He arrived {#nth.letter ? 3} and scored {#ntimes.le ? 1}.")
-test(txt, "Five observations. He arrived third and scored once.")
+
+txt = cub("{3K ? x}")
+test(txt, 1:3)
+
+txt = cub("{3KO ? x}")
+test(txt, c("1", "2", "three others"))
+
+txt = cub("{3Ko ? x}")
+test(txt, c("1", "2", "3 others"))
+
+txt = cub("{'3|le reste'K ? x}")
+test(txt, c("1", "2", "3", "le reste"))
+
+txt = cub("{'3||le reste'K ? x}")
+test(txt, c("1", "2", "le reste"))
+
+txt = cub("{'3||et :rest:/:n:'K ? x}")
+test(txt, c("1", "2", "et 3/5"))
+
+txt = cub("{'3||et :REST:/:N:'K ? x}")
+test(txt, c("1", "2", "et three/five"))
+
+# conditional
+x = cub("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+test(cub("info: {' 'S, ~(2Ko), C ? x}"), "err")
 
 #
-# la conjugaison
+# enum ####
+#
 
-pple = c("Francis", "Henry")
-txt = cub("{$enum, is, (a;) ? pple} tall guy{$s}.",
-          "\n{$(He;They), like} to eat donuts.",
-          "\nWhen happy, at the pub {$(he;they), goes}!",
-          "\n{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?")
-test(txt, "Francis and Henry are tall guys.\nThey like to eat donuts.\nWhen happy, at the pub they go!\nDon't they have wit, they who try?")
+x = 1:5
+txt = cub("{enum.q.3.oxf ? x}")
+test(txt, "'1', '2', and 3 others")
 
-pple = "Francis"
-txt = cub("{$enum, is, (a;) ? pple} tall guy{$s}.",
-          "\n{$(He;They), like} to eat donuts.",
-          "\nWhen happy, at the pub {$(he;they), goes}!",
-          "\n{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?")
-test(txt, "Francis is a tall guy.\nHe likes to eat donuts.\nWhen happy, at the pub he goes!\nDoesn't he have wit, he who tries?")
+txt = cub("{enum.bq.or ! x{1:3}}")
+test(txt, "`x1`, `x2` or `x3`")
 
-cub("{$enum, is, (a;) ? pple} tall guy{$s}.")
-cub("\n{$(He;They), like ? pple} to eat donuts.")
-cub("\nWhen happy, at the pub {$(he;they), goes ? pple}!")
+txt = cub("{enum.Q.nor.1 ! x{1:3}}")
+test(txt, '1) "x1", 2) "x2", nor 3) "x3"')
 
-cub("\n{$Don't, (he;they)} have wit, {$(he;they)} who {$try ? pple}?")
+txt = cub("{enum.a ! x{1:3}}")
+test(txt, "a) x1, b) x2, and c) x3")
 
-cub("\n{$Don't, (he;they) ? pple} have wit,")
-cub("\n{$(he;they)} who {$Try ? pple}?")
+txt = cub("{enum.i ! x{1:3}}")
+test(txt, "i) x1, ii) x2, and iii) x3")
 
-cub("\n{$Don't, (he;they) ? pple} have wit, {$(he;they)} who {$try ? pple}?")
-cub("\n{$Don't, (he;they) ! hey} have wit, {$(he;they)} who ?")
+# conditional
+x = c("123", "abc", "a1b2")
+txt = cub("{''S, ~(enum), ' ; 'c ? x}")
+test(txt, "1, 2 and 3 ; a, b and c ; a, 1, b and 2")
 
-cub("{$Don't, (he;they) ! hey} have wit, {$(he;they)} who ?")
+#
+# first and last ###
+#
 
-cub("\\{} have wit, {$(he;they) ! hey} who ?")
+x = 1:5
+txt = cub("{2 first, ''c ? x}")
+test(txt, "12")
 
-cub("test?")
+txt = cub("{last.2, ''c ? x}")
+test(txt, "45")
 
+a = 2
+txt = cub("{'3'first, `a`last, ''c ? x}")
+test(txt, "23")
 
-####
-#### n, len ####
-####
+# conditional
+x = c("123", "abc", "a1b2")
+txt = cub("{''S, ~(first), ' ; 'c ? x}")
+test(txt, "1 ;a ; a")
+
+txt = cub("{''S, ~(last), ' ; 'c ? x}")
+test(txt, "3 ; c ; 2")
+
+#
+# cfirst, clast ####
+#
+
+x = c("bonjour", "les", "gens")
+a = 2
+txt = cub("{3 cfirst, `a`clast ? x}")
+test(txt, c("on", "es", "en"))
+
+#
+# rev ####
+#
+
+test(cub("{rev ? 1:3}"), 3:1)
+
+# conditional
+x = c("123", "abc", "a1b2")
+txt = cub("{''S, ~(rev, ''c), ' ; 'c ? x}")
+test(txt, "321 ; cba ; 2b1a")
+
+#
+# sort, dsort ####
+#
+
+x = c(5, 3, 8, 1)
+test(cub("{sort ? x}"), c(1, 3, 5, 8))
+
+test(cub("{dsort ? x}"), c(8, 5, 3, 1))
+
+# conditional
+x = c("521", "aebc")
+txt = cub("{''S, ~(sort, ''c), ' ; 'c ? x}")
+test(txt, "125 ; abce")
+
+txt = cub("{''S, ~(dsort, ''c), ' ; 'c ? x}")
+test(txt, "521 ; ecba")
+
+#
+# paste ####
+#
+
+x = 1:2
+txt = cub("{'x'paste, ', 'c ? x}")
+test(txt, "x1, x2")
+
+txt = cub("{'*'paste.both, ', 'c ? x}")
+test(txt, "*1*, *2*")
+
+txt = cub("{_ paste.right, ', 'c ? x}")
+test(txt, "1_, 2_")
+
+x = 1:3
+txt = cub("The number{if(.N>1 ; 's are 'paste.front ; ' is'paste.front), C ? x}.")
+test(txt, "The numbers are 1, 2 and 3.")
+
+x = 5
+txt = cub("The number{if(.N>1 ; 's are 'paste.front ; ' is 'paste.front), C ? x}.")
+test(txt, "The number is 5.")
+
+#
+# append ####
+#
+
+x = 1:2
+txt = cub("{'0'append, ''c ? x}")
+test(txt, "012")
+
+txt = cub("{'0'append.both, ''c ? x}")
+test(txt, "0120")
+
+txt = cub("{'0'append.right, ''c ? x}")
+test(txt, "120")
+
+# conditional
+x = c("521", "aebc")
+txt = cub("{''S, ~('0'append, ''c), ' ; 'c ? x}")
+test(txt, "err")
+
+#
+# unik ####
+#
+
+x = c(1, 1, 2, 3, 3, 3) 
+test(cub("{unik ? x}"), 1:3)
+
+# conditional
+x = c("11211125564454", "aggafsgaffasg")
+txt = cub("{''S, ~(unik, ''c), ' ; 'c ? x}")
+test(txt, "12564 ; agfs")
+
+#
+# nth ####
+#
+
+x = c(1, 6)
+txt = cub("They arrived {nth, C ? x}.")
+test(txt, "They arrived 1st and 6th.")
+
+txt = cub("They arrived {Nth, C ? x}.")
+test(txt, "They arrived first and sixth.")
+
+#
+# ntimes ####
+#
+
+x = c(1, 6)
+txt = cub("They won {ntimes, C ? x}.")
+test(txt, "They won 1 time and 6 times.")
+
+txt = cub("They won {Ntimes, C ? x}.")
+test(txt, "They won once and six times.")
+
+#
+# n ####
+#
 
 x = c(45546, "bonjour")
 txt = cub("A = {n ? x} ; B = {n.l ? 55}")
 test(txt, c("A = 45,546 ; B = fifty-five", "A = bonjour ; B = fifty-five"))
 
+txt = cub("{N.up ? 8} times he won!")
+test(txt, "Eight times he won!")
+
+#
+# len ####
+#
+
+x = 1:5
+txt = cub("{Len.up ? x} numbers.")
+test(txt, "Five numbers.")
+
+x = 1:2
 txt = cub("x is of length {len ? x}, or {Len ? x}.")
 test(txt, "x is of length 2, or two.")
 
-# conditionnaly
+# conditionaly
 x = c("bonjour les gens", "la pluie", "est drue, je rentre")
 txt = cub("Number of words: {' 'S, ~(len), C ? x}.")
 test(txt, "Number of words: 3, 2 and 4.")
@@ -468,7 +584,7 @@ num = str_op(x, "' 'S, ~(len), num")
 test(num, c(3, 2, 4))
 
 #
-# swidth
+# swidth ####
 #
 
 x = "Rome, l'unique objet de mon ressentiment, Rome a qui vient ton bras d'immoler mon amant"
@@ -476,7 +592,7 @@ txt = cub("Voici le texte a apprendre:\n{40 swidth.> ? x}.")
 test(txt, c("Voici le texte a apprendre:\n> Rome, l'unique objet de mon\n> ressentiment, Rome a qui vient ton\n> bras d'immoler mon amant."))
 
 #
-# difftime
+# difftime ####
 #
 
 x = 3654
@@ -487,26 +603,191 @@ x = structure(1680294984.14505, class = c("POSIXct", "POSIXt")) - structure(1680
 txt = cub("Time since last check: {dtime ? x}.")
 test(txt, "Time since last check: 41 min 42 sec.")
 
-####
-#### ... if-else ####
-####
+#
+# erase ####
+#
 
+x = 1:5
+txt = cub("{if(. <= 3 ; erase), '.'c ? x}")
+test(txt, "...4.5")
+
+#
+# nuke ####
+#
+
+x = 1:5
+txt = cub("nothing = {nuke ? x}")
+test(txt, "nothing = ")
+
+#
+# rm ####
+#
+
+x = c("", "    ", "556", ":!", "pour qui sont ces", "serpents qui sifflent sur nos tetes?")
+txt = cub("{5 cfirst, rm, ', 'c ? x}")
+test(txt, "    , 556, :!, pour , serpe")
+
+txt = cub("{5 cfirst, rm.blank, ', 'c ? x}")
+test(txt, "556, :!, pour , serpe")
+
+txt = cub("{5 cfirst, rm.noalpha, ', 'c ? x}")
+test(txt, "pour , serpe")
+
+txt = cub("{5 cfirst, rm.noalnum, ', 'c ? x}")
+test(txt, "556, pour , serpe")
+
+txt = cub("{5 cfirst, rm.all, ', 'c ? x}")
+test(txt, "")
+
+txt = cub("{5 cfirst, 'pour'rm.blank, ', 'c ? x}")
+test(txt, "556, :!, serpe")
+
+# conditional
+x = cub("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+txt = cub("{' 'S, rm.noalpha, ~('-'c), C ? x}")
+test(txt, "laura-and, charles-and, charly-and and june")
+
+#
+# num ####
+#
+
+x = "parse55this"
+txt = str_op(x, "'\\d+'x, num")
+test(txt, 55)
+
+x = c("55", "abc")
+txt = cub("{num ? x}")
+test(txt, c(55, NA))
+
+txt = cub("{num.soft ? x}")
+test(txt, c(55, "abc"))
+
+txt = cub("{num.clean ? x}")
+test(txt, c(55, ""))
+
+txt = cub("{num.rm ? x}")
+test(txt, 55)
+
+# conditional
+x = cub("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+txt = cub("{' 'S, num.rm, ~('-'c), C ? x}")
+test(txt, "57-26, 32-7, 29-8 and 55")
+
+#
+# ascii ####
+#
+
+test(dsb("laurent .[ascii ! bergé]"), "laurent berge")
+
+#
+# stop ####
+#
+
+x = "Hi I'm Laurent and I'm trying to remove stop-words."
+txt = cub("Before: {x}\nAfter: {stop, ws ? x}")
+test(txt, "Before: Hi I'm Laurent and I'm trying to remove stop-words.
+After: Hi Laurent trying remove stop-words.")
+
+#
+# if-else ####
+#
+
+# elementwise
 x = c(15, 550)
-txt = dsb("The value is .[= x > 50 ; > 50 ; <= 50]")
+txt = dsb("The value is .[& x > 50 ; > 50 ; <= 50]")
 test(txt, c("The value is <= 50", "The value is > 50"))
 
-x = c(15, 550)
-txt = dsb("The value is .[== x > 50 ; > 50]")
-test(txt, c("The value is 15", "The value is > 50"))
+txt = dsb("The value is .[& x > 50 ; > 50]")
+test(txt, c("The value is ", "The value is > 50"))
 
+# testing the quote
+txt = dsb("The value is .[& x > 50 ; > 50 ; '   .']")
+test(txt, c("The value is    .", "The value is > 50"))
+
+# whole string
 x = c(15, 550)
-txt = cub("The values are{=length(x) < 5 ; ': {C ? x}' ; 'too many'}.")
+txt = dsb("The max value is .[& max(x) > 50 ; large ; small].")
+test(txt, "The max value is large.")
+
+x = c(-5, 15)
+txt = dsb("The max value is .[& max(x) > 50 ; large ; small].")
+test(txt, "The max value is small.")
+
+x = c(-5, 15)
+txt = dsb("The max value is .[& max(x) > 50 ; large].")
+test(txt, "The max value is .")
+
+# nesting
+x = c(15, 550)
+txt = cub("The values are{& length(x) < 5 ; ': {C ? x}' ; 'too many'}.")
 test(txt, "The values are: 15 and 550.")
 
+# special if else
+x = c(15, 550)
+txt = dsb("The value is .[&& x > 50 ; > 50]")
+test(txt, c("The value is 15", "The value is > 50"))
 
-####
-#### escaping ####
-####
+#
+# if ####
+#
+
+# special values: ., .len (or .N), .nchar (or .C)
+
+x = c(5, 25, 30, 7)
+txt = cub("The large numbers are {if(.<10 ; nuke), C ? x}.")
+test(txt, "The large numbers are 25 and 30.")
+
+x = c(5, 25, 30, 7)
+txt = cub("The numbers are {if(.C < 2 ; 'x'pa ; 1k), C ? x}.")
+test(txt, "The numbers are x5, 2, 3 and x7.")
+
+txt = cub("The numbers are {if(.nchar >= 2 ; 'x'pa ; 1k), C ? x}.")
+test(txt, "The numbers are 5, x25, x30 and 7.")
+
+x = c(5, 25, 30, 7)
+txt = cub("The hash is {if(.N < 4 ; ':'c ; '-'c), C ? x}.")
+test(txt, "The hash is 5-25-30-7.")
+
+x = c(5, 25, 30)
+txt = cub("The hash is {if(.N < 4 ; ':'c ; '-'c), C ? x}.")
+test(txt, "The hash is 5:25:30.")
+
+# conditional
+x = c(5, 25, 30)
+txt = cub("Example: {if(.C < 2 ; 'x'pa ; ''s, ~('/'c)), C ? x}.")
+test(txt, "Example: x5, 2/5 and 3/0.")
+
+
+#
+# vif ####
+#
+
+x = c(5, 25, 30, 7)
+txt = cub("There are {vif(.len<3 ; not many ; many), C ? x} numbers.")
+test(txt, "There are many numbers.")
+
+x = c(5, 25)
+txt = cub("There are {vif(.N<3 ; not many ; many), C ? x} numbers.")
+test(txt, "There are not many numbers.")
+
+# elementwise
+x = c(5, 25, 30, 7)
+txt = cub("Numbers: {vif(.<10 ; small ; large), C ? x}.")
+test(txt, "Numbers: small, large, large and small.")
+
+# nesting
+x = c(5, 25, 30, 7)
+txt = cub("Numbers: {vif(.N > 5 ; sum = {n?sum(x)} ; prod = {n?prod(x)}), C ? x}.")
+test(txt, "Numbers: prod = 26,250.")
+
+x = c(5, 25, 30, 7, 5, 4)
+txt = cub("Numbers: {vif(.N > 5 ; sum = {n?sum(x)} ; prod = {n?prod(x)}), C ? x}.")
+test(txt, "Numbers: sum = 76.")
+
+
+#
+# escaping ####
+#
 
 txt = cub("\\{} it's some braces")
 test(txt, "{} it's some braces")
@@ -520,175 +801,18 @@ test(txt, "I'm saying 'ha } ha'!")
 txt = dsb("I'm saying .[q!ha \\] ha]!")
 test(txt, "I'm saying 'ha ] ha'!")
 
-
-####
-#### ... conditions ####
-####
-
 #
-# @: number of characters
-
-x = dsb("/le, bal, vin, ides, amens")
-
-txt = dsb("@(u : D) ! .['[vin]'R ? x]")
-test(txt, c("Le", "Bal", "Des", "Ames"))
-
-txt = dsb("@ >= 4(u:1k) ? x")
-test(txt, c("l", "b", "v", "Ides", "Amens"))
-
-txt = dsb("@ < 4(:U) ? x")
-test(txt, c("le", "bal", "vin", "IDES", "AMENS"))
-
-txt = dsb("@ == 3(U) ? x")
-test(txt, c("le", "BAL", "VIN", "ides", "amens"))
-
-
+# user-defined ops ####
 #
-# #: number of elements
 
-x = dsb("/julien, rebecca, sarah")
+xplode = function(x, argument, options, ...){
+  unlist(strsplit(x, ""))
+}
 
-txt = dsb("Here .[#('are 'A ; 'is 'A), C ? x]")
-test(txt, "Here are julien, rebecca and sarah")
+smagick_register(xplode, "xplode")
 
-txt = dsb("Here .[#('are 'A ; 'is 'A), C ? x[1]]")
-test(txt, "Here is julien")
-
-
-#
-# <: regex
-
-
-
-
-####
-#### str_is ####
-####
-
-
-x = dsb("/one, two, one... two, microphone, check")
-
-val = str_is(x, "^...$")
-test(val, c(TRUE, TRUE, FALSE, FALSE, FALSE))
-
-val = str_is(x, "#...")
-test(val, c(FALSE, FALSE, TRUE, FALSE, FALSE))
-
-val = str_is(x, "!#...")
-test(val, c(TRUE, TRUE, FALSE, TRUE, TRUE))
-
-val = str_is(x, c("#one", "#c"))
-test(val, c(FALSE, FALSE, FALSE, TRUE, FALSE))
-
-val = str_is(x, c("#one", "|#c"))
-test(val, c(TRUE, FALSE, TRUE, TRUE, TRUE))
-
-
-# escaping
-
-x = dsb("/hey!, #twitter, !##!")
-
-val = str_is(x, "\\#")
-test(val, c(FALSE, TRUE, TRUE))
-
-val = str_is(x, "!\\#")
-test(val, c(TRUE, FALSE, FALSE))
-
-val = str_is(x, "\\!")
-test(val, c(TRUE, FALSE, TRUE))
-
-val = str_is(x, "\\!#")
-test(val, c(FALSE, FALSE, TRUE))
-
-
-####
-#### str_get ####
-####
-
-
-x = rownames(mtcars)
-
-val = str_get(x, "Mazda")
-test(val, c("Mazda RX4", "Mazda RX4 Wag"))
-
-val = str_get(x, c("!\\d", "u"))
-test(val, c("Hornet Sportabout", "Lotus Europa"))
-
-val = str_get(x, c("Mazda", "Volvo"), seq = TRUE)
-test(val, c("Mazda RX4", "Mazda RX4 Wag", "Volvo 142E"))
-
-val = str_get(x, c("Volvo", "Mazda"), seq = TRUE)
-test(val, c("Volvo 142E", "Mazda RX4", "Mazda RX4 Wag"))
-
-
-####
-#### selvars ####
-####
-
-
-x = rownames(mtcars)
-
-val = selvars(x, "^Maz")
-test(val, c("Mazda RX4", "Mazda RX4 Wag")
-
-val = selvars(x, "^Mer, !#450")
-test(val, c("Merc 240D", "Merc 230", "Merc 280", "Merc 280C")
-
-val = selvars(x, "^Maz, &!@\\d")
-test(val, c("Mazda RX4", "Mazda RX4 Wag", "Hornet Sportabout", "Valiant",
-            "Cadillac Fleetwood", "Lincoln Continental", "Chrysler Imperial",
-            "Honda Civic", "Toyota Corolla", "Toyota Corona", "Dodge Challenger",
-            "AMC Javelin", "Pontiac Firebird", "Lotus Europa", "Ford Pantera L",
-            "Ferrari Dino", "Maserati Bora"))
-
-val = selvars(x, "@\\d, !^Merc || ^Fiat, !^Maz")
-test(val, c("Fiat 128", "Fiat X1-9", "Datsun 710", "Hornet 4 Drive", "Duster 360",
-            "Camaro Z28", "Porsche 914-2", "Volvo 142E", "Mazda RX4", "Mazda RX4 Wag"))
-
-####
-#### str_split2df ####
-####
-
-
-x = c("Nor rain, wind", "When my information")
-id = c("ws", "jmk")
-
-val = str_split2df(x, "[[:punct:] ]+")
-test(val$x, c("Nor", "rain", "wind", "When", "my", "information"))
-test(val$obs, c(1L, 1L, 1L, 2L, 2L, 2L))
-
-val = str_split2df(x, "[[:punct:] ]+", id = id)
-test(val$x, c("Nor", "rain", "wind", "When", "my", "information"))
-test(val$obs, c(1L, 1L, 1L, 2L, 2L, 2L))
-test(val$id, c("ws", "ws", "ws", "jmk", "jmk", "jmk"))
-
-base = data.frame(text = x, my_id = id)
-val = str_split2df(text ~ my_id, base, "[[:punct:] ]+")
-test(val$text, c("Nor", "rain", "wind", "When", "my", "information"))
-test(val$obs, c(1L, 1L, 1L, 2L, 2L, 2L))
-test(val$my_id, c("ws", "ws", "ws", "jmk", "jmk", "jmk"))
-
-base = data.frame(text = x, my_id = id)
-val = str_split2df(text ~ my_id, base, "[[:punct:] ]+", add.pos = TRUE)
-test(val$pos, c(1L, 2L, 3L, 1L, 2L, 3L))
-
-####
-#### str_clean ####
-####
-
-x = c("hello world  ", "it's 5 am....")
-
-val = str_clean(x, c("o", "#."))
-test(val, c("hell wrld  ", "it's 5 am"))
-
-val = str_clean(x, "o|\\.")
-test(val, c("hell wrld  ", "it's 5 am"))
-
-val = str_clean(x, "@w")
-test(val, c("hello world", "it's 5 am...."))
-
-val = str_clean(x, c("o(?= )", "@wpi"))
-test(val, c("hell world", "it am"))
+txt = cub("bon{xplode!jour}")
+test(txt, c("bonj", "bono", "bonu", "bonr"))
 
 
 

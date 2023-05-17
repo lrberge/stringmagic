@@ -333,6 +333,10 @@ void extract_paren_operator(const int box_type, bool &is_pblm, const char * str,
     
     if(str[i - 1] == ';'){
       
+      if(is_decorative_space){
+        operator_tmp.pop_back();
+      }
+      
       operator_tmp += "_;;;_";
       // last round
       if(op == 'i'){
@@ -680,6 +684,9 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
 
     operator_tmp = "&";
     ++i;
+    if(i < n && str[i] == '&'){
+      operator_tmp += str[i++];
+    }
 
     operator_vec.push_back(operator_tmp);
     operator_tmp = "";
@@ -696,18 +703,25 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     // step 2: extraction of the first verbatim
     std::string ending = ";" + get_closing_box_string(box_type);
     
+    if(i < n && str[i] == ' ' && str[i - 2] == ' '){
+      // we strip one WS for readability
+      ++i;
+    }
+    
     extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ending, false);
     if(is_pblm) return;
 
     bool two_verbatims = str[i] == ';';
 
-    if(two_verbatims && str[i - 1] == ' ' && (i + 1 < n && str[i + 1] == ' ')){
-      // we strip 1 WS on both sides for readability
-      operator_tmp.pop_back();
-      i += 2;
-    } else {
-      ++i;
-    }
+    if(two_verbatims){
+      if(str[i - 1] == ' ' && (i + 1 < n && str[i + 1] == ' ')){
+        // we strip 1 WS on both sides for readability
+        operator_tmp.pop_back();
+        i += 2;
+      } else {
+        ++i;
+      }
+    } 
 
     operator_vec.push_back(operator_tmp);
     operator_tmp = "";
@@ -995,7 +1009,9 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
       string_value += str[i++];
     }
 
-    res.push_back(string_value);
+    if(!string_value.empty()){
+      res.push_back(string_value);  
+    }    
 
     if(i < n){
       // there was one open
@@ -1178,7 +1194,7 @@ List cpp_parse_operator(SEXP Rstr){
   }
   
   // special case: `!stuff`
-  if(!argument.empty() && argument[0] == '!'){
+  if(!argument.empty() && is_eval && argument[0] == '!'){
     std::string new_arg;
     for(size_t j=1 ; j<argument.length() ; ++j) new_arg += argument[j];
     is_eval = false;
@@ -1359,5 +1375,52 @@ std::vector<std::string> cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
   return operator_vec;
 }
 
+// [[Rcpp::export]]
+std::vector<std::string> cpp_parse_slash(SEXP Rstr, bool is_dsb){
 
+  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+
+  const int box_type = is_dsb ? DSB : CUB;
+  
+  std::vector<std::string> res;
+  std::string string_tmp;
+  
+  int i = 0;
+  while(i < n){
+    
+    while(i < n && str[i] != ',' && !is_box_open(box_type, str, i, n, true)){
+      string_tmp += str[i++];
+    }
+    
+    if(i == n || str[i] == ','){
+      // we're done
+      res.push_back(string_tmp);
+      string_tmp = "";
+      ++i;
+      
+      // we strip WS
+      while(i < n && is_blank(str, i)) ++i;
+      
+      continue;
+    }
+    
+    // If here: we're in a box!
+    bool is_pblm = false;
+    string_tmp += str[i++];
+    if(box_type == DSB){
+      string_tmp += str[i++];
+    }
+    
+    // we extract the box, the index if after the closing box
+    extract_box_verbatim(box_type, is_pblm, str, i, n, string_tmp);
+  }
+  
+  // we save the last one if needed
+  if(!string_tmp.empty()){
+    res.push_back(string_tmp);
+  }
+  
+  return res;
+}
 

@@ -560,7 +560,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
       if(n != n_id){
         stop("The argument `id` must be either a vector of identifiers or a data.frame ",
              "of identifiers of the same length as `x`.",
-             dsb("\nPROBELM: len x: .[#n ? n] len id: .[#n ? n_id]."))
+             dsb("\nPROBELM: len x: .[n ? n]; len id: .[n ? n_id]."))
       }
       if(!is.atomic(id)){
         stop("The argument `id` must be either a vector of identifiers or a data.frame ",
@@ -881,7 +881,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
             items = paste0("\\Q", items, "\\E")
             is_fixed = FALSE
           }
-          p = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
+          p = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
         }
 
         if(is_ignore){

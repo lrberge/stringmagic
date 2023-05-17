@@ -57,6 +57,10 @@ cpp_parse_simple_operations <- function(Rstr, is_dsb) {
     .Call(`_stringmagick_cpp_parse_simple_operations`, Rstr, is_dsb)
 }
 
+cpp_parse_slash <- function(Rstr, is_dsb) {
+    .Call(`_stringmagick_cpp_parse_slash`, Rstr, is_dsb)
+}
+
 cpp_to_integer <- function(x) {
     .Call(`_stringmagick_cpp_to_integer`, x)
 }

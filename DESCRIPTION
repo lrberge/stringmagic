@@ -1,20 +1,21 @@
 Package: stringmagick
 Type: Package
-Title: Brings Magick Dust to String Operations
+Title: Character String Operations and Interpolation, but with Magick
 Version: 0.1.0
-Author@R: c(person(given = "Laurent",
+Author@R: 
+  person(given = "Laurent",
                    family = "Berge",
+                   middle = "R"
                    role = c("aut", "cre"),
-                   email = "laurent.berge@u-bordeaux.fr")
+                   email = "laurent.berge@u-bordeaux.fr",
+                   c(ORCID = "3-2736-1917"))
 Imports: Rcpp(>= 1.0.5)
 Suggests: knitr, data.table
 LinkingTo: Rcpp
-Description: Performs complex string operations compactly and efficiently. Supports string interpolation jointly with over 40 string operations. 
-             Includes formula interpolation with the function xpd().
+Description: Performs complex string operations compactly and efficiently. Supports string interpolation jointly with over 40 string operations. Also enhances regular string operations (like `grep` and co).
 SystemRequirements: C++11
 License: MIT
 Encoding: UTF-8
 VignetteBuilder: knitr
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
-

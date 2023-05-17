@@ -71,8 +71,8 @@ str_op = function(x, op, pre_unik = NULL){
     res_small = str_op(x_small, op, pre_unik = FALSE)
     res = res_small[x_int]
   } else {
-    operation = paste0(op, " ? x")
-    res = .dsb(operation, slash = TRUE)
+    operation = paste0("{", op, " ? x}")
+    res = .cub(operation)
   }
 
   if("group_index" %in% names(attributes(res))){
@@ -141,7 +141,7 @@ str_op = function(x, op, pre_unik = NULL){
 #' dsb("/J. Mills, David, Agnes, Dr Strong")
 #'
 #' # Nota: this is equivalent to (explained later)
-#' dsb("', *'S !J. Mills, David, Agnes, Dr Strong")
+#' dsb("{', *'S ! J. Mills, David, Agnes, Dr Strong}")
 #'
 #' #
 #' # Applying low level operations to strings
@@ -270,20 +270,20 @@ str_op = function(x, op, pre_unik = NULL){
 #' dsb("S, bq, C ! Julia, David, Wilkins")
 #'
 #' #
-#' # f, F: formats the string to fit the same length
+#' # format, Format: formats the string to fit the same length
 #'
-#' # f: the right side is filled with blanks
-#' # F: the left side is filled with blanks
+#' # format: the right side is filled with blanks
+#' # Format: the left side is filled with blanks
 #'
 #' score = c(-10, 2050)
 #' nm = c("Wilkins", "David")
-#' dsb("Monopoly scores:\n.['\n'c ! - .[f ? nm]: .[F ? score] US$]")
+#' dsb("Monopoly scores:\n.['\n'c ! - .[format ? nm]: .[Format ? score] US$]")
 #'
 #' # OK that example may have been a bit too complex,
 #' # let's make it simple:
 #'
-#' dsb("Scores: .[f ? score]")
-#' dsb("Names: .[F ? nm]")
+#' dsb("Scores: .[format ? score]")
+#' dsb("Names: .[Format ? nm]")
 #'
 #' #
 #' # w: white space normalization
@@ -758,9 +758,9 @@ dsb_c = function(..., frame = parent.frame(), vectorize = FALSE,
 #' the empty string. This means that `cub("wp ! Meg's car")` will become "Meg s car".
 #' + q, Q, bq: to add quotes to the strings. q: single quotes, Q: double quotes, bq: 
 #' back quotes. `x = c("Mark", "Pam"); cub("Hello {q,C?x}!")` leads to "Hello 'Mark' and 'Pam'!".
-#' + f, F: applies the base R's function format to the string. f: format with left
+#' + format, Format: applies the base R's function format to the string. f: format with left
 #'  alignment, F: format with right alignment.
-#'   Ex: `x = c(1, 12345); cub("left: {f,q,C?x}, right: {F,q,C?x}")` 
+#'   Ex: `x = c(1, 12345); cub("left: {format,q,C?x}, right: {Format,q,C?x}")` 
 #' leads to "left: '1     ' and '12,345', right: '     1' and '12,345'".
 #' + d: replaces the content with the empty string (useful in conditions, see section below).
 #' + D: deletes all content (useful in conditions, see section below). Ex: we want 
@@ -997,7 +997,7 @@ setup_help = function(){
     '    Ex: dsb(".[\' + \'c?1:3] = 6") -> "1 + 2 + 3 = 6". 1:3 is collapsed (c) with \' + \'.',
     "",
     "    Using ! instead of ? applies the operation to the *verbatim* of the expression.",
-    '    Ex: dsb(".[\': => 2\'r!1:3] = 6") -> "123 = 6".',
+    '    Ex: dsb(".[\': => 2\'r ! 1:3] = 6") -> "123 = 6".',
     "        In the string '1:3', ':' is replaced (r) with '2'.",
     "",
     "    Operations can be chained using comma-separation. The syntax is: .['s1'op1, 's2'op2?x]",
@@ -1011,12 +1011,8 @@ setup_help = function(){
     "    Ex: x = c(\"Doe\", \"Smith\")",
     "        dsb(\"Hi .[' and 'c!John .[x]]\") -> \"Hi John Doe and John Smith\"",
     "",
-    "    If nest = TRUE (default), the initial string is implicitly embedded in .[] ",
-    "  and considered as verbatim. This means that operations can be applied from the start.",
-    "    Ex: dsb(\"', 's!a1, b3, d8\") -> c(\"a1\", \"b3\", \"d8\")",
-    "",
     "    Operators have default values, so the quoted argument is optional.",
-    '    Ex: dsb("c?1:3") -> "1 2 3". 1:3 is collapsed (c) with \' \', its default.',
+    '    Ex: dsb(".[c ? 1:3]") -> "1 2 3". 1:3 is collapsed (c) with \' \', its default.',
     "",
     "# OPERATORS --------------|",
     "    Below is the list of operators and their default argument when relevant.",
@@ -1033,7 +1029,7 @@ setup_help = function(){
     "    - extracts one ('x') or several ('X') patterns from a character string",
     "    x _TAB_ '[[:alnum:]]+' _TAB_ extracts the first pattern, perl = TRUE",
     "    X _TAB_ '[[:alnum:]]+' _TAB_ extracts all patterns, perl = TRUE",
-    "    ex: x = c(\"6 feet under\", \"mahogany\") ; dsb(\"'\\\\w{3}'x ? x\")",
+    "    ex: x = c(\"6 feet under\", \"mahogany\") ; dsb(\".['\\\\w{3}'x ? x]\")",
     "",
     "  Collapse:",
     "    - collapses a vector with paste(x, collapse = 's'),",
@@ -1042,7 +1038,7 @@ setup_help = function(){
     "    - .[', || and 'c!1:3] -> \"1, 2 and 3\".",
     "    c _TAB_ '' _TAB_ collapse",
     "    C _TAB_ ', || and ' _TAB_ collapse",
-    "    ex: dsb(\"C ? 1:5\")",
+    "    ex: dsb(\".[C ? 1:5]\")",
     "",
     "  Replication:",
     "    - use '5'times to replicate 5 times,",
@@ -1051,7 +1047,7 @@ setup_help = function(){
     "    times.c _TAB_ NO DEFAULT _TAB_ replicates n times, then collapses with ''",
     "    each _TAB_ NO DEFAULT _TAB_ replicates n times, each",
     "    each.c _TAB_ NO DEFAULT _TAB_ replicates n times, each, then collapses with ''",
-    "    ex: dsb(\"yes.[10*c ! !]\")",
+    "    ex: dsb(\"yes.[10 times.c ! !]\")",
     "",
     "  Replacement: ",
     "    - the syntax is 'old => new', 'old=>new' or 'old_=>_new',",
@@ -1091,7 +1087,7 @@ setup_help = function(){
     "    - you can add any of them in any order after the w. ex: `wi`, `wd`, `wpd`, all work.",
     "    - uppercase `w` (ie `W`) is equivalent to `wp`",
     "    - note that the algorithm is quite fast but you may lose the encoding if the data is non-ascii",
-    "    ex: x = \"  bad,,  text! 77 format? \" ; dsb(\"w ? x\") ; dsb(\"wpd ? x\")",
+    "    ex: x = \"  bad,,  text! 77 format? \" ; dsb(\".[w ? x]\") ; dsb(\".[wpd ? x]\")",
     "",
     "  Enumerations:",
     "    - the `enum` command creates an enumeration of the elements",
@@ -1118,7 +1114,7 @@ setup_help = function(){
     "    last _TAB_ NO DEFAULT _TAB_ selects the last n",
     "    cfirst _TAB_ NO DEFAULT _TAB_ selects the first n characters",
     "    clast _TAB_ NO DEFAULT _TAB_ selects the last n characters",
-    "    ex: dsb(\"'15'first, last3 ? letters\")",
+    "    ex: dsb(\".['15'first, last3 ? letters]\")",
     "",
     "  Keeping a selected number of characters or elements: ",
     "    - the syntax is n K, 'n'K, 'n|s'K, or 'n||s'K",
@@ -1134,7 +1130,7 @@ setup_help = function(){
     "    k _TAB_ NO DEFAULT _TAB_ keeps the first n characters",
     "    K _TAB_ NO DEFAULT _TAB_ keeps the first n elements",
     "    Ko _TAB_ NO DEFAULT _TAB_ keeps the first n elements and adds 'others'",
-    "    ex: dsb(\"4Ko, C ? 1:200\")",
+    "    ex: dsb(\".[4Ko, C ? 1:200]\")",
     "",
     "  Insertion and appending operators:",
     "    - the syntax is 's1|s2' to insert, or append, the string s1 first and the string 's2' last.",
@@ -1159,14 +1155,14 @@ setup_help = function(){
     "    - the operations listed in `true` will be applied to the elements with 3 characters or less",
     "    - the operations listed in `false` will be applied to other elements",
     "    - the operation @(true:false) is a shorthand for @>0(true:false)",
-    "    ex: x = c(\"short\", \"long sentence\") ; dsb(\"@<=5('*|*'a:x) ? x\")",
+    "    ex: x = c(\"short\", \"long sentence\") ; dsb(\".[@<=5('*|*'a:x) ? x]\")",
     "",
     "  Condition on the number of elements:",
     "    - the syntax is: &<=3(true:false)",
     "    - the operations listed in `true` will be applied to the full vector if it contains 3 elements or less",
     "    - the operations listed in `false` will be applied to the full vector if it contains strictly more than 3 elements",
     "    - the operation #(true:false) is a shorthand for #>1(true:false)",
-    "    ex: dsb(\"#>=5('+'c : ' + 'c) ? 1:8\") ; dsb(\"#>=5('+'c : ' + 'c) ? 8:10\")",
+    "    ex: dsb(\".[#>=5('+'c : ' + 'c) ? 1:8]\") ; dsb(\".[#>=5('+'c : ' + 'c) ? 8:10]\")",
     "",
     "  Condition on the patterns:",
     "    - the syntax is: <regex>(true:false)",
@@ -1175,7 +1171,7 @@ setup_help = function(){
     "    - the operations listed in `false` will be applied to the other elements",
     "    - use # first in the regex to trigger fixed search instead of regex-search",
     "    - <#x^2>(true:false) will search for the fixed pattern 'x^2'",
-    "    ex: x = c(\"hello\", \"age = 25\", \"young\") ; dsb(\"<\\\\d>(D) ? x\")",
+    "    ex: x = c(\"hello\", \"age = 25\", \"young\") ; dsb(\".[<\\\\d>(D) ? x]\")",
     "",
     "# CONDITIONAL OPERATIONS--------------|",
     "  Some operations turn a single element into several elements (e.g.: `s` or `X`)",
@@ -1183,7 +1179,7 @@ setup_help = function(){
     "    - operations listed in `~(ops)` will be applied separately for each element that has been split.",
     "    - conditional operations only have sense if they come after a splitting operation.",
     "    ex: x = c(\"Name: Frederick, Age: 32, Height: 1m68\", \"Francesca, 24, 1m85\")",
-    "        dsb(\"' 's, <\\\\d>(:D), W, ~(' -- 'c) ? x\")",
+    "        dsb(\".[' 's, <\\\\d>(:D), W, ~(' -- 'c) ? x]\")",
     "",
     "# PLURALIZATION ----|",
     "  To trigger pluralization use a dollar sign right at the beginning of the operators.",
@@ -1214,7 +1210,7 @@ setup_help = function(){
     '        dsb("Hi .[/David, Dora]!") -> c("Hi David!", "Hi Dora!")',
     "",
     "    In quoted arguments, use backticks to evaluate them from the frame.",
-    '    Ex: n = 3 ; dsb("`n`times.c!$") -> "$$$". The \'$\' is replicated n times, then collapsed.'
+    '    Ex: n = 3 ; dsb(".[`n`times.c!$]") -> "$$$". The \'$\' is replicated n times, then collapsed.'
   )
 
 
@@ -1491,8 +1487,8 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
                 if(length(operators) == 1){
                   example = 'Example: x = c("Mark", "Sarah"); dsb(".[$enum, is ? x] away.")'
                   example = bespoke_msg(example, fun_name)
-                  stop_hook("In `", fun_name, "`, the pluralization operator (`", operators[1], "`) must contain operations. ",
-                          '\n', example)
+                  .stop_hook("In `", fun_name, "`, the pluralization operator (`", operators[1], 
+                             "`) must contain operations. ", '\n', example)
                 }
 
                 # We need to find it out!!!!!!
@@ -1514,7 +1510,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
                     example = 'Example: x = c("Mark", "Sarah"); dsb(".[$enum, is ? x] away.")'
                     example = bespoke_msg(example, fun_name)
 
-                    stop_hook("In `", fun_name, "`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
+                    .stop_hook("In `", fun_name, "`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
                             "Please provide one by adding it after a question mark.\n", example)
                   }
 
@@ -1587,7 +1583,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
             }
 
             if(is.function(xi)){
-              stop_hook("`", fun_name, "` cannot coerce functions into strings. Problem: `",
+              .stop_hook("`", fun_name, "` cannot coerce functions into strings. Problem: `",
                       trimws(x_parsed[[i]][[2]]), "` is a function.")
             }
           }
@@ -1612,18 +1608,18 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
         } else if(is_ifelse) {
 
           xi_val = NULL
-          if(operators[1] == "=="){
+          if(operators[1] == "&&"){
             vars = all.vars(str2lang(xi_raw))
 
             if(length(vars) == 0){
               # ERROR
-              form = ".[== cond ; true ; false]"
-              example = 'Example: x = c(5, 700); dsb("Value: .[==x > 20 ; > 20]")'
+              form = ".[&& cond ; true]"
+              example = 'Example: x = c(5, 700); dsb("Value: .[&&x > 20 ; > 20]")'
 
               form = bespoke_msg(form, fun_name)
               example = bespoke_msg(example, fun_name)
 
-              stop_hook("The if-else operator `==`, of the form ", form,
+              .stop_hook("The if-else operator `&&`, of the form ", form,
                       ", requires at least one variable to be evaluated in the condition.",
                       " PROBLEM: no variable could be found.\n", example)
             }
@@ -1717,7 +1713,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
           attr(xi, "extra") = NULL
         }
       }
-
+      
       if(i == 1){
         res = xi
       } else{
@@ -1758,7 +1754,7 @@ sop_char2operator = function(x, fun_name){
   op = op_parsed$operator
 
   if(nchar(op) == 0){
-    stop_hook("In ", fun_name, ", if a quoted value is present, the operators must ",
+    .stop_hook("In ", fun_name, ", if a quoted value is present, the operators must ",
               "be of the form 'value'op, ",
               "with 'op' an operator. Problem: In `", x, "` the operator is missing.")
   }
@@ -1772,7 +1768,7 @@ sop_char2operator = function(x, fun_name){
     op_parsed$operator = op
   }
 
-  if(nchar(argument) == 0){
+  if(nchar(argument) == 0 && !substr(x, 1, 1) %in% c("'", "\"", "`")){
     # no argument provided: we need to:
     # - set default values if available
     # - send error if operator requires argument
@@ -1791,19 +1787,20 @@ sop_char2operator = function(x, fun_name){
     op_parsed$argument = argument
 
     if(op %in% c("R", "r", "%", "k", "K", "append", "get", "is", "which")){
-      ex = c("R" = 'x = "She loves me."; dsb("\'s\\b => d\'R ? x")',
+      ex = c("R" = 'x = "She loves me."; dsb(".[\'s\\b => d\'R ? x]")',
             "r" = 'x = "Amour"; dsb(".[\'ou => e\'r ? x]...")',
             "%" = 'dsb("pi is: .[%.03f ? pi]")',
             "k" = 'dsb("The first 8 letters of the longuest word are: .[8k, q ! the longuest word].")',
             "K" = 'x = 5:9; dsb("The first 2 elements of `x` are: .[2K, C ? x].")',
             "get" = 'x = row.names(mtcars) ; dsb("My fav. cars are .[\'toy\'get.ignore, \'the \'app, enum ? x].")',
-            "is" = 'x = c("Bob", "Pam") ; dsb("\'am\'is ? x")',
-            "which" = 'x = c("Bob", "Pam") ; dsb("\'am\'which ? x")',
+            "is" = 'x = c("Bob", "Pam") ; dsb(".[\'am\'is ? x]")',
+            "which" = 'x = c("Bob", "Pam") ; dsb(".[\'am\'which ? x]")',
             "append" = 'x = "those, words"; dsb("Let\'s emphasize .[S, \'**\'append.both, c ? x].")')
 
       ex = bespoke_msg(ex[op])
-      stop_hook("The operator `", op,
-              "` has no default value, you must provide values explicitly.\n Example: ", ex)
+      .stop_hook("The operator `", op,
+              "` has no default value, you must provide values explicitly.\n Example: ", 
+              ex)
     }
   }
 
@@ -1811,7 +1808,7 @@ sop_char2operator = function(x, fun_name){
     # special case
     text = if(op == "Ko") "||:rest: others" else "||:REST: others"
     argument = paste0(argument, text)
-    op_parsed$operator = "K"
+    op_parsed$operator = op = "K"
     op_parsed$argument = argument
   }
     
@@ -1819,18 +1816,18 @@ sop_char2operator = function(x, fun_name){
     
     op = check_set_options(op, OPERATORS, case = TRUE, free = TRUE)
     op_parsed$operator = op
-
+    
     if(!op %in% OPERATORS){
 
-      sugg_txt = suggest_item(op, OPERATORS, newline = FALSE)
+      sugg_txt = suggest_item(op, OPERATORS, newline = FALSE, info = "operator")
 
       msg = c("Operations on interpolated strings must be of the form .['arg'op ? x], with `arg` the (optional) argument and `op` an operator.",
-              "\nProblem: `", op, "` is not a valid operator. ", sugg_txt,
+              "\nPROBLEM: `", op, "` is not a valid operator. ", sugg_txt,
               "\n  Valid operators (limited list, see help): ",
               "\n                   to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
               "\n                   to replicate: times, each / to replicate and collapse with the empty string: times.c",
               "\n                   to upper/lower case: u, U, L / to single, double, back quote: q, Q, bq",
-              "\n                   to format f, F / to apply sprintf format: %",
+              "\n                   to format format, Format / to apply sprintf format: %",
               "\n                   to format whitespaces: ws, tws / to append: append, Append / to insert: insert",
               "\n                   to keep: k (#characters), K (#items) / to delete: rm",
               "\n                   to remove stopwords: stop ",
@@ -1856,9 +1853,6 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
   # conditional_flag:  0 nothing
   #                    1 keep track of conditional things
   #                    2 apply conditional
-  
-  message("Operation: ", op)
-
 
   extra = attr(x, "extra")
   group_index = attr(x, "group_index")
@@ -1870,7 +1864,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     # - string is split wrt commas
     # - any interpolation is vectorized
     
-    res = strsplit(x, split = ",[ \t\n\r]*")[[1]]
+    res = cpp_parse_slash(x, is_dsb)
     
     box = if(is_dsb) ".[" else "{"
     
@@ -1894,7 +1888,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     
     
   } else if(op %in% c("c", "C")){
-    # C ####
+    # C, collapse ####
     # collapse
 
     # argument of the form: 'main_sep|last_sep'
@@ -1928,8 +1922,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
     if(!is.null(group_index) && conditional_flag == 2){
       res = cpp_paste_conditional(x, group_index, sep, sep_last)
-      group_index = seq_along(group_index)
-
+      group_index = seq_along(res)
+      
     } else {
       n_x = length(x)
       if(is_last){
@@ -1951,8 +1945,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
     
   } else if(op %in% c("s", "S", "r", "R", "get", "is", "which", "x", "X", "extract")){
-    # S, R, X, get, is, which ####
-
+    # split, replace, extract, get, is, which ####
+    
     valid_options = c("word", "ignore", "fixed")
     if(op == "extract"){
       valid_options = c(valid_options, "first")
@@ -1975,6 +1969,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
     if(op %in% c("s", "S", "X", "x", "extract")){
       # otherwise => dealt with in str_is or str_clean
+      # we don't repeat the processing (otherwise => bugs)
       
       pat_parsed = parse_regex_pattern(argument, c("word", "ignore", "fixed"), parse_logical = FALSE)
       flags = pat_parsed$flags
@@ -1983,27 +1978,30 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       is_fixed = is_fixed || "fixed" %in% flags
       is_ignore = is_ignore || "ignore" %in% flags
       is_word = is_word || "word" %in% flags
-    } 
-
-    if(is_word){
-      items = strsplit(argument, ",[ \t\n]+")[[1]]
-      if(is_fixed){
-        items = paste0("\\Q", items, "\\E")
-        is_fixed = FALSE
+      
+      if(is_word){
+        items = strsplit(argument, ",[ \t\n]+")[[1]]
+        if(is_fixed){
+          items = paste0("\\Q", items, "\\E")
+          is_fixed = FALSE
+        }
+        argument = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
       }
-      argument = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
-    }
 
-    if(is_ignore){
-      # ignore case
-      is_fixed = FALSE
-      argument = paste0("(?i)", argument)
-    }
+      if(is_ignore){
+        # ignore case
+        is_fixed = FALSE
+        argument = paste0("(?i)", argument)
+      }
+    } 
 
     #
     # now the operations
     #
-
+    if(!is.character(x)){
+      x = as.character(x)
+    }
+    
     if(op %in% c("s", "S")){
       x_split = strsplit(x, argument, fixed = is_fixed, perl = !is_fixed)
 
@@ -2070,7 +2068,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       } else if(conditional_flag == 2){
         stop_hook("The operation `which` cannot be applied in ",
                   "conditionnal statements (inside `~()`).",
-                  "FIX: simply put this operation after the conditionnal statement.")
+                  "\nFIX: simply put this operation after the conditionnal statement.")
       }
       
     } else {
@@ -2085,7 +2083,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         } else if(conditional_flag == 2){
           stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
                     "conditionnal statements (inside `~()`).",
-                    "FIX: simply put this operation after the conditionnal statement.")
+                    "\nFIX: simply put this operation after or before the conditionnal statement.")
         }
 
         if(op == "get"){
@@ -2104,7 +2102,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     if(!is_numeric_in_char(argument)){
       msg = paste0("In `dsb`: the operator `", op, "` must have numeric arguments, `",
                    argument, "` is not numeric.")
-      stop_hook(bespoke_msg(msg))
+      .stop_hook(bespoke_msg(msg))
     }
 
     if(op == "each"){
@@ -2120,7 +2118,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     group_index = NULL
 
   } else if(op == "upper"){
-    # upper, lower, title, Q, F, % ####
+    # upper, lower, title, Q, ####
     
     options = check_set_options(options, c("first", "sentence"))
     
@@ -2172,12 +2170,13 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
   } else if(op == "bq"){
     res = paste0("`", x, "`")
 
-  } else if(op %in% c("f", "F")){
+  } else if(op %in% c("format", "Format")){
+    # Format, % ####
 
     options = check_set_options(options, c("0", "zero", "right"))
 
     is_zero = any(options %in% c("0", "zero"))
-    is_right = "right" %in% options || op == "F" || is_zero
+    is_right = "right" %in% options || op == "Format" || is_zero
     is_left = !is_right
 
     if(is_right){
@@ -2230,7 +2229,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     if(!is_numeric_in_char(nb)){
       msg = paste0("In `dsb`: the operator `", op, "` must first contain a numeric argument. PROBLEM: `",
                    argument, "` is not numeric.")
-      stop_hook(bespoke_msg(msg))
+      .stop_hook(bespoke_msg(msg))
     }
     nb = as.numeric(nb)
 
@@ -2282,7 +2281,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     if(!is_numeric_in_char(nb)){
       msg = paste0("In `dsb`, the operator `", op, "` must first contain a numeric argument, `",
                    argument, "` does not contain a numeric first.")
-      stop_hook(bespoke_msg(msg))
+      .stop_hook(bespoke_msg(msg))
     }
 
     nb = as.numeric(nb)
@@ -2305,6 +2304,12 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         res = character(0)
       } else {
         res = if(nb < length(x)) x[1:nb] else x
+        
+        if(conditional_flag == 2){
+          stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
+                    "conditionnal statements (inside `~()`).",
+                    "\nFIX: simply put this operation after or before the conditionnal statement.")
+        }
 
         if(any(grepl(":(?:n|N|rest|REST):", add))){
           n = length(x)
@@ -2361,7 +2366,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     if(!is_numeric_in_char(nb)){
       msg = paste0("In `dsb`: the operator `", op, "` must first contain a numeric argument. PROBLEM: `",
                    argument, "` is not numeric.")
-      stop_hook(bespoke_msg(msg))
+      .stop_hook(bespoke_msg(msg))
     }
 
     # the numeric argument can also be passed in options
@@ -2427,22 +2432,26 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       res = sort(x, decreasing = op == "dsort")
     }
 
-  } else if(op %in% c("append", "Append", "insert")){
-    # Appends at the beginning/end of all strings
+  } else if(op %in% c("paste", "append")){
+    # paste, append ####
+    # paste: at the beginning/end of all strings
+    # insert: element at the beginning/end of the vector 
+    
+    valid_options = c("delete", "both", "right")
+    if(op == "paste"){
+      valid_options = c(valid_options, "front", "back")
+    }
+    
+    options = check_set_options(options, valid_options)
 
-    #
-    # Insert/Append ####
-    #
-
-    if("d" %in% options){
+    if("delete" %in% options){
       x = character(length(x))
     }
 
     left = right = ""
-    if("b" %in% options){
-      # 'both'
+    if("both" %in% options){
       left = right = argument
-    } else if("r" %in% options){
+    } else if("right" %in% options){
       right = argument
     } else {
       left = argument
@@ -2451,11 +2460,22 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     if(nchar(argument) == 0){
       res = x
 
-    } else if(op == "append"){
+    } else if(op == "paste"){
 
       if(length(x) == 0){
         res = x
 
+      } else if(any(options %in% c("front", "back"))) {
+        res = x
+        if("front" %in% options){
+          res[[1]] = paste0(left, x[1], right)
+        }
+        
+        if("back" %in% options){
+          n = length(x)
+          res[[n]] = paste0(left, x[n], right)
+        }        
+        
       } else {
 
         # We replace the special values
@@ -2517,8 +2537,14 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
           res = paste0(x, right)
         }
       }
-    } else if(op == "insert"){
-      # inserts an ELEMENT at the beginning/end
+    } else if(op == "append"){
+      # appends an ELEMENT at the beginning/end
+      
+      if(conditional_flag == 2){
+        stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
+                  "conditionnal statements (inside `~()`).",
+                  "\nFIX: simply put this operation after or before the conditionnal statement.")
+      }
 
       if(nchar(left) > 0){
         if(nchar(right) > 0){
@@ -2531,6 +2557,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
 
     } else if(op %in% "Append"){
+      # THIS IS DEPRECATED:
+      # I give it just in case
       # appends **implicitly** at the beginning of the first/last string
 
       res = x
@@ -2562,7 +2590,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
     }
 
-    # END: insert/append
+    # END: paste/append
 
   } else if(op == "unik"){
     # unik ####
@@ -2579,7 +2607,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
     } else {
       
-      res = uique(x)
+      res = unique(x)
 
       if(conditional_flag == 1){
         group_index = NULL
@@ -2589,7 +2617,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
   } else if(op %in% c("nth", "Nth", "ntimes", "Ntimes", "n", "N", "len", "Len")){
     #
-    # nth, ntimes, nst, n, len ####
+    # nth, ntimes, n, len ####
     #
     
     # parsing the default values of the options and if we display in letters
@@ -2667,18 +2695,16 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
       if(is_letter){
         res = n_letter(res)
-      } else if(opt_equal(option, "format")){
+      } else if(opt_equal(options, "format")){
         res = format(res, big.mark = ",")
       }
     }
 
     if("upper" %in% options){
-      val = gsub("^(.)", "\\U\\1", val, perl = TRUE)
+      res = gsub("^(.)", "\\U\\1", res, perl = TRUE)
     }
   } else if(op == "swidth"){
-    #
     # swidth, dtime ####
-    #
 
     comment = ""
     if(length(options) > 0) comment = options[1]
@@ -2694,7 +2720,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     if(!is_numeric_in_char(nb)){
       msg = paste0("In `dsb`: the operator `", op, "` must first contain a numeric argument. PROBLEM: `",
                    argument, "` is not numeric.")
-      stop_hook(bespoke_msg(msg))
+      .stop_hook(bespoke_msg(msg))
     }
     nb = as.numeric(nb)
 
@@ -2710,8 +2736,6 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     res = format_difftime(x)
 
   } else if(op == "erase"){
-
-    #
     # erase, rm, nuke, num ####
     #
 
@@ -2745,6 +2769,18 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       is_ignore = "ignore" %in% options
 
       qui = !str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      
+      options = setdiff(options, c("fixed", "ignore", "word"))
+      if("blank" %in% options){
+        # 10 times faster than grepl("\\S", x, perl = TRUE)
+        qui_blank = cpp_which_empty(x)
+        if(length(qui_blank) > 0){
+          qui[qui_blank] = FALSE
+        } 
+        
+      } else if("empty" %in% options){
+        qui = qui & x != ""
+      }
 
     } else {
       options = setdiff(options, c("fixed", "ignore", "word"))
@@ -2788,17 +2824,22 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
   } else if(op == "num"){
     options = check_set_options(options, c("warn", "soft", "rm", "clean"))
 
+    # warn: warning if failed conversions
     is_warn = "warn" %in% options
+    # soft: if some numbers couldn't be parsed to numeric: no conversion is done
     is_soft = "soft" %in% options
+    # rm: the on numeric are removed
     is_rm = "rm" %in% options
+    # clean: the non numeric are turned into empty strings
     is_clean = "clean" %in% options
 
     is_valid_num = TRUE
     if(is_warn || is_soft){
       is_valid_num = is_numeric_in_char(x)
       if(!is_valid_num && is_warn){
-        msg = if(!is_soft) "" else " No conversion is performed"
-        warning("In operation `num`: when trying to convert to numeric, NAs were created.", msg)
+        msg = if(!is_soft) "" else " No conversion is performed."
+        warning("In operation `num`: when trying to convert to numeric, NAs were created.", 
+                 msg, call. = FALSE)
       }
     }
 
@@ -2941,7 +2982,9 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       
       if(op == "if"){
         n_old = length(xi)
-        xi = apply_simple_operations(xi, op, instruction, check, frame, conditional_flag, is_dsb, fun_name)
+        cond_flag = +grepl("~(", instruction, fixed = TRUE)
+        xi = apply_simple_operations(xi, op, instruction, check, frame, 
+                                     conditional_flag = cond_flag, is_dsb, fun_name)
         
         if(is_elementwise && !length(xi) %in% c(0, n_old)){
           stop_hook("In {bq?op} operations, when conditions are of length > 1, the operations either a) can ",
@@ -2970,18 +3013,20 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
           group_index = NULL
         }
       } else if(length(x_true) == 0){
-        if(length(x_false) == 1){
-          res = rep(x_false, length(cond))
+        if(op == "vif" && length(x_false) == 1){
+          res = x
+          res[!cond] = x_false
         } else {
-          res = x_false
+          res = x_false  
         }
         
         if(conditional_flag != 0){
           group_index = group_index[!cond]
         }
       } else if(length(x_false) == 0){
-        if(length(x_true) == 1){
-          res = rep(x_true, length(cond))
+        if(op == "vif" && length(x_true) == 1){
+          res = x
+          res[cond] = x_true
         } else {
           res = x_true
         }
@@ -3026,7 +3071,10 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
   } else if(op == "~"){
     # Conditional: ~ ####
-    res = apply_simple_operations(x, op, argument, check, frame, conditional_flag = 2, is_dsb, fun_name)
+    res = apply_simple_operations(x, op, argument, check, frame, 
+                                  conditional_flag = 2, is_dsb, fun_name)
+                                  
+    group_index = attr(res, "group_index")
 
   } else if(op == "ascii"){
     # ascii, stop ####
@@ -3085,6 +3133,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     res = cpp_paste_conditional(x_vec, id)
 
   } else {
+    # user-defined operations ####
+    
     user_ops = getOption("smagick_user_ops")
     if(op %in% names(user_ops)){
       fun = user_ops[[op]]
@@ -3096,6 +3146,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
       tmp = fun(x = x, argument = argument, options = options, group = group_index, 
                 conditional_flag = conditional_flag)
+
       if(is.list(tmp)){
         if(!all(c("x", "group") %in% names(tmp))){
           pblm  = setdiff(c("x", "group") %in% names(tmp))
@@ -3112,7 +3163,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     } else {
       msg = paste0("In `dsb`: the operator `", op, "` is not recognized. ",
                   "Internal error: this problem should have been spotted beforehand.")
-      stop_hook(bespoke_msg(msg))
+      .stop_hook(bespoke_msg(msg))
     }
   }
 
@@ -3164,7 +3215,7 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
         reason = "PROBLEM: It is negative."
       }
 
-      stop_hook("The pluralization operator `#` applies to a", extra, " number. ", reason, ".\n",
+      .stop_hook("The pluralization operator `#` applies to a", extra, " number. ", reason, ".\n",
               example)
     }
   }
@@ -3260,7 +3311,7 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
         example = 'Example: x = c("Charles", "Alice"); dsb(".[$Is, enum ? x] crazy? Yes .[$(he:they), are].")'
         example = bespoke_msg(example, fun_name)
 
-        stop_hook("In pluralization, `", op, "` is expected to be a verb and verbs must always be composed of at least two letters.\n", example)
+        .stop_hook("In pluralization, `", op, "` is expected to be a verb and verbs must always be composed of at least two letters.\n", example)
       }
 
       zero_case = opt_equal(options, c("zero", "0"))
@@ -3278,7 +3329,7 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
 sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
 
   if(length(xi) == 1 && is.numeric(xi) && !is.na(xi)){
-    xi = xi != 0 
+    xi = xi != 0
   }
 
   if(!is.logical(xi)){
@@ -3287,7 +3338,7 @@ sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
     example = 'Example: x = Sys.time(); dsb("Hello .[&format(x, \'%H\') < 20 ; Sun ; Moon]!")'
     example = bespoke_msg(example, fun_name)
 
-    stop_hook("The if-else operator `", operator[1], "`, of the form ", form,
+    .stop_hook("The if-else operator `", operator[1], "`, of the form ", form,
             ", accepts only logical values in the condition. ",
             "PROBLEM: the value is not logical, but of class `",
             class(xi)[1], "`.\n", example)
@@ -3296,10 +3347,10 @@ sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
   if(anyNA(xi)){
     form = paste0(".[", operator[1], " cond ; true ; false]")
 
-    example = 'Example: x = Sys.time(); dsb("Hello .[=format(x, \'%H\') < 20 ; Sun ; Moon]!")'
+    example = 'Example: x = Sys.time(); dsb("Hello .[&format(x, \'%H\') < 20 ; Sun ; Moon]!")'
     example = bespoke_msg(example, fun_name)
 
-    stop_hook("The if-else operator `", operator[1], "`, of the form ", form,
+    .stop_hook("The if-else operator `", operator[1], "`, of the form ", form,
               ", accepts only non-NA logical values.\n",
               "PROBLEM: the condition contains NA values.\n", example)
   }
@@ -3308,7 +3359,7 @@ sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
   false = operators[4]
   if(is.na(false)) false = ""
 
-  if(operators[1] == "="){
+  if(operators[1] == "&"){
     # we replace TRUE and FALSE with the strings, even empty
 
     true = cpp_extract_quote_from_op(true)
@@ -3366,7 +3417,7 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
                "\nPROBLEM: the operations were not formatted correctly. ", extra)
     msg = bespoke_msg(msg)
     
-    stop_hook(msg)
+    .stop_hook(msg)
   }
   
   #
@@ -3426,14 +3477,15 @@ setup_operations = function(){
   OPERATORS = c("s", "S", "x", "X", "extract", "c", "C", "r", "R",
                 "times", "each",
                 "~", "if", "vif",
-                "upper", "lower", "q", "Q", "bq", "f", "F", "%",
-                "erase", "rm", "nuke",  "append", "Append", 
+                "upper", "lower", "q", "Q", "bq", 
+                "format", "Format", "%",
+                "erase", "rm", "nuke", "paste", "append", 
                 "k", "K", "last", "first",
                 "cfirst", "clast", "unik", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
                 "ws", "tws", "trim", "get", "is", "which",
                 "n", "N", "len", "Len", "swidth", "dtime",
-                "stop", "insert", "nth", "Nth", "ntimes", "Ntimes")
+                "stop", "nth", "Nth", "ntimes", "Ntimes")
   options("smagick_operations" = sort(OPERATORS))
 }
 

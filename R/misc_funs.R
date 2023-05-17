@@ -504,9 +504,12 @@ n_times = function(x, letters = TRUE){
     } else if(xi < 4 && letters){
       dict = c("once", "twice", "three times", "four times")
       res[i] = dict[xi]
-    } else if(n == 1 && !letters){
+    } else if(xi == 1 && !letters){
       res[i] = "1 time"
     } else {
+      if(letters){
+        xi = n_letter(xi)  
+      }      
       res[i] = paste0(xi, " times")
     }    
   }
@@ -555,8 +558,10 @@ enum_main = function(x, options){
   if(length(qui) > 0){
     nmax = as.numeric(options[qui[1]])
   }
-
-  enumerate_items(x, quote = quote, or = or, enum = enum, nmax = nmax)
+  
+  oxford = opt_equal(options, "oxford")
+  
+  enumerate_items(x, quote = quote, or = or, enum = enum, nmax = nmax, oxford = oxford)
 }
 
 format_difftime = function(x, options){
@@ -696,7 +701,7 @@ fsignif = function (x, s = 2, r = 0, commas = TRUE){
 
 
 enumerate_items = function (x, or = FALSE, quote = NULL,
-                            enum = FALSE, nmax = 7){
+                            enum = FALSE, nmax = 7, oxford = FALSE){
   # function that enumerates items
   # in argument type, you can have a mix of the different arguments, all separated with a "."
 
@@ -765,6 +770,9 @@ enumerate_items = function (x, or = FALSE, quote = NULL,
     if(is_enum){
       res = paste0(paste0(enum_all[-n], x[-n], collapse = ", "), enum_comma, and_or, enum_all[n], x[n])
     } else {
+      if(oxford){
+        and_or = paste0(",", and_or)
+      }
       res = paste0(paste0(x[-n], collapse = ", "), and_or, x[n])
     }
 
@@ -1242,3 +1250,23 @@ display_list_of_variables = function(all_vars, flags, warn_msg, remaining_QS = F
 }
 
 
+
+# substitute to sprintf which does not handle char length properly
+# slower but safer
+simple_str_fill = function(x, n, symbol = " "){
+  
+  x_nc = nchar(x)
+  pattern = sprintf("% *s", n, "  ")
+  if(symbol != " "){
+    pattern = gsub(" ", symbol, pattern, fixed = TRUE)
+  }
+  
+  i_add = which(x_nc < n)
+  if(length(i_add)){
+    x_add = x[i_add]
+    extra = substr(rep(pattern, length(x_add)), 1, n - x_nc[i_add])
+    x[i_add] = paste0(x_add, extra)
+  }
+  
+  x
+}

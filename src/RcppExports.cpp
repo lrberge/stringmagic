@@ -176,6 +176,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_parse_slash
+std::vector<std::string> cpp_parse_slash(SEXP Rstr, bool is_dsb);
+RcppExport SEXP _stringmagick_cpp_parse_slash(SEXP RstrSEXP, SEXP is_dsbSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_dsb(is_dsbSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_parse_slash(Rstr, is_dsb));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_to_integer
 IntegerVector cpp_to_integer(SEXP x);
 RcppExport SEXP _stringmagick_cpp_to_integer(SEXP xSEXP) {
@@ -226,6 +238,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_extract_quote_from_op", (DL_FUNC) &_stringmagick_cpp_extract_quote_from_op, 1},
     {"_stringmagick_cpp_parse_operator", (DL_FUNC) &_stringmagick_cpp_parse_operator, 1},
     {"_stringmagick_cpp_parse_simple_operations", (DL_FUNC) &_stringmagick_cpp_parse_simple_operations, 2},
+    {"_stringmagick_cpp_parse_slash", (DL_FUNC) &_stringmagick_cpp_parse_slash, 2},
     {"_stringmagick_cpp_to_integer", (DL_FUNC) &_stringmagick_cpp_to_integer, 1},
     {"_stringmagick_cpp_combine_clusters", (DL_FUNC) &_stringmagick_cpp_combine_clusters, 2},
     {"_stringmagick_cpp_create_pos", (DL_FUNC) &_stringmagick_cpp_create_pos, 1},

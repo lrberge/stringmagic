@@ -163,11 +163,6 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
     problem = if(scalar) "it is equal to NA" else "it contains NA values"
     stop_up("The ", nullable, "argument `", x_dp, "` must be a character ", type, ". \n",
             " Problem: ", problem, ".")
-    # alternative:
-    # stop_cub("The {nullable}argument {bq?x_dp} must be a character ",
-    #          "{&scalar ; scalar ; vector without NA}.\n",
-    #          " Problem: {=scalar ; it is equal to NA ; it contains NA values}")
-    #                     if(scalar) "it is equal to NA" else "it contains NA values"
   }
   
   return(x)
@@ -263,7 +258,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
 
       stop_up("In the argument `...`, all elements must be scalars (i.e. of length 1).\nPROBLEM: ",
               "{'\n'c ! The {nth ? i_pblm} element ({info_call}) is ",
-              "of length {f, ws ? len_pblm}.")
+              "of length {format, ws ? len_pblm}.")
     }
   }
 
@@ -289,7 +284,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       # really, this is gibberish: who can understand the code?
       info_call = cub("`{@<4(erase) ! {nm_pblm} = }{value_all}`")
 
-      cls_pblm = sapply(dots[i_pblm], function(x) dsb("bq ! .[enum ? class(x)]"))
+      cls_pblm = sapply(dots[i_pblm], function(x) dsb(".[bq ! .[enum ? class(x)]]"))
       stop_up(dsb("In the argument `...`, all elements must be atomic (i.e. convertible to a character string).\nPROBLEM: ",
                   ".['\n'c ! The .[Nth ? i_pblm] element (.[info_call]) is not character",
                   " (instead it is of class: .[cls_pblm]).]"))
@@ -352,7 +347,7 @@ check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
     
     if(is.na(pm) && !free){
       # absence of a match
-      stop_hook("The option {bq?v} is not valid {=is.null(op) ; for the current operation ; for the operator {bq?op}}.\n",
+      stop_hook("The option {bq?v} is not valid {&is.null(op) ; for the current operation ; for the operator {bq?op}}.\n",
                 "FYI the option{$s ? options} available {$are, enum.bq}.")
     }
 
@@ -601,7 +596,7 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
   if(show_full_stack){
     # The user requests the full stack
     my_call = sapply(sc, function(x) deparse(x, width.cutoff = 200L, nlines = 1))
-    my_call = cub("'\n'c ! [{f.0 ? 1:length(sc)}] {'100|...'k ? my_call}")
+    my_call = cub("{'\n'c ! [{format.0 ? 1:length(my_call)}] {'100|...'k ? my_call}}")
 
     intro = paste0("the full stack is shown (set this off with setDreamerr_show_stack(FALSE))\n", my_call)
 
@@ -868,7 +863,7 @@ isError = function(x){
 ####
 
 
-error_sender = function(expr, ..., clean, up = 0, arg_name){
+error_sender = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
 
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e),
                                                           conditionMessage(e)), class = "try-error"))
@@ -890,8 +885,7 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
         up = 1
       }
     }
-
-
+    
     set_up(1 + up)
 
     msg = paste0(..., collapse = "")
@@ -900,7 +894,7 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
         arg_name = deparse(substitute(expr))
       }
       msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
-      stop_up(msg, res[[2]])
+      stop_up(msg, res[[2]], verbatim = verbatim, frame = parent.frame())
     }
     else {
       call_non_informative = deparse(substitute(expr),100)[1]
@@ -929,11 +923,10 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
           from = clean
           to = ""
         }
-        stop_up(msg, "\n  ", call_error, gsub(from, to,
-                                              err))
+        stop_up(msg, "\n  ", call_error, gsub(from, to, err), verbatim = verbatim, frame = parent.frame())
       }
       else {
-        stop_up(msg, "\n  ", call_error, err)
+        stop_up(msg, "\n  ", call_error, err, verbatim = verbatim, frame = parent.frame())
       }
     }
   }
