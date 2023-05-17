@@ -5,9 +5,6 @@
 #----------------------------------------------#
 
 
-
-
-
 test = function(x, y, type = "=", tol = 1e-6){
     mc = match.call()
     IS_Y = TRUE
@@ -403,7 +400,6 @@ run_test = function(chunk, from){
     print(paste0("tests performed successfully (", n_tests, ")"))
   }
 }
-
 
 
 non_ascii = function(folder = "R"){

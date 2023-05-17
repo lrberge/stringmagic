@@ -20,7 +20,7 @@ check_logical = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
   if(missing(x)){
     if(mbt){
       x_dp = deparse_short(substitute(x))
-      stop_up("The argument `", x_dp, "` must be provided. Problem: it is missing.")
+      stop_up("The argument `", x_dp, "` must be provided. PROBLEM: it is missing.")
     }
 
     return()
@@ -35,7 +35,7 @@ check_logical = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
     nullable = if(null) "(nullable) " else ""
     type = if(scalar) "scalar" else "vector"
     stop_up("The ", nullable, "argument `", x_dp, "` must be a logical ", type, ".",
-            " Problem: it is not logical, it is of class ", enum(class(x)), ".")
+            " PROBLEM: it is not logical, it is of class ", enum(class(x)), ".")
   }
 
   len_x = length(x)
@@ -48,7 +48,7 @@ check_logical = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
       x_dp = deparse_short(substitute(x))
       nullable = if(null) "(nullable) " else ""
       stop_up("The ", nullable, "argument `", x_dp, "` must be a logical scalar.",
-              " Problem: it is not of length 1, it is of length ", length(x), ".")
+              " PROBLEM: it is not of length 1, it is of length ", length(x), ".")
     }
   }
 
@@ -58,7 +58,70 @@ check_logical = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
     type = if(scalar) "scalar" else "vector without NA"
     problem = if(scalar) "it is equal to NA" else "it contains NA values"
     stop_up("The ", nullable, "argument `", x_dp, "` must be a logical ", type, ". ",
-            "Problem: ", problem, ".")
+            "PROBLEM: ", problem, ".")
+  }
+
+}
+
+check_numeric = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FALSE, mbt = FALSE, integer = FALSE){
+
+  if(missing(x)){
+    if(mbt){
+      x_dp = deparse_short(substitute(x))
+      stop_up("The argument `", x_dp, "` must be provided. PROBLEM: it is missing.")
+    }
+
+    return()
+  }
+
+  if(null && is.null(x)){
+    return()
+  }
+
+  if(!is.numeric(x)){
+    x_dp = deparse_short(substitute(x))
+    nullable = if(null) "(nullable) " else ""
+    vector_type = if(scalar) "scalar" else "vector"
+    type = if(integer) "an integer" else "a numeric"
+    
+    stop_up("The ", nullable, "argument `", x_dp, "` must be ", type, " ", vector_type, ".",
+            " PROBLEM: it is not {'^.+ 'r ? type} it is of class ", enum(class(x)), ".")
+  }
+
+  len_x = length(x)
+  if(len_x == 0 &&  l0) return()
+
+  if(scalar){
+    if(missing(no_na)) no_na = TRUE
+
+    if(len_x != 1){
+      x_dp = deparse_short(substitute(x))
+      nullable = if(null) "(nullable) " else ""
+      type = if(integer) "an integer" else "a numeric"
+      
+      stop_up("The ", nullable, "argument `", x_dp, "` must be ", type, " scalar.",
+              " PROBLEM: it is not of length 1, it is of length ", length(x), ".")
+    }
+  }
+
+  if(no_na && anyNA(x)){
+    x_dp = deparse_short(substitute(x))
+    nullable = if(null) "(nullable) " else ""
+    vector_type = if(scalar) "scalar" else "vector without NA"
+    type = if(integer) "an integer" else "a numeric"
+    problem = if(scalar) "it is equal to NA" else "it contains NA values"
+    
+    stop_up("The ", nullable, "argument `", x_dp, "` must be ", type, " ", vector_type, ". ",
+            "PROBLEM: ", problem, ".")
+  }
+  
+  if(integer){
+    if(any(x != round(x))){
+      x_dp = deparse_short(substitute(x))
+      i = which(x != round(x))[1]
+      stop_up("The argument {bq?x_dp} must be an integer {&scalar ; scalar ; vector}.",
+              "\nPROBLEM: {&length(x)==1 ; it is equal to {x} ; the {nth ? i} value is equal to {x[i]}}, not an integer.")
+    }
   }
 
 }
@@ -68,7 +131,7 @@ check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = 
   if(missing(x)){
     if(mbt){
       x_dp = deparse_short(substitute(x))
-      stop_up("The argument `", x_dp, "` must be provided. Problem: it is missing.")
+      stop_up("The argument `", x_dp, "` must be provided. PROBLEM: it is missing.")
     }
 
     return()
@@ -83,7 +146,7 @@ check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = 
     nullable = if(null) "(nullable) " else ""
     type = if(scalar) "scalar" else "vector"
     stop_up("The ", nullable, "argument `", x_dp, "` must be a character ", type, ".",
-            " Problem: it is not character, it is of class ", enum(class(x)), ".")
+            " PROBLEM: it is not character, it is of class ", enum(class(x)), ".")
   }
 
   len_x = length(x)
@@ -96,7 +159,7 @@ check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = 
       x_dp = deparse_short(substitute(x))
       nullable = if(null) "(nullable) " else ""
       stop_up("The ", nullable, "argument `", x_dp, "` must be a character scalar.",
-              " Problem: it is not of length 1, it is of length ", length(x), ".")
+              " PROBLEM: it is not of length 1, it is of length ", length(x), ".")
     }
   }
 
@@ -106,7 +169,7 @@ check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = 
     type = if(scalar) "scalar" else "vector without NA"
     problem = if(scalar) "it is equal to NA" else "it contains NA values"
     stop_up("The ", nullable, "argument `", x_dp, "` must be a character ", type, ". ",
-            "Problem: ", problem, ".")
+            "PROBLEM: ", problem, ".")
   }
 
 }
@@ -117,7 +180,7 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
   if(missing(x)){
     if(mbt){
       x_dp = deparse_short(substitute(x))
-      stop_up("The argument `", x_dp, "` must be provided. Problem: it is missing.")
+      stop_up("The argument `", x_dp, "` must be provided. PROBLEM: it is missing.")
     }
 
     return(NULL)
@@ -149,7 +212,7 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
       x_dp = deparse_short(substitute(x))
       nullable = if(null) "(nullable) " else ""
       stop_up("The ", nullable, "argument `", x_dp, "` must be a character scalar.\n",
-              " Problem: it is not of length 1, it is of length ", length(x), ".")
+              " PROBLEM: it is not of length 1, it is of length ", length(x), ".")
       # .[length(x)]
       # .[len, n ? x]
       # .[Len ? x]
@@ -162,7 +225,7 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
     type = if(scalar) "scalar" else "vector without NA"
     problem = if(scalar) "it is equal to NA" else "it contains NA values"
     stop_up("The ", nullable, "argument `", x_dp, "` must be a character ", type, ". \n",
-            " Problem: ", problem, ".")
+            " PROBLEM: ", problem, ".")
   }
   
   return(x)
@@ -174,7 +237,7 @@ check_envir = function(x){
   if(!inherits(x, "environment")){
     x_dp = deparse_short(substitute(x))
     stop_up("The argument `", x_dp, "` must be an environment (ex: parent.frame()). ",
-            "Problem: it is not an environment, it is of class ", enum(class(x)), ".")
+            "PROBLEM: it is not an environment, it is of class ", enum(class(x)), ".")
   }
 
 }

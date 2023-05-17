@@ -161,8 +161,29 @@ x = c("One two, one two", "Microphone check")
 val = str_split2df(x, "w/one")
 test(val$x, c("One two, ", " two", "Microphone check"))
 
+####
+#### str_fill ####
+####
 
+x = c("bon", "bonjour les gens")
+txt = str_fill(x)
+test(txt, c("bon             ", "bonjour les gens"))
 
+txt = str_fill(x, right = TRUE)
+test(txt, c("             bon", "bonjour les gens"))
 
+txt = str_fill(x, center = TRUE)
+test(txt, "       bon      ", "bonjour les gens")
 
+x = c(5, 15)
+txt = str_fill(x, n = 3, right = TRUE)
+test(txt, c("  5", " 15"))
 
+txt = str_fill(x, n = 1, right = TRUE)
+test(txt, c("5", "15"))
+
+txt = str_fill(x, n = 3, right = TRUE, symbol = "0")
+test(txt, c("005", "015"))
+
+x = c("  hey  ", "de bas en haut")
+txt = str_fill(x)

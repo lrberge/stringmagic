@@ -947,6 +947,46 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
   res
 }
 
+str_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = FALSE, na = "NA"){
+  # Character vectors starting with " " are not well taken care of
+
+  x = check_set_character(x, l0 = TRUE)
+  if(length(x) == 0) return(character(0))
+
+  check_numeric(n, null = TRUE, scalar = TRUE, integer = TRUE)
+  check_character(symbol, scalar = TRUE)
+  check_logical(right, scalar = TRUE)
+
+  if(anyNA(x)){
+    x[is.na(x)] = na
+  }  
+
+  if(nchar(symbol) != 1){
+    stop("Argument 'symbol' must be a single character ", 
+         "(currenlty it is of length ", nchar(symbol), ").")
+  }
+
+  if(!is.null(n) && n == 0){
+    return(x)
+  }
+
+  n_all = nchar(x)
+  if(is.null(n)) n = max(n_all)
+
+  n2fill = n - n_all
+  qui = which(n2fill > 0)
+  if(length(qui) == 0){
+    return(x)
+  }
+  
+  x_new = simple_str_fill(x[qui], n, symbol, right = right, center = center)
+
+  res = x
+  res[qui] = x_new
+  res
+}
+
+
 
 ####
 #### dedicated utilities ####

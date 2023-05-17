@@ -1195,9 +1195,13 @@ eval_dt = function(call, frame){
 
 # substitute to sprintf which does not handle char length properly
 # slower but safer
-simple_str_fill = function(x, n, symbol = " "){
+simple_str_fill = function(x, n = NULL, symbol = " ", right = FALSE, center = FALSE){
   
   x_nc = nchar(x)
+  if(is.null(n)){
+    n = max(x_nc)
+  }
+
   pattern = sprintf("% *s", n, "  ")
   if(symbol != " "){
     pattern = gsub(" ", symbol, pattern, fixed = TRUE)
@@ -1207,7 +1211,18 @@ simple_str_fill = function(x, n, symbol = " "){
   if(length(i_add)){
     x_add = x[i_add]
     extra = substr(rep(pattern, length(x_add)), 1, n - x_nc[i_add])
-    x[i_add] = paste0(x_add, extra)
+    if(center){
+      nc_extra = nchar(extra)
+      extra_left = substr(extra, 1, ceiling(nc_extra / 2))
+      extra_right = substr(extra, ceiling(nc_extra / 2) + 1, nc_extra)
+      x[i_add] = paste0(extra_left, x_add, extra_right)
+      
+    } else if(right){
+      x[i_add] = paste0(extra, x_add)
+    } else {
+      x[i_add] = paste0(x_add, extra)
+    }
+    
   }
   
   x
