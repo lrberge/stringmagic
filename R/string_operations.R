@@ -2592,6 +2592,44 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
     # END: paste/append
 
+  } else if(op == "fill"){
+    # fill ####
+    
+    valid_options = c("right", "center")
+    options = check_set_options(options, valid_options, free = TRUE, op = op)
+    
+    center = "center" %in% options
+    right = "right" %in% options
+    symbol = setdiff(options, valid_options)
+    
+    if(length(symbol) == 0){
+      symbol = " "
+    }
+    
+    if(nchar(symbol) != 1){
+      stop_hook("In the operator `fill`, the symbol used to fill must be of length 1.",
+                "\nPROBLEM: the symbol, equal to {bq?symbol}, is of length {len?symbol}.",
+                "\nEXAMPLE: to fill with 0s: `fill.0`; of length 10 with underscores on the right: `10 fill._.right`.")
+    }
+    
+    if(nchar(argument) == 0){
+      argument = NULL
+    }
+    
+    if(!is.null(argument)){
+      if(is_numeric_in_char(argument)){
+        argument = as.numeric(argument)
+      } else {
+        stop_hook("In the operator `fill`, the argument (giving the length of the fill) must be numeric.",
+                "\nPROBLEM: the argument, equal to {bq?argument}, is not numeric ",
+                "(instead it is of class {enum ? class(argument)}.",
+                "\nEXAMPLE: a fill of size 10: `10 fill`; of size 10 (using quotes) on the right: `'10'fill.right`.")
+      }
+    }
+    
+    res = str_fill(x, argument, symbol = symbol, right = right, center = center)
+    
+    
   } else if(op == "unik"){
     # unik ####
 
@@ -3475,7 +3513,7 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
 
 setup_operations = function(){
   OPERATORS = c("/", "s", "S", "x", "X", "extract", "c", "C", "r", "R",
-                "times", "each",
+                "times", "each", "fill",
                 "~", "if", "vif",
                 "upper", "lower", "q", "Q", "bq", 
                 "format", "Format", "%",

@@ -518,6 +518,31 @@ x = c("521", "aebc")
 test(cub("{''S, ~('0'append, ''c), ' ; 'c ? x}"), "err")
 
 #
+# fill ####
+#
+
+x = c("bon", "bonjour les gens")
+txt = cub("{fill, q, C ? x}")
+test(txt, "'bon             ' and 'bonjour les gens'")
+
+txt = cub("{fill.right, q, C ? x}")
+test(txt, "'             bon' and 'bonjour les gens'")
+
+txt = cub("{fill.center, q, C ? x}")
+test(txt, "'       bon      ' and 'bonjour les gens'")
+
+x = c(5, 15)
+txt = cub("{3 fill.right, q, C ? x}")
+test(txt, "'  5' and ' 15'")
+
+txt = cub("{1 fill.right, q, C ? x}")
+test(txt, "'5' and '15'")
+
+txt = cub("{3 fill.right.0, q, C ? x}")
+test(txt, "'005' and '015'")
+
+
+#
 # unik ####
 #
 
