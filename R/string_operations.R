@@ -589,78 +589,6 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
 
 
-#' Title
-#'
-#' @param ...
-#' @param sep
-#' @param frame
-#' @param slash
-#'
-#' @return
-#' @export
-#'
-#' @examples
-dsb_cat = function(..., sep = "", frame = parent.frame(), slash = FALSE){
-  set_pblm_hook()
-
-  res = string_ops_internal(..., is_dsb = TRUE, frame = frame,
-                            slash = slash,
-                            sep = sep, vectorize = FALSE, check = TRUE,
-                            collapse = "", fun_name = "dsb_cat")
-
-  cat(res)
-}
-
-
-#' @describeIn dsb_cat
-dsb_msg = function(..., sep = "", frame = parent.frame(), slash = FALSE,
-                   appendLF = TRUE){
-  set_pblm_hook()
-
-  res = string_ops_internal(..., is_dsb = TRUE, frame = frame,
-                            slash = slash,
-                            sep = sep, vectorize = FALSE, check = TRUE,
-                            collapse = "", fun_name = "dsb_msg")
-
-  message(res, appendLF = appendLF)
-
-}
-
-
-#' Title
-#'
-#' @param ...
-#' @param frame
-#' @param vectorize
-#' @param slash
-#'
-#' @return
-#' @export
-#'
-#' @examples
-dsb_c = function(..., frame = parent.frame(), vectorize = FALSE,
-                 slash = TRUE){
-  set_pblm_hook()
-
-  dots = error_sender(list(...), "Some elements in `...` could not be evaluated.")
-
-  n_dots = length(dots)
-
-  if(n_dots == 0){
-    return(NULL)
-  }
-
-  res = vector("list", n_dots)
-  for(i in 1:n_dots){
-    res[[i]] = string_ops_internal(dots[[i]], is_dsb = TRUE, frame = frame,
-                                   slash = slash,
-                                   sep = sep, vectorize = TRUE, check = TRUE,
-                                   collapse = NULL, fun_name = "dsb_c")
-  }
-
-  unlist(res)
-}
-
 ####
 #### ... cub ####
 ####
@@ -918,56 +846,6 @@ cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                       slash = slash, sep = sep,
                       vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".cub")
-}
-
-
-cub_cat = function(..., sep = "", frame = parent.frame(), slash = FALSE){
-  set_pblm_hook()
-
-  res = string_ops_internal(..., is_dsb = FALSE, frame = frame,
-                            slash = slash,
-                            sep = sep, vectorize = FALSE, check = TRUE,
-                            collapse = "", fun_name = "cub_cat")
-
-  cat(res)
-}
-
-
-cub_msg = function(..., sep = "", frame = parent.frame(), slash = FALSE,
-                   appendLF = TRUE){
-  set_pblm_hook()
-
-  res = string_ops_internal(..., is_dsb = FALSE, frame = frame,
-                            slash = slash,
-                            sep = sep, vectorize = FALSE, check = TRUE,
-                            collapse = "", fun_name = "cub_msg")
-
-  message(res, appendLF = appendLF)
-
-}
-
-
-cub_c = function(..., frame = parent.frame(), vectorize = FALSE,
-                 slash = TRUE){
-  set_pblm_hook()
-
-  dots = error_sender(list(...), "Some elements in `...` could not be evaluated.")
-
-  n_dots = length(dots)
-
-  if(n_dots == 0){
-    return(NULL)
-  }
-
-  res = vector("list", n_dots)
-  for(i in 1:n_dots){
-    res[[i]] = string_ops_internal(dots[[i]], is_dsb = FALSE, frame = frame,
-                                   slash = slash,
-                                   sep = sep, vectorize = TRUE, check = TRUE,
-                                   collapse = NULL, fun_name = "cub_c")
-  }
-
-  unlist(res)
 }
 
 ####
