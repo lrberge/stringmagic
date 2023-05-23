@@ -24,7 +24,8 @@ return \code{TRUE} for strings that do not end with \code{"sepal"}).
 Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore').
 Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT\link{i = 5}" (flags 'ignore' + 'fixed').
-The flag 'verbatim' does not parse logical operations. For 'word', see the documentation of this argument.}
+The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the
+pattern. See the documentation of this argument.}
 
 \item{fixed}{Logical scalar, default is \code{FALSE}. Whether to trigger a fixed search instead of a
 regular expression search (default).}
@@ -47,10 +48,13 @@ return \code{TRUE} for strings that do not end with \code{"sepal"}).
 Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore').
 Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT\link{i = 5}" (flags 'ignore' + 'fixed').
-The flag 'verbatim' does not parse logical operations. For 'word', see the documentation of this argument.}
+The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the
+pattern. See the documentation of this argument.}
 }
 \value{
 It returns a logical vector of the same length as \code{x}.
+
+The function \code{str_which} returns a numeric vector.
 }
 \description{
 Function that detects if one or more patterns are in a string. The patterns can be
@@ -58,10 +62,13 @@ chained, by default this is a regex search but special flags be triggered with a
 specific syntax, supports negation.
 }
 \details{
-Note that the parser of the patterns may lead to problems with some multibyte encodings. This is a limitation.
+Note that the parser of the flags may lead to problems with some multibyte encodings. This is a limitation.
 If such encodings should be in the pattern, then this function cannot be used, there is no workaround.
 }
 \examples{
+
+# NOTA: using `str_get` instead of `str_is` may lead to a faster understanding 
+#       of the examples 
 
 x = dsb("/one, two, one... two, microphone, check")
 
@@ -116,4 +123,7 @@ str_which(x, "e", "o")
 str_which(x, "e & o")
 
 
+}
+\seealso{
+See also \link{str_get}, further that function may be easier to understand the examples.
 }

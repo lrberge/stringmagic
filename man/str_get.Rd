@@ -26,7 +26,8 @@ return \code{TRUE} for strings that do not end with \code{"sepal"}).
 Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore').
 Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT\link{i = 5}" (flags 'ignore' + 'fixed').
-The flag 'verbatim' does not parse logical operations. For 'word', see the documentation of this argument.}
+The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the
+pattern. See the documentation of this argument.}
 
 \item{fixed}{Logical scalar, default is \code{FALSE}. Whether to trigger a fixed search instead of a
 regular expression search (default).}
@@ -58,7 +59,8 @@ return \code{TRUE} for strings that do not end with \code{"sepal"}).
 Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore').
 Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT\link{i = 5}" (flags 'ignore' + 'fixed').
-The flag 'verbatim' does not parse logical operations. For 'word', see the documentation of this argument.}
+The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the
+pattern. See the documentation of this argument.}
 }
 \value{
 It always return a character vector.

@@ -2,6 +2,7 @@
 % Please edit documentation in R/string_tools.R
 \name{str_split2df}
 \alias{str_split2df}
+\alias{str_split2dt}
 \title{Splits a character vector into a data frame}
 \usage{
 str_split2df(
@@ -12,35 +13,69 @@ str_split2df(
   add.pos = FALSE,
   id_unik = TRUE,
   fixed = FALSE,
+  ignore.case = FALSE,
+  word = FALSE,
   dt = FALSE,
   ...
 )
+
+str_split2dt(
+  x,
+  data = NULL,
+  split = NULL,
+  id = NULL,
+  add.pos = FALSE,
+  id_unik = TRUE,
+  fixed = FALSE
+)
 }
 \arguments{
-\item{x}{A character vector or a two-sided formula. If a two-sided formula, then the argument \code{data} must be provided since the variables will be fetched in there. A formula is of the form \code{char_var ~ id1 + id2} where \code{char_var} on the left is a character variable and on the right \code{id1} and \code{id2} are identifiers which will be included in the resulting table. Alternatively, you can provide identifiers via the argument \code{id}.}
+\item{x}{A character vector or a two-sided formula. If a two-sided formula, then the
+argument \code{data} must be provided since the variables will be fetched in there.
+A formula is of the form \code{char_var ~ id1 + id2} where \code{char_var} on the left is a
+character variable and on the right \code{id1} and \code{id2} are identifiers which will be
+included in the resulting table. Alternatively, you can provide identifiers via
+the argument \code{id}.}
 
-\item{data}{Optional, only used if the argument \code{x} is a formula. It should contain the variables of the formula.}
+\item{data}{Optional, only used if the argument \code{x} is a formula. It should
+contain the variables of the formula.}
 
-\item{split}{A character scalar. Used to split the character vectors. By default this is a regular expression.}
+\item{split}{A character scalar. Used to split the character vectors. By default
+this is a regular expression. You can use flags in the pattern in the form \verb{flag1, flag2/pattern}.
+Available flags are \code{ignore} (case), \code{fixed} (no regex), word (add word boundaries). Example:
+if "ignore/hello" and the text contains "Hello", it will be split at "Hello".
+Shortcut: use the first letters of the flags. Ex: "iw/one" will split at the word
+"one" (flags 'ignore' + 'word').}
 
-\item{id}{Optional. A character vector or a list of vectors. If provided, the values of \code{id} are considered as identifiers that will be included in the resulting table.}
+\item{id}{Optional. A character vector or a list of vectors. If provided, the
+values of \code{id} are considered as identifiers that will be included in the resulting table.}
 
 \item{add.pos}{Logical, default is \code{FALSE}. Whether to include the position of each split element.}
 
-\item{id_unik}{Logical, default is \code{TRUE}. In the case identifiers are provided, whether to trigger a message if the identifiers are not unique. Indeed, if the identifiers are not unique, it is not possible to reconstruct the texts based only on them.}
+\item{id_unik}{Logical, default is \code{TRUE}. In the case identifiers are provided,
+whether to trigger a message if the identifiers are not unique. Indeed, if
+the identifiers are not unique, it is not possible to reconstruct the original texts.}
 
-\item{fixed}{Logical, default is \code{FALSE}. Whether to consider the argument \code{split} as fixed (and not as a regular expression).}
+\item{fixed}{Logical, default is \code{FALSE}. Whether to consider the argument \code{split}
+as fixed (and not as a regular expression).}
 
 \item{dt}{Logical, default is \code{FALSE}. Whether to return a \code{data.table}. See also the function \code{str_split2dt}.}
 
 \item{...}{Not currently used.}
 }
 \value{
-It returns a \code{data.frame} or a \code{data.table} which will contain: i) \code{obs}: the observation index, ii) \code{pos}: the position of the text element in the initial string (optional, via add.pos), iii) the text element, iv) the identifier(s) (optional, only if \code{id} was provided).
+It returns a \code{data.frame} or a \code{data.table} which will contain: i) \code{obs}: the observation index,
+ii) \code{pos}: the position of the text element in the initial string (optional, via add.pos),
+iii) the text element, iv) the identifier(s) (optional, only if \code{id} was provided).
 }
 \description{
 Splits a character vector and formats the resulting substrings into a data.frame
 }
+\section{Functions}{
+\itemize{
+\item \code{str_split2dt}: Splits a string vector and returns a \code{data.table}
+}}
+
 \examples{
 
 x = c("Nor rain, wind, thunder, fire are my daughters.",
@@ -73,7 +108,7 @@ base = within(mtcars, carname <- rownames(mtcars))
 # we have a message because the identifiers are not unique
 str_split2df(carname ~ am + gear + carb, base, " +")
 
-#
+# adding the position of the words & removing the message
 str_split2df(carname ~ am + gear + carb, base, " +", id_unik = FALSE, add.pos = TRUE)
 
 

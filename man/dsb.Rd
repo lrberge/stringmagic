@@ -10,7 +10,7 @@ dsb(
   frame = parent.frame(),
   sep = "",
   vectorize = FALSE,
-  string_as_box = TRUE,
+  slash = TRUE,
   collapse = NULL,
   help = NULL,
   use_DT = TRUE
@@ -22,7 +22,7 @@ dsb(
   sep = "",
   vectorize = FALSE,
   check = FALSE,
-  string_as_box = FALSE,
+  slash = FALSE,
   use_DT = FALSE
 )
 }
@@ -42,7 +42,7 @@ But type \code{dsb("--help")} to prompt an (almost) extensive help, or use the a
 \item{vectorize}{Logical, default is \code{FALSE}. If \code{TRUE}, Further, elements in \code{...} are
 NOT collapsed together, but instead vectorised.}
 
-\item{string_as_box}{Logical, default is \code{TRUE}. Whether the original character strings
+\item{slash}{Logical, default is \code{TRUE}. Whether the original character strings
 should be nested into a \code{".[]"}. If \code{TRUE}, then things like \code{dsb("S!one, two")}
 are equivalent to \code{dsb(".[S!one, two]")} and hence create the vector \code{c("one", "two")}.}
 
@@ -63,9 +63,9 @@ Compactly performs many low level string operations. Advanced support for plural
 }
 \section{Functions}{
 \itemize{
-\item \code{.dsb()}: Like \code{dsb} but without nice error messages (leads to slightly faster run times).
-
+\item \code{.dsb}: Like \code{dsb} but without nice error messages (leads to slightly faster run times).
 }}
+
 \examples{
 
 #
@@ -86,7 +86,7 @@ dsb("Hello .[x[1]], ",
 dsb("/J. Mills, David, Agnes, Dr Strong")
 
 # Nota: this is equivalent to (explained later)
-dsb("', *'S !J. Mills, David, Agnes, Dr Strong")
+dsb("{', *'S ! J. Mills, David, Agnes, Dr Strong}")
 
 #
 # Applying low level operations to strings
@@ -140,7 +140,7 @@ dsb("s, ' my 'c ! hello dear")
 dsb("The variables are: .[C ! x.[1:4]].")
 
 # This one is ugly but it shows triple nesting
-dsb("The variables are: .[w, C ! .[2* ! x.[1:4]].[','s, 4** !  ,_sq]].")
+dsb("The variables are: .[ws, C ! .[2 times ! x.[1:4]].[','s, 4 each !  ,_sq]].")
 
 #
 # Splitting
@@ -421,7 +421,7 @@ dsb("The author.[$s, enum, have ? x] written .[#N ? n] play.[#s].")
 
 # Another similar example illustrating that we need not express the object several times:
 x = c("Eschyle", "Sophocle", "Euripide")
-dsb("The .[$n ? x] classic author.[$s, are, enum].")
+dsb("The .[len ? x] classic author.[$s, are, enum].")
 
 
 #

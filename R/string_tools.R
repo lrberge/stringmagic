@@ -19,7 +19,8 @@
 #' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 #' Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore'). 
 #' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT[i = 5]" (flags 'ignore' + 'fixed').
-#' The flag 'verbatim' does not parse logical operations. For 'word', see the documentation of this argument.
+#' The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the 
+#' pattern. See the documentation of this argument.
 #' @param or Logical, default is `FALSE`. In the presence of two or more patterns, 
 #' whether to combine them with a logical "or" (the default is to combine them with a logical "and").
 #' @param pattern (If provided, elements of `...` are ignored.) A character vector representing the 
@@ -30,7 +31,8 @@
 #' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 #' Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore'). 
 #' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT[i = 5]" (flags 'ignore' + 'fixed').
-#' The flag 'verbatim' does not parse logical operations. For 'word', see the documentation of this argument.
+#' The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the 
+#' pattern. See the documentation of this argument.
 #' @param fixed Logical scalar, default is `FALSE`. Whether to trigger a fixed search instead of a 
 #' regular expression search (default).
 #' @param word Logical scalar, default is `FALSE`. If `TRUE` then a) word boundaries are added to the pattern, 
@@ -40,13 +42,21 @@
 #' @param ignore.case Logical scalar, default is `FALSE`. If `TRUE`, then case insensitive search is triggered. 
 #' 
 #' @details
-#' Note that the parser of the patterns may lead to problems with some multibyte encodings. This is a limitation.
+#' Note that the parser of the flags may lead to problems with some multibyte encodings. This is a limitation.
 #' If such encodings should be in the pattern, then this function cannot be used, there is no workaround.
 #'
 #' @return
 #' It returns a logical vector of the same length as `x`.
+#' 
+#' The function `str_which` returns a numeric vector. 
+#' 
+#' @seealso 
+#' See also [str_get], further that function may be easier to understand the examples.
 #'
 #' @examples
+#' 
+#' # NOTA: using `str_get` instead of `str_is` may lead to a faster understanding 
+#' #       of the examples 
 #'
 #' x = dsb("/one, two, one... two, microphone, check")
 #'
@@ -204,7 +214,7 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   res
 }
 
-#' @describeIn str_is
+#' @describeIn str_is Returns the indexes of the values in which a pattern is detected
 str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
                      or = FALSE, pattern = NULL){
 
@@ -364,7 +374,11 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' @param data Optional, only used if the argument `x` is a formula. It should 
 #' contain the variables of the formula.
 #' @param split A character scalar. Used to split the character vectors. By default 
-#' this is a regular expression.
+#' this is a regular expression. You can use flags in the pattern in the form `flag1, flag2/pattern`.
+#' Available flags are `ignore` (case), `fixed` (no regex), word (add word boundaries). Example:
+#' if "ignore/hello" and the text contains "Hello", it will be split at "Hello". 
+#' Shortcut: use the first letters of the flags. Ex: "iw/one" will split at the word 
+#' "one" (flags 'ignore' + 'word').
 #' @param id Optional. A character vector or a list of vectors. If provided, the 
 #' values of `id` are considered as identifiers that will be included in the resulting table.
 #' @param add.pos Logical, default is `FALSE`. Whether to include the position of each split element.
@@ -377,7 +391,9 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' @param ... Not currently used.
 #'
 #' @return
-#' It returns a `data.frame` or a `data.table` which will contain: i) `obs`: the observation index, ii) `pos`: the position of the text element in the initial string (optional, via add.pos), iii) the text element, iv) the identifier(s) (optional, only if `id` was provided).
+#' It returns a `data.frame` or a `data.table` which will contain: i) `obs`: the observation index, 
+#' ii) `pos`: the position of the text element in the initial string (optional, via add.pos), 
+#' iii) the text element, iv) the identifier(s) (optional, only if `id` was provided).
 #'
 #' @examples
 #'
@@ -947,6 +963,53 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
   res
 }
 
+#' Fills a character string up to a size
+#' 
+#' Fills a character string up to a size and handles multibyte encodings 
+#' (differently from sprintf).
+#' 
+#' @param x A character vector.
+#' @param n Integer scalar, possibly equal to `NULL` (default). The size up to which the character 
+#' vector will be filled. If `NULL` (default), it is set to the largest width in the character vector `x`.
+#' To handle how the character is filled, see the arguments `symbol`, `right` and `center`.
+#' @param symbol Character scalar of length 1, default is a space (" "). It is the symbol with which
+#' the string will be filled.
+#' @param right Logical scalar, default is `FALSE`. If `TRUE`, then the filling of the string is 
+#' done from the left, leading to right-alignment.
+#' @param center Logical scalar, default is `FALSE`. If `TRUE`, then the filling of the string will
+#' be balanced so as to center the strings.
+#' @param na Character scalar or `NA`. Default is "NA" (a character string!). What happens to NAs: by default 
+#' they are replaced by the character string "NA".
+#' 
+#' @details 
+#' If you use character filling of the form `sprintf("% 20s", x)` with `x``containing multibyte characters,
+#' you may be suprised that all character strings do not end up at the same lenght. This function
+#' uses other base R functions to compensate this. It is slower but, in general, safer. It also looks
+#' a bit like [[base::format]], but slightly different.
+#' 
+#' @author 
+#' Laurent R. Berge
+#' 
+#' @examples 
+#' 
+#' x = c("apple", "pineapple") 
+#' 
+#' # simple fill with blank
+#' cat(paste0(str_fill(x), ":", c(3, 7), "€"), sep = "\n")
+#' 
+#' # center fill
+#' cat(paste0(str_fill(x, center = TRUE), ":", c(3, 7), "€"), sep = "\n")
+#' 
+#' # changing the length of the fill and the symbol used for filling
+#' cat(paste0(str_fill(x), ":", str_fill(c(3, 7), 3, "0", right = TRUE), "€"), sep = "\n")
+#' 
+#' # na behavior: default/NA/other
+#' x = c("hello", NA) 
+#' str_fill(x)
+#' str_fill(x, na = NA)
+#' str_fill(x, na = "(missing)")
+#' 
+#' 
 str_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = FALSE, na = "NA"){
   # Character vectors starting with " " are not well taken care of
 

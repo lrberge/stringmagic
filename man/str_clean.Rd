@@ -7,7 +7,7 @@
 str_clean(
   x,
   ...,
-  rep = "",
+  replacement = "",
   pipe = " => ",
   sep = ",[ \\n\\t]+",
   ignore.case = FALSE,
@@ -24,15 +24,46 @@ str_clean(
 with the string 'replacement'. By default patterns are comma separated and the replacement comes
 after a ' => ' (see args \code{sep} and \code{pipe} to change this). By default the replacement is the empty string
 (so "pat1, pat2" \emph{removes} the patterns).
+
 Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), and 'total'.
 The flag \code{total} leads to a \emph{total replacement} of the string if the pattern is found. Use flags
 with comma separation ("word, total/pat") or use only their initials ("wt/pat").
-Starting with an '@' leads to operations in [\link{str_op}]. Ex: "@ascii, l, ws" leads to turning
-the string into ASCII, lower the case and normalize white spaces (see help of [\link{str_ops}]).}
+
+Starting with an '@' leads to operations in \link{str_op}. Ex: "@ascii, l, ws" turns
+the string into ASCII, lowers the case and normalizes white spaces (see help of \link{str_ops}).}
+
+\item{replacement}{Character scalar, default is the empty string. It represents the default
+value by which the patterns found in the character strings will be replaced. For example
+\code{str_clean(x, "e", replacement = "a")} turn all letters "e" in \code{x} into "a".}
+
+\item{pipe}{Character scalar, default is \code{" => "}. If thevalue of \code{pipe} is found in a pattern,
+then the string is split w.r.t. the pipe and anything after the pipe becomes the replacement.
+
+For example in \code{str_clean(x, "e => a")} the default pipe is found in "e => a", so the pattern
+"e" will be replaced with "a". In other terms, this is equivalent to \code{str_clean(x, "e", replacement = "a")}.
+Example changing the pipe: you can obtain the previous result with \code{str_clean(x, "e|>a", pipe = "|>")}.}
+
+\item{sep}{Character scalar, default is \code{",[ \\t\\n]+"} (which means a comma followed with spaces
+and/or new lines). By default the patterns to be replaced are comma separated, that is
+the pattern is split w.r.t. the argument \code{sep} and a replacement is done for each sub-pattern.
+
+Use \code{NULL} or the empty string to disable pattern separation.
+
+For example: let's look at \code{str_clean(x, "w/one, two => three")}. First the flag "word" is extracted from
+the pattern (see arg. \code{...}) as well as the replacement (see arg. \code{pipe}), leading to "one, two" the
+pattern to be replaced. Then the pattern is split w.r.t. \code{sep}, leading
+to two patterns "one" and "two". Hence the words (thanks to the flag "w") "one" and "two" from
+the string \code{x} will be replaced with "three".}
+
+\item{total}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, then when a pattern is found
+in a string, the full string is replaced (instead of just the pattern). Note, \emph{importantly},
+that when \code{total = TRUE} you can use logical operators in the patterns.
+
+Example: \code{str_clean(x, "wi/ & two, three & !four => ", total = TRUE)}}
 }
 \value{
 The main usage returns a character vector of the same length as the vector in input.
-Note, however, that since you can apply arbitrary [\link{str_op}] operations, the length and type
+Note, however, that since you can apply arbitrary \link{str_op} operations, the length and type
 of the final vector may depend on those (if they are used).
 }
 \description{
@@ -65,7 +96,7 @@ new = str_clean(cars,
            "wi/merc => Mercedes",
            # replace strings containing "Merc" and a digit followed with an 'S'
            "t/Merc & \\\\dS => Mercedes S!",
-           # put tolower case, remove isolated characters and normalize white spaces
+           # put to lower case, remove isolated characters and normalize white spaces
            "@l, ws.isolated")
 
 cbind(cars, new)
