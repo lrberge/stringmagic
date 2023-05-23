@@ -341,7 +341,6 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   // flags
   //
 
-  bool is_flag = true;
   while(i < n){
     while(i < n && is_blank(str[i])) ++i;
     while(i < n && str[i] >= 'a' && str[i] <= 'z'){
@@ -355,7 +354,6 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
     }
 
     if(i == n || (str[i] != '/' && str[i] != ',')){
-      is_flag = false;
       flags.clear();
       break;
     } else if(str[i] == '/'){
@@ -369,7 +367,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   // saving the flags
   res["flags"] = flags;
 
-  if(!is_flag){
+  if(flags.empty()){
     // we start over again
     i = 0;
   } else {
