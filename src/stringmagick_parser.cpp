@@ -991,7 +991,8 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
   // Rstr: string from R of length 1
 
   List res;
-  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  // const char *str = CHAR(STRING_ELT(Rstr, 0));
+  const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
 
   const int box_type = is_dsb ? DSB : CUB;
 
@@ -1012,7 +1013,7 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
     }
 
     if(!string_value.empty()){
-      res.push_back(string_value);  
+      res.push_back(std_string_to_r_string(string_value));  
     }    
 
     if(i < n){
@@ -1044,11 +1045,11 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
         extract_r_expression(is_pblm, str, i, n, expr_value, get_closing_box_char(box_type));
         
         // if we end up with is_pblm again, OK, there will be an error in the R side
-        sop_element.push_back(expr_value);   
+        sop_element.push_back(std_string_to_r_string(expr_value));   
               
       } else {
-        sop_element.push_back(operator_vec);
-        sop_element.push_back(expr_value);
+        sop_element.push_back(std_string_to_r_string(operator_vec));
+        sop_element.push_back(std_string_to_r_string(expr_value));
       }
 
       res.push_back(sop_element);
@@ -1062,58 +1063,6 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
   return res;
 }
 
-// [[Rcpp::export]]
-List cpp_string_ops_nested(SEXP Rstr, bool is_dsb){
-  // Rstr: string from R of length 1
-  // we consider the full string to be in a box
-
-  List res;
-  const char *str = CHAR(STRING_ELT(Rstr, 0));
-
-  const int box_type = is_dsb ? DSB : CUB;
-
-  // pluralization flag
-  bool any_plural = false;
-
-  std::string sop_value = "";
-
-  int n = std::strlen(str);
-  int i = 0;
-
-  bool is_pblm = false;      
-
-  List sop_element;
-  std::vector<std::string> operator_vec;
-  std::string expr_value;
-
-  // modifies i, expr_value and operator_vec "in place"
-  parse_box(box_type, is_pblm, str, i, n, operator_vec, expr_value, any_plural);
-
-  // if we end up at the end of the string: fine
-  if(i == n) is_pblm = false;
-
-  if(is_pblm){
-    // there is a parsing error
-    // => we send the full string to be evaluated (it will very likely lead to an error in R)
-    // not sure how to cleanly deal with this
-    std::vector<std::string> empty_vec;
-    sop_element.push_back(empty_vec);
-    
-    while(i < n) expr_value += str[i++];
-    sop_element.push_back(expr_value);   
-  } else {
-    sop_element.push_back(operator_vec);
-    sop_element.push_back(expr_value);
-  }
-
-  res.push_back(sop_element);
-
-  res.attr("plural") = any_plural;
-
-  return res;
-}
-
-
 //
 // END PARSER
 //
@@ -1125,9 +1074,9 @@ In the section below are utility functions to extend the parsing to set pieces
 
 
 // [[Rcpp::export]]
-std::string cpp_extract_quote_from_op(SEXP Rstr){
+SEXP cpp_extract_quote_from_op(SEXP Rstr){
 
-  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
 
   std::string res;
@@ -1140,7 +1089,7 @@ std::string cpp_extract_quote_from_op(SEXP Rstr){
     extract_quote(str, i, n, res, true);
   }
 
-  return res;
+  return std_string_to_r_string(res);
 }
 
 // detects 'if(' or 'vif('
@@ -1177,7 +1126,7 @@ List cpp_parse_operator(SEXP Rstr){
   //   the syntax is `!my'stuff" is ok`, ie ! right after the backtick
 
 
-  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
   
   std::string argument;
@@ -1299,16 +1248,16 @@ List cpp_parse_operator(SEXP Rstr){
   //
 
   List res;
-  res["operator"] = op;
-  res["options"] = options;
-  res["argument"] = argument;
+  res["operator"] = std_string_to_r_string(op);
+  res["options"] = std_string_to_r_string(options);
+  res["argument"] = std_string_to_r_string(argument);
   res["eval"] = is_eval;
 
   return res;
 }
 
 // [[Rcpp::export]]
-std::vector<std::string> cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
+SEXP cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
   // "'-'S, title, C" => c("'-'S", "title", "C")
   
   const char *str = CHAR(STRING_ELT(Rstr, 0));
@@ -1374,13 +1323,13 @@ std::vector<std::string> cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
     operator_vec.insert(operator_vec.begin(), "_ERROR_");
   }
 
-  return operator_vec;
+  return std_string_to_r_string(operator_vec);
 }
 
 // [[Rcpp::export]]
-std::vector<std::string> cpp_parse_slash(SEXP Rstr, bool is_dsb){
+SEXP cpp_parse_slash(SEXP Rstr, bool is_dsb){
 
-  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
 
   const int box_type = is_dsb ? DSB : CUB;
@@ -1423,6 +1372,6 @@ std::vector<std::string> cpp_parse_slash(SEXP Rstr, bool is_dsb){
     res.push_back(string_tmp);
   }
   
-  return res;
+  return std_string_to_r_string(res);
 }
 

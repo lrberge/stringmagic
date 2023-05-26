@@ -6,16 +6,21 @@
 #include <algorithm>
 using namespace Rcpp;
 
+inline void append_r_str(std::string &x, SEXP &Rstr_vec, int i = 0){
+  const char* str = Rf_translateCharUTF8(STRING_ELT(Rstr_vec, i));
+  x.append(str);  
+}
+
 // [[Rcpp::export]]
-StringVector cpp_paste_conditional(StringVector x, IntegerVector id,
-                                   std::string sep = "", std::string sep_last = ""){
+SEXP cpp_paste_conditional(SEXP x, IntegerVector id,
+                           std::string sep = "", std::string sep_last = ""){
 
   int n = max(id);
-  StringVector res(n);
-  int n_x = x.length();
+  std::vector<std::string> res(n);
+  int n_x = Rf_length(x);
 
   if(n_x == 0){
-    return res;
+    return std_string_to_r_string(res);
   }
 
   const bool is_sep = !sep.empty();
@@ -35,11 +40,11 @@ StringVector cpp_paste_conditional(StringVector x, IntegerVector id,
         }
       }
 
-      tmp += x[i];
+      append_r_str(tmp, x, i);
 
     } else {
       res[id_current - 1] = tmp;
-      tmp = x[i];
+      append_r_str(tmp, x, i);
       id_current = id[i];
     }
   }
@@ -47,7 +52,7 @@ StringVector cpp_paste_conditional(StringVector x, IntegerVector id,
   // don't forget the last item
   res[id[n_x - 1] - 1] = tmp;
 
-  return res;
+  return std_string_to_r_string(res);
 }
 
 
@@ -82,14 +87,14 @@ inline bool is_invalid_char(const int invalid_type, const char *str, int i){
 }
 
 // [[Rcpp::export]]
-StringVector cpp_normalize_ws(SEXP Rstr){
+SEXP cpp_normalize_ws(SEXP Rstr){
 
   int n_vec = Rf_length(Rstr);
 
-  StringVector res(n_vec);
+  std::vector<std::string> res(n_vec);
 
   for(int i_vec=0 ; i_vec<n_vec ; ++i_vec){
-    const char *str = CHAR(STRING_ELT(Rstr, i_vec));
+    const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, i_vec));
     int n = std::strlen(str);
 
     std::string x;
@@ -107,20 +112,20 @@ StringVector cpp_normalize_ws(SEXP Rstr){
     res[i_vec] = x;
   }
 
-  return res;
+  return std_string_to_r_string(res);
 }
 
 // [[Rcpp::export]]
-StringVector cpp_normalize_string(SEXP Rstr, bool clean_punct, bool clean_digit,
+SEXP cpp_normalize_string(SEXP Rstr, bool clean_punct, bool clean_digit,
                                   bool clean_isolated){
 
   int n_vec = Rf_length(Rstr);
-  StringVector res(n_vec);
+  std::vector<std::string> res(n_vec);
 
   const int invalid_type = clean_punct ? (clean_digit ? PUNCT_DIGIT : PUNCT) : (clean_digit ? DIGIT : BLANK);
 
   for(int i_vec=0 ; i_vec<n_vec ; ++i_vec){
-    const char *str = CHAR(STRING_ELT(Rstr, i_vec));
+    const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, i_vec));
     int n = std::strlen(str);
 
     std::string x;
@@ -148,23 +153,18 @@ StringVector cpp_normalize_string(SEXP Rstr, bool clean_punct, bool clean_digit,
     res[i_vec] = x;
   }
 
-  return res;
+  return std_string_to_r_string(res);
 }
 
 // [[Rcpp::export]]
-StringVector cpp_trimws(StringVector x){
-  // this is 'fast' because the changes are in place:
-  // 'res' is an alias here
-  // 
-  // can I skip the cstring conversion? => to investigate how to speed that up
-  /// bc the computation seems unnecessary
+SEXP cpp_trimws_in_place(SEXP x){
+  // this is 'fast' because the changes are in place
+  // beware!
 
-  int n_vec = x.length();
-  StringVector res(x);
+  int n_vec = Rf_length(x);
 
   for(int i_vec=0 ; i_vec<n_vec ; ++i_vec){
-    String xi = x[i_vec];
-    const char* str(xi.get_cstring());
+    const char* str = Rf_translateCharUTF8(STRING_ELT(x, i_vec));
     int n = std::strlen(str);
 
     if(str[0] == ' ' || str[n - 1] == ' '){
@@ -177,11 +177,11 @@ StringVector cpp_trimws(StringVector x){
         tmp += str[i];
       }
 
-      res[i_vec] = tmp;
+      SET_STRING_ELT(x, i_vec, Rf_mkCharCE(tmp.c_str(), CE_UTF8));
     }
   }
 
-  return res;
+  return x;
 }
 
 // [[Rcpp::export]]
@@ -328,7 +328,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
 
    if(Rf_length(Rstr) != 1) stop("Internal error in cpp_parse_regex_pattern: the vector must be of length 1.");
 
-  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
 
   List res;
@@ -365,7 +365,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   }
 
   // saving the flags
-  res["flags"] = flags;
+  res["flags"] = std_string_to_r_string(flags);
 
   if(flags.empty()){
     // we start over again
@@ -422,7 +422,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
     is_or_all.push_back(false);
   }
 
-  res["patterns"] = patterns;
+  res["patterns"] = std_string_to_r_string(patterns);
   res["is_or"] = is_or_all;
 
   return res;

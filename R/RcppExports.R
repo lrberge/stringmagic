@@ -13,8 +13,8 @@ cpp_normalize_string <- function(Rstr, clean_punct, clean_digit, clean_isolated)
     .Call(`_stringmagick_cpp_normalize_string`, Rstr, clean_punct, clean_digit, clean_isolated)
 }
 
-cpp_trimws <- function(x) {
-    .Call(`_stringmagick_cpp_trimws`, x)
+cpp_trimws_in_place <- function(x) {
+    .Call(`_stringmagick_cpp_trimws_in_place`, x)
 }
 
 cpp_which_empty <- function(Rstr) {
@@ -39,10 +39,6 @@ cpp_parse_regex_pattern <- function(Rstr, parse_logical) {
 
 cpp_string_ops <- function(Rstr, is_dsb) {
     .Call(`_stringmagick_cpp_string_ops`, Rstr, is_dsb)
-}
-
-cpp_string_ops_nested <- function(Rstr, is_dsb) {
-    .Call(`_stringmagick_cpp_string_ops_nested`, Rstr, is_dsb)
 }
 
 cpp_extract_quote_from_op <- function(Rstr) {

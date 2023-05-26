@@ -28,3 +28,27 @@ std::vector<std::string> trim_ws(std::vector<std::string> x){
 
   return res;
 }
+
+SEXP std_string_to_r_string(std::string x){
+    
+  SEXP res = PROTECT(Rf_ScalarString(Rf_mkCharCE(x.c_str(), CE_UTF8)));
+  UNPROTECT(1);
+  
+  return res;
+}
+
+SEXP std_string_to_r_string(std::vector<std::string> x){
+  
+  int n = x.size();
+  
+  SEXP res = PROTECT(Rf_allocVector(STRSXP, n));
+  
+  for(int i=0 ; i<n ; ++i){
+    SET_STRING_ELT(res, i, Rf_mkCharCE(x[i].c_str(), CE_UTF8));
+  }
+  
+  UNPROTECT(1);
+  
+  return res;
+}
+

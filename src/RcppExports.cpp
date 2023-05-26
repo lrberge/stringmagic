@@ -11,12 +11,12 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // cpp_paste_conditional
-StringVector cpp_paste_conditional(StringVector x, IntegerVector id, std::string sep, std::string sep_last);
+SEXP cpp_paste_conditional(SEXP x, IntegerVector id, std::string sep, std::string sep_last);
 RcppExport SEXP _stringmagick_cpp_paste_conditional(SEXP xSEXP, SEXP idSEXP, SEXP sepSEXP, SEXP sep_lastSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< StringVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type id(idSEXP);
     Rcpp::traits::input_parameter< std::string >::type sep(sepSEXP);
     Rcpp::traits::input_parameter< std::string >::type sep_last(sep_lastSEXP);
@@ -25,7 +25,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_normalize_ws
-StringVector cpp_normalize_ws(SEXP Rstr);
+SEXP cpp_normalize_ws(SEXP Rstr);
 RcppExport SEXP _stringmagick_cpp_normalize_ws(SEXP RstrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -36,7 +36,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_normalize_string
-StringVector cpp_normalize_string(SEXP Rstr, bool clean_punct, bool clean_digit, bool clean_isolated);
+SEXP cpp_normalize_string(SEXP Rstr, bool clean_punct, bool clean_digit, bool clean_isolated);
 RcppExport SEXP _stringmagick_cpp_normalize_string(SEXP RstrSEXP, SEXP clean_punctSEXP, SEXP clean_digitSEXP, SEXP clean_isolatedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -49,14 +49,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_trimws
-StringVector cpp_trimws(StringVector x);
-RcppExport SEXP _stringmagick_cpp_trimws(SEXP xSEXP) {
+// cpp_trimws_in_place
+SEXP cpp_trimws_in_place(SEXP x);
+RcppExport SEXP _stringmagick_cpp_trimws_in_place(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< StringVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_trimws(x));
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_trimws_in_place(x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -130,20 +130,8 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_string_ops_nested
-List cpp_string_ops_nested(SEXP Rstr, bool is_dsb);
-RcppExport SEXP _stringmagick_cpp_string_ops_nested(SEXP RstrSEXP, SEXP is_dsbSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
-    Rcpp::traits::input_parameter< bool >::type is_dsb(is_dsbSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_string_ops_nested(Rstr, is_dsb));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_extract_quote_from_op
-std::string cpp_extract_quote_from_op(SEXP Rstr);
+SEXP cpp_extract_quote_from_op(SEXP Rstr);
 RcppExport SEXP _stringmagick_cpp_extract_quote_from_op(SEXP RstrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -165,7 +153,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_parse_simple_operations
-std::vector<std::string> cpp_parse_simple_operations(SEXP Rstr, bool is_dsb);
+SEXP cpp_parse_simple_operations(SEXP Rstr, bool is_dsb);
 RcppExport SEXP _stringmagick_cpp_parse_simple_operations(SEXP RstrSEXP, SEXP is_dsbSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -177,7 +165,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_parse_slash
-std::vector<std::string> cpp_parse_slash(SEXP Rstr, bool is_dsb);
+SEXP cpp_parse_slash(SEXP Rstr, bool is_dsb);
 RcppExport SEXP _stringmagick_cpp_parse_slash(SEXP RstrSEXP, SEXP is_dsbSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -227,14 +215,13 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_paste_conditional", (DL_FUNC) &_stringmagick_cpp_paste_conditional, 4},
     {"_stringmagick_cpp_normalize_ws", (DL_FUNC) &_stringmagick_cpp_normalize_ws, 1},
     {"_stringmagick_cpp_normalize_string", (DL_FUNC) &_stringmagick_cpp_normalize_string, 4},
-    {"_stringmagick_cpp_trimws", (DL_FUNC) &_stringmagick_cpp_trimws, 1},
+    {"_stringmagick_cpp_trimws_in_place", (DL_FUNC) &_stringmagick_cpp_trimws_in_place, 1},
     {"_stringmagick_cpp_which_empty", (DL_FUNC) &_stringmagick_cpp_which_empty, 1},
     {"_stringmagick_cpp_find_first_index", (DL_FUNC) &_stringmagick_cpp_find_first_index, 3},
     {"_stringmagick_cpp_group_rev_index", (DL_FUNC) &_stringmagick_cpp_group_rev_index, 1},
     {"_stringmagick_cpp_recreate_index", (DL_FUNC) &_stringmagick_cpp_recreate_index, 1},
     {"_stringmagick_cpp_parse_regex_pattern", (DL_FUNC) &_stringmagick_cpp_parse_regex_pattern, 2},
     {"_stringmagick_cpp_string_ops", (DL_FUNC) &_stringmagick_cpp_string_ops, 2},
-    {"_stringmagick_cpp_string_ops_nested", (DL_FUNC) &_stringmagick_cpp_string_ops_nested, 2},
     {"_stringmagick_cpp_extract_quote_from_op", (DL_FUNC) &_stringmagick_cpp_extract_quote_from_op, 1},
     {"_stringmagick_cpp_parse_operator", (DL_FUNC) &_stringmagick_cpp_parse_operator, 1},
     {"_stringmagick_cpp_parse_simple_operations", (DL_FUNC) &_stringmagick_cpp_parse_simple_operations, 2},
