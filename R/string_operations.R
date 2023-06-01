@@ -1432,7 +1432,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
   } else {
 
     if(check){
-      dots = check_eval(list(...), "In `", fun_name, "`, one element of ... could not be evaluated.")
+      dots = check_expr(list(...), "In `", fun_name, "`, one element of ... could not be evaluated.")
     } else {
       dots = list(...)
     }
@@ -1543,7 +1543,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
         # we need to evaluate xi
         if(check){
-          xi_call = check_eval(str2lang(xi), "The value `", xi,
+          xi_call = check_expr(str2lang(xi), "The value `", xi,
                                   "` could not be parsed.")
         } else {
           xi_call = str2lang(xi)
@@ -1558,13 +1558,13 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
         } else {
           if(is_dt){
             if(check){
-              xi = check_eval(eval_dt(xi_call, frame), "The value `", xi,
+              xi = check_expr(eval_dt(xi_call, frame), "The value `", xi,
                                 "` could not be evaluated.")
             } else {
               xi = eval_dt(xi_call, frame)
             }
           } else if(check){
-            xi = check_eval(eval(xi_call, frame), "The value `", xi,
+            xi = check_expr(eval(xi_call, frame), "The value `", xi,
                               "` could not be evaluated.")
           } else {
             xi = eval(xi_call, frame)
@@ -1699,15 +1699,15 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
             # evaluation
             if(is_dt){
               if(check){
-                xi = check_eval(eval_dt(xi_call, frame), "The value `", xi,
+                xi = check_expr(eval_dt(xi_call, frame), "The value `", xi,
                                   "` could not be evaluated.")
               } else {
                 xi = eval_dt(xi_call, frame)
               }
             } else if(check){
-              xi_call = check_eval(str2lang(xi), "The value `", xi,
+              xi_call = check_expr(str2lang(xi), "The value `", xi,
                                      "` could not be parsed.")
-              xi = check_eval(eval(xi_call, frame), "The value `", xi,
+              xi = check_expr(eval(xi_call, frame), "The value `", xi,
                                 "` could not be evaluated.")
             } else {
               xi = eval(str2lang(xi), frame)
@@ -1758,7 +1758,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
             xi_call = str2lang(vars[1])
             if(is_dt){
               if(check){
-                xi_val = check_eval(eval_dt(xi_call, frame), "The value `", xi,
+                xi_val = check_expr(eval_dt(xi_call, frame), "The value `", xi,
                                   "` could not be evaluated.")
               } else {
                 xi_val = eval_dt(xi_call, frame)
@@ -1784,11 +1784,11 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
 
             if(op_parsed$eval){
               if(check){
-                argument_call = check_eval(str2lang(op_parsed$argument),
+                argument_call = check_expr(str2lang(op_parsed$argument),
                                            "In operation `", opi, "`, the value `",
                                            op_parsed$argument, "` could not be parsed.")
 
-                argument = check_eval(eval(argument_call, frame),
+                argument = check_expr(eval(argument_call, frame),
                                       "In operation `", opi, "`, the value `",
                                       op_parsed$argument, "` could not be evaluated.")
               } else {
@@ -1800,7 +1800,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
             }
 
             if(check){
-              xi = check_eval(sop_operators(xi, op_parsed$operator, op_parsed$options, argument,
+              xi = check_expr(sop_operators(xi, op_parsed$operator, op_parsed$options, argument,
                                               check = check, frame = frame, conditional_flag = conditional_flag,
                                               is_dsb = is_dsb, fun_name = fun_name),
                                 "The operation {bq, '_;;;_ => ;'R ? opi} failed. Please revise your call.")
@@ -3201,7 +3201,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     # computing the condition
     # a) parsing
     if(check){
-      cond_parsed = check_eval(str2lang(cond_raw), "The string operation `", op, "` should be of the form ",
+      cond_parsed = check_expr(str2lang(cond_raw), "The string operation `", op, "` should be of the form ",
                                  op, "(condition ; true ; false). \nPROBLEM: the condition could not be parsed.")
     } else {
       cond_parsed = str2lang(cond_raw)
@@ -3212,7 +3212,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       # REGEX
       
       if(check){
-        cond = check_eval(str_is(x, cond_parsed), "The operation is of the form {bq?op}(cond ; true ; false). ",
+        cond = check_expr(str_is(x, cond_parsed), "The operation is of the form {bq?op}(cond ; true ; false). ",
                             "When `cond` is a pure character string, the function `str_is` is applied with `cond` being the searched pattern.",
                             "\nPROBLEM: in {bq ! {op}({'_;;;_ => ;'R ? argument})}, the condition {bq?cond_raw} led to an error.")
       } else {
@@ -3233,7 +3233,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
       
       if(check){
-        cond = check_eval(eval(cond_parsed, my_data, frame), "The string operation `", op, "` should be of the form ",
+        cond = check_expr(eval(cond_parsed, my_data, frame), "The string operation `", op, "` should be of the form ",
                                   op, "(condition ; true ; false). \nPROBLEM: the condition `", cond_parsed, 
                                   "`could not be evaluated.")  
       } else {
@@ -3696,7 +3696,7 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
 
     if(op_parsed$eval){
       if(check){
-        argument_call = check_eval(str2lang(op_parsed$argument), 
+        argument_call = check_expr(str2lang(op_parsed$argument), 
                                      "In the operation `{op}()`, the ",
                                      "{&length(op_all) == 1 ; operation ; chain of operations} ",
                                      " {bq?operations_string} led to a problem.", 
@@ -3704,7 +3704,7 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
                                      "(equal to {bq?op_parsed$argument}) is evaluated from the calling frame.",
                                      "\nPROBLEM: the argument could not be parsed.")
 
-        argument = check_eval(eval(argument_call, frame),
+        argument = check_expr(eval(argument_call, frame),
                               "In the operation `{op}()`, the ",
                               "{&length(op_all) == 1 ; operation ; chain of operations} ",
                               " {bq?operations_string} led to a problem.", 
@@ -3720,7 +3720,7 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
     }
 
     if(check){
-      xi = check_eval(sop_operators(xi, op_parsed$operator, op_parsed$options, argument, 
+      xi = check_expr(sop_operators(xi, op_parsed$operator, op_parsed$options, argument, 
                                       conditional_flag = conditional_flag, is_dsb = is_dsb, fun_name = fun_name),
                                      "In the operation `{op}()`, the ",
                                      "{&length(op_all) == 1 ; operation ; chain of operations} ",

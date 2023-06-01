@@ -926,7 +926,7 @@ isError = function(x){
 ####
 
 
-check_eval = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
+check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
 
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e),
                                                           conditionMessage(e)), class = "try-error"))
