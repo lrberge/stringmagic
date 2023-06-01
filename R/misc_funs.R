@@ -1174,9 +1174,21 @@ duplicated_xy = function(x, y){
   which(x_dup & y_dup)
 }
 
-eval_dt = function(call, frame){
+eval_dt = function(call, data = list(), frame){
+  
+  is_data = TRUE
+  if(missing(frame)){
+    frame = data
+    is_data = FALSE
+  }
 
   dt_data = attr(frame, "dt_data")
+  
+  if(is_data){
+    for(v in names(data)){
+      dt_data[[v]] = data[[v]]
+    }
+  }
 
   if(".BY" %in% names(dt_data)){
     # we subset the data

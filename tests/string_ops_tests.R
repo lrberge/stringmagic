@@ -819,6 +819,10 @@ x = c(5, 25, 30, 7, 5, 4)
 txt = cub("Numbers: {vif(.N > 5 ; sum = {n?sum(x)} ; prod = {n?prod(x)}), C ? x}.")
 test(txt, "Numbers: sum = 76.")
 
+# '.' as a placeholder
+x = c(5, 12, 20, 35)
+txt = cub("y = {3 first, vif(.N<2 ; short ; {' + 'c ? .}) ? x}")
+test(txt, "y = 5 + 12 + 20")
 
 #
 # escaping ####

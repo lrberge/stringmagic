@@ -569,6 +569,12 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Note that there are many ways to get to the same result. Here is another example:
 #' `cub("y = {vif(.N>4 ; {x[1]} + ... + {last?x} ; {' + 'c ? x}) ? x}")`.
 #' 
+#' The `vif` condition allows the use of '.' to refer to the current value in 
+#' `verb_true` and `verb_false`, as illustrated by the last example:
+#' 
+#' Ex.5: `cub("{4 last, vif(. %% 2 ; x{.} ; y{rev?.}), C ? 1:11}")`
+#' leads to "y10, x9, y8 and x11".
+#' 
 #' 
 #' @section Special interpolation: The slash:
 #' 
@@ -1355,7 +1361,7 @@ setup_help = function(){
 #### Internal ####
 ####
 
-string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(), 
+string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = list(),
                                sep = "", vectorize = FALSE,
                                slash = TRUE, collapse = NULL,
                                help = NULL, is_root = FALSE,
@@ -1558,16 +1564,16 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
         } else {
           if(is_dt){
             if(check){
-              xi = check_expr(eval_dt(xi_call, frame), "The value `", xi,
+              xi = check_expr(eval_dt(xi_call, data, frame), "The value `", xi,
                                 "` could not be evaluated.")
             } else {
-              xi = eval_dt(xi_call, frame)
+              xi = eval_dt(xi_call, data, frame)
             }
           } else if(check){
-            xi = check_expr(eval(xi_call, frame), "The value `", xi,
+            xi = check_expr(eval(xi_call, data, frame), "The value `", xi,
                               "` could not be evaluated.")
           } else {
-            xi = eval(xi_call, frame)
+            xi = eval(xi_call, data, frame)
           }
         }
 
@@ -1699,18 +1705,18 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
             # evaluation
             if(is_dt){
               if(check){
-                xi = check_expr(eval_dt(xi_call, frame), "The value `", xi,
+                xi = check_expr(eval_dt(xi_call, data, frame), "The value `", xi,
                                   "` could not be evaluated.")
               } else {
-                xi = eval_dt(xi_call, frame)
+                xi = eval_dt(xi_call, data, frame)
               }
             } else if(check){
               xi_call = check_expr(str2lang(xi), "The value `", xi,
                                      "` could not be parsed.")
-              xi = check_expr(eval(xi_call, frame), "The value `", xi,
+              xi = check_expr(eval(xi_call, data, frame), "The value `", xi,
                                 "` could not be evaluated.")
             } else {
-              xi = eval(str2lang(xi), frame)
+              xi = eval(str2lang(xi), data, frame)
             }
 
             if(is.function(xi)){
@@ -1758,13 +1764,13 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),
             xi_call = str2lang(vars[1])
             if(is_dt){
               if(check){
-                xi_val = check_expr(eval_dt(xi_call, frame), "The value `", xi,
+                xi_val = check_expr(eval_dt(xi_call, data, frame), "The value `", xi,
                                   "` could not be evaluated.")
               } else {
-                xi_val = eval_dt(xi_call, frame)
+                xi_val = eval_dt(xi_call, data, frame)
               }
             } else {
-              xi_val = eval(xi_call, frame)
+              xi_val = eval(xi_call, data, frame)
             }
 
           }
@@ -3248,6 +3254,11 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
                 "\nPROBLEM: the condition is of length {len?cond} while the interpolated value is of length {len?x}.")
     }
     
+    if(is.numeric(cond)){
+      # numeric values are converted to logical
+      cond = as.logical(cond)
+    }
+    
     if(!is.logical(cond)){
       stop_hook("In {bq?op} operations, the condition (here {bq?cond_raw}) must be logical.",
                 "\nPROBLEM: the condition is not logical, instead it is of class {enum.bq ? class(cond)}.")
@@ -3312,7 +3323,12 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         }
       } else {
         # verbatim if
-        xi = string_ops_internal(instruction, is_dsb = is_dsb, frame = frame, check = check, 
+        if(grepl(".", instruction, fixed = TRUE)){
+          data = list("." = xi)
+        } else {
+          data = list()
+        }
+        xi = string_ops_internal(instruction, is_dsb = is_dsb, data = data, frame = frame, check = check, 
                                 fun_name = fun_name)
       }
       

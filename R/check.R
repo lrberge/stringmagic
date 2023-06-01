@@ -930,7 +930,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
 
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e),
                                                           conditionMessage(e)), class = "try-error"))
-  if ("try-error" %in% class(res)) {
+  if("try-error" %in% class(res)){
 
     if(missing(up)){
       # up with set_up
@@ -957,20 +957,19 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
       msg = .cub(..., frame = parent.frame())
     }
     
-    if (nchar(msg) == 0) {
+    if(nchar(msg) == 0){
       if (missing(arg_name)) {
         arg_name = deparse(substitute(expr))
       }
       msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
       stop_up(msg, res[[2]], verbatim = verbatim, frame = parent.frame())
-    }
-    else {
+      
+    } else {
       call_non_informative = deparse(substitute(expr),100)[1]
 
       call_error = deparse(res[[1]], 100)[1]
 
-      if (call_error == call_non_informative || call_error ==
-          "NULL" || grepl("^(doTry|eval)", call_error)) {
+      if (call_error == call_non_informative || call_error == "NULL" || grepl("^(doTry|eval)", call_error)) {
         call_error = ""
       } else {
         call_error = paste0("In ", call_error, ": ")
@@ -986,14 +985,14 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
           clean_split = strsplit(clean, " => ")[[1]]
           from = clean_split[1]
           to = clean_split[2]
-        }
-        else {
+        } else {
           from = clean
           to = ""
         }
+        
         stop_up(msg, "\n  ", call_error, gsub(from, to, err), verbatim = TRUE)
-      }
-      else {
+        
+      } else {
         stop_up(msg, "\n  ", call_error, err, verbatim = TRUE)
       }
     }
