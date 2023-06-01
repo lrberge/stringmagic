@@ -248,6 +248,12 @@ test(txt, "Where is bryan? Bryan is in the kitchen.")
 txt = dsb(".[title ? x]")
 test(txt, "Where Is Bryan? Bryan Is In The KITCHEN.")
 
+txt = dsb(".[title.force ? x]")
+test(txt, "Where Is Bryan? Bryan Is In The Kitchen.")
+
+txt = dsb(".[title.force.ignore ? x]")
+test(txt, "Where Is Bryan? Bryan Is In The Kitchen.")
+
 x = "results from a new estimator: a new hope"
 txt = dsb(".[title.i ? x]")
 test(txt, "Results From a New Estimator: A New Hope")
@@ -431,6 +437,12 @@ test(txt, "45")
 a = 2
 txt = cub("{'3'first, `a`last, ''c ? x}")
 test(txt, "23")
+
+txt = cub("{'1|1'first, ''c ? x}")
+test(txt, "15")
+
+txt = cub("{'-3'first, ''c ? x}")
+test(txt, "45")
 
 # conditional
 x = c("123", "abc", "a1b2")

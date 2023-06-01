@@ -97,9 +97,16 @@ new = str_clean(cars,
            # replace strings containing "Merc" and a digit followed with an 'S'
            "t/Merc & \\\\dS => Mercedes S!",
            # put to lower case, remove isolated characters and normalize white spaces
-           "@l, ws.isolated")
+           "@lower, ws.isolated")
 
 cbind(cars, new)
 
 
+}
+\seealso{
+A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_op]{str_op()}}.
+String interpolation combined with operation chaining: \code{\link[=cub]{cub()}}.
+}
+\author{
+Laurent R. Berge
 }

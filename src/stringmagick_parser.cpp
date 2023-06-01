@@ -282,7 +282,8 @@ inline bool is_paren_operator(const char * str, int i, int n){
 
 
 void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &i, int n,
-                      std::string &operator_tmp, std::string ending_str, bool skip_box_open);
+                      std::string &operator_tmp, std::string ending_str, bool skip_box_open,
+                      bool skip_second_space = false);
 
 void extract_simple_ops_verbatim(const int box_type, bool &is_pblm, const char * str, int &i, int n,
                                  std::string &operator_tmp, std::string ending_str);
@@ -592,7 +593,7 @@ void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, i
     if(str[i] == '?'){
       extract_r_expression(is_pblm, str, i, n, operator_tmp, ending[0]);
     } else if(str[i] == '!'){
-      extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ending, false);
+      extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ending, false, true);
     }
 
     if(is_pblm) return;
@@ -603,9 +604,22 @@ void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, i
 }
 
 void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &i, int n,
-                      std::string &operator_tmp, std::string ending_str, bool skip_box_open){
+                      std::string &operator_tmp, std::string ending_str, bool skip_box_open,
+                      bool skip_second_space){
   // ending_str: we stop at the ending, can be at most 2 char length
   // the final index i stops at the ending value (and not after it)
+  // the default for skip_second_space is given in its first declaration
+  
+  if(skip_second_space){
+    // case verbatim expression and space before
+    // ex: {S, " et "c ! bonjour}
+    //                  ^ we start here
+    operator_tmp += str[i++];
+    // sikpping the space
+    if(str[i] == ' '){
+      ++i;  
+    }    
+  }
 
   while(i < n){
     

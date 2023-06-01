@@ -926,7 +926,7 @@ isError = function(x){
 ####
 
 
-error_sender = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
+check_eval = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
 
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e),
                                                           conditionMessage(e)), class = "try-error"))
@@ -950,8 +950,13 @@ error_sender = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
     }
     
     set_up(1 + up)
-
-    msg = paste0(..., collapse = "")
+    
+    if(verbatim){
+      msg = paste0(..., collapse = "")  
+    } else {
+      msg = .cub(..., frame = parent.frame())
+    }
+    
     if (nchar(msg) == 0) {
       if (missing(arg_name)) {
         arg_name = deparse(substitute(expr))
@@ -975,7 +980,7 @@ error_sender = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
       if (grepl("^in eval\\(str[^:]+:\n", err)) {
         err = sub("^in eval\\(str[^:]+:\n", "", err)
       }
-
+      
       if (!missing(clean)) {
         if (grepl(" => ", clean)) {
           clean_split = strsplit(clean, " => ")[[1]]
@@ -986,10 +991,10 @@ error_sender = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
           from = clean
           to = ""
         }
-        stop_up(msg, "\n  ", call_error, gsub(from, to, err), verbatim = verbatim, frame = parent.frame())
+        stop_up(msg, "\n  ", call_error, gsub(from, to, err), verbatim = TRUE)
       }
       else {
-        stop_up(msg, "\n  ", call_error, err, verbatim = verbatim, frame = parent.frame())
+        stop_up(msg, "\n  ", call_error, err, verbatim = TRUE)
       }
     }
   }

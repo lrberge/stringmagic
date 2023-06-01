@@ -489,6 +489,7 @@ enum_letter = function(n){
 
 # Internal fun, n is ALWAYS len 1, positive and not missing
 n_times = function(x, letters = TRUE){
+  # 1 and 2 are always once and twice
 
   res = character(length(x))
 
@@ -504,8 +505,8 @@ n_times = function(x, letters = TRUE){
     } else if(xi < 4 && letters){
       dict = c("once", "twice", "three times", "four times")
       res[i] = dict[xi]
-    } else if(xi == 1 && !letters){
-      res[i] = "1 time"
+    } else if(!letters && xi <= 2){
+      res[i] = if(xi == 1) "once" else "twice"
     } else {
       if(letters){
         xi = n_letter(xi)  

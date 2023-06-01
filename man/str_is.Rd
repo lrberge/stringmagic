@@ -2,9 +2,20 @@
 % Please edit documentation in R/string_tools.R
 \name{str_is}
 \alias{str_is}
+\alias{str_which}
 \title{Detects whether a pattern is in a character string}
 \usage{
 str_is(
+  x,
+  ...,
+  fixed = FALSE,
+  ignore.case = FALSE,
+  word = FALSE,
+  or = FALSE,
+  pattern = NULL
+)
+
+str_which(
   x,
   ...,
   fixed = FALSE,
@@ -62,9 +73,39 @@ chained, by default this is a regex search but special flags be triggered with a
 specific syntax, supports negation.
 }
 \details{
-Note that the parser of the flags may lead to problems with some multibyte encodings. This is a limitation.
-If such encodings should be in the pattern, then this function cannot be used, there is no workaround.
+The internal function used to find the patterns is \code{\link[base:grep]{base::grepl()}} with \code{perl = TRUE}.
 }
+\section{Functions}{
+\itemize{
+\item \code{str_which}: Returns the indexes of the values in which a pattern is detected
+}}
+
+\section{Generic pattern flags}{
+
+
+All \code{stringmagick} functions support generic flags in regular-expression patterns.
+The flags are useful to quickly give extra instructions, similarly to \emph{usual}
+\href{https://javascript.info/regexp-introduction}{regular expression flags}.
+
+Here the syntax is "flag1, flag2/pattern". That is: flags are a comma separated list of flag-names
+separated from the pattern with a slash (\code{/}). Example: \code{str_which(c("hello...", "world"), "fixed/.")} returns \code{1}.
+Here the flag "fixed" removes the regular expression meaning of "." which would have otherwise meant \emph{"any character"}.
+The no-flag verion \code{str_which(c("hello...", "world"), ".")} returns \code{1:2}.
+
+Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
+comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".
+
+The three flags always available are: "ignore", "fixed" and "word".
+\itemize{
+\item "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" at the beginning of the pattern.
+\item "fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "["
+(among others) lose their special meaning and are treated for what they are: simple characters.
+\item "word" adds word boundaries (\code{"\\\\b"} in regex language) to the pattern. Further, the comma (\code{","})
+becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example:
+\code{str_clean("Am I ambushed?", "wi/am")} leads to " I ambushed?" thanks to the flags "ignore" and "word".
+}
+}
+
 \examples{
 
 # NOTA: using `str_get` instead of `str_is` may lead to a faster understanding 
@@ -124,6 +165,6 @@ str_which(x, "e & o")
 
 
 }
-\seealso{
-See also \link{str_get}, further that function may be easier to understand the examples.
+\author{
+Laurent R. Berge
 }

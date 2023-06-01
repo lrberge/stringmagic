@@ -11,5 +11,5 @@ export(dsb, .dsb)
 export(cub, .cub)
 
 # Methods
-S3method(print, string_ops)
+S3method(print, smagick)
 

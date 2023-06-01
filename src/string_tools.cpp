@@ -44,6 +44,7 @@ SEXP cpp_paste_conditional(SEXP x, IntegerVector id,
 
     } else {
       res[id_current - 1] = tmp;
+      tmp = "";
       append_r_str(tmp, x, i);
       id_current = id[i];
     }

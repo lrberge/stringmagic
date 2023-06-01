@@ -46,9 +46,9 @@ whether to combine them with a logical "or" (the default is to combine them with
 patterns which are combined with an \code{and} by default. If \code{seq = TRUE}, then it is like
 if \code{str_get} was called sequentially with its results stacked. See examples.}
 
-\item{seq.unik}{Logical, default is \code{FALSE}. The argument \code{pattern} accepts a vector
-of patterns which are combined with an \code{and} by default. If \code{seq.unik = TRUE}, then it is
-like if \code{str_get} was called sequentially with its results stacked, and \code{unique()} was
+\item{seq.unik}{Logical, default is \code{FALSE}. The argument \code{...} (or the argument \code{pattern}) accepts
+a vector of patterns which are combined with an \code{and} by default. If \code{seq.unik = TRUE}, then
+\code{str_get} is called sequentially with its results stacked, and \code{unique()} is
 applied in the end. See examples.}
 
 \item{pattern}{(If provided, elements of \code{...} are ignored.) A character vector representing the
@@ -68,6 +68,49 @@ It always return a character vector.
 \description{
 Convenient way to get elements from a character vector.
 }
+\details{
+This function is a wrapper to \code{\link[=str_is]{str_is()}}.
+}
+\section{Caching}{
+
+
+In an exploratory stage, it can be useful to quicky get values from a vector with the
+least hassle as possible. Hence \code{str_get} implements caching, so that users do not need
+to repeat the value of the argument \code{x} in successive function calls, and can concentrate
+only on the selection patterns.
+
+Caching is a feature only available when the user calls \code{str_get} from the global environment.
+If that feature were available in regular code, it would be too dangerous, likely leading to hard to debug bugs.
+Hence caching is disabled when used within code (i.e. inside a function or inside an
+automated script), and function calls without the main argument will lead to errors in such scripts.
+}
+
+\section{Generic pattern flags}{
+
+
+All \code{stringmagick} functions support generic flags in regular-expression patterns.
+The flags are useful to quickly give extra instructions, similarly to \emph{usual}
+\href{https://javascript.info/regexp-introduction}{regular expression flags}.
+
+Here the syntax is "flag1, flag2/pattern". That is: flags are a comma separated list of flag-names
+separated from the pattern with a slash (\code{/}). Example: \code{str_which(c("hello...", "world"), "fixed/.")} returns \code{1}.
+Here the flag "fixed" removes the regular expression meaning of "." which would have otherwise meant \emph{"any character"}.
+The no-flag verion \code{str_which(c("hello...", "world"), ".")} returns \code{1:2}.
+
+Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
+comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".
+
+The three flags always available are: "ignore", "fixed" and "word".
+\itemize{
+\item "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" at the beginning of the pattern.
+\item "fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "["
+(among others) lose their special meaning and are treated for what they are: simple characters.
+\item "word" adds word boundaries (\code{"\\\\b"} in regex language) to the pattern. Further, the comma (\code{","})
+becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example:
+\code{str_clean("Am I ambushed?", "wi/am")} leads to " I ambushed?" thanks to the flags "ignore" and "word".
+}
+}
+
 \examples{
 
 x = rownames(mtcars)
@@ -114,7 +157,27 @@ str_get(x, "iw/one")
 # you can escape the meaning of ! with backslashes
 str_get(x, "\\\\!")
 
+#
+# Caching
+#
+
+# Caching is enabled when the function is used interactively
+# so you don't need to repeat the argument 'x'
+# Mostly useful at an exploratory stage
+
+if(interactive() && identical(sys.frame(), .GlobalEnv)){
+   
+   # first run, the data is cached
+   str_get(row.names(mtcars), "i/vol")
+
+   # now you don't need to specify the data
+   str_get("i/^m & 4")
+}
 
 
 
+
+}
+\author{
+Laurent R. Berge
 }

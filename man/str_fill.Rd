@@ -37,10 +37,10 @@ Fills a character string up to a size and handles multibyte encodings
 (differently from sprintf).
 }
 \details{
-If you use character filling of the form \code{sprintf("\% 20s", x)} with `x``containing multibyte characters,
-you may be suprised that all character strings do not end up at the same lenght. This function
-uses other base R functions to compensate this. It is slower but, in general, safer. It also looks
-a bit like [\link[base:format]{base::format}], but slightly different.
+If you use character filling of the form \code{sprintf("\% 20s", x)} with \verb{x``containing multibyte characters, you may be suprised that all character strings do not end up at the same lenght (the occurrence of this problem depends on many things: encodings are a mess). }str_fill`
+uses only base R functions to compensate this. It is slightly slower but, in general, safer.
+
+It also looks a bit like \code{\link[base:format]{base::format()}}, but slightly different (and a bit faster, but more restrictive).
 }
 \examples{
 

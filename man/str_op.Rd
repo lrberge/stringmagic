@@ -11,7 +11,7 @@ str_op(x, op, pre_unik = NULL)
 it will be converted to a character vector.}
 
 \item{op}{Character \strong{scalar}. Character scalar containing the comma separated values
-of operations to perform to the vector. For help type \code{dsb("--help")}.}
+of operations to perform to the vector. For help type \code{cub("--help")}.}
 
 \item{pre_unik}{Logical scalar, default is \code{NULL}. Whether to first unique the vector
 before applying the possibly costly string operations, and merging back the result.

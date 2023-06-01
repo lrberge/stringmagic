@@ -42,16 +42,39 @@
 #' @param ignore.case Logical scalar, default is `FALSE`. If `TRUE`, then case insensitive search is triggered. 
 #' 
 #' @details
-#' Note that the parser of the flags may lead to problems with some multibyte encodings. This is a limitation.
-#' If such encodings should be in the pattern, then this function cannot be used, there is no workaround.
+#' The internal function used to find the patterns is [base::grepl()] with `perl = TRUE`.
+#' 
+#' @section Generic pattern flags:
+#' 
+#' All `stringmagick` functions support generic flags in regular-expression patterns. 
+#' The flags are useful to quickly give extra instructions, similarly to *usual* 
+#' [regular expression flags](https://javascript.info/regexp-introduction).
+#' 
+#' Here the syntax is "flag1, flag2/pattern". That is: flags are a comma separated list of flag-names 
+#' separated from the pattern with a slash (`/`). Example: `str_which(c("hello...", "world"), "fixed/.")` returns `1`. 
+#' Here the flag "fixed" removes the regular expression meaning of "." which would have otherwise meant *"any character"*.
+#' The no-flag verion `str_which(c("hello...", "world"), ".")` returns `1:2`.
+#' 
+#' Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
+#' comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".
+#' 
+#' The three flags always available are: "ignore", "fixed" and "word". 
+#' + "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" at the beginning of the pattern.
+#' + "fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "[" 
+#' (among others) lose their special meaning and are treated for what they are: simple characters. 
+#' + "word" adds word boundaries (`"\\b"` in regex language) to the pattern. Further, the comma (`","`) 
+#' becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example: 
+#' `str_clean("Am I ambushed?", "wi/am")` leads to " I ambushed?" thanks to the flags "ignore" and "word".
 #'
 #' @return
 #' It returns a logical vector of the same length as `x`.
 #' 
 #' The function `str_which` returns a numeric vector. 
 #' 
-#' @seealso 
-#' See also [str_get], further that function may be easier to understand the examples.
+#' @author 
+#' Laurent R. Berge
+#' 
+#' @inheritSection str_clean seealso
 #'
 #' @examples
 #' 
@@ -239,13 +262,36 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' @param seq Logical, default is `FALSE`. The argument `pattern` accepts a vector of 
 #' patterns which are combined with an `and` by default. If `seq = TRUE`, then it is like 
 #' if `str_get` was called sequentially with its results stacked. See examples.
-#' @param seq.unik Logical, default is `FALSE`. The argument `pattern` accepts a vector 
-#' of patterns which are combined with an `and` by default. If `seq.unik = TRUE`, then it is 
-#' like if `str_get` was called sequentially with its results stacked, and `unique()` was 
+#' @param seq.unik Logical, default is `FALSE`. The argument `...` (or the argument `pattern`) accepts 
+#' a vector of patterns which are combined with an `and` by default. If `seq.unik = TRUE`, then 
+#' `str_get` is called sequentially with its results stacked, and `unique()` is 
 #' applied in the end. See examples.
+#' 
+#' @details 
+#' This function is a wrapper to [str_is()].
+#' 
+#' @inheritSection str_is Generic pattern flags
+#' 
+#' @section Caching:
+#' 
+#' In an exploratory stage, it can be useful to quicky get values from a vector with the 
+#' least hassle as possible. Hence `str_get` implements caching, so that users do not need
+#' to repeat the value of the argument `x` in successive function calls, and can concentrate
+#' only on the selection patterns.
+#' 
+#' Caching is a feature only available when the user calls `str_get` from the global environment.
+#' If that feature were available in regular code, it would be too dangerous, likely leading to hard to debug bugs. 
+#' Hence caching is disabled when used within code (i.e. inside a function or inside an 
+#' automated script), and function calls without the main argument will lead to errors in such scripts.
+#' 
+#' @author 
+#' Laurent R. Berge
 #'
 #' @return
 #' It always return a character vector.
+#' 
+#' @inheritSection str_clean seealso
+#' 
 #'
 #' @examples
 #'
@@ -292,6 +338,23 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' 
 #' # you can escape the meaning of ! with backslashes
 #' str_get(x, "\\!")
+#' 
+#' #
+#' # Caching
+#' #
+#' 
+#' # Caching is enabled when the function is used interactively
+#' # so you don't need to repeat the argument 'x'
+#' # Mostly useful at an exploratory stage
+#' 
+#' if(interactive() && identical(sys.frame(), .GlobalEnv)){
+#'    
+#'    # first run, the data is cached
+#'    str_get(row.names(mtcars), "i/vol")
+#' 
+#'    # now you don't need to specify the data
+#'    str_get("i/^m & 4")
+#' }
 #'
 #'
 #'
@@ -394,7 +457,9 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' It returns a `data.frame` or a `data.table` which will contain: i) `obs`: the observation index, 
 #' ii) `pos`: the position of the text element in the initial string (optional, via add.pos), 
 #' iii) the text element, iv) the identifier(s) (optional, only if `id` was provided).
-#'
+#' 
+#' @inheritSection str_clean seealso
+#' 
 #' @examples
 #'
 #' x = c("Nor rain, wind, thunder, fire are my daughters.",
@@ -682,65 +747,6 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 }
 
 
-to_integer = function(x){
-  # x: vector or a list of vectors
-
-  if(!is.list(x) && !is.atomic(x)){
-    stop("Argument `x` must be either a list or a vector.")
-  }
-
-  if(!is.list(x)){
-    id = to_integer_single(x)
-  } else {
-    Q = length(x)
-
-    if(Q == 1){
-      id = to_integer_single(x[[1]])
-    } else {
-
-      x_int_all = list()
-      g_all = numeric(Q)
-      for(i in seq_along(x)){
-        id_i = to_integer_single(x[[i]])
-        x_int_all[[i]] = id_i
-        g_all[i] = max(id_i)
-      }
-
-      # Then we combine
-      power = floor(1 + log10(g_all))
-
-      is_large = sum(power) > 14
-      if(is_large){
-        order_index = do.call(order, x_int_all)
-        index = cpp_combine_clusters(x_int_all, order_index)
-      } else {
-        # quicker, but limited by the precision of doubles
-        index = x_int_all[[1]]
-        for(q in 2:Q){
-          index = index + x_int_all[[q]] * 10 ** sum(power[1:(q-1)])
-        }
-      }
-
-      id = cpp_to_integer(index)
-
-    }
-  }
-
-  return(id)
-}
-
-
-to_integer_single = function(x){
-
-  if(!is.numeric(x) && !is.character(x) && !is.factor(x)){
-    # we're super conservative
-    # otherwise, there can be error when underlying types or "wrongly" integer
-    x = as.character(x)
-  }
-
-  cpp_to_integer(x)
-}
-
 #' Cleans a character vector from multiple patterns
 #'
 #' Recursively cleans a character vector from several patterns. Quickly handle the 
@@ -790,6 +796,13 @@ to_integer_single = function(x){
 #' The main usage returns a character vector of the same length as the vector in input.
 #' Note, however, that since you can apply arbitrary [str_op] operations, the length and type
 #' of the final vector may depend on those (if they are used).
+#' 
+#' @author 
+#' Laurent R. Berge
+#' 
+#' @seealso 
+#' A few basic operation: [str_is()], [str_get()], [str_clean()]. Chain basic operations with [str_op()]. 
+#' String interpolation combined with operation chaining: [cub()].
 #'
 #' @examples
 #'
@@ -817,7 +830,7 @@ to_integer_single = function(x){
 #'            # replace strings containing "Merc" and a digit followed with an 'S'
 #'            "t/Merc & \\dS => Mercedes S!",
 #'            # put to lower case, remove isolated characters and normalize white spaces
-#'            "@l, ws.isolated")
+#'            "@lower, ws.isolated")
 #' 
 #' cbind(cars, new)
 #'
@@ -983,12 +996,16 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' 
 #' @details 
 #' If you use character filling of the form `sprintf("% 20s", x)` with `x``containing multibyte characters,
-#' you may be suprised that all character strings do not end up at the same lenght. This function
-#' uses other base R functions to compensate this. It is slower but, in general, safer. It also looks
-#' a bit like [[base::format]], but slightly different.
+#' you may be suprised that all character strings do not end up at the same lenght (the occurrence of this problem
+#' depends on many things: encodings are a mess). `str_fill`
+#' uses only base R functions to compensate this. It is slightly slower but, in general, safer. 
+#' 
+#' It also looks a bit like [base::format()], but slightly different (and a bit faster, but more restrictive).
 #' 
 #' @author 
 #' Laurent R. Berge
+#' 
+#' @inheritSection str_clean seealso
 #' 
 #' @examples 
 #' 
@@ -1092,6 +1109,65 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
   res
 }
 
+
+to_integer = function(x){
+  # x: vector or a list of vectors
+
+  if(!is.list(x) && !is.atomic(x)){
+    stop("Argument `x` must be either a list or a vector.")
+  }
+
+  if(!is.list(x)){
+    id = to_integer_single(x)
+  } else {
+    Q = length(x)
+
+    if(Q == 1){
+      id = to_integer_single(x[[1]])
+    } else {
+
+      x_int_all = list()
+      g_all = numeric(Q)
+      for(i in seq_along(x)){
+        id_i = to_integer_single(x[[i]])
+        x_int_all[[i]] = id_i
+        g_all[i] = max(id_i)
+      }
+
+      # Then we combine
+      power = floor(1 + log10(g_all))
+
+      is_large = sum(power) > 14
+      if(is_large){
+        order_index = do.call(order, x_int_all)
+        index = cpp_combine_clusters(x_int_all, order_index)
+      } else {
+        # quicker, but limited by the precision of doubles
+        index = x_int_all[[1]]
+        for(q in 2:Q){
+          index = index + x_int_all[[q]] * 10 ** sum(power[1:(q-1)])
+        }
+      }
+
+      id = cpp_to_integer(index)
+
+    }
+  }
+
+  return(id)
+}
+
+
+to_integer_single = function(x){
+
+  if(!is.numeric(x) && !is.character(x) && !is.factor(x)){
+    # we're super conservative
+    # otherwise, there can be error when underlying types or "wrongly" integer
+    x = as.character(x)
+  }
+
+  cpp_to_integer(x)
+}
 
 
 
