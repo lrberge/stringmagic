@@ -57,7 +57,7 @@ str_to_ascii = function(x, options){
       attr(x_conv, "isFailed") = which_failed[attr(x_manual, "isFailed")]
 
       if(!is_silent){
-        warning(fit_screen(cub("When transforming to ASCII, there {#was, n ? nbfail} failed encoding{#s}. ",
+        warning(fit_screen(smagick("When transforming to ASCII, there {#was, n ? nbfail} failed encoding{#s}. ",
                     "Attribute `isFailed` is created (note that you can only access it if the variable is not transformed).",
                     "\n(Ignore this message with the `silent` option [ex: `ascii.silent`]. Pass the native encoding as an option?)")))
       }
@@ -226,9 +226,9 @@ format_help = function(x, pattern = NULL){
   }
 
   # we format the tabs
-  if(any(str_is(text, "#_TAB_"))){
+  if(any(sma_is(text, "#_TAB_"))){
 
-    qui_tabs = str_is(text, "#_TAB_")
+    qui_tabs = sma_is(text, "#_TAB_")
     tabs_split = strsplit(text[qui_tabs], "_TAB_", fixed = TRUE)
 
     tabs_mat = do.call(rbind, tabs_split)
@@ -251,9 +251,9 @@ format_help = function(x, pattern = NULL){
     text[qui_tabs] = tabs_fmt
   }
 
-  if(any(str_is(text, "#---|"))){
+  if(any(sma_is(text, "#---|"))){
     # we format the sections
-    qui_sec = str_is(text, "#---|")
+    qui_sec = sma_is(text, "#---|")
 
     text[qui_sec] = .dsb(".[55k ! .['|'r ? text[qui_sec]].[55*c ! -]]|")
   }
@@ -268,7 +268,7 @@ format_help = function(x, pattern = NULL){
 
 bespoke_msg = function(x, fun_name = NULL){
   # function to write an error message curated for the current function
-  # cat(bespoke_msg('x = 1:5; dsb("test.[3K ? x[-1]]")', ".cub", FALSE))
+  # cat(bespoke_msg('x = 1:5; dsb("test.[3K ? x[-1]]")', ".smagick", FALSE))
   # the original error msg must always be written in the dsb way
 
   if(length(x) > 1){
@@ -604,11 +604,11 @@ format_difftime = function(x, options){
       n_hour = xi %/% 3600
       rest_s = floor(xi %% 3600)
       n_min = rest_s %/% 60
-      res[i] = cub("{n ? n_hour} hour{#s} {%02i ? n_min} min")
+      res[i] = smagick("{n ? n_hour} hour{#s} {%02i ? n_min} min")
     } else if(xi > 60){
       n_min = xi %/% 60
       n_sec = floor(xi %% 60)
-      res[i] = cub("{n ? n_min} min {%02i ? n_sec} sec")
+      res[i] = smagick("{n ? n_min} min {%02i ? n_sec} sec")
     } else if(xi > 0.9){
       res[i] = paste0(fsignif(xi, 2, 1), "s")
     } else if(xi > 1e-3){
@@ -931,10 +931,10 @@ fml_extract_elements = function(fml){
 
 # x = "x = 1:5; dsb(Hi .[' 'c ! .[letters[x]].[x[]]])"
 dsb2curb = function(x){
-  # transforms help written for dsb into help for cub
+  # transforms help written for dsb into help for smagick
 
   # function name
-  res = gsub("dsb", "cub", x)
+  res = gsub("dsb", "smagick", x)
 
   # opening
   res = gsub(".[", "{", res, fixed = TRUE)
@@ -1208,7 +1208,7 @@ eval_dt = function(call, data = list(), frame){
 
 # substitute to sprintf which does not handle char length properly
 # slower but safer
-simple_str_fill = function(x, n = NULL, symbol = " ", right = FALSE, center = FALSE){
+simple_sma_fill = function(x, n = NULL, symbol = " ", right = FALSE, center = FALSE){
   
   x_nc = nchar(x)
   if(is.null(n)){

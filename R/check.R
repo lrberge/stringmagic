@@ -279,7 +279,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value = deparse_short(mc_dots[[i]])
 
       # really, this is gibberish: who can understand the code?
-      nm = cub(" ({if(.C<4 ; erase) ! {nm} = }{value})")
+      nm = smagick(" ({if(.C<4 ; erase) ! {nm} = }{value})")
 
       if(grepl("try(...", elem, fixed = TRUE)){
         elem = gsub("^[^:]+:", "", elem)
@@ -317,7 +317,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
       # really, this is gibberish: who can understand the code?
-      info_call = .cub("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
+      info_call = .smagick("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up("In the argument `...`, all elements must be scalars (i.e. of length 1).\nPROBLEM: ",
               "{'\n'c ! The {nth ? i_pblm} element ({info_call}) is ",
@@ -345,7 +345,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
       # really, this is gibberish: who can understand the code?
-      info_call = cub("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
+      info_call = smagick("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       cls_pblm = sapply(dots[i_pblm], function(x) dsb(".[bq ! .[enum ? class(x)]]"))
       stop_up(dsb("In the argument `...`, all elements must be atomic (i.e. convertible to a character string).\nPROBLEM: ",
@@ -378,7 +378,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
       # really, this is gibberish: who can understand the code?
-      info_call = cub("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
+      info_call = smagick("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up(dsb("In the argument `...`, all elements must be without NA.\nPROBLEM: ",
                   "The .[nth, enum ? i_pblm] element.[$s] (.[C ? info_call])",
@@ -442,7 +442,7 @@ warn_up = function (..., up = 1, immediate. = FALSE, verbatim = FALSE){
   if(verbatim){
     message = paste0(...)
   } else {
-    message = cub(..., frame = parent.frame())
+    message = smagick(..., frame = parent.frame())
   }
   
   mc = match.call()
@@ -541,12 +541,12 @@ suggest_item = function(x, items, write_msg = TRUE, newline = TRUE, info = "vari
   if(write_msg){
     if(length(res) == 0){
       if(length(items) <= 5){
-        res = cub("FYI the {info}{$s, are, enum.bq ? items_origin}.")
+        res = smagick("FYI the {info}{$s, are, enum.bq ? items_origin}.")
       } else {
-        res = cub("FYI the first 5 {info}s are {enum.bq ? items_origin}.")
+        res = smagick("FYI the first 5 {info}s are {enum.bq ? items_origin}.")
       }
     } else {
-      res = cub("Maybe you meant {enum.bq.or ? res}?")
+      res = smagick("Maybe you meant {enum.bq.or ? res}?")
     }
 
     if(newline){
@@ -641,7 +641,7 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
   if(verbatim){
     main_msg = paste0(...)
   } else {
-    main_msg = .cub(..., frame = frame)
+    main_msg = .smagick(..., frame = frame)
   }
   
 
@@ -659,7 +659,7 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
   if(show_full_stack){
     # The user requests the full stack
     my_call = sapply(sc, function(x) deparse(x, width.cutoff = 200L, nlines = 1))
-    my_call = cub("{'\n'c ! [{format.0 ? 1:length(my_call)}] {'100|...'k ? my_call}}")
+    my_call = smagick("{'\n'c ! [{format.0 ? 1:length(my_call)}] {'100|...'k ? my_call}}")
 
     intro = paste0("the full stack is shown (set this off with setDreamerr_show_stack(FALSE))\n", my_call)
 
@@ -954,7 +954,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
     if(verbatim){
       msg = paste0(..., collapse = "")  
     } else {
-      msg = .cub(..., frame = parent.frame())
+      msg = .smagick(..., frame = parent.frame())
     }
     
     if(nchar(msg) == 0){

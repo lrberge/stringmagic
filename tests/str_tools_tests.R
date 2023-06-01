@@ -8,182 +8,182 @@
 
 
 ####
-#### str_is ####
+#### sma_is ####
 ####
 
 
 x = dsb("/one, two, one... two, microphone, check")
 
-val = str_is(x, "^...$")
+val = sma_is(x, "^...$")
 test(val, c(TRUE, TRUE, FALSE, FALSE, FALSE))
 
 
-val = str_is(x, "f/...")
+val = sma_is(x, "f/...")
 test(val, c(FALSE, FALSE, TRUE, FALSE, FALSE))
 
-val = str_is(x, "...", fixed = TRUE)
+val = sma_is(x, "...", fixed = TRUE)
 test(val, c(FALSE, FALSE, TRUE, FALSE, FALSE))
 
 
-val = str_is(x, "!f/...")
+val = sma_is(x, "!f/...")
 test(val, c(TRUE, TRUE, FALSE, TRUE, TRUE))
 
-val = str_is(x, "!...", fixed = TRUE)
+val = sma_is(x, "!...", fixed = TRUE)
 test(val, c(TRUE, TRUE, FALSE, TRUE, TRUE))
 
 
-val = str_is(x, "iw/one")
+val = sma_is(x, "iw/one")
 test(val, c(TRUE, FALSE, TRUE, FALSE, FALSE))
 
-val = str_is(x, "one", ignore.case = TRUE, word = TRUE)
+val = sma_is(x, "one", ignore.case = TRUE, word = TRUE)
 test(val, c(TRUE, FALSE, TRUE, FALSE, FALSE))
 
 
-val = str_is(x, "!iw/one")
+val = sma_is(x, "!iw/one")
 test(val, c(FALSE, TRUE, FALSE, TRUE, TRUE))
 
-val = str_is(x, "!one", ignore.case = TRUE, word = TRUE)
+val = sma_is(x, "!one", ignore.case = TRUE, word = TRUE)
 test(val, c(FALSE, TRUE, FALSE, TRUE, TRUE))
 
 
-val = str_is(x, "i/one & .{5,}")
+val = sma_is(x, "i/one & .{5,}")
 test(val, c(FALSE, FALSE, TRUE, TRUE, FALSE))
 
 
-val = str_is(x, "one", "c", fixed = TRUE)
+val = sma_is(x, "one", "c", fixed = TRUE)
 test(val, c(FALSE, FALSE, FALSE, TRUE, FALSE))
 
-val = str_is(x, "one & c", fixed = TRUE)
+val = sma_is(x, "one & c", fixed = TRUE)
 test(val, c(FALSE, FALSE, FALSE, TRUE, FALSE))
 
-val = str_is(x, "one | c", fixed = TRUE)
+val = sma_is(x, "one | c", fixed = TRUE)
 test(val, c(TRUE, FALSE, TRUE, TRUE, TRUE))
 
 # escaping
 x = dsb("/hey!, /twitter, !##!")
 
-val = str_is(x, "\\/t")
+val = sma_is(x, "\\/t")
 test(val, c(FALSE, TRUE, FALSE))
 
-val = str_is(x, "!\\/")
+val = sma_is(x, "!\\/")
 test(val, c(TRUE, FALSE, TRUE))
 
-val = str_is(x, "\\!")
+val = sma_is(x, "\\!")
 test(val, c(TRUE, FALSE, TRUE))
 
 
 ####
-#### str_get ####
+#### sma_get ####
 ####
 
 
 x = rownames(mtcars)
 
-val = str_get(x, "Mazda")
+val = sma_get(x, "Mazda")
 test(val, c("Mazda RX4", "Mazda RX4 Wag"))
 
-val = str_get(x, "!\\d & u")
+val = sma_get(x, "!\\d & u")
 test(val, c("Hornet Sportabout", "Lotus Europa"))
 
-val = str_get(x, "Mazda", "Volvo", seq = TRUE)
+val = sma_get(x, "Mazda", "Volvo", seq = TRUE)
 test(val, c("Mazda RX4", "Mazda RX4 Wag", "Volvo 142E"))
 
-val = str_get(x, "volvo", "mazda", seq = TRUE, ignore.case = TRUE)
+val = sma_get(x, "volvo", "mazda", seq = TRUE, ignore.case = TRUE)
 test(val, c("Volvo 142E", "Mazda RX4", "Mazda RX4 Wag"))
 
-cars = str_clean(rownames(mtcars)," .+")
-val = str_get(cars, "i/^h", "i/^m", seq = TRUE)
+cars = sma_clean(rownames(mtcars)," .+")
+val = sma_get(cars, "i/^h", "i/^m", seq = TRUE)
 test(val, c("Hornet", "Hornet", "Honda", "Mazda", 
             "Mazda", "Merc", "Merc", 
             "Merc", "Merc", "Merc", "Merc", "Merc", "Maserati"))
 
-val = str_get(cars, "i/^h", "i/^m", seq.unik = TRUE)
+val = sma_get(cars, "i/^h", "i/^m", seq.unik = TRUE)
 test(val, c("Hornet", "Honda", "Mazda", "Merc", "Maserati"))
 
 ####
-#### str_clean ####
+#### sma_clean ####
 ####
 
 x = c("hello world  ", "it's 5 am....")
 
-val = str_clean(x, "o", "f/.")
+val = sma_clean(x, "o", "f/.")
 test(val, c("hell wrld  ", "it's 5 am"))
 
-val = str_clean(x, "f/o, .")
+val = sma_clean(x, "f/o, .")
 test(val, c("hell wrld  ", "it's 5 am"))
 
-val = str_clean(x, "@ws")
+val = sma_clean(x, "@ws")
 test(val, c("hello world", "it's 5 am...."))
 
-val = str_clean(x, "o(?= )", "@ws.p.i")
+val = sma_clean(x, "o(?= )", "@ws.p.i")
 test(val, c("hell world", "it am"))
 
 # replacement
-val = str_clean(x, "o => a", "f/. => !")
+val = sma_clean(x, "o => a", "f/. => !")
 test(val, c("hella warld  ", "it's 5 am!!!!"))
 
-val = str_clean(x, "w/hello, it => _")
+val = sma_clean(x, "w/hello, it => _")
 test(val, c("_ world  ", "_'s 5 am...."))
 
-# total + str_op
-val = str_clean(x, "it/Hell => Heaven", "@'f/...'rm")
+# total + sma_op
+val = sma_clean(x, "it/Hell => Heaven", "@'f/...'rm")
 test(val, "Heaven")
 
 
 ####
-#### str_split2df ####
+#### sma_split2df ####
 ####
 
 
 x = c("Nor rain, wind", "When my information")
 id = c("ws", "jmk")
 
-val = str_split2df(x, "[[:punct:] ]+")
+val = sma_split2df(x, "[[:punct:] ]+")
 test(val$x, c("Nor", "rain", "wind", "When", "my", "information"))
 test(val$obs, c(1L, 1L, 1L, 2L, 2L, 2L))
 
-val = str_split2df(x, "[[:punct:] ]+", id = id)
+val = sma_split2df(x, "[[:punct:] ]+", id = id)
 test(val$x, c("Nor", "rain", "wind", "When", "my", "information"))
 test(val$obs, c(1L, 1L, 1L, 2L, 2L, 2L))
 test(val$id, c("ws", "ws", "ws", "jmk", "jmk", "jmk"))
 
 base = data.frame(text = x, my_id = id)
-val = str_split2df(text ~ my_id, base, "[[:punct:] ]+")
+val = sma_split2df(text ~ my_id, base, "[[:punct:] ]+")
 test(val$text, c("Nor", "rain", "wind", "When", "my", "information"))
 test(val$obs, c(1L, 1L, 1L, 2L, 2L, 2L))
 test(val$my_id, c("ws", "ws", "ws", "jmk", "jmk", "jmk"))
 
 base = data.frame(text = x, my_id = id)
-val = str_split2df(text ~ my_id, base, "[[:punct:] ]+", add.pos = TRUE)
+val = sma_split2df(text ~ my_id, base, "[[:punct:] ]+", add.pos = TRUE)
 test(val$pos, c(1L, 2L, 3L, 1L, 2L, 3L))
 
 x = c("One two, one two", "Microphone check")
-val = str_split2df(x, "w/one")
+val = sma_split2df(x, "w/one")
 test(val$x, c("One two, ", " two", "Microphone check"))
 
 ####
-#### str_fill ####
+#### sma_fill ####
 ####
 
 x = c("bon", "bonjour les gens")
-txt = str_fill(x)
+txt = sma_fill(x)
 test(txt, c("bon             ", "bonjour les gens"))
 
-txt = str_fill(x, right = TRUE)
+txt = sma_fill(x, right = TRUE)
 test(txt, c("             bon", "bonjour les gens"))
 
-txt = str_fill(x, center = TRUE)
+txt = sma_fill(x, center = TRUE)
 test(txt, "       bon      ", "bonjour les gens")
 
 x = c(5, 15)
-txt = str_fill(x, n = 3, right = TRUE)
+txt = sma_fill(x, n = 3, right = TRUE)
 test(txt, c("  5", " 15"))
 
-txt = str_fill(x, n = 1, right = TRUE)
+txt = sma_fill(x, n = 1, right = TRUE)
 test(txt, c("5", "15"))
 
-txt = str_fill(x, n = 3, right = TRUE, symbol = "0")
+txt = sma_fill(x, n = 3, right = TRUE, symbol = "0")
 test(txt, c("005", "015"))
 
 x = c("  hey  ", "de bas en haut")
-txt = str_fill(x)
+txt = sma_fill(x)

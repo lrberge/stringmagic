@@ -1,14 +1,14 @@
 useDynLib(stringmagick, .registration = TRUE)
 
-# str_*
-export(str_op, str_is, str_which, str_get, str_clean, str_split2df,
-       str_split2dt)
+# sma_*
+export(sma_op, sma_is, sma_which, sma_get, sma_clean, sma_split2df,
+       sma_split2dt)
 
 # dsb
 export(dsb, .dsb)
 
-# cub
-export(cub, .cub)
+# smagick
+export(smagick, .smagick)
 
 # Methods
 S3method(print, smagick)

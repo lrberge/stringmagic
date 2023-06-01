@@ -9,7 +9,7 @@
 #### User-level ####
 ####
 
-#' @describeIn cub Simple print function for objects of class `smagick`
+#' @describeIn smagick Simple print function for objects of class `smagick`
 print.smagick = function(x, ...){
   if(length(x) == 0){
     print(character(0))
@@ -19,75 +19,10 @@ print.smagick = function(x, ...){
 }
 
 ####
-#### ... str_op ####
-####
-
-#' Chains basic operations to character vectors
-#'
-#' Simple tool to perform multiple operations to character vectors.
-#'
-#' @param x A character vector. If not a character vector but atomistic (i.e. not a list), 
-#' it will be converted to a character vector.
-#' @param op Character **scalar**. Character scalar containing the comma separated values 
-#' of operations to perform to the vector. For help type `cub("--help")`.
-#' @param pre_unik Logical scalar, default is `NULL`. Whether to first unique the vector 
-#' before applying the possibly costly string operations, and merging back the result. 
-#' For very large vectors with repeated values the time gained can be substantial. By 
-#' default, this is `TRUE` for vector of length 1M or more.
-#'
-#' @return
-#' In general it returns a character vector. It may ba of a length different from the original
-#'  one, depending on the operations performed. 
-#'
-#' @author
-#' Laurent Berge
-#'
-#' @examples
-#' 
-str_op = function(x, op, pre_unik = NULL){
-
-  if(missing(x)){
-    stop("Argument `x` must be provided. PROBLEM: it is currently missing.")
-  }
-
-  if(!is.atomic(x)){
-    stop("Argument `x` must be atomic. Currently it is of class `", class(x)[1], "`")
-  }
-
-  if(!is.character(x)){
-    x = as.character(x)
-  }
-
-  check_character(op, mbt = TRUE, scalar = TRUE)
-  check_logical(pre_unik, null = TRUE, scalar = TRUE)
-
-  # For very large vectors, we unique
-  n = length(x)
-  if(is.null(pre_unik)) pre_unik = n > 1e6
-
-  if(pre_unik){
-    x_int = to_integer(x)
-    x_small = x[!duplicated(x_int)]
-
-    res_small = str_op(x_small, op, pre_unik = FALSE)
-    res = res_small[x_int]
-  } else {
-    operation = paste0("{", op, " ? x}")
-    res = .cub(operation)
-  }
-
-  if("group_index" %in% names(attributes(res))){
-    attr(res, "group_index") = NULL
-  }
-
-  res
-}
-
-
-####
 #### ... dsb ####
 ####
 
+#' @describeIn smagick Like `smagick` but interpolation is with the dot-square-bracket ".[]"
 dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
 
@@ -125,7 +60,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 }
 
 
-#' @describeIn dsb Like `dsb` but without error handling (leads to slightly faster run times).
+#' @describeIn smagick Like `dsb` but without error handling (leads to slightly faster run times).
 .dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                 check = FALSE, slash = FALSE, use_DT = FALSE){
 
@@ -139,7 +74,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
 
 ####
-#### ... cub ####
+#### ... smagick ####
 ####
 
 #' Simple and powerful string manipulation with the dot square bracket operator
@@ -152,8 +87,8 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' (resp. `"'arg'op ! x"`) to apply the operation `'op'` with the argument `'arg'` to `x`
 #'  (resp. the verbatim of `x`). Otherwise, what to say? Ah, nesting is enabled, and since 
 #' there's over 50 operators, it's a bit complicated to sort you out in this small space. 
-#' But type `cub("--help")` to prompt an (almost) extensive help, or use the argument `help = "keyword"`
-#' to obtain a selective help.
+#' But type `smagick("--help")` to prompt a compact help, or use the argument `help = "keyword"`
+#' to obtain a selective help from the main documentation.
 #' @param frame An environment used to evaluate the variables in `"{}"`. By default the variables are
 #' evaluated using the environment from where the function is called.
 #' @param sep Character scalar, default is the empty string `""`. It is used to collapse all
@@ -161,33 +96,33 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' @param vectorize Logical scalar, default is `FALSE`. If `TRUE`, Further, elements in `...` are 
 #' NOT collapsed together, but instead vectorised.
 #' @param slash Logical, default is `TRUE`. If `TRUE`, then starting the string with a slash,
-#' like in `cub("/one, two, three")` will split the character string after the slash breaking at
+#' like in `smagick("/one, two, three")` will split the character string after the slash breaking at
 #' each comma followed by spaces or newlines. The previous example leads to the string vector
 #' `c("one", "two", "three")`. 
 #' 
-#' Any interpolation after the slash is vectorized. Example: `a = 2:3 ; cub("/x1, x{a}, x4")` leads
+#' Any interpolation after the slash is vectorized. Example: `a = 2:3 ; smagick("/x1, x{a}, x4")` leads
 #' to the vector `c("x1", "x2", "x3", "x4")`.
 #' @param collapse Character scalar or `NULL` (default). If provided, the resulting 
 #' character vector will be collapsed into a character scalar using this value as a separator.
 #'
 #'  @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
-#' nested (it may be the most powerful feature), operations can be applied conditionnally and
+#' nested (it may be the most powerful feature), operations can be applied group-wise or conditionnally and
 #' operators have sensible defaults. 
 #' 
 #' You can also declare your own basic operations with [smagick_register()].
 #'
-#' See detailed help on the console with `cub("--help")` or use the argument `help` to which
-#' you can pass keywords or regular expressions.
+#' Access a compact help on the console with `smagick("--help")` or use the argument `help` to which
+#' you can pass keywords or regular expressions and fecth select pieces from the main documentation.
 #' 
 #' @section Interpolation and string operations: principle:
 #' 
-#' To interpolate a variable, say `x`, simply use `{x}`. For example `x = "world"; cub("hello {x}")` leads 
+#' To interpolate a variable, say `x`, simply use `{x}`. For example `x = "world"; smagick("hello {x}")` leads 
 #' to "hello world".
 #' 
 #' To any interpolation you can add operations. Taking the previous example, say we want to display
 #'  "hello W O R L D". This means upper casing all letters of the interpolated variable and adding a space between 
-#' each of them. Do you think we can do that? Of course yes: cub("hello {upper, ''s, c ? x}"). And that's it.
+#' each of them. Do you think we can do that? Of course yes: smagick("hello {upper, ''s, c ? x}"). And that's it.
 #' 
 #' Now let's explain what happened. Within the `{}` *box*, we first write a set of 
 #' operations, here "upper, ''s, c", then add "?" and finally write 
@@ -204,21 +139,21 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' 
 #' Some operations, like `upper`, accept options. You attach options to an operation 
 #' with a dot followed by the option name. Formally: `op.option1.option2`, etc.
-#' Example: `x = "hi there. what's up? fine." ; cub("He said: {upper.sentence, Q ? x}")`.
+#' Example: `x = "hi there. what's up? fine." ; smagick("He said: {upper.sentence, Q ? x}")`.
 #' Leads to: `He said: "Hi there. What's up? Fine."`.
 #' 
-#' Both operators and options are partially matched. So `cub("He said: {up.s, Q ? x}")` would 
+#' Both operators and options are partially matched. So `smagick("He said: {up.s, Q ? x}")` would 
 #' also work.
 #' 
 #' @section  Verbatim interpolation and nesting: principle:
 #' 
 #' Instead of interpolating a variable, say `x`, with `{x}`, you can use an exclamation 
 #' mark to trigger varbatim evaluation.
-#' For example `cub("hello {!x}")` would lead to "hello x". It's a
+#' For example `smagick("hello {!x}")` would lead to "hello x". It's a
 #'  bit disappointing, right? What's the point of doing that? Wait until the next two paragraphs.
 #' 
 #' Verbatim evaluation is a powerful way to apply operations to plain text. For example:
-#'  `cub("hello {upper, ''s, c ! world}")` leads to "hello W O R L D".
+#'  `smagick("hello {upper, ''s, c ! world}")` leads to "hello W O R L D".
 #' 
 #' (A note in passing. The spaces surrounding the exclamation mark are non necessary,
 #'  but when one space is present on both sides of the `!`, then the verbatim
@@ -226,17 +161,17 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' leads to "HI" and "{upper !  hi}" leads to " HI".)
 #' 
 #' The second advantage of verbatim evaluations is *nesting*. Anything in a verbatim 
-#' expression is evaluated with the function `cub`.
+#' expression is evaluated with the function `smagick`.
 #' This means that any *box* will be evaluated as previously described. Let's
 #'  give an example. You want to write the expression of a polynomial of order n: a + bx + cx^2 + etc.
 #' You can do that with nesting. Assume we have `n = 2`.
 #' 
-#' Then `cub("poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}")` leads to 
+#' Then `smagick("poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}")` leads to 
 #' "poly(2): ax^0 + bx^1 + cx^2".
 #' 
 #' How does it work? The verbatim expression (the one following the exclamation mark),
-#'  here "{letters[1 + 0:n]}x^{0:n}", is evaluated with `cub`.
-#' `cub("{letters[1 + 0:n]}x^{0:n}")` leads to the vector c("ax^0", "bx^1", "cx^2").
+#'  here "{letters[1 + 0:n]}x^{0:n}", is evaluated with `smagick`.
+#' `smagick("{letters[1 + 0:n]}x^{0:n}")` leads to the vector c("ax^0", "bx^1", "cx^2").
 #' 
 #' The operation `' + 'c` then concatenates (or collapses) that vector with ' + '.
 #'  This value is then appended to the previous string.
@@ -244,7 +179,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' We could refine by adding a cleaning operation in which we replace "x^0" and "^1" 
 #' by the empty string. Let's do it:
 #' 
-#' `cub("poly({n}): {' + 'c, 'x\\^0|\\^1'r ! {letters[1 + 0:n]}x^{0:n}}")` leads to 
+#' `smagick("poly({n}): {' + 'c, 'x\\^0|\\^1'r ! {letters[1 + 0:n]}x^{0:n}}")` leads to 
 #' "poly(2): a + bx + cx^2", what we wanted.
 #' 
 #' You can try to write a function to express the polynomial as before: although it is 
@@ -279,45 +214,45 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' 
 #' + s, S: splits the string according to a pattern. The two operations have different defaults: `' '` 
 #' for `s` and ',[ \t\n}*' for `S` (i.e. comma separation). 
-#' Ex.1: `cub("S ! romeo, juliet")` leads to the vector c("romeo", "juliet"). 
-#' Ex.2: `cub("{'f/+'s, '-'c ! 5 + 2} = 3")` leads to "5 - 2 = 3" (note the flag "fixed" in `s`'s pattern).
+#' Ex.1: `smagick("S ! romeo, juliet")` leads to the vector c("romeo", "juliet"). 
+#' Ex.2: `smagick("{'f/+'s, '-'c ! 5 + 2} = 3")` leads to "5 - 2 = 3" (note the flag "fixed" in `s`'s pattern).
 #' + c, C: to concatenate multiple strings into a single one. The two operations are 
 #' identical, only their default change. c: default is ' ', C: default is ', | and '.
 #'   The syntax of the argument is 's1' or 's1|s2'. s1 is the string used to concatenate 
 #' (think `paste(x, collapse = s1)`). In arguments of the form `'s1|s2'`, `s2` will be used to concatenate the last two elements. 
-#' Ex.1: `x = 1:4; cub("Et {' et 'c ? x}!")` leads to "Et 1 et 2 et 3 et 4!".
-#' Ex.2: `cub("Choose: {', | or 'c ? 2:4}?")` leads to "Choose: 2, 3 or 4?".
+#' Ex.1: `x = 1:4; smagick("Et {' et 'c ? x}!")` leads to "Et 1 et 2 et 3 et 4!".
+#' Ex.2: `smagick("Choose: {', | or 'c ? 2:4}?")` leads to "Choose: 2, 3 or 4?".
 #' + x, X: extracts patterns from a string. Both have the same default: '[[:alnum:]]+'. 
 #' `x` extracts the first match while `X` extracts **all** the matches.
-#'   Ex.1: `x = c("6 feet under", "mahogany") ; cub("{'\\w{3}'x ? x}")` leads to the vector c("fee", "mah").
-#'   Ex2.: `x = c("6 feet under", "mahogany") ; cub("{'\\w{3}'X ? x}")` leads to the
+#'   Ex.1: `x = c("6 feet under", "mahogany") ; smagick("{'\\w{3}'x ? x}")` leads to the vector c("fee", "mah").
+#'   Ex2.: `x = c("6 feet under", "mahogany") ; smagick("{'\\w{3}'X ? x}")` leads to the
 #'  vector c("fee", "und", "mah", "oga").
 #' + extract: extracts multiple patterns from a string, this is an alias to the operation `X` described above.
 #' Use the option "first" to extract only the first match for each string (behavior becomes like `x`).
-#' Ex: `x = c("margo: 32, 1m75", "luke doe: 27, 1m71") ; cub("{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}")`
+#' Ex: `x = c("margo: 32, 1m75", "luke doe: 27, 1m71") ; smagick("{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}")`
 #' leads to c("margo is 32", "luke is 27").
 #' + r, R: replacement within a string. The two operations are identical and have no default.
 #'  The syntax is `'old'` or `'old => new'` with `'old'` the pattern to find and `new` the replacement. If `new` is missing, it is 
 #' considered the empty string. This operation also accepts the flag "total" which instruct to 
 #' replace the fulll string in case the pattern is found.
-#' Ex.1: `cub("{'e'r ! Where is the letter e?}")` leads to "Whr is th lttr ?".
-#' Ex.2: `cub("{'(?<!\\b)e => a'R ! Where is the letter e?}")` leads to "Whara is tha lattar e?".
-#' Ex.3: `cub("{'t/e => here'r ! Where is the letter e?}")` leads to "here".
+#' Ex.1: `smagick("{'e'r ! Where is the letter e?}")` leads to "Whr is th lttr ?".
+#' Ex.2: `smagick("{'(?<!\\b)e => a'R ! Where is the letter e?}")` leads to "Whara is tha lattar e?".
+#' Ex.3: `smagick("{'t/e => here'r ! Where is the letter e?}")` leads to "here".
 #' + get: restricts the string only to values respecting a pattern. This operation has no default.
-#' It uses the same syntax as [str_get()] so that you can include logical operations with ' & ' and ' | '.
-#' Example: `x = row.names(mtcars) ; cub("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, C ? x}")`
+#' It uses the same syntax as [sma_get()] so that you can include logical operations with ' & ' and ' | '.
+#' Example: `x = row.names(mtcars) ; smagick("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, C ? x}")`
 #' leads to "Mercedes models: 240D, 280C, 450SE, 450SL and 450SLC".
 #' + is: detects if a pattern is present in a string, returns a logical vector. This operation has no default.
-#' Mostly useful as the final operation in a [str_op()] call.
-#' Example: `x = c("Mark", "Lucas") ; cub("Mark? {'i/mark'is, C ? x}")` leads to "Mark? TRUE and FALSE".
+#' Mostly useful as the final operation in a [sma_op()] call.
+#' Example: `x = c("Mark", "Lucas") ; smagick("Mark? {'i/mark'is, C ? x}")` leads to "Mark? TRUE and FALSE".
 #' + which: returns the index of string containing a specified pattern. With no default, can be applied
-#' to a logical vector directly. Mostly useful as the final operation in a [str_op()] call.
-#' Ex.1: `x = c("Mark", "Lucas") ; cub("Mark is number {'i/mark'which ? x}.")` leads to 
+#' to a logical vector directly. Mostly useful as the final operation in a [sma_op()] call.
+#' Ex.1: `x = c("Mark", "Lucas") ; smagick("Mark is number {'i/mark'which ? x}.")` leads to 
 #' "Mark is number 1.".
 #' 
 #' @section Operations changing the length or order of the vector:
 #' 
-#' + first: keeps only the first `n` elements. Example: `cub("First 3 numbers: {3 first, C ? mtcars$mpg}.")`
+#' + first: keeps only the first `n` elements. Example: `smagick("First 3 numbers: {3 first, C ? mtcars$mpg}.")`
 #' leads to "First 3 numbers: 21, 21 and 22.8.". Negative numbers as argument remove the 
 #' first `n` values. You can add a second argument in the form `'n1|n2'first` in which case the first `n1` and last
 #' `n2` values are kept; `n1` and `n2` must be positive numbers.
@@ -329,44 +264,44 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'   The string `s` accepts specials values:
 #'   + `:n:` or `:N:` which gives the total number of items in digits or letters (N)
 #'   + `:rest:` or `:REST:` which gives the number of elements that have been truncated in digits or letters (REST)
-#'   Ex: `cub("'3|:rest: others'K ? 1:200")` leads to the vector `c("1", "2", "3", "197 others")`.
+#'   Ex: `smagick("'3|:rest: others'K ? 1:200")` leads to the vector `c("1", "2", "3", "197 others")`.
 #'   + The operator 'n'Ko is like `'n||:rest: others'K` and 'n'KO is like `'n||:REST: others'K`.
-#' + last: keeps only the last `n` elements. Example: `cub("Last 3 numbers: {3 last, C ? mtcars$mpg}.")`
+#' + last: keeps only the last `n` elements. Example: `smagick("Last 3 numbers: {3 last, C ? mtcars$mpg}.")`
 #' leads to "Last 3 numbers: 19.7, 15 and 21.4.". Negative numbers as argument remove the 
 #' last `n` values.
-#' + sort: sorts the vector in increasing order. Example: `x = c("sort", "me") ; cub("{sort, c ? x}")` 
+#' + sort: sorts the vector in increasing order. Example: `x = c("sort", "me") ; smagick("{sort, c ? x}")` 
 #' leads to "me sort". **Important note**: the sorting operation is applied before any character conversion.
 #' If previous operations were applied, it is likely that numeric data were transformed to character.
-#' Note the difference: `x = c(20, 100, 10); cub("{sort, ' + 'c ? x}")` leads to "10 + 20 + 100"
-#' while `cub("{n, sort, ' + 'c ? x}")` leads to "10 + 100 + 20" because the operation "n"
+#' Note the difference: `x = c(20, 100, 10); smagick("{sort, ' + 'c ? x}")` leads to "10 + 20 + 100"
+#' while `smagick("{n, sort, ' + 'c ? x}")` leads to "10 + 100 + 20" because the operation "n"
 #' first transformed the numeric vector into character.
-#' + dsort: sorts the vector in decreasing order. Example: `cub("5 = {dsort, ' + 'c ? 2:3}")` 
+#' + dsort: sorts the vector in decreasing order. Example: `smagick("5 = {dsort, ' + 'c ? 2:3}")` 
 #' leads to "5 = 3 + 2". Same note as for the operation "sort".
-#' + rev: reverses the vector. Example: `cub("{rev, ''c ? 1:3}")` leads to "321".
-#' + unik: makes the string vector unique. Example: `cub("Iris species: {unik, C ? iris$Species}.")`
+#' + rev: reverses the vector. Example: `smagick("{rev, ''c ? 1:3}")` leads to "321".
+#' + unik: makes the string vector unique. Example: `smagick("Iris species: {unik, C ? iris$Species}.")`
 #' leads to "Iris species: setosa, versicolor and virginica.".
 #' + each: repeats each element of the vector `n` times. Option "c" then collapses the full vector 
-#' with the empty string as a separator. Ex.1: `cub("{/x, y}{2 each ? 1:2}")` leads to the 
-#' vector `c("x1", "y1", "x2", "y2")`. Ex.2: cub("Large number: 1{5 each.c ! 0}") leads to 
+#' with the empty string as a separator. Ex.1: `smagick("{/x, y}{2 each ? 1:2}")` leads to the 
+#' vector `c("x1", "y1", "x2", "y2")`. Ex.2: smagick("Large number: 1{5 each.c ! 0}") leads to 
 #' "Large number: 100000".
 #' + times: repeats the vector sequence `n` times. Option "c" then collapses the full vector 
-#' with the empty string as a separator. Example: `cub("What{6 times.c ! ?}")` leads to "What??????".
+#' with the empty string as a separator. Example: `smagick("What{6 times.c ! ?}")` leads to "What??????".
 #' + rm: removes elements from the vector. Options: "empty", "blank", "noalpha", "noalnum", "all".
 #' The *optional* argument represents the pattern used to detect strings to be deleted. 
-#' Ex.1: x = c("Luke", "Charles"); cub("{'i/lu'rm ? x}") leads to "charles". By default it removes
+#' Ex.1: x = c("Luke", "Charles"); smagick("{'i/lu'rm ? x}") leads to "charles". By default it removes
 #' empty strings. Option "blank" removes strings containing only blank characters (spaces, tab, newline).
 #' Option "noalpha" removes strings not containing letters. Option "noalnum" removes strings not 
 #' containing alpha numeric characters. Option "all" removes all strings (useful in conditions, see 
 #' the dedicated section). If an argument is provided, only the options "empty" and "blank" are available.
-#' Ex.2: `x = c("I want to enter.", "Age?", "21"); cub("Nightclub conversation: {rm.noalpha, c ! - {x}}")` 
+#' Ex.2: `x = c("I want to enter.", "Age?", "21"); smagick("Nightclub conversation: {rm.noalpha, c ! - {x}}")` 
 #' leads to "Nightclub conversation: - I want to enter. - Age?"
 #' + nuke: removes all elements, equivalent to `rm.all` but possibly more explicit (not sure). 
 #' Useful in conditions, see the dedicated section.
-#' Example: `x = c(5, 7, 453, 647); cub("Small numbers only: {if(.>20 ; nuke), C ? x}")` leads 
+#' Example: `x = c(5, 7, 453, 647); smagick("Small numbers only: {if(.>20 ; nuke), C ? x}")` leads 
 #' to "Small numbers only: 5 and 7";
 #' + insert: inserts a new element to the vector. Options: "right" and "both". Option "right" adds
 #' the new element to the right. Option "both" inserts the new element on the two sides of the vector.
-#' Example: `cub("{'3'insert.right, ' + 'c ? 1:2}")` leads to "1 + 2 + 3".
+#' Example: `smagick("{'3'insert.right, ' + 'c ? 1:2}")` leads to "1 + 2 + 3".
 #' 
 #' 
 #' @section Formatting operations:
@@ -375,35 +310,35 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' + upper: upper cases the full string. Options: "first" and "sentence".
 #' Option "first" upper cases only the first character. Option "sentence"
 #' upper cases the first letter after punctuation. 
-#' Ex: `x = "hi. how are you? fine." ; cub("{upper.sentence ? x}")` leads
+#' Ex: `x = "hi. how are you? fine." ; smagick("{upper.sentence ? x}")` leads
 #' to "Hi. How are you? Fine.".
 #' + title: applies a title case to the string. Options: "force" and "ignore".
 #' Option "force" first puts everything to lowercase before applying the title case. 
 #' Option "ignore" ignores a few small prepositions ("a", "the", "of", etc).
-#' Ex: `x = "bryan is in the KITCHEN" ; cub("{title.force.ignore ? x}")` leads to "Bryan Is in the Kitchen".
+#' Ex: `x = "bryan is in the KITCHEN" ; smagick("{title.force.ignore ? x}")` leads to "Bryan Is in the Kitchen".
 #' + ws: normalizes whitespaces (WS). It trims the whitespaces on the edges and transforms any succession 
 #' of whitespaces into a single one. Can also be used to further clean the string with its options. 
 #' Options: "punct", "digit", "isolated". Option "punct" cleans the punctuation. Option "digit" cleans digits.
 #' Option "isolated" cleans isolated letters. WS normalization always come after any of these options.
 #' **Important note:** punctuation (or digits) are replaced with WS and **not** 
-#' the empty string. This means that `cub("ws.punct ! Meg's car")` will become "Meg s car".
+#' the empty string. This means that `smagick("ws.punct ! Meg's car")` will become "Meg s car".
 #' + trimws: trims the white spaces on both ends of the strings.
 #' + q, Q, bq: to add quotes to the strings. q: single quotes, Q: double quotes, bq: 
-#' back quotes. `x = c("Mark", "Pam"); cub("Hello {q, C ? x}!")` leads to "Hello 'Mark' and 'Pam'!".
+#' back quotes. `x = c("Mark", "Pam"); smagick("Hello {q, C ? x}!")` leads to "Hello 'Mark' and 'Pam'!".
 #' + format, Format: applies the base R's function [base::format()] to the string. 
 #' By default, the values are left aligned, *even numbers* (differently from [base::format()]'s behavior).
 #' The upper case command (`Format`) applies right alignment. Options: "0", "zero", "right", "centre", "center".
 #' Options "0" or "zero" fills the blanks with 0s: useful to format numbers. Option "right" right aligns,
 #' and "centre" or "centre" centers the strings.
-#' Ex: `x = c(1, 12345); cub("left: {format.0, q, C ? x}, right: {Format, q, C ? x}")` 
+#' Ex: `x = c(1, 12345); smagick("left: {format.0, q, C ? x}, right: {Format, q, C ? x}")` 
 #' leads to "left: '000001' and '12,345', right: '     1' and '12,345'".
 #' + %: applies [base::sprintf()] formatting. The syntax is 'arg'% with arg an sprintf formatting,
-#' or directly the sprint formatting, e.g. `% 5s`. Example: `cub("pi = {%.3f ? pi}")` leads
+#' or directly the sprint formatting, e.g. `% 5s`. Example: `smagick("pi = {%.3f ? pi}")` leads
 #' to "pi = 3.142".
 #' + stop: removes basic English stopwords (the snowball list is used). 
 #' The stopwords are replaced with an empty space but the left and right WS are 
 #' untouched. So WS normalization may be needed (see operation `ws`).
-#'   `x = c("He is tall", "He isn't young"); cub("Is he {stop, ws, C ? x}?")` leads to "Is he tall and young?".
+#'   `x = c("He is tall", "He isn't young"); smagick("Is he {stop, ws, C ? x}?")` leads to "Is he tall and young?".
 #' + ascii: turns all letters into ASCII with transliteration. Non ASCII elements
 #'  are transformed into question marks. Options: "silent", "utf8". By default, if some conversion fails
 #' a warning is prompted. Option "silent" disables the warning in case of failed conversion. The conversion 
@@ -412,28 +347,28 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' + n: formats integers by adding a comma to separate thousands. Options: "letter", "upper", "0", "zero".
 #' The option "letter" writes the number in letters (large numbers keep their numeric format). The option
 #' "upper" is like the option "letter" but uppercases the first letter. Options "0" or "zero" left pads
-#' numeric vectors with 0s. Ex.1: `x = 5; cub("He's {N ? x} year old.")` leads to "He's five year old.".
-#' Ex.2: `x = c(5, 12, 52123); cub("She owes {n.0, '$'paste, C ? x}.")` leads to 
+#' numeric vectors with 0s. Ex.1: `x = 5; smagick("He's {N ? x} year old.")` leads to "He's five year old.".
+#' Ex.2: `x = c(5, 12, 52123); smagick("She owes {n.0, '$'paste, C ? x}.")` leads to 
 #' "She owes $5, $12 and $52,123.".
 #' + N: same as `n` but automatically adds the option "letter".
 #' + nth: when applied to a number, these operators write them as a rank. Options: "letter", 
 #' "upper", "compact".
-#' Ex.1: `n = c(3, 7); cub("They finished {nth, enum ? n}!")` leads to "They finished 3rd and 7th!". 
+#' Ex.1: `n = c(3, 7); smagick("They finished {nth, enum ? n}!")` leads to "They finished 3rd and 7th!". 
 #' Option "letter" tries to write the numbers in letters, but note that it stops at 20. Option "upper"
 #' is the same as "letter" but uppercases the first letter. Option "compact" aggregates
 #' consecutive sequences in the form "start_n_th to end_n_th". 
-#' Ex.2: cub("They arrived {nth.compact ? 5:20}.") leads to "They arrived 5th to 20th.".
+#' Ex.2: smagick("They arrived {nth.compact ? 5:20}.") leads to "They arrived 5th to 20th.".
 #' Nth: same as `nth`, but automatically adds the option "letter". Example:
-#' `n = c(3, 7); cub("They finished {Nth, enum ? n}!")` leads to "They finished third and seventh!".
+#' `n = c(3, 7); smagick("They finished {Nth, enum ? n}!")` leads to "They finished third and seventh!".
 #' + ntimes: write numbers in the form `n` times. Options: "letter", "upper". Option 
 #' "letter" writes the number in letters (up to 100). Option "upper" does the same as "letter" 
-#' and uppercases the first letter. Example: `cub("They lost {C ! {ntimes ? c(1, 12)} against {/Real, Barcelona}}.")`
+#' and uppercases the first letter. Example: `smagick("They lost {C ! {ntimes ? c(1, 12)} against {/Real, Barcelona}}.")`
 #' leads to "They lost once against Real and 12 times against Barcelona.".
 #' + Ntimes: same as `ntimes` but automatically adds the option "letter".
-#' Example: `x = 5; cub("This paper was rejected {Ntimes ? x}...")` leads to
+#' Example: `x = 5; smagick("This paper was rejected {Ntimes ? x}...")` leads to
 #' "This paper was rejected five times...".
 #' + cfirst, clast: to select the first/last characters of each element. 
-#'   Ex: cub("{19 cfirst, 9 clast ! This is a very long sentence}") leads to "very long".
+#'   Ex: smagick("{19 cfirst, 9 clast ! This is a very long sentence}") leads to "very long".
 #' Negative numbers remove the first/last characters.
 #' + k: to keep only the first n characters (like cfirst but with more options). The
 #'  syntax is `nk`, `'n'k`, `'n|s'k` or `'n||s'k` with `n` a number and `s` a string.
@@ -441,19 +376,19 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'  length is greater than `n`, after truncation, the string `s` can be appended at the end.
 #'   The difference between 'n|s' and 'n||s' is that in the second case the strings
 #'  will always be of maximum size `n`, while in the first case they can be of length `n + nchar(s)`.
-#'   Ex: `cub("{4k ! long sentence}")` leads to "long",  `cub("{'4|..'k ! long sentence}") `
-#' leads to "long..", `cub("{'4||..'k ! long sentence}")` leads to "lo..".
+#'   Ex: `smagick("{4k ! long sentence}")` leads to "long",  `smagick("{'4|..'k ! long sentence}") `
+#' leads to "long..", `smagick("{'4||..'k ! long sentence}")` leads to "lo..".
 #' + fill: fills the character strings up to a size. Options: "right", "center" and a free-form symbol.
 #' Option "right" right aligns and "center" centers the strings. You can pass a free-form symbol
 #' as option, it will be used for the filling. By default if no argument is provided, the
-#' maximum size of the character string is used. See help for [str_fill()] for more information.
-#' Ex.1: `cub("Numbers: {'5'fill.0.right, C ? c(1, 55)}")` leads to "Numbers: 00001 and 00055".
+#' maximum size of the character string is used. See help for [sma_fill()] for more information.
+#' Ex.1: `smagick("Numbers: {'5'fill.0.right, C ? c(1, 55)}")` leads to "Numbers: 00001 and 00055".
 #' + paste: pastes some character to all elements of the string. This operation has no default.
 #' Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
 #' Option "right" pastes on the right and "both" pastes on both sides. Option "front" only 
 #' pastes on the first element while option "back" only pastes on the last element. Option "delete"
 #' first replaces all elements with the empty string.
-#' Example: `cub("6 = {'|'paste.both, ' + 'c ? -3:-1}")` leads to "6 = |-3| + |-2| + |-1|".
+#' Example: `smagick("6 = {'|'paste.both, ' + 'c ? -3:-1}")` leads to "6 = |-3| + |-2| + |-1|".
 #' 
 #' 
 #' @section Other operations:
@@ -465,39 +400,39 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Option "soft" does not convert if the conversion of at least one element fails. 
 #' Option "rm" converts and removes the elements that could not be converted. 
 #' Option "clean" turns failed conversions into the empty string, and hence lead to a character vector.
-#' Example: `x = c(5, "six"); cub("Compare {num, C, q ? x} with {num.rm, C, q ? x}.")` leads to 
-#' "Compare '5 and NA' with '5'.", and `cub("Compare {num.soft, C, q ? x} with {num.clean, C, q ? x}.")`
+#' Example: `x = c(5, "six"); smagick("Compare {num, C, q ? x} with {num.rm, C, q ? x}.")` leads to 
+#' "Compare '5 and NA' with '5'.", and `smagick("Compare {num.soft, C, q ? x} with {num.clean, C, q ? x}.")`
 #' leads to "Compare '5 and six' with '5 and '.".
 #' + enum: enumerates the elements. It creates a single string containing the comma 
 #' separated list of elements.
 #'   If there are more than 7 elements, only the first 6 are shown and the number of
 #'  items left is written.
-#'   For example `cub("enum ? 1:5")` leads to "1, 2, 3, 4, and 5".
+#'   For example `smagick("enum ? 1:5")` leads to "1, 2, 3, 4, and 5".
 #'   You can add the following options by appending the letter to enum after a dot:
 #'   + q, Q, or bq: to quote the elements
 #'   + or, nor: to finish with an 'or' (or 'nor') instead of an 'and'
 #'   + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two
 #'   + a number: to tell the number of items to display
-#'   Ex.1: `x = c("Marv", "Nancy"); cub("The main characters are {enum ? x}.")` leads to 
+#'   Ex.1: `x = c("Marv", "Nancy"); smagick("The main characters are {enum ? x}.")` leads to 
 #' "The main characters are Marv and Nancy.".
-#'   Ex.2: `x = c("orange", "milk", "rice"); cub("Shopping list: {enum.i.q ? x}.")` leads to
+#'   Ex.2: `x = c("orange", "milk", "rice"); smagick("Shopping list: {enum.i.q ? x}.")` leads to
 #'  "Shopping list: i) 'orange', ii) 'milk', and iii) 'rice'."
 #' + len: gives the length of the vector. Options "letter", "upper", "format".
 #' Option "letter" writes the length in words (up to 100). Option "upper" is the same 
 #' as letter but uppercases the first letter. Option "format" add comma separation for thousands.
-#' Example: `cub("Size = {len.format ? 1:5000}")` leads to "Size = 5,000".
-#' + swidth: formats the string to fit a given width by cutting at word boundaries. You can add 
+#' Example: `smagick("Size = {len.format ? 1:5000}")` leads to "Size = 5,000".
+#' + width: formats the string to fit a given width by cutting at word boundaries. You can add 
 #' a free-form option which will appear at the beginning of the string. If you provide a free-form option
 #' equal to a leading string, by default a trailing white space is added; to remove this 
 #' behavior, add an underscore at the end of the option. 
 #' The argument is either 
 #' an integer giving the target character width (minimum is 15), or it can be a fraction expressing the 
 #' target size as a fraction of the current screen.
-#' Ex.1: `cub("{15 swidth ! this is a long sentence}")` leads to "this is a long\\nsentence".
-#' Ex.2: `cub("{15 swidth.#> ! this is a long sentence}")` leads to "#> this is a long\\n#> sentence".
+#' Ex.1: `smagick("{15 width ! this is a long sentence}")` leads to "this is a long\\nsentence".
+#' Ex.2: `smagick("{15 width.#> ! this is a long sentence}")` leads to "#> this is a long\\n#> sentence".
 #' + dtime: displays a formatted time difference. Option "silent" does not report an warning if the
 #' operation fails. It accepts either objects of class `POSIXt` or `difftime`.
-#' Example: `x = Sys.time() ; Sys.sleep(0.5) ; cub("Time: {dtime ? x}")` leads to something 
+#' Example: `x = Sys.time() ; Sys.sleep(0.5) ; smagick("Time: {dtime ? x}")` leads to something 
 #' like "Time: 514ms".
 #' 
 #' @section Group-wise operations:
@@ -507,7 +442,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' group-wise, to each of the split strings.
 #' 
 #' Better with an example. `x = c("Oreste, Hermione", "Hermione, Pyrrhus", "Pyrrhus, Andromaque") ;`
-#' `cub("Troubles ahead: {S, ~(' loves 'c), C ? x}.")` leads to 
+#' `smagick("Troubles ahead: {S, ~(' loves 'c), C ? x}.")` leads to 
 #' "Troubles ahead: Oreste loves Hermione, Hermione loves Pyrrhus and Pyrrhus loves Andromaque.".
 #' 
 #' Almost all operations can be applied group-wise (although only operations changing the order or 
@@ -526,7 +461,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Ex.1: Let's take a sentence, delete words of less than 4 characters, and trim 
 #' words of 7+ characters. 
 #' x = "Songe Cephise a cette nuit cruelle qui fut pour tout un peuple une nuit eternelle"
-#' `cub("{' 's, if(.nchar<=4 ; nuke ; '7|..'k), c ? x}")`.
+#' `smagick("{' 's, if(.nchar<=4 ; nuke ; '7|..'k), c ? x}")`.
 #' Let's break it down. First the sentence is split w.r.t. spaces, leading to a vector
 #' of words. Then we use the special variable `.nchar` in `if`'s condition to refer 
 #' to the number of characters of the current vector (the words). The words with 
@@ -545,19 +480,19 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' for which operations modifying the length of the vectors are forbidden (apart from nuking),
 #' such operations are fine in full-string conditions.
 #' 
-#' Ex.2: `x = cub("x{1:10}")`; `cub("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x}")`
-#' leads to "y = x1 + x2 + x3 + ...". the same opration applied to `x = cub("x{1:4}")`
+#' Ex.2: `x = smagick("x{1:10}")`; `smagick("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x}")`
+#' leads to "y = x1 + x2 + x3 + ...". the same opration applied to `x = smagick("x{1:4}")`
 #' leads to "y = x1 + x2 + x3 + x4".
 #' 
 #' For `vif`, the syntax is `vif(cond ; verb_true ; verb_false)` with `verb_true`
 #' a verbatim value with which the vector will be replaced if the condition is `TRUE`. 
 #' This is similar for `verb_false`. The condition works as in `if`.
 #' 
-#' Ex.3: `x = c(1, 25, 12, 6) ; cub("Values: {vif(.<10 ; <10), C ? x}")` leads to 
+#' Ex.3: `x = c(1, 25, 12, 6) ; smagick("Values: {vif(.<10 ; <10), C ? x}")` leads to 
 #' "Values: <10, 25, 12 and <10". As we can see values lower than 10 are replaced
 #' with "<10" while other values are not modified.
 #' 
-#' Ex.4: `x = cub("x{1:10}")`; `cub("y = {vif(.N>4 ; {/{x[1]}, ..., {last?x}}), ' + 'c ? x}")`
+#' Ex.4: `x = smagick("x{1:10}")`; `smagick("y = {vif(.N>4 ; {/{x[1]}, ..., {last?x}}), ' + 'c ? x}")`
 #' leads to "y = x1 + ... + x10".
 #' Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
 #' the full string is replaced with "{/{x[1]}, ..., {last?x}}". Interpolation applies to
@@ -567,19 +502,19 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' the vector `c("x1", "...", "x10")`. Finally, this vector is collapsed with ' + ' leading
 #' to the final string.
 #' Note that there are many ways to get to the same result. Here is another example:
-#' `cub("y = {vif(.N>4 ; {x[1]} + ... + {last?x} ; {' + 'c ? x}) ? x}")`.
+#' `smagick("y = {vif(.N>4 ; {x[1]} + ... + {last?x} ; {' + 'c ? x}) ? x}")`.
 #' 
 #' The `vif` condition allows the use of '.' to refer to the current value in 
 #' `verb_true` and `verb_false`, as illustrated by the last example:
 #' 
-#' Ex.5: `cub("{4 last, vif(. %% 2 ; x{.} ; y{rev?.}), C ? 1:11}")`
+#' Ex.5: `smagick("{4 last, vif(. %% 2 ; x{.} ; y{rev?.}), C ? 1:11}")`
 #' leads to "y10, x9, y8 and x11".
 #' 
 #' 
 #' @section Special interpolation: The slash:
 #' 
 #' Interpolations starting with a slash are different from regular interpolations. 
-#' Ex.1: `x = 3:4; cub("{/one, two, {x}}")` leads to the vector `c("one", "two", "3", "4")`.
+#' Ex.1: `x = 3:4; smagick("{/one, two, {x}}")` leads to the vector `c("one", "two", "3", "4")`.
 #' 
 #' When a "/" is the first character of an interpolation:
 #' - all characters until the closing bracket is taken as verbatim
@@ -594,14 +529,14 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' By default, thanks to the argument `slash = TRUE`, you can apply the slash operator without
 #' the need of an interpolation box (provided the slash appears as the first character), see the example below. 
 #' 
-#' Ex.2: `x = 3:4; cub("/one, two, {x}")` also leads to the vector `c("one", "two", "3", "4")`.
+#' Ex.2: `x = 3:4; smagick("/one, two, {x}")` also leads to the vector `c("one", "two", "3", "4")`.
 #' 
 #' @section Special interpolation: if-else:
 #' 
 #' Using an ampersand ("&") as the first character of an interpolation leads to an *if-else* operation.
 #' Using two ampersands ("&&") leads to a slightly different operation described at the end of this section.
 #' 
-#' Ex.1: \code{x = 1:5; cub("x is \{&length(x)<10 ; short ; \{`log10(length(x) - 1)`times, ''c ! very \}long\}")}
+#' Ex.1: \code{x = 1:5; smagick("x is \{&length(x)<10 ; short ; \{`log10(length(x) - 1)`times, ''c ! very \}long\}")}
 #' leads to "x is short". With `x = 1:50`, it leads to "x is long", and to "x is very very long"
 #' if `x = 1:5000`.
 #' 
@@ -620,14 +555,14 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' by `verb_true`, and `FALSE` or `NA` values are replaced with `verb_false`. Note,
 #' importantly, that **no interpolation is perfomed in that case**.
 #' 
-#' Ex.2: `x = 1:3 ; cub("x is {&x == 2 ; two ; not two}")` leads to the vector 
+#' Ex.2: `x = 1:3 ; smagick("x is {&x == 2 ; two ; not two}")` leads to the vector 
 #' `c("x is not two", "x is two", "x is not two")`.
 #' 
 #' Using the two ampersand operator ("&&") is like the simple ampersand version but the 
 #' default for `verb_false` is the variable used in the condition itself. So the syntax is
 #' {&&cond ; `verb_true`} and *it does not accept* `verb_false`.
 #' 
-#' Ex.3: `i = 3 ; cub("i = {&&i == 3 ; three}")` leads to "i = three", and to "i = 5" if `i = 5`. 
+#' Ex.3: `i = 3 ; smagick("i = {&&i == 3 ; three}")` leads to "i = three", and to "i = 5" if `i = 5`. 
 #' 
 #' 
 #' @section Special interpolation: Pluralization:
@@ -640,7 +575,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' - `$` to pluralize over the length of a variable (see Ex.2)
 #' - `#` to pluralize over the value of a variable (see Ex.1)
 #' 
-#' Ex.1: `x = 5; cub("I bought {N?x} book{#s}.")` leads to "I bought five books.". 
+#' Ex.1: `x = 5; smagick("I bought {N?x} book{#s}.")` leads to "I bought five books.". 
 #' If `x = 1`, this leads to "I bought one book.".
 #' 
 #' The syntax is `{#plural_ops ? variable}` or `{#plural_ops}` where `plural_ops` are
@@ -654,7 +589,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' the next interpolated variable will be used (see Ex.2). If no variable is interpolated
 #' at all, an error is thrown.
 #' 
-#' Ex.2: `x = c("J.", "M."); cub("My BFF{$s, are} {C?x}!")` leads to "My BFFs are J. and M.!".
+#' Ex.2: `x = c("J.", "M."); smagick("My BFF{$s, are} {C?x}!")` leads to "My BFFs are J. and M.!".
 #' If "x = "S.", this leads to "My BFF is S.!".
 #' 
 #' Pluralizing accept the following operations:
@@ -672,7 +607,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' 
 #' You can chain operations, in that case a whitespace is automatically added between them.
 #' 
-#'  Ex.3: `x = c(7, 3, 18); cub("The winning number{$s, is, enum ? sort(x)}.")` leads
+#'  Ex.3: `x = c(7, 3, 18); smagick("The winning number{$s, is, enum ? sort(x)}.")` leads
 #' leads to "The winning numbers are 3, 7 and 18.". With `x = 7` this leads to
 #' "The winning number is 7.".
 #' 
@@ -685,11 +620,11 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' These case-dependent verbatim values **are interpolated** (if appropriate). In these interpolations
 #' you need not refer explicitly to the variable for pluralization interpolations.
 #' 
-#' Ex.4: `x = 3; cub("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")` leads to 
+#' Ex.4: `x = 3; smagick("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")` leads to 
 #' "Three matches were found.". If "x = 1", this leads to "One match was found." and if "x = 0" this leads
 #' to "Sorry, nothing found.".
 #' 
-#' @inheritSection str_is Generic pattern flags
+#' @inheritSection sma_is Generic pattern flags
 #' 
 #'
 #'
@@ -697,7 +632,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' It returns a character vector whose length depends on the elements and operations in the interpolations.
 #' 
 #' @seealso 
-#' If you want to apply a chain of operations on a single vector, see [str_op()] which 
+#' If you want to apply a chain of operations on a single vector, see [sma_op()] which 
 #' may be more appropriate.
 #'
 #' @examples
@@ -709,18 +644,18 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' x = c("Romeo", "Juliet")
 #'
 #' # {x} inserts x
-#' cub("Hello {x}!")
+#' smagick("Hello {x}!")
 #'
 #' # elements in ... are collapsed with "" (default)
-#' cub("Hello {x[1]}, ",
+#' smagick("Hello {x[1]}, ",
 #'     "how is {x[2]} doing?")
 #'
 #' # Splitting a comma separated string
 #' # The mechanism is explained later
-#' cub("/J. Mills, David, Agnes, Dr Strong")
+#' smagick("/J. Mills, David, Agnes, Dr Strong")
 #'
 #' # Nota: this is equivalent to (explained later)
-#' cub("{', *'S ! J. Mills, David, Agnes, Dr Strong}")
+#' smagick("{', *'S ! J. Mills, David, Agnes, Dr Strong}")
 #'
 #' #
 #' # Applying low level operations to strings
@@ -744,10 +679,10 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #' # Example: splitting
 #' x = "hello dear"
-#' cub("{' 's ? x}")
+#' smagick("{' 's ? x}")
 #' # x is split by ' '
 #'
-#' cub("{' 's ! hello dear}")
+#' smagick("{' 's ! hello dear}")
 #' # 'hello dear' is split by ' '
 #' # had we used ?, there would have been an error
 #'
@@ -758,7 +693,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' # Operations can be chained by separating them with a comma
 #'
 #' # Example: default of 's' is ' ' + chaining with collapse
-#' cub("{s, ' my 'c ! hello dear}")
+#' smagick("{s, ' my 'c ! hello dear}")
 #'
 #' #
 #' # Nesting
@@ -769,25 +704,25 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' #             |    \-> expr will be interpolated then added to the string
 #' #              \-> nesting requires verbatim evaluation: '!'
 #'
-#' cub("The variables are: {C ! x{1:4}}.")
+#' smagick("The variables are: {C ! x{1:4}}.")
 #'
 #' # This one is ugly but it shows triple nesting
-#' cub("The variables are: {ws, C ! {2 times ! x{1:4}}{','s, 4 each !  ,_sq}}.")
+#' smagick("The variables are: {ws, C ! {2 times ! x{1:4}}{','s, 4 each !  ,_sq}}.")
 #'
 #' #
 #' # Splitting
 #' #
 #'
 #' # s: split with fixed pattern, default is ' '
-#' cub("{s ! a b c}")
-#' cub("{' b 's !a b c}")
+#' smagick("{s ! a b c}")
+#' smagick("{' b 's !a b c}")
 #'
 #' # S: same as 's' but default is ',[ \t\n]*'
-#' cub("{S !a, b, c}")
-#' cub("{'[[:punct:] ]+'S ! a! b; c}")
+#' smagick("{S !a, b, c}")
+#' smagick("{'[[:punct:] ]+'S ! a! b; c}")
 #' 
 #' # add regex flags: e.g. fixed search
-#' cub("{'f/.'s ! hi.there}")
+#' smagick("{'f/.'s ! hi.there}")
 #' 
 #'
 #' #
@@ -800,12 +735,12 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' # - s2 (optional) the string used for the last collapse
 #'
 #' # c: default is ' '
-#' cub("{c ? 1:3}")
+#' smagick("{c ? 1:3}")
 #'
 #' # C: default is ', | and '
-#' cub("{C ? 1:3}")
+#' smagick("{C ? 1:3}")
 #'
-#' cub("{', | or 'c ? 1:4}")
+#' smagick("{', | or 'c ? 1:4}")
 #'
 #' #
 #' # Extraction
@@ -818,10 +753,10 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' # Default is '[[:alnum:]]+'
 #'
 #' x = "This years is... 2020"
-#' cub("{x ? x}") # similar to cub("{extract.first ? x}")
-#' cub("{X ? x}") # similar to cub("{extract ? x}")
+#' smagick("{x ? x}") # similar to smagick("{extract.first ? x}")
+#' smagick("{X ? x}") # similar to smagick("{extract ? x}")
 #'
-#' cub("{'\\d+'x ? x}")
+#' smagick("{'\\d+'x ? x}")
 #'
 #' #
 #' # STRING FORMATTING ####
@@ -831,23 +766,23 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' # upper, lower, title
 #'
 #' # upper case the first letter
-#' cub("{upper.first ! julia mills}")
+#' smagick("{upper.first ! julia mills}")
 #'
 #' # title case
-#' cub("{title ! julia mills}")
+#' smagick("{title ! julia mills}")
 #'
 #' # upper all letters
-#' cub("{upper ! julia mills}")
+#' smagick("{upper ! julia mills}")
 #'
 #' # lower case
-#' cub("{lower ! JULIA MILLS}")
+#' smagick("{lower ! JULIA MILLS}")
 #'
 #' #
 #' # q, Q, bq: single, double, back quote
 #'
-#' cub("{S, q, C ! Julia, David, Wilkins}")
-#' cub("{S, Q, C ! Julia, David, Wilkins}")
-#' cub("{S, bq, C ! Julia, David, Wilkins}")
+#' smagick("{S, q, C ! Julia, David, Wilkins}")
+#' smagick("{S, Q, C ! Julia, David, Wilkins}")
+#' smagick("{S, bq, C ! Julia, David, Wilkins}")
 #'
 #' #
 #' # format, Format: formats the string to fit the same length
@@ -857,13 +792,13 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #' score = c(-10, 2050)
 #' nm = c("Wilkins", "David")
-#' cub("Monopoly scores:\n{'\n'c ! - {format ? nm}: {Format ? score} US$}")
+#' smagick("Monopoly scores:\n{'\n'c ! - {format ? nm}: {Format ? score} US$}")
 #'
 #' # OK that example may have been a bit too complex,
 #' # let's make it simple:
 #'
-#' cub("Scores: {format ? score}")
-#' cub("Names: {Format ? nm}")
+#' smagick("Scores: {format ? score}")
+#' smagick("Names: {Format ? nm}")
 #'
 #' #
 #' # ws: white space normalization
@@ -874,25 +809,25 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' # - digit: remove digits
 #' # - isolated: remove isolated characters
 #'
-#' cub("{ws ! The   white  spaces are now clean.  }")
+#' smagick("{ws ! The   white  spaces are now clean.  }")
 #'
-#' cub("{ws.punct ! I, really -- truly; love punctuation!!!}")
+#' smagick("{ws.punct ! I, really -- truly; love punctuation!!!}")
 #'
-#' cub("{ws.digit ! 1, 2, 12, a microphone check!}")
+#' smagick("{ws.digit ! 1, 2, 12, a microphone check!}")
 #'
-#' cub("{ws.i ! 1, 2, 12, a microphone check!}")
+#' smagick("{ws.i ! 1, 2, 12, a microphone check!}")
 #'
-#' cub("{ws.d.i ! 1, 2, 12, a microphone check!}")
+#' smagick("{ws.d.i ! 1, 2, 12, a microphone check!}")
 #'
-#' cub("{ws.p.d.i ! 1, 2, 12, a microphone check!}")
+#' smagick("{ws.p.d.i ! 1, 2, 12, a microphone check!}")
 #'
 #' #
 #' # %: applies sprintf formatting
 #'
 #'  # add the formatting as a regular argument
-#' cub("pi = {'.2f'% ? pi}")
+#' smagick("pi = {'.2f'% ? pi}")
 #' # or right after the %
-#' cub("pi = {%.2f ? pi}")
+#' smagick("pi = {%.2f ? pi}")
 #'
 #' #
 #' # paste: appends text on each element
@@ -900,12 +835,12 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' # It accepts the special values :1:, :i:, :I:, :a:, :A: to create enumerations
 #'
 #' # adding '|' on both sides
-#' cub("{'|'paste.both, ' + 'c ! x{1:4}}")
+#' smagick("{'|'paste.both, ' + 'c ! x{1:4}}")
 #' 
 #'
 #' # Enumerations
-#' acad = cub("/you like admin, you enjoy working on weekends, you really love emails")
-#' cub("Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}.")
+#' acad = smagick("/you like admin, you enjoy working on weekends, you really love emails")
+#' smagick("Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}.")
 #'
 #'
 #' #
@@ -913,7 +848,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' # the list is from the Snowball project:
 #' #  http://snowball.tartarus.org/algorithms/english/stop.txt
 #'
-#' cub("{stop, ws ! It is a tale told by an idiot, full of sound and fury, signifying nothing.}")
+#' smagick("{stop, ws ! It is a tale told by an idiot, full of sound and fury, signifying nothing.}")
 #'
 #' #
 #' # k: keeps the first n characters
@@ -921,12 +856,12 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' #         'n|s'k: same + adds 's' at the end of shortened strings
 #' #         'n||s'k: same but 's' counts in the n characters kept
 #'
-#' words = cub("/short, constitutional")
-#' cub("{5k ? words}")
+#' words = smagick("/short, constitutional")
+#' smagick("{5k ? words}")
 #'
-#' cub("{'5|..'k ? words}")
+#' smagick("{'5|..'k ? words}")
 #'
-#' cub("{'5||..'k ? words}")
+#' smagick("{'5||..'k ? words}")
 #'
 #' #
 #' # K: keeps the first n elements
@@ -936,53 +871,53 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' #
 #' # Special values :rest: and :REST:, give the number of items dropped
 #'
-#' bx = cub("/Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
-#' cub("Bordeaux wines I like: {3K, ', 'C ? bx}.")
+#' bx = smagick("/Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
+#' smagick("Bordeaux wines I like: {3K, ', 'C ? bx}.")
 #'
-#' cub("Bordeaux wines I like: {'3|etc..'K, ', 'C ? bx}.")
+#' smagick("Bordeaux wines I like: {'3|etc..'K, ', 'C ? bx}.")
 #'
-#' cub("Bordeaux wines I like: {'3||etc..'K, ', 'C ? bx}.")
+#' smagick("Bordeaux wines I like: {'3||etc..'K, ', 'C ? bx}.")
 #'
-#' cub("Bordeaux wines I like: {'3|and at least :REST: others'K, ', 'C ? bx}.")
+#' smagick("Bordeaux wines I like: {'3|and at least :REST: others'K, ', 'C ? bx}.")
 #'
 #' #
 #' # Ko, KO: special operator which keeps the first n elements and adds "others"
 #' # syntax: nKo
 #' # KO gives the rest in letters
 #'
-#' cub("Bordeaux wines I like: {4KO, C ? bx}.")
+#' smagick("Bordeaux wines I like: {4KO, C ? bx}.")
 #'
 #' #
 #' # r, R: string replacement 
 #' # syntax: 's'R: deletes the content in 's' (replaces with the empty string)
 #' #         's1 => s2'R replaces s1 into s2
 #'
-#' cub("{'e'r, ws ! The letter e is deleted}")
+#' smagick("{'e'r, ws ! The letter e is deleted}")
 #'
 #' # adding a perl look-behind
-#' cub("{'(?<! )e'r !The letter e is deleted}")
+#' smagick("{'(?<! )e'r !The letter e is deleted}")
 #'
-#' cub("{'e => a'r !The letter e becomes a}")
+#' smagick("{'e => a'r !The letter e becomes a}")
 #'
-#' cub("{'([[:alpha:]]{3})[[:alpha:]]+ => \\1.'r ! Trimming the words}")
+#' smagick("{'([[:alpha:]]{3})[[:alpha:]]+ => \\1.'r ! Trimming the words}")
 #'
 #' # Alternative way with simple operations: split, shorten, collapse
-#' cub("{s, '3|.'k, c ! Trimming the words}")
+#' smagick("{s, '3|.'k, c ! Trimming the words}")
 #'
 #' #
 #' # times, each
 #' They accept the option c to collapse with the empty string
 #'
-#' cub("N{10 times.c ! o}!")
+#' smagick("N{10 times.c ! o}!")
 #'
-#' cub("{3 times.c ? 1:3}")
-#' cub("{3 each.c ? 1:3}")
+#' smagick("{3 times.c ? 1:3}")
+#' smagick("{3 each.c ? 1:3}")
 #'
 #' #
 #' # erase: replaces the items by the empty string
 #' # -> useful in conditions
 #'
-#' cub("{erase ! I am going to be annihilated}")
+#' smagick("{erase ! I am going to be annihilated}")
 #'
 #' #
 #' # ELEMENT MANIPULATION ####
@@ -994,14 +929,14 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' # Many options: "empty", "blank", "noalpha", "noalnum", "all" 
 #'
 #' x = c("Destroy", "All")
-#' cub("{'A'rm ? x}")
+#' smagick("{'A'rm ? x}")
 #' 
-#' cub("{rm.all ? x}")
+#' smagick("{rm.all ? x}")
 #'
-#' x = cub("/1, 12, 123, 1234, 123456, 1234567")
+#' x = smagick("/1, 12, 123, 1234, 123456, 1234567")
 #' # we delete elements whose number of characters is lower or equal to 3
 #' # => see later section CONDITIONS
-#' cub("{if(.nchar > 3 ; nuke) ? x}")
+#' smagick("{if(.nchar > 3 ; nuke) ? x}")
 #'
 #' #
 #' # PLURALIZATION ####
@@ -1014,11 +949,11 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' # Explanatory example
 #' x = c("Eschyle", "Sophocle", "Euripide")
 #' n = 37
-#' cub("The author{$s, enum, have ? x} written {#N ? n} play{#s}.")
+#' smagick("The author{$s, enum, have ? x} written {#N ? n} play{#s}.")
 #'
 #' x = "Laurent Berge"
 #' n = 0
-#' cub("The author{$s, enum, have ? x} written {#N ? n} play{#s}.")
+#' smagick("The author{$s, enum, have ? x} written {#N ? n} play{#s}.")
 #'
 #' # How does it work?
 #' # First is {$s, enum, have ? x}.
@@ -1037,7 +972,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #' # Another similar example illustrating that we need not express the object several times:
 #' x = c("Eschyle", "Sophocle", "Euripide")
-#' cub("The {Len ? x} classic author{$s, are, enum}.")
+#' smagick("The {Len ? x} classic author{$s, are, enum}.")
 #'
 #'
 #'
@@ -1050,14 +985,14 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #' dollar = 6
 #' reason = "glory"
-#' cub("Why do you develop packages? For {`dollar`times.c ! $}?",
+#' smagick("Why do you develop packages? For {`dollar`times.c ! $}?",
 #'     "For money? No... for {upper,''s, c ? reason}!", sep = "\n")
 #'
 #'
 #'
 #'
 #
-cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                slash = TRUE, collapse = NULL, use_DT = TRUE){
 
 
@@ -1085,7 +1020,7 @@ cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
   res = string_ops_internal(..., is_dsb = FALSE, frame = frame, sep = sep,
                             vectorize = vectorize, slash = slash,
                             collapse = collapse, is_root = use_DT,
-                            check = TRUE, fun_name = "cub")
+                            check = TRUE, fun_name = "smagick")
 
   if(inherits(res, "help")){
       return(invisible(NULL))
@@ -1096,7 +1031,7 @@ cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 }
 
 
-.cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+.smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                 check = FALSE, slash = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
@@ -1104,7 +1039,7 @@ cub = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
   string_ops_internal(..., is_dsb = FALSE, frame = frame,
                       slash = slash, sep = sep,
                       vectorize = vectorize, is_root = use_DT,
-                      check = check, fun_name = ".cub")
+                      check = check, fun_name = ".smagick")
 }
 
 ####
@@ -1115,219 +1050,74 @@ setup_help = function(){
 
 
   msg = c(
-    "# Welcome to dsb help",
-    "Usage: dsb(s) with 's' a character string",
+    "# Welcome to smagick help",
+    "Usage: smagick(s) with 's' a character string",
     " ",
     "# BASIC usage ------------|",
-    "    dsb evaluates anything in '.[]' and inserts it in 's'.",
-    '    Ex: if x = "John", then dsb("Hi .[x]!") -> "Hi John!"',
+    "    smagick evaluates anything in '{}' and inserts it in 's'.",
+    '    Ex: if x = "John", then smagick("Hi {x}!") -> "Hi John!"',
     " ",
     "# STRING OPERATIONS ------|",
-    "    Each .[] instance supports one or more string operations.",
-    "    The syntax is .['arg'op?x] or .['arg'op!x], with:",
-    "      - 'arg' a quoted string used as argument,",
+    "    Each {} instance supports one or more string operations.",
+    "    The syntax is {'arg'op.option ? x} or {'arg'op.option ! x}, with:",
+    "      - 'arg' a quoted string used as argument (not all operators need arguments),",
     "      - op an operator code,",
+    "      - option an option (not all operators have options),",
     "      - ? or !:",
     "        + ?: evaluates the expression x",
     "        + !: takes x as verbatim",
     "      - x an expression to be evaluated or some verbatim text (no quote needed).",
-    '    Ex: dsb(".[\' + \'c?1:3] = 6") -> "1 + 2 + 3 = 6". 1:3 is collapsed (c) with \' + \'.',
+    '    Ex: smagick("{\' + \'c?1:3} = 6") -> "1 + 2 + 3 = 6". 1:3 is collapsed (c) with \' + \'.',
     "",
     "    Using ! instead of ? applies the operation to the *verbatim* of the expression.",
-    '    Ex: dsb(".[\': => 2\'r ! 1:3] = 6") -> "123 = 6".',
+    '    Ex: smagick("{\': => 2\'r ! 1:3} = 6") -> "123 = 6".',
     "        In the string '1:3', ':' is replaced (r) with '2'.",
     "",
-    "    Operations can be chained using comma-separation. The syntax is: .['s1'op1, 's2'op2?x]",
+    "    Operations can be chained using comma-separation. The syntax is: {'s1'op1, 's2'op2?x}",
     "    Evaluations are from left to right.",
-    '    Ex: dsb(".[\': => 2\'r, \'\'s, \' + \'c!1:3] = 6") -> "1 + 2 + 3 = 6',
+    '    Ex: smagick("{\': => 2\'r, \'\'s, \' + \'c!1:3} = 6") -> "1 + 2 + 3 = 6',
     "        1) '1:3'            -> ':' is replaced (r) with '2'  -> '123',",
     "        2) '123'            -> is split (s) with ''          -> c('1', '2', '3')",
     "        3) c('1', '2', '3') -> is collapsed (c) with ' + '   -> '1 + 2 + 3'",
     "",
     "    Nesting works, but only in verbatim components.",
     "    Ex: x = c(\"Doe\", \"Smith\")",
-    "        dsb(\"Hi .[' and 'c!John .[x]]\") -> \"Hi John Doe and John Smith\"",
+    "        smagick(\"Hi {' and 'c ! John {x}}\") -> \"Hi John Doe and John Smith\"",
     "",
     "    Operators have default values, so the quoted argument is optional.",
-    '    Ex: dsb(".[c ? 1:3]") -> "1 2 3". 1:3 is collapsed (c) with \' \', its default.',
+    '    Ex: smagick("{c ? 1:3}") -> "1 2 3". 1:3 is collapsed (c) with \' \', its default.',
     "",
     "# OPERATORS --------------|",
-    "    Below is the list of operators and their default argument when relevant.",
-    "    OPERATOR _TAB_ DEFAULT _TAB_ VALUE ",
+    "   Below is a compact list of operators; their default arg. is in quotes, ",
+    "   their options are in brackets",
     "",
-    "  Splitting:",
-    "    - splits a character vector with 's' or 'S' (regex enabled)",
-    "    - uses strsplit(x, split = 's')",
-    "    s _TAB_ ' ' _TAB_ split, fixed = TRUE",
-    "    S _TAB_ ',[ \\t\\n]*' _TAB_ split, perl = TRUE",
-    "    ex: dsb(\"'[[:punct:] ]'S ! x^2 = 4\")",
-    "",
-    "  Extraction:",
-    "    - extracts one ('x') or several ('X') patterns from a character string",
-    "    x _TAB_ '[[:alnum:]]+' _TAB_ extracts the first pattern, perl = TRUE",
-    "    X _TAB_ '[[:alnum:]]+' _TAB_ extracts all patterns, perl = TRUE",
-    "    ex: x = c(\"6 feet under\", \"mahogany\") ; dsb(\".['\\\\w{3}'x ? x]\")",
-    "",
-    "  Collapse:",
-    "    - collapses a vector with paste(x, collapse = 's'),",
-    "    - use a double pipe to apply a special collapse to the last values,",
-    "    - the syntax is 's1||s2', s2 will be applied to the last 2 values,",
-    "    - .[', || and 'c!1:3] -> \"1, 2 and 3\".",
-    "    c _TAB_ '' _TAB_ collapse",
-    "    C _TAB_ ', || and ' _TAB_ collapse",
-    "    ex: dsb(\".[C ? 1:5]\")",
-    "",
-    "  Replication:",
-    "    - use '5'times to replicate 5 times,",
-    "    - you can avoid using quotes, as in: `5 times`",
-    "    times _TAB_ NO DEFAULT _TAB_ replicates n times",
-    "    times.c _TAB_ NO DEFAULT _TAB_ replicates n times, then collapses with ''",
-    "    each _TAB_ NO DEFAULT _TAB_ replicates n times, each",
-    "    each.c _TAB_ NO DEFAULT _TAB_ replicates n times, each, then collapses with ''",
-    "    ex: dsb(\"yes.[10 times.c ! !]\")",
-    "",
-    "  Replacement: ",
-    "    - the syntax is 'old => new', 'old=>new' or 'old_=>_new',",
-    "    - if new is missing, it is considered as the empty string,",
-    "    - they have no default",
-    "    r _TAB_ NO DEFAULT _TAB_ replacement, fixed = TRUE ",
-    "    R _TAB_ NO DEFAULT _TAB_ replacement, perl = TRUE ",
-    "",
-    "",
-    "  Operators without arguments:",
-    "    u _TAB_  _TAB_ puts the first letter of the string to uppercase",
-    "    U _TAB_  _TAB_ puts the complete string to uppercase",
-    "    l, L _TAB_  _TAB_ puts the complete string to lowercase",
-    "    title _TAB_  _TAB_ puts the string in title case",
-    "    q _TAB_  _TAB_ adds single quotes",
-    "    Q _TAB_  _TAB_ adds double quotes",
-    "    bq _TAB_  _TAB_ adds back quotes",
-    "    f _TAB_  _TAB_ applies format(x)",
-    "    F _TAB_  _TAB_ applies format(x, justify = 'right')",
-    "    d _TAB_  _TAB_ replaces the content with the empty string",
-    "    D _TAB_  _TAB_ removes all elements (useful in conditions)",
-    "    e _TAB_  _TAB_ removes empty strings",
-    "    E _TAB_  _TAB_ removes strings containing only white spaces or punctuation",
-    "    stop _TAB_  _TAB_ removes basic English stop words",
-    "    ascii _TAB_  _TAB_ transforms all letters into ASCII with transliteration",
-    "    sort _TAB_  _TAB_ sorts all elements",
-    "    dsort _TAB_  _TAB_ sorts all elements decreasingly",
-    "    rev _TAB_  _TAB_ reverts the order of the elements",
-    "    num _TAB_  _TAB_ converts the string to numeric (silently)",
-    "",
-    "  Normalizing white spaces and cleaning:",
-    "    - the `w` commands normalizes the white spaces (trims left and right and suppresses duplicate WS)",
-    "    - you can add additionnal parameters to further clean:",
-    "      + p: punctuation",
-    "      + d: digits",
-    "      + i: isolated characters",
-    "    - you can add any of them in any order after the w. ex: `wi`, `wd`, `wpd`, all work.",
-    "    - uppercase `w` (ie `W`) is equivalent to `wp`",
-    "    - note that the algorithm is quite fast but you may lose the encoding if the data is non-ascii",
-    "    ex: x = \"  bad,,  text! 77 format? \" ; dsb(\".[w ? x]\") ; dsb(\".[wpd ? x]\")",
-    "",
-    "  Enumerations:",
-    "    - the `enum` command creates an enumeration of the elements",
-    "    - by default, it creates a comma separated list of elements finishing with 'and'",
-    "    - in case there are more than 7 elements, only the first 6 are shown and the number of items left is written",
-    "    - after this keyword, you can add the following options:",
-    "      + q, Q, bq: to quote the elements",
-    "      + or: to finish with an 'or' instead of an 'and'",
-    "      + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two",
-    "      + a number: to tell the number of items to display",
-    "    ex: x = c(\"Marv\", \"Nancy\"); dsb(\"The main characters are .[enum ? x].\") ",
-    "        x = c(\"orange\", \"milk\", \"rice\"); dsb(\"Shopping list: .[enum.i.q ? x].\") ",
-    "",
-    "  sprintf formatting:",
-    "    - applies a formatting via sprintf,",
-    "    - .['.3f'%?x] is equivalent to sprintf('%.3f', x),",
-    "    - you can also use `%.3f` directly: .[%.3f ? pi]",
-    "    % _TAB_ NO DEFAULT _TAB_ applies sprintf formatting",
-    "    ex: dsb(\"pi = .[%.2f ? pi]\")",
-    "",
-    "  Selecting the first/last elements/characters",
-    "    - syntax is 'n'first or firstn",
-    "    first _TAB_ NO DEFAULT _TAB_ selects the first n",
-    "    last _TAB_ NO DEFAULT _TAB_ selects the last n",
-    "    cfirst _TAB_ NO DEFAULT _TAB_ selects the first n characters",
-    "    clast _TAB_ NO DEFAULT _TAB_ selects the last n characters",
-    "    ex: dsb(\".['15'first, last3 ? letters]\")",
-    "",
-    "  Keeping a selected number of characters or elements: ",
-    "    - the syntax is n K, 'n'K, 'n|s'K, or 'n||s'K",
-    "    - with 'n' a number and 's' a string,",
-    "    - K keeps the first n elements and drops the rest,",
-    "    - k keeps the first n characters of each element,",
-    "    - optionaly a string 's' can be appended at the end,",
-    "    - but only when the length is greater than n.",
-    "    - 'n|s' simply appends 's' while 'n||s' includes the length of 's' in the calculation of the final length.",
-    "    - the special markup :rest: and :REST: can be used in 's'.",
-    "    - ex: .['5||..'k!c('hello', 'bonjour')] -> c('hello', 'bon..')",
-    "    -     .['5|..'k!c('hello', 'bonjour')]  -> c('hello', 'bonjo..')",
-    "    k _TAB_ NO DEFAULT _TAB_ keeps the first n characters",
-    "    K _TAB_ NO DEFAULT _TAB_ keeps the first n elements",
-    "    Ko _TAB_ NO DEFAULT _TAB_ keeps the first n elements and adds 'others'",
-    "    ex: dsb(\".[4Ko, C ? 1:200]\")",
-    "",
-    "  Insertion and appending operators:",
-    "    - the syntax is 's1|s2' to insert, or append, the string s1 first and the string 's2' last.",
-    "    - the syntax is 's' for `ar` and `da`",
-    "    - note that '_|_' can also be used to separate first/last.",
-    "    - the uppercase versions insert/append invisibly: ie without changing the vector.",
-    "    a _TAB_ NO DEFAULT _TAB_ equiv. to paste0(s1, x, s2)",
-    "    ar _TAB_ NO DEFAULT _TAB_ appends right; equiv. to paste0(x, s)",
-    "    da _TAB_ NO DEFAULT _TAB_ deletes the content and appends s",
-    "    A _TAB_ NO DEFAULT _TAB_ appends s1/s2 to the beginning/end of the full string",
-    "    i _TAB_ NO DEFAULT _TAB_ inserts s1/s2 at the beginning/end of the vector",
-    "    I _TAB_ NO DEFAULT _TAB_ inserts s1/s2 at the beginning/end of the vector",
+    "    %, ascii[silent, utf8], bq, ' 'c, ', | and 'C, cfirst, clast, dsort, ",
+    "    dtime[silent], each[c], enum[bq, q, Q, or, nor, 1, i, I, a, A, oxford], ", 
+    "    erase, '[[:alnum:]]+'extract[first], fill[right, center], first, ",
+    "    format[letter, upper, right, center], get, insert[right], is, ",
+    "    k, K, last, len[letter, upper, format], lower, n[letter, upper, 0], ",
+    "    nth[letter, upper, compact], ntimes[letter, upper], nuke, ",
+    "    num[warn, soft, rm, clean], paste[right, front, back], q, Q, r, R, rev,", 
+    "    rm[empty, blank, noalpha, noalnum, all], s, S, sort, stop, times[c], ", 
+    "    title[force, ignore], trim[right, both], tws, unik, upper[first, sentence],",
+    "    which, width, ws[punct, digit, isolated], x, X",
     "",
     "# CONDITIONS--------------|",
-    "  There are three types of conditions:",
-    "    - on the number of characters, with @",
-    "    - on the number of elements, with #",
-    "    - on the patterns, with <regex>",
-    "",
-    "  Condition on the number of characters",
-    "    - the syntax is: @<=3(true:false)",
-    "    - the operations listed in `true` will be applied to the elements with 3 characters or less",
-    "    - the operations listed in `false` will be applied to other elements",
-    "    - the operation @(true:false) is a shorthand for @>0(true:false)",
-    "    ex: x = c(\"short\", \"long sentence\") ; dsb(\".[@<=5('*|*'a:x) ? x]\")",
-    "",
-    "  Condition on the number of elements:",
-    "    - the syntax is: &<=3(true:false)",
-    "    - the operations listed in `true` will be applied to the full vector if it contains 3 elements or less",
-    "    - the operations listed in `false` will be applied to the full vector if it contains strictly more than 3 elements",
-    "    - the operation #(true:false) is a shorthand for #>1(true:false)",
-    "    ex: dsb(\".[#>=5('+'c : ' + 'c) ? 1:8]\") ; dsb(\".[#>=5('+'c : ' + 'c) ? 8:10]\")",
-    "",
-    "  Condition on the patterns:",
-    "    - the syntax is: <regex>(true:false)",
-    "    - regex should be a valid perl regular expression",
-    "    - the operations listed in `true` will be applied to the elements matching the regex",
-    "    - the operations listed in `false` will be applied to the other elements",
-    "    - use # first in the regex to trigger fixed search instead of regex-search",
-    "    - <#x^2>(true:false) will search for the fixed pattern 'x^2'",
-    "    ex: x = c(\"hello\", \"age = 25\", \"young\") ; dsb(\".[<\\\\d>(D) ? x]\")",
-    "",
-    "# CONDITIONAL OPERATIONS--------------|",
-    "  Some operations turn a single element into several elements (e.g.: `s` or `X`)",
-    "  You can use the conditional operator `~(ops)` to perfom operations within each element.",
-    "    - operations listed in `~(ops)` will be applied separately for each element that has been split.",
-    "    - conditional operations only have sense if they come after a splitting operation.",
-    "    ex: x = c(\"Name: Frederick, Age: 32, Height: 1m68\", \"Francesca, 24, 1m85\")",
-    "        dsb(\".[' 's, <\\\\d>(:D), W, ~(' -- 'c) ? x]\")",
+    "    Two condition operators: `if` and `vif`",
+    "    - if(cond ; ops_true ; ops_false): ops_true = operations applied if TRUE",
+    "    - vif(cond ; verb_true ; verb_false): verb_true = replacement text if TRUE ",
+    "    The condition cond accept the special values '.' (=the variable), ",
+    "    '.len' (alias '.N') and `.nchar` (alias `.C`).",
     "",
     "# PLURALIZATION ----|",
-    "  To trigger pluralization use a dollar sign right at the beginning of the operators.",
     "  There are two pluralization tags: `$` and `#`.",
-    "  The tag `$` pluralizes on the *length* of the element.",
-    "  The tag `#` pluralizes on the *value* of the element.",
-    "  ex, length: x = c(\"Mark\", \"Francis\"); dsb(\".[$enum, is?x] here.\")",
-    "  ex, value: n = 1; dsb(\".[n] file.[#s, were] found.\")",
+    "  - use `$` to pluralize on the *length* of the variable",
+    "  - use `#` to pluralize on the *value* of the variable",
+    "  ex, length: x = c(\"Mark\", \"Francis\"); smagick(\"{$enum, is?x} here.\")",
+    "  ex, value: n = 1; smagick(\"{n} file{#s, were} found.\")",
     "",
     "  When pluralizing you can perform the following operations:",
-    "    - s: adds an 's' if it is plural",
+    "    - s, es: adds an 's' (or 'es') if it is plural",
     "    - y or ies: adds an 'y' if singular and 'ies' if plural",
     "    - enum: enumerates the elements (see help for the regular enum)",
     "    - (s1;s2): adds verbatim 's1' if singular and 's2' if plural",
@@ -1336,18 +1126,18 @@ setup_help = function(){
     "    - is, or any verb: conjugates the verb appropriately",
     "    - n, N: add the number of elements as a number (n) or in letters (N)",
     "  You can chain operations, in that case a whitespace is automatically added between them.",
-    "  ex: x = sample(20, 5); dsb(\"The winning number.[$s, is, enum ? sort(x)].\")",
+    "  ex: x = sample(20, 5); smagick(\"The winning number{$s, is, enum ? sort(x)}.\")",
     "",
     "  You need not provide the value over which to pluralize if it has been used previously or will be used afterwards:",
-    "  ex: x = \"Mara\"; dsb(\"I like .[C ? x], .[$(she:they), is] my best friend.[$s].\")",
+    "  ex: x = \"Mara\"; smagick(\"I like {C ? x}, {$(she;they), is} my best friend{$s}.\")",
     "",
     "# SPECIALS ---------------|",
     "    Use '/' first to split the character with commas:",
-    '    Ex: dsb("/x1, x2")             -> c("x1", "x2")',
-    '        dsb("Hi .[/David, Dora]!") -> c("Hi David!", "Hi Dora!")',
+    '    Ex: smagick("/x1, x2")             -> c("x1", "x2")',
+    '        smagick("Hi {/David, Dora}!") -> c("Hi David!", "Hi Dora!")',
     "",
     "    In quoted arguments, use backticks to evaluate them from the frame.",
-    '    Ex: n = 3 ; dsb(".[`n`times.c!$]") -> "$$$". The \'$\' is replicated n times, then collapsed.'
+    '    Ex: n = 3 ; smagick("{`n`times.c!$}") -> "$$$". The \'$\' is replicated n times, then collapsed.'
   )
 
 
@@ -1959,15 +1749,6 @@ sop_char2operator = function(x, fun_name){
 
       msg = c("Operations on interpolated strings must be of the form .['arg'op ? x], with `arg` the (optional) argument and `op` an operator.",
               "\nPROBLEM: `", op, "` is not a valid operator. ", sugg_txt,
-              "\n  Valid operators (limited list, see help): ",
-              "\n                   to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
-              "\n                   to replicate: times, each / to replicate and collapse with the empty string: times.c",
-              "\n                   to upper/lower case: u, U, L / to single, double, back quote: q, Q, bq",
-              "\n                   to format format, Format / to apply sprintf format: %",
-              "\n                   to format whitespaces: ws, tws / to append: append, Append / to insert: insert",
-              "\n                   to keep: k (#characters), K (#items) / to delete: rm",
-              "\n                   to remove stopwords: stop ",
-              "\n------------------------------",
               "\n  type dsb('--help') for more help or dsb(help = 'word').",
               "\n  Examples: .[', *'S, 'a => b'r ? var] first splits the variable var by commas then replaces every 'a' with a 'b'",
               '\n            x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")')
@@ -1984,7 +1765,7 @@ sop_char2operator = function(x, fun_name){
 
 
 sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
-                         conditional_flag = 0, is_dsb = FALSE, fun_name = "cub"){
+                         conditional_flag = 0, is_dsb = FALSE, fun_name = "smagick"){
 
   # conditional_flag:  0 nothing
   #                    1 keep track of conditional things
@@ -2104,7 +1885,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
 
     if(op %in% c("s", "S", "X", "x", "extract")){
-      # otherwise => dealt with in str_is or str_clean
+      # otherwise => dealt with in sma_is or sma_clean
       # we don't repeat the processing (otherwise => bugs)
       
       pat_parsed = parse_regex_pattern(argument, c("word", "ignore", "fixed"), parse_logical = FALSE)
@@ -2167,7 +1948,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         pipe = " => "
       }
 
-      res = str_clean(x, argument, pipe = pipe, sep = "", 
+      res = sma_clean(x, argument, pipe = pipe, sep = "", 
                       ignore.case = is_ignore, fixed = is_fixed, word = is_word, 
                       total = is_total)
 
@@ -2209,8 +1990,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
       
     } else {
-      # default is str_is
-      res = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      # default is sma_is
+      res = sma_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
 
       if(op %in% c("get", "which")){
 
@@ -2857,7 +2638,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
     }
     
-    res = str_fill(x, argument, symbol = symbol, right = right, center = center)
+    res = sma_fill(x, argument, symbol = symbol, right = right, center = center)
     
     
   } else if(op == "unik"){
@@ -2971,8 +2752,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     if("upper" %in% options){
       res = gsub("^(.)", "\\U\\1", res, perl = TRUE)
     }
-  } else if(op == "swidth"){
-    # swidth, dtime ####
+  } else if(op == "width"){
+    # width, dtime ####
 
     comment = ""
     if(length(options) > 0) comment = options[1]
@@ -3016,7 +2797,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       is_word = "word" %in% options
       is_ignore = "ignore" %in% options
 
-      qui = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      qui = sma_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
 
       res[qui] = ""
     }
@@ -3036,7 +2817,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       is_word = "word" %in% options
       is_ignore = "ignore" %in% options
 
-      qui = !str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      qui = !sma_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
       
       options = setdiff(options, c("fixed", "ignore", "word"))
       if("blank" %in% options){
@@ -3218,11 +2999,11 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       # REGEX
       
       if(check){
-        cond = check_expr(str_is(x, cond_parsed), "The operation is of the form {bq?op}(cond ; true ; false). ",
-                            "When `cond` is a pure character string, the function `str_is` is applied with `cond` being the searched pattern.",
+        cond = check_expr(sma_is(x, cond_parsed), "The operation is of the form {bq?op}(cond ; true ; false). ",
+                            "When `cond` is a pure character string, the function `sma_is` is applied with `cond` being the searched pattern.",
                             "\nPROBLEM: in {bq ! {op}({'_;;;_ => ;'R ? argument})}, the condition {bq?cond_raw} led to an error.")
       } else {
-        cond = str_is(x, cond_parsed)
+        cond = sma_is(x, cond_parsed)
       }      
       
     } else {
@@ -3672,7 +3453,7 @@ sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
 
 
 apply_simple_operations = function(x, op, operations_string, check = FALSE, frame = NULL, 
-                                 conditional_flag = 0, is_dsb = FALSE, fun_name = "cub"){
+                                 conditional_flag = 0, is_dsb = FALSE, fun_name = "smagick"){
                                   
   op_all = cpp_parse_simple_operations(operations_string, is_dsb)
     
@@ -3685,14 +3466,14 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
     last = gsub("_;;;_", ";", tail(op_all, 1))
     extra = ""
     if(last %in% c("!", "?")){
-      extra = cub("The character {bq?last} is forbidden in operations.")
+      extra = smagick("The character {bq?last} is forbidden in operations.")
     } else if(last != "_ERROR_"){
-      extra = cub("Operations must be of the form `'arg'operator.option` but the value {bq?last} is ill formed.")
+      extra = smagick("Operations must be of the form `'arg'operator.option` but the value {bq?last} is ill formed.")
     } else {
-      extra = cub("The value {bq?operations} could not be parsed.")
+      extra = smagick("The value {bq?operations} could not be parsed.")
     }
       
-    msg = cub("The operator {bq?op} expects a suite of valid operations (format: {bq?op_msg}). ",
+    msg = smagick("The operator {bq?op} expects a suite of valid operations (format: {bq?op_msg}). ",
                "\nPROBLEM: the operations were not formatted correctly. ", extra)
     msg = bespoke_msg(msg)
     
@@ -3763,7 +3544,7 @@ setup_operations = function(){
                 "cfirst", "clast", "unik", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
                 "ws", "tws", "trim", "get", "is", "which",
-                "n", "N", "len", "Len", "swidth", "dtime",
+                "n", "N", "len", "Len", "width", "dtime",
                 "stop", "nth", "Nth", "ntimes", "Ntimes")
   options("smagick_operations" = sort(OPERATORS))
 }

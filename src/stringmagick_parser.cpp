@@ -919,8 +919,8 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     extract_separator = true;
 
     // we tolerate only one whitespace per operator:
-    // - "{80 swidth ? x}": valid
-    // - "{80  swidth ? x}": not valid
+    // - "{80 width ? x}": valid
+    // - "{80  width ? x}": not valid
     
     int n_ops = 0;
 
@@ -1125,8 +1125,8 @@ List cpp_parse_operator(SEXP Rstr){
   // - eval: logical
   // 
   // ex: 
-  // "80 swidth.#" 
-  // => list(operator = "swidth", options = "#", argument = "80", eval = FALSE)
+  // "80 width.#" 
+  // => list(operator = "width", options = "#", argument = "80", eval = FALSE)
   // 
   // "enum.5.i.or"
   // => list(operator = "enum", options = c("5", "i", "or"), argument = "", eval = FALSE)
@@ -1168,7 +1168,7 @@ List cpp_parse_operator(SEXP Rstr){
 
   
   //
-  // operator extraction (beware the case "80 swidth")
+  // operator extraction (beware the case "80 width")
   //
   
   // we skip a possible leading space (can't be more than 1)
@@ -1202,7 +1202,7 @@ List cpp_parse_operator(SEXP Rstr){
   } else {
     // we extract up to the ' ' if there is one
     // then we extract up to the '.' that defines the options
-    // why? "0.8 swidth" => we don't want to have '.' as an option here
+    // why? "0.8 width" => we don't want to have '.' as an option here
 
     int i_start = i;
     while(i < n && str[i] != ' '){
@@ -1210,7 +1210,7 @@ List cpp_parse_operator(SEXP Rstr){
     }
 
     if(i < n && str[i] == ' '){
-      // case "80 swidth"
+      // case "80 width"
       argument = op_raw;
       ++i;
       op = "";
