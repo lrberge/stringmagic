@@ -18,6 +18,139 @@ print.smagick = function(x, ...){
   }
 }
 
+#' Register custom operations to apply them in smagick
+#' 
+#' Extends the capabilities of [smagick()] by adding any custom operation
+#' 
+#' @param fun A function which must have at least the arguments 'x' and '...'. 
+#' Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'conditional_flag'.
+#' This function must return a vector.
+#' This function will be internally called by `smagick` in the form 
+#' `fun(x, argument, options, group, conditional_flag)`.`x`: the value to which the 
+#' operation applies. `argument`: the quoted `smagick` argument (always character). 
+#' `options`: a character vector of `smagick` options. The two last arguments are of use
+#' only in group-wise operations if `fun` changes the lengths of vectors. `group`: an index of
+#' the group to which belongs each observation (integer). `conditional_flag`: value between 0
+#' and 2; 0: no grouping operation requested; 1: keep track of groups; 2: apply grouping.
+#' @param alias Character scalar, the name of the operation.
+#' @param valid_options A character vector or NULL (default). Represents a list of 
+#' valid options for the operation. This is used: a) to enable auto-completion,
+#' b) for error-handling purposes.
+#' 
+#' 
+#' @author 
+#' Laurent R. Berge
+#' 
+#' @seealso 
+#' `smagick()`
+#' 
+#' @examples
+#' 
+#' # let's create an operation that adds markdown emphasis
+#' # to elements of a vector
+#' 
+#' # A) define the function
+#' fun_emph = function(x, ...) paste0("*", x, "*")
+#' 
+#' # B) register it
+#' smagick_register(fun_emph, "emph")
+#' 
+#' # C) use it
+#' x = dsb("/right, now")
+#' smagick("Take heed, {emph, c? x}.")
+#' 
+#' #
+#' # now let's add the option "strong"
+#' fun_emph = function(x, options, ...) {
+#'   if("strong" %in% options){
+#'     paste0("***", x, "***")
+#'   } else {
+#'     paste0("*", x, "*")
+#'   }
+#' }
+#' 
+#' smagick_register(fun_emph, "emph", "strong")
+#' 
+#' x = dsb("/right, now")
+#' smagick("Take heed, {emph.strong, c? x}.")
+#' 
+#' #
+#' # now let's add an argument
+#' fun_emph = function(x, argument, options, ...) {
+#'   arg = argument
+#'   if(nchar(arg) == 0) arg = "*"
+#'   
+#'   if("strong" %in% options){
+#'     arg = paste0(rep(arg, 3), collapse = "")
+#'   }
+#'   
+#'   paste0(arg, x, arg)
+#' }
+#' 
+#' smagick_register(fun_emph, "emph", "strong")
+#' 
+#' x = dsb("/right, now")
+#' smagick("Take heed, {'_'emph.strong, c? x}.")
+#' 
+#' 
+#' 
+#' 
+smagick_register = function(fun, alias, valid_options = NULL){
+  # fun: must be a function with x and ... as arguments
+  # the argument names must be in:
+  # x, argument, options, group, conditonnal_flag
+
+  if(missing(fun)){
+    stop("The argument `fun` must be provided. PROBLEM: it is missing.")
+  }
+
+  if(!is.function(fun)){
+    stop_hook("The argument `fun` must be a function. ",
+              "PROBLEM: it is not a function, instead it is of class {enum.bq?class(fun)}.")
+  }
+
+  check_character(alias, scalar = TRUE, mbt = TRUE)
+  check_character(valid_options, no_na = TRUE, null = TRUE)
+
+  fun_args = names(formals(fun))
+  
+  arg_must = c("...", "x")
+  arg_missing = setdiff(arg_must, fun_args)
+  if(length(arg_missing) > 0){
+    stop_hook("The argument `fun` must be a function with {enum.bq?arg_missing} in its arguments.",
+              "\nPROBLEM: it has no argument {enum.bq.or?arg_missing}.")
+  }
+
+  valid_args = dsb("/x, argument, options, group, conditional_flag")
+  arg_pblm = setdiff(setdiff(fun_args, "..."), valid_args)
+  if(length(arg_pblm) > 0){
+    stop_hook("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
+              "\nPROBLEM: the argument{$s, enum.bq, are?arg_pblm} invalid.")
+  }
+
+  OPERATORS = getOption("smagick_operations_origin")
+
+  if(alias %in% OPERATORS){
+    stop_hook("The argument `alias` must not be equal to an existing internal argument.",
+              "\nPROBLEM: the operation {bq?alias} is already an internal operation.")
+  }
+
+  user_operators = getOption("smagick_user_ops")
+  if(is.null(user_operators)){
+    user_operators = list()
+  }
+
+  if(!is.null(valid_options)){
+    attr(fun, "valid_options") = valid_options
+  }
+
+  user_operators[[alias]] = fun
+
+  options("smagick_user_ops" = user_operators)
+  options("smagick_operations" = c(OPERATORS, names(user_operators)))
+
+}
+
 ####
 #### ... dsb ####
 ####
@@ -1098,7 +1231,7 @@ setup_help = function(){
     "    k, K, last, len[letter, upper, format], lower, n[letter, upper, 0], ",
     "    nth[letter, upper, compact], ntimes[letter, upper], nuke, ",
     "    num[warn, soft, rm, clean], paste[right, front, back], q, Q, r, R, rev,", 
-    "    rm[empty, blank, noalpha, noalnum, all], s, S, sort, stop, times[c], ", 
+    "    rm[empty, blank, noalpha, noalnum, all], ' 's, ',[ \\t\\n]+'S, sort, stop, times[c], ", 
     "    title[force, ignore], trim[right, both], tws, unik, upper[first, sentence],",
     "    which, width, ws[punct, digit, isolated], x, X",
     "",
@@ -1713,7 +1846,7 @@ sop_char2operator = function(x, fun_name){
     
     op_parsed$argument = argument
 
-    if(op %in% c("R", "r", "%", "k", "K", "append", "get", "is")){
+    if(op %in% c("R", "r", "%", "k", "K", "paste", "get", "is")){
       ex = c("R" = 'x = "She loves me."; dsb(".[\'s\\b => d\'R ? x]")',
             "r" = 'x = "Amour"; dsb(".[\'ou => e\'r ? x]...")',
             "%" = 'dsb("pi is: .[%.03f ? pi]")',
@@ -1721,7 +1854,7 @@ sop_char2operator = function(x, fun_name){
             "K" = 'x = 5:9; dsb("The first 2 elements of `x` are: .[2K, C ? x].")',
             "get" = 'x = row.names(mtcars) ; dsb("My fav. cars are .[\'toy\'get.ignore, \'the \'app, enum ? x].")',
             "is" = 'x = c("Bob", "Pam") ; dsb(".[\'am\'is ? x]")',
-            "append" = 'x = "those, words"; dsb("Let\'s emphasize .[S, \'**\'append.both, c ? x].")')
+            "paste" = 'x = "those, words"; dsb("Let\'s emphasize .[S, \'**\'paste.both, c ? x].")')
 
       ex = bespoke_msg(ex[op])
       .stop_hook("The operator `", op,
@@ -1746,6 +1879,9 @@ sop_char2operator = function(x, fun_name){
     if(!op %in% OPERATORS){
 
       sugg_txt = suggest_item(op, OPERATORS, newline = FALSE, info = "operator")
+      
+      op = gsub("\n", "\\n", op)
+      op = gsub("\t", "\\t", op)
 
       msg = c("Operations on interpolated strings must be of the form .['arg'op ? x], with `arg` the (optional) argument and `op` an operator.",
               "\nPROBLEM: `", op, "` is not a valid operator. ", sugg_txt,
@@ -3547,62 +3683,8 @@ setup_operations = function(){
                 "n", "N", "len", "Len", "width", "dtime",
                 "stop", "nth", "Nth", "ntimes", "Ntimes")
   options("smagick_operations" = sort(OPERATORS))
+  options("smagick_operations_origin" = sort(OPERATORS))
 }
 
 
 
-smagick_register = function(fun, alias, valid_options = NULL){
-  # fun: must be a function with x and ... as arguments
-  # the argument names must be in:
-  # x, argument, options, group, conditonnal_flag
-
-  if(missing(fun)){
-    stop("The argument `fun` must be provided. PROBLEM: it is missing.")
-  }
-
-  if(!is.function(fun)){
-    stop_hook("The argument `fun` must be a function. ",
-              "PROBLEM: it is not a function, instead it is of class {enum.bq?class(fun)}.")
-  }
-
-  check_character(alias, scalar = TRUE, mbt = TRUE)
-  check_character(valid_options, no_na = TRUE, null = TRUE)
-
-  fun_args = names(formals(fun))
-  
-  arg_must = c("...", "x")
-  arg_missing = setdiff(arg_must, fun_args)
-  if(length(arg_missing) > 0){
-    stop_hook("The argument `fun` must be a function with {enum.bq?arg_missing} in its arguments.",
-              "\nPROBLEM: it has no argument {enum.bq.or?arg_missing}.")
-  }
-
-  valid_args = dsb("/x, argument, options, group, conditional_flag")
-  arg_pblm = setdiff(setdiff(fun_args, "..."), valid_args)
-  if(length(arg_pblm) > 0){
-    stop_hook("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
-              "\nPROBLEM: the argument{$s, enum.bq, are?arg_pblm} invalid.")
-  }
-
-  OPERATORS = getOption("smagick_operations")
-
-  if(alias %in% OPERATORS){
-    stop_hook("The argument `alias` must not be equal to an existing internal argument.",
-              "\nPROBLEM: the operation {bq?alias} is already an internal operation.")
-  }
-
-  user_operators = getOption("smagick_user_ops")
-  if(is.null(user_operators)){
-    user_operators = list()
-  }
-
-  if(!is.null(valid_options)){
-    attr(fun, "valid_options") = valid_options
-  }
-
-  user_operators[[alias]] = fun
-
-  options("smagick_user_ops" = user_operators)
-  options("smagick_operations" = c(OPERATORS, names(user_operators)))
-
-}
