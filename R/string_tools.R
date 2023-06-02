@@ -1172,6 +1172,38 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
   # common authorized_flags: c("fixed", "word", "ignore")
 
   info_pattern = cpp_parse_regex_pattern(pattern, parse_logical = parse_logical)
+  
+  if(!is.null(info_pattern$error)){
+    main_msg = .sma("Problem found in the regex pattern {'50|..'k, Q ? pattern}.",
+                    "\nPROBLEM: ")
+    
+    msg = switch(info_pattern$error,
+                 "flag starting with space" = "flags cannot start with a space.", 
+                 "flags list is too long" = 
+                    .sma("the flag list is too long, ",
+                         "most likely they are no flags.\nFIX? start with a slash."), 
+                 "non valid character at position" = 
+                    .sma("the flag list contains a non ",
+                        "valid character in position {info_pattern$error_extra} ",
+                        "({`info_pattern$error_extra`cfirst, clast, bq ? pattern}). ",
+                        "Flags must only consist of lower case letters followed by a comma or a slash."), 
+                 "flag empty" = 
+                    .sma("The {Nth ? info_pattern$error_extra} flag is empty. ", 
+                         "Flags must only consist of lower case letters followed by a comma or a slash."))
+    
+    note_rm = .sma("\n\nINFO: Regular expression flags must be of the form: 'flag1, flag2/pattern'",
+                    " where a flag must consist of only lower case letters. Ex: 'ignore, fixed/dt[' leads",
+                    " to the flags 'ignore' and 'fixed' and to the pattern '.['.", 
+                    "\n      Alternatively, collate the first letters of the flags:",
+                    " 'if/dt[' leads to the same results.", 
+                    "\n      Start with a slash to remove the meaning of the slash and suppress the parsing",
+                    " of flags. Ex.1: '/hey/': no flag, pattern is 'hey/'.",
+                    " To have a slash as a pattern, double it: '//': no flag, pattern is '/'.")
+    
+    full_msg = .sma(main_msg, msg, note_rm)
+    
+    stop_hook(full_msg)
+  }
 
   flags = info_pattern$flags
   if(length(flags) == 1){

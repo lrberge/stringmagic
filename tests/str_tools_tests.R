@@ -71,6 +71,10 @@ test(val, c(TRUE, FALSE, TRUE))
 val = sma_is(x, "\\!")
 test(val, c(TRUE, FALSE, TRUE))
 
+# other
+test(sma_is("bonjour", "fixed/---|"), FALSE)
+
+
 
 ####
 #### sma_get ####

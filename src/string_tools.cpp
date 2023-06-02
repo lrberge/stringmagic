@@ -341,44 +341,87 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   //
   // flags
   //
-
-  while(i < n){
-    while(i < n && is_blank(str[i])) ++i;
-    while(i < n && str[i] >= 'a' && str[i] <= 'z'){
-      flag_tmp += str[i++];
-    }
-    while(i < n && is_blank(str[i])) ++i;
-
-    if(!flag_tmp.empty()){
-      flags.push_back(flag_tmp);
-      flag_tmp = "";
-    }
-
-    if(i == n || (str[i] != '/' && str[i] != ',')){
-      flags.clear();
-      break;
-    } else if(str[i] == '/'){
-      break;
-    } else if(str[i] == ','){
-      ++i;
-      continue;
-    }
+  
+  bool is_empty_flag = str[0] == '/';
+  
+  if(is_empty_flag){
+    i = 1;
   }
+  
+  if(!is_empty_flag){
+    // parsing the flags
+    // since flag parsing can be dangerous, I thoroughly
+    // send an error if a pattern contains a '/'
+    
+    // first: we check if the pattern contains '/'
+    bool is_slash = false;
+    for(int j=0 ; j<n ; ++j){
+      if(str[j] == '/'){
+        is_slash = true;
+        break;
+      }
+    }
+    
+    if(is_slash){
+      // at the end of this loop, i points at the beginning of the pattern
+      
+      if(is_blank(str[0])){
+        res["error"] = "flag starting with space";
+        return res;
+      }
+      
+      while(i < n){
+        
+        if(i >= 100){
+          res["error"] = "flags list is too long";
+          return res;
+        }
+        
+        while(i < n && is_blank(str[i])) ++i;
+        while(i < n && str[i] >= 'a' && str[i] <= 'z'){
+          flag_tmp += str[i++];
+        }
+        
+        if(i < n && str[i] != ',' && str[i] != '/' && 
+           !(str[i] == ' ' && i +  2 < n && str[i+1] == '/' && str[i+2] == ' ')){
+          res["error"] = "non valid character at position";
+          res["error_extra"] = i + 1;
+          return res;
+        }
+
+        if(flag_tmp.empty()){
+          res["error"] = "flag empty";
+          res["error_extra"] = flags.size() + 1;
+          return res;
+        }
+        
+        flags.push_back(flag_tmp);
+        flag_tmp = "";
+
+        if(str[i] == ' '){
+          // if a space: we checked it at "non valid character at position"
+          i += 3;
+        } else if(str[i] == '/'){
+          ++i;
+          break;
+        } else if(str[i] == ','){
+          ++i;
+          continue;
+        }
+      }
+      
+      if(flags.empty()){
+        stop("Internal errors: flags cannot be empty in the presence of a slash in a pattern.");
+      }
+      
+    }
+    
+    
+  }  
 
   // saving the flags
   res["flags"] = std_string_to_r_string(flags);
-
-  if(flags.empty()){
-    // we start over again
-    i = 0;
-  } else {
-    if(i > 1 && i + 1 < n && str[i - 1] == ' ' && str[i + 1] == ' '){
-      // "fixed / test" => "fixed/test"
-      ++i;
-    }
-    ++i;
-  }
-
+  
   //
   // logical operators
   //
@@ -391,7 +434,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   bool is_or_tmp = false;
 
   while(i < n){
-    while(i < n && (!parse_logical || (str[i] != '&' && str[i] != '|'))){
+    while(i < n && !(parse_logical && (str[i] == '&' || str[i] == '|'))){
       pat_tmp += str[i++];
     }
 
@@ -414,6 +457,10 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
         i += 2;
       } else {
         pat_tmp += str[i++];
+        if(i == n){
+          patterns.push_back(pat_tmp);
+          is_or_all.push_back(is_or_tmp);
+        }
       }
     }
   }
