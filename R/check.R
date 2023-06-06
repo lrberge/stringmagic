@@ -543,7 +543,7 @@ suggest_item = function(x, items, write_msg = TRUE, newline = TRUE, info = "vari
       if(length(items) <= 5){
         res = smagick("FYI the {info}{$s, are, enum.bq ? items_origin}.")
       } else {
-        res = smagick("FYI the first 5 {info}s are {enum.bq ? items_origin}.")
+        res = smagick("\nFYI the {info}s are: {sort, ', 'c ? items_origin}.")
       }
     } else {
       res = smagick("Maybe you meant {enum.bq.or ? res}?")
@@ -687,13 +687,23 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
 }
 
 
-fit_screen = function(msg, width = 0.9, leading_ws = TRUE, leader = ""){
+fit_screen = function(msg, width = NULL, leading_ws = TRUE, leader = ""){
   # makes a message fit the current screen, by cutting the text at the appropriate location
   # msg must be a character string of length 1
   
   if(length(msg) == 0) return(msg)
 
   # Note that \t are NOT handled
+  
+  # eval
+  sw = getOption("width") 
+  width_expr = substitute(width)
+  data = list(.sw = sw)
+  width = eval(width_expr, data, parent.frame())
+  
+  if(is.null(width)){
+    width = min(120, 0.9 * sw)
+  }
 
   N_LEAD = nchar(leader)
 

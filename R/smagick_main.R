@@ -90,7 +90,7 @@ print.smagick = function(x, ...){
 #' smagick_register(fun_emph, "emph", "strong")
 #' 
 #' x = dsb("/right, now")
-#' smagick("Take heed, {'_'emph.strong, c? x}.")
+#' smagick("Take heed, {'_'emph.s, c? x}.")
 #' 
 #' 
 #' 
@@ -173,13 +173,13 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
   } else if(identical(..1, "--help")){
     sc = sys.call()
     if(identical(sc[[2]], "--help")){
-      help = TRUE # means full help
+      help = "_COMPACT_" # means full help
     }
   }
 
   set_pblm_hook()
 
-  res = string_ops_internal(..., is_dsb = TRUE, frame = frame, sep = sep,
+  res = smagick_internal(..., is_dsb = TRUE, frame = frame, sep = sep,
                             vectorize = vectorize, slash = slash,
                             collapse = collapse, help = help, is_root = use_DT,
                             check = TRUE, fun_name = "dsb")
@@ -198,7 +198,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                 check = FALSE, slash = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
-  string_ops_internal(..., is_dsb = TRUE, frame = frame,
+  smagick_internal(..., is_dsb = TRUE, frame = frame,
                       slash = slash, sep = sep,
                       vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".dsb")
@@ -240,7 +240,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #'  @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
-#' nested (it may be the most powerful feature), operations can be applied group-wise or conditionnally and
+#' nested (it may be the most powerful feature), operations can be applied group-wise or conditionally and
 #' operators have sensible defaults. 
 #' 
 #' You can also declare your own basic operations with [smagick_register()].
@@ -248,7 +248,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Access a compact help on the console with `smagick("--help")` or use the argument `help` to which
 #' you can pass keywords or regular expressions and fecth select pieces from the main documentation.
 #' 
-#' @section Interpolation and string operations: principle:
+#' @section Interpolation and string operations: Principle:
 #' 
 #' To interpolate a variable, say `x`, simply use `{x}`. For example `x = "world"; smagick("hello {x}")` leads 
 #' to "hello world".
@@ -278,7 +278,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Both operators and options are partially matched. So `smagick("He said: {up.s, Q ? x}")` would 
 #' also work.
 #' 
-#' @section  Verbatim interpolation and nesting: principle:
+#' @section  Verbatim interpolation and nesting: Principle:
 #' 
 #' Instead of interpolating a variable, say `x`, with `{x}`, you can use an exclamation 
 #' mark to trigger varbatim evaluation.
@@ -318,7 +318,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' You can try to write a function to express the polynomial as before: although it is 
 #' a simple task, my guess is that it will require more typing.
 #' 
-#' @section General operations syntax:
+#' @section Operations: General syntax:
 #' 
 #' As seen in the previous sections, within a *box* (i.e. `"{}"`), multiple operations
 #'  can be performed.
@@ -372,18 +372,18 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Ex.2: `smagick("{'(?<!\\b)e => a'R ! Where is the letter e?}")` leads to "Whara is tha lattar e?".
 #' Ex.3: `smagick("{'t/e => here'r ! Where is the letter e?}")` leads to "here".
 #' + get: restricts the string only to values respecting a pattern. This operation has no default.
-#' It uses the same syntax as [sma_get()] so that you can include logical operations with ' & ' and ' | '.
+#' It uses the same syntax as [str_get()] so that you can include logical operations with ' & ' and ' | '.
 #' Example: `x = row.names(mtcars) ; smagick("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, C ? x}")`
 #' leads to "Mercedes models: 240D, 280C, 450SE, 450SL and 450SLC".
 #' + is: detects if a pattern is present in a string, returns a logical vector. This operation has no default.
-#' Mostly useful as the final operation in a [sma_op()] call.
+#' Mostly useful as the final operation in a [str_op()] call.
 #' Example: `x = c("Mark", "Lucas") ; smagick("Mark? {'i/mark'is, C ? x}")` leads to "Mark? TRUE and FALSE".
 #' + which: returns the index of string containing a specified pattern. With no default, can be applied
-#' to a logical vector directly. Mostly useful as the final operation in a [sma_op()] call.
+#' to a logical vector directly. Mostly useful as the final operation in a [str_op()] call.
 #' Ex.1: `x = c("Mark", "Lucas") ; smagick("Mark is number {'i/mark'which ? x}.")` leads to 
 #' "Mark is number 1.".
 #' 
-#' @section Operations changing the length or order of the vector:
+#' @section Operations changing the length or the order:
 #' 
 #' + first: keeps only the first `n` elements. Example: `smagick("First 3 numbers: {3 first, C ? mtcars$mpg}.")`
 #' leads to "First 3 numbers: 21, 21 and 22.8.". Negative numbers as argument remove the 
@@ -514,7 +514,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' + fill: fills the character strings up to a size. Options: "right", "center" and a free-form symbol.
 #' Option "right" right aligns and "center" centers the strings. You can pass a free-form symbol
 #' as option, it will be used for the filling. By default if no argument is provided, the
-#' maximum size of the character string is used. See help for [sma_fill()] for more information.
+#' maximum size of the character string is used. See help for [str_fill()] for more information.
 #' Ex.1: `smagick("Numbers: {'5'fill.0.right, C ? c(1, 55)}")` leads to "Numbers: 00001 and 00055".
 #' + paste: pastes some character to all elements of the string. This operation has no default.
 #' Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
@@ -581,9 +581,9 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Almost all operations can be applied group-wise (although only operations changing the order or 
 #' the length of the strings really matter).
 #' 
-#' @section Conditionnal operations:
+#' @section Conditional operations:
 #' 
-#' There are two operators to apply operations conditionnally: `if` and `vif`, the latter
+#' There are two operators to apply operations conditionally: `if` and `vif`, the latter
 #' standing for *verbatim if*. 
 #' 
 #' The syntax of `if` is `if(cond ; ops_true ; ops_false)` with `cond` a
@@ -725,7 +725,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Ex.2: `x = c("J.", "M."); smagick("My BFF{$s, are} {C?x}!")` leads to "My BFFs are J. and M.!".
 #' If "x = "S.", this leads to "My BFF is S.!".
 #' 
-#' Pluralizing accept the following operations:
+#' Pluralizing accepts the following operations:
 #' - s, es: adds an "s" (or "es") if it is plural (> 1), nothing otherwise. Accepts the option `0` or `zero` which 
 #' treats a 0-length or a 0-value as plural.
 #' - y or ies: adds an 'y' if singular and 'ies' if plural (>1). Accepts the option `0` or `zero` which 
@@ -740,7 +740,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' 
 #' You can chain operations, in that case a whitespace is automatically added between them.
 #' 
-#'  Ex.3: `x = c(7, 3, 18); smagick("The winning number{$s, is, enum ? sort(x)}.")` leads
+#'  Ex.3: `x = c(7, 3, 18); smagick("The winning number{$s, is, enum ? sort(x)}.")`
 #' leads to "The winning numbers are 3, 7 and 18.". With `x = 7` this leads to
 #' "The winning number is 7.".
 #' 
@@ -757,7 +757,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' "Three matches were found.". If "x = 1", this leads to "One match was found." and if "x = 0" this leads
 #' to "Sorry, nothing found.".
 #' 
-#' @inheritSection sma_is Generic pattern flags
+#' @inheritSection str_is Generic pattern flags
 #' 
 #'
 #'
@@ -765,7 +765,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' It returns a character vector whose length depends on the elements and operations in the interpolations.
 #' 
 #' @seealso 
-#' If you want to apply a chain of operations on a single vector, see [sma_op()] which 
+#' If you want to apply a chain of operations on a single vector, see [str_op()] which 
 #' may be more appropriate.
 #'
 #' @examples
@@ -1124,9 +1124,8 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #'
 #'
-#
-smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-               slash = TRUE, collapse = NULL, use_DT = TRUE){
+sma = smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+               slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
 
 
   if(!missing(vectorize)) check_logical(vectorize, scalar = TRUE)
@@ -1142,7 +1141,7 @@ smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
   } else if(identical(..1, "--help")){
     sc = sys.call()
     if(identical(sc[[2]], "--help")){
-      help = TRUE # means full help
+      help = "_COMPACT_" # means full help
     }
   }
 
@@ -1150,8 +1149,8 @@ smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
   # is_root is only used to enable DT evaluation
 
-  res = string_ops_internal(..., is_dsb = FALSE, frame = frame, sep = sep,
-                            vectorize = vectorize, slash = slash,
+  res = smagick_internal(..., is_dsb = FALSE, frame = frame, sep = sep,
+                            vectorize = vectorize, slash = slash, help = help,
                             collapse = collapse, is_root = use_DT,
                             check = TRUE, fun_name = "smagick")
 
@@ -1164,127 +1163,22 @@ smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 }
 
 
-.smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+.sma = .smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                 check = FALSE, slash = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
 
-  string_ops_internal(..., is_dsb = FALSE, frame = frame,
+  smagick_internal(..., is_dsb = FALSE, frame = frame,
                       slash = slash, sep = sep,
                       vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".smagick")
 }
 
 ####
-#### Help ####
-####
-
-setup_help = function(){
-
-
-  msg = c(
-    "# Welcome to smagick help",
-    "Usage: smagick(s) with 's' a character string",
-    " ",
-    "# BASIC usage ------------|",
-    "    smagick evaluates anything in '{}' and inserts it in 's'.",
-    '    Ex: if x = "John", then smagick("Hi {x}!") -> "Hi John!"',
-    " ",
-    "# STRING OPERATIONS ------|",
-    "    Each {} instance supports one or more string operations.",
-    "    The syntax is {'arg'op.option ? x} or {'arg'op.option ! x}, with:",
-    "      - 'arg' a quoted string used as argument (not all operators need arguments),",
-    "      - op an operator code,",
-    "      - option an option (not all operators have options),",
-    "      - ? or !:",
-    "        + ?: evaluates the expression x",
-    "        + !: takes x as verbatim",
-    "      - x an expression to be evaluated or some verbatim text (no quote needed).",
-    '    Ex: smagick("{\' + \'c?1:3} = 6") -> "1 + 2 + 3 = 6". 1:3 is collapsed (c) with \' + \'.',
-    "",
-    "    Using ! instead of ? applies the operation to the *verbatim* of the expression.",
-    '    Ex: smagick("{\': => 2\'r ! 1:3} = 6") -> "123 = 6".',
-    "        In the string '1:3', ':' is replaced (r) with '2'.",
-    "",
-    "    Operations can be chained using comma-separation. The syntax is: {'s1'op1, 's2'op2?x}",
-    "    Evaluations are from left to right.",
-    '    Ex: smagick("{\': => 2\'r, \'\'s, \' + \'c!1:3} = 6") -> "1 + 2 + 3 = 6',
-    "        1) '1:3'            -> ':' is replaced (r) with '2'  -> '123',",
-    "        2) '123'            -> is split (s) with ''          -> c('1', '2', '3')",
-    "        3) c('1', '2', '3') -> is collapsed (c) with ' + '   -> '1 + 2 + 3'",
-    "",
-    "    Nesting works, but only in verbatim components.",
-    "    Ex: x = c(\"Doe\", \"Smith\")",
-    "        smagick(\"Hi {' and 'c ! John {x}}\") -> \"Hi John Doe and John Smith\"",
-    "",
-    "    Operators have default values, so the quoted argument is optional.",
-    '    Ex: smagick("{c ? 1:3}") -> "1 2 3". 1:3 is collapsed (c) with \' \', its default.',
-    "",
-    "# OPERATORS --------------|",
-    "   Below is a compact list of operators; their default arg. is in quotes, ",
-    "   their options are in brackets",
-    "",
-    "    %, ascii[silent, utf8], bq, ' 'c, ', | and 'C, cfirst, clast, dsort, ",
-    "    dtime[silent], each[c], enum[bq, q, Q, or, nor, 1, i, I, a, A, oxford], ", 
-    "    erase, '[[:alnum:]]+'extract[first], fill[right, center], first, ",
-    "    format[letter, upper, right, center], get, insert[right], is, ",
-    "    k, K, last, len[letter, upper, format], lower, n[letter, upper, 0], ",
-    "    nth[letter, upper, compact], ntimes[letter, upper], nuke, ",
-    "    num[warn, soft, rm, clean], paste[right, front, back], q, Q, r, R, rev,", 
-    "    rm[empty, blank, noalpha, noalnum, all], ' 's, ',[ \\t\\n]+'S, sort, stop, times[c], ", 
-    "    title[force, ignore], trim[right, both], tws, unik, upper[first, sentence],",
-    "    which, width, ws[punct, digit, isolated], x, X",
-    "",
-    "# CONDITIONS--------------|",
-    "    Two condition operators: `if` and `vif`",
-    "    - if(cond ; ops_true ; ops_false): ops_true = operations applied if TRUE",
-    "    - vif(cond ; verb_true ; verb_false): verb_true = replacement text if TRUE ",
-    "    The condition cond accept the special values '.' (=the variable), ",
-    "    '.len' (alias '.N') and `.nchar` (alias `.C`).",
-    "",
-    "# PLURALIZATION ----|",
-    "  There are two pluralization tags: `$` and `#`.",
-    "  - use `$` to pluralize on the *length* of the variable",
-    "  - use `#` to pluralize on the *value* of the variable",
-    "  ex, length: x = c(\"Mark\", \"Francis\"); smagick(\"{$enum, is?x} here.\")",
-    "  ex, value: n = 1; smagick(\"{n} file{#s, were} found.\")",
-    "",
-    "  When pluralizing you can perform the following operations:",
-    "    - s, es: adds an 's' (or 'es') if it is plural",
-    "    - y or ies: adds an 'y' if singular and 'ies' if plural",
-    "    - enum: enumerates the elements (see help for the regular enum)",
-    "    - (s1;s2): adds verbatim 's1' if singular and 's2' if plural",
-    "    - (s1;s2;s3): adds verbatim 's1' if zero, 's2' if singular and 's3' if plural",
-    "    - (s1;;s3): adds verbatim 's1' if zero, 's3' if singular or plural",
-    "    - is, or any verb: conjugates the verb appropriately",
-    "    - n, N: add the number of elements as a number (n) or in letters (N)",
-    "  You can chain operations, in that case a whitespace is automatically added between them.",
-    "  ex: x = sample(20, 5); smagick(\"The winning number{$s, is, enum ? sort(x)}.\")",
-    "",
-    "  You need not provide the value over which to pluralize if it has been used previously or will be used afterwards:",
-    "  ex: x = \"Mara\"; smagick(\"I like {C ? x}, {$(she;they), is} my best friend{$s}.\")",
-    "",
-    "# SPECIALS ---------------|",
-    "    Use '/' first to split the character with commas:",
-    '    Ex: smagick("/x1, x2")             -> c("x1", "x2")',
-    '        smagick("Hi {/David, Dora}!") -> c("Hi David!", "Hi Dora!")',
-    "",
-    "    In quoted arguments, use backticks to evaluate them from the frame.",
-    '    Ex: n = 3 ; smagick("{`n`times.c!$}") -> "$$$". The \'$\' is replicated n times, then collapsed.'
-  )
-
-
-  options("stringmagick_help" = msg)
-
-
-}
-
-
-####
 #### Internal ####
 ####
 
-string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = list(),
+smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = list(),
                                sep = "", vectorize = FALSE,
                                slash = TRUE, collapse = NULL,
                                help = NULL, is_root = FALSE,
@@ -1292,18 +1186,17 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data
 
 
   if(!is.null(help)){
-    msg = getOption("stringmagick_help")
-    if(!is_dsb) {
-      msg = dsb2curb(msg)
-    }
-    msg = format_help(msg, help)
-
-    message(msg)
-
-    obj = list()
-    class(obj) = "help"
-
-    return(obj)
+    if(identical(help, "_COMPACT_")){
+      msg = getOption("smagick_help_compact")
+      
+      msg = paste(msg, collapse = "\n")
+      stop_up("Help requested.", msg = msg)
+    } else {
+      
+      on.exit(smagick_dynamic_help(help))
+      
+      stop_up("smagick: Help requested.")
+    }    
   }
 
   if(is_root){
@@ -1383,7 +1276,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data
       n = length(dots)
       res = vector("list", n)
       for(i in 1:n){
-        res[[i]] = string_ops_internal(dots[[i]], is_dsb = is_dsb, slash = slash, 
+        res[[i]] = smagick_internal(dots[[i]], is_dsb = is_dsb, slash = slash, 
                                        frame = frame, check = check, fun_name = fun_name)
       }
 
@@ -1481,7 +1374,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data
         if(is.character(xi_call)){
           # if a string literal => it's nesting
           if(grepl(BOX_OPEN, xi_call, fixed = TRUE)){
-            xi = string_ops_internal(xi_call, is_dsb = is_dsb, frame = frame, 
+            xi = smagick_internal(xi_call, is_dsb = is_dsb, frame = frame, 
                                      slash = FALSE, check = check, fun_name = fun_name)
           }
         } else {
@@ -1621,7 +1514,7 @@ string_ops_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data
 
         if(!is_xi_done){
           if(verbatim && grepl(BOX_OPEN, xi, fixed = TRUE)){
-            xi = string_ops_internal(xi, is_dsb = is_dsb, frame = frame, slash = FALSE,
+            xi = smagick_internal(xi, is_dsb = is_dsb, frame = frame, slash = FALSE,
                                      vectorize = concat_nested, check = check, fun_name = fun_name)
 
           } else if(!verbatim){
@@ -1885,7 +1778,7 @@ sop_char2operator = function(x, fun_name){
 
       msg = c("Operations on interpolated strings must be of the form .['arg'op ? x], with `arg` the (optional) argument and `op` an operator.",
               "\nPROBLEM: `", op, "` is not a valid operator. ", sugg_txt,
-              "\n  type dsb('--help') for more help or dsb(help = 'word').",
+              "\n  Type dsb('--help') for more help or dsb(help = 'word').",
               "\n  Examples: .[', *'S, 'a => b'r ? var] first splits the variable var by commas then replaces every 'a' with a 'b'",
               '\n            x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")')
 
@@ -1929,7 +1822,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       
       for(i in 1:n_res){
         if(is_open[i]){
-          all_elements[[i]] = string_ops_internal(res[i], is_dsb = is_dsb, frame = frame,
+          all_elements[[i]] = smagick_internal(res[i], is_dsb = is_dsb, frame = frame,
                                                   check = check, fun_name = fun_name)  
         } else {
           all_elements[[i]] = res[i]
@@ -1974,6 +1867,9 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     sep = argument
 
     if(!is.null(group_index) && conditional_flag == 2){
+      if(!is.character(x)){
+        x = as.character(x)
+      }
       res = cpp_paste_conditional(x, group_index, sep, sep_last)
       group_index = seq_along(res)
       
@@ -2021,31 +1917,12 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
 
     if(op %in% c("s", "S", "X", "x", "extract")){
-      # otherwise => dealt with in sma_is or sma_clean
+      # otherwise => dealt with in str_is or str_clean
       # we don't repeat the processing (otherwise => bugs)
       
-      pat_parsed = parse_regex_pattern(argument, c("word", "ignore", "fixed"), parse_logical = FALSE)
-      flags = pat_parsed$flags
-      argument = pat_parsed$patterns
-
-      is_fixed = is_fixed || "fixed" %in% flags
-      is_ignore = is_ignore || "ignore" %in% flags
-      is_word = is_word || "word" %in% flags
-      
-      if(is_word){
-        items = strsplit(argument, ",[ \t\n]+")[[1]]
-        if(is_fixed){
-          items = paste0("\\Q", items, "\\E")
-          is_fixed = FALSE
-        }
-        argument = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
-      }
-
-      if(is_ignore){
-        # ignore case
-        is_fixed = FALSE
-        argument = paste0("(?i)", argument)
-      }
+      pat_parsed = format_simple_regex_flags(argument, fixed = is_fixed, word = is_word, ignore = is_ignore)
+      argument = pat_parsed$pattern
+      is_fixed = pat_parsed$fixed
     } 
 
     #
@@ -2057,24 +1934,30 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
     
     if(op %in% c("s", "S")){
+      # strsplit applied to "" returns character(0)
+      # if occurring: need to fix
+      
       x_split = strsplit(x, argument, fixed = is_fixed, perl = !is_fixed)
+      
+      fix_empty = any(x == "")
 
       if(conditional_flag != 0){
         # we keep track of the group index
         x_len_all = lengths(x_split)
-        # I could avoid the last line... later
+        
+        if(fix_empty){
+          x_len_all[x_len_all == 0] = 1
+        }
+        
         group_index = rep(seq_along(x_len_all), x_len_all)
-        group_index = cpp_recreate_index(group_index)
+      }
+      
+      # Note that unlist removes empty strings
+      if(fix_empty){
+        x_split[x == ""] = ""
       }
 
-      # NOTA:
-      # strsplit returns stg of length 0 for empty strings, my algo then removes these elements
-      # should I drop them or keep them????
-      # ex: strsplit("", "m")
-
       res = unlist(x_split)
-
-      res = res[nchar(res) > 0]
       
     } else if(op %in% c("r", "R")){
       is_total = "total" %in% options
@@ -2084,7 +1967,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         pipe = " => "
       }
 
-      res = sma_clean(x, argument, pipe = pipe, sep = "", 
+      res = str_clean(x, argument, pipe = pipe, sep = "", 
                       ignore.case = is_ignore, fixed = is_fixed, word = is_word, 
                       total = is_total)
 
@@ -2126,8 +2009,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
       
     } else {
-      # default is sma_is
-      res = sma_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      # default is str_is
+      res = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
 
       if(op %in% c("get", "which")){
 
@@ -2630,7 +2513,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         # we allow only one special value
         n_x = length(x)
 
-        pat = c(":1:", ":i:", ":a:", ":I:", ":A:")
+        pat = c(":1:", ":01:", ":i:", ":a:", ":I:", ":A:")
 
         for(i in 1:2){
           tmp = if(i == 1) left else right
@@ -2643,6 +2526,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
               if(length(tmp_split) > 1){
                 txt = switch(p,
                              ":1:" = 1:n_x,
+                             ":01:" = str_fill(1:n_x, right = TRUE, symbol = "0"),
                              ":i:" = tolower(as.roman(1:n_x)),
                              ":I:" = as.character(as.roman(1:n_x)),
                              ":a:" = enum_letter(n_x),
@@ -2774,7 +2658,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
     }
     
-    res = sma_fill(x, argument, symbol = symbol, right = right, center = center)
+    res = str_fill(x, argument, symbol = symbol, right = right, center = center)
     
     
   } else if(op == "unik"){
@@ -2933,7 +2817,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       is_word = "word" %in% options
       is_ignore = "ignore" %in% options
 
-      qui = sma_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      qui = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
 
       res[qui] = ""
     }
@@ -2953,7 +2837,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       is_word = "word" %in% options
       is_ignore = "ignore" %in% options
 
-      qui = !sma_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      qui = !str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
       
       options = setdiff(options, c("fixed", "ignore", "word"))
       if("blank" %in% options){
@@ -3135,11 +3019,11 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       # REGEX
       
       if(check){
-        cond = check_expr(sma_is(x, cond_parsed), "The operation is of the form {bq?op}(cond ; true ; false). ",
-                            "When `cond` is a pure character string, the function `sma_is` is applied with `cond` being the searched pattern.",
+        cond = check_expr(str_is(x, cond_parsed), "The operation is of the form {bq?op}(cond ; true ; false). ",
+                            "When `cond` is a pure character string, the function `str_is` is applied with `cond` being the searched pattern.",
                             "\nPROBLEM: in {bq ! {op}({'_;;;_ => ;'R ? argument})}, the condition {bq?cond_raw} led to an error.")
       } else {
-        cond = sma_is(x, cond_parsed)
+        cond = str_is(x, cond_parsed)
       }      
       
     } else {
@@ -3245,7 +3129,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         } else {
           data = list()
         }
-        xi = string_ops_internal(instruction, is_dsb = is_dsb, data = data, frame = frame, check = check, 
+        xi = smagick_internal(instruction, is_dsb = is_dsb, data = data, frame = frame, check = check, 
                                 fun_name = fun_name)
       }
       
@@ -3489,7 +3373,7 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
          (op == "singular" && !IS_PLURAL && !(any(grepl("zero$", operators)) && IS_ZERO)) || 
          (op == "plural" && IS_PLURAL)){
           
-          value = string_ops_internal(argument, is_dsb = is_dsb, frame = frame,
+          value = smagick_internal(argument, is_dsb = is_dsb, frame = frame,
                                       slash = FALSE, check = check, fun_name = fun_name,
                                       plural_value = xi)
         if(value != ""){
@@ -3580,7 +3464,7 @@ sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
 
   # we allow nestedness only for single values
   if(length(res) == 1){
-    res = string_ops_internal(res, is_dsb = is_dsb, frame = frame,
+    res = smagick_internal(res, is_dsb = is_dsb, frame = frame,
                                 slash = FALSE, check = check, fun_name = fun_name)
   }
 

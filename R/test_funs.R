@@ -370,7 +370,7 @@ run_test = function(chunk, from){
       file_info = ""
       if(length(all_files) > 0){
         my_file = get("MY_FILE", env)
-        file_info = smagick("In file {'.+/'r, Q ? my_file}\n==> ")
+        file_info = smagick("In file {'/.+/'r, Q ? my_file}\n==> ")
       }
       
       offset = get("MY_OFFSET", env)

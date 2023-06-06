@@ -309,6 +309,10 @@ IntegerVector cpp_recreate_index(IntegerVector id){
   return res;
 }
 
+inline bool is_inside(std::vector<int> v, int key){
+  return std::find(v.begin(), v.end(), key) != v.end();
+}
+
 // [[Rcpp::export]]
 List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   // Limitation: multibyte strings are not handled properly
@@ -343,6 +347,8 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   //
   
   bool is_empty_flag = str[0] == '/';
+  bool is_escape = false;
+  std::vector<int> i_skip;
   
   if(is_empty_flag){
     i = 1;
@@ -357,8 +363,13 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
     bool is_slash = false;
     for(int j=0 ; j<n ; ++j){
       if(str[j] == '/'){
-        is_slash = true;
-        break;
+        if(j > 0 && str[j - 1] == '\\' && !(j > 1 && str[j - 2] == '\\')){
+          i_skip.push_back(j - 1);
+          is_escape = true;
+        } else {
+          is_slash = true;
+          break;
+        }
       }
     }
     
@@ -401,6 +412,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
         if(str[i] == ' '){
           // if a space: we checked it at "non valid character at position"
           i += 3;
+          break;
         } else if(str[i] == '/'){
           ++i;
           break;
@@ -434,7 +446,12 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   bool is_or_tmp = false;
 
   while(i < n){
+    
     while(i < n && !(parse_logical && (str[i] == '&' || str[i] == '|'))){
+      if(is_escape && is_inside(i_skip, i)){
+        ++i;
+        continue;
+      }
       pat_tmp += str[i++];
     }
 
@@ -456,6 +473,10 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
         is_or_tmp = str[i] == '|';
         i += 2;
       } else {
+        if(is_escape && is_inside(i_skip, i)){
+          ++i;
+          continue;
+        }
         pat_tmp += str[i++];
         if(i == n){
           patterns.push_back(pat_tmp);

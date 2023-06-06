@@ -153,119 +153,6 @@ ascii_convert_manual = function(x, type = c("all", "upper", "lower")){
 #### internal ####
 ####
 
-format_help = function(x, pattern = NULL){
-  # x: help message
-
-  do_select = !is.null(pattern) && !isTRUE(pattern)
-
-  text = x
-  select = logical(length(x))
-
-  for(i in seq_along(pattern)){
-    p = pattern[i]
-
-    p_raw = p
-    first_char = substr(p, 1, 1)
-
-    if(first_char == "#"){
-      # fixed char search
-      p = substr(p, 2, nchar(p))
-      qui = grepl(p, x, fixed = TRUE)
-
-    } else if(first_char %in% c("@", "^")){
-      # regex or pmatch
-      p = substr(p, 2, nchar(p))
-      if(first_char == "^"){
-        p = paste0("(?i)(^| )\\Q", p, "\\E")
-      }
-      qui = grepl(p, x, perl = TRUE)
-
-    } else {
-      p = paste0("(?i)(^| )\\Q", p, "\\Es?( |$)")
-      qui = grepl(p, x, perl = TRUE)
-    }
-
-    if(!any(qui)){
-      stop_up("In argument `help`, the pattern `", p_raw, "` did not match any element of the help.")
-    }
-
-    select = select | qui
-  }
-
-  if(do_select){
-    # We select the section
-    # of each selected line
-
-    line_id = which(qui)
-    section_id = which(substr(x, 1, 3) != "   " & x != "")
-    empty_id = which(x == "")
-
-    start = end = c()
-    for(i in seq_along(line_id)){
-      line = line_id[i]
-      start[i] = max(section_id[section_id <= line])
-      if(line == length(x)){
-        end[i] = line
-      } else {
-        end[i] = min(empty_id[empty_id > line])
-      }
-
-    }
-
-    info = cbind(start, end)
-    info = info[!duplicated(info[, 1]), ]
-
-    text = c()
-    for(i in 1:nrow(info)){
-      text = c(text, x[info[i, 1]:info[i, 2]])
-    }
-
-    arrow_id = which(text %in% x[line_id])
-    arrows = rep("   ", length(text))
-    arrows[arrow_id] = "-> "
-  }
-
-  # we format the tabs
-  if(any(sma_is(text, "#_TAB_"))){
-
-    qui_tabs = sma_is(text, "#_TAB_")
-    tabs_split = strsplit(text[qui_tabs], "_TAB_", fixed = TRUE)
-
-    tabs_mat = do.call(rbind, tabs_split)
-    tabs_mat = apply(tabs_mat, 2, format)
-
-    # we correct the backslashes not "properly" (in our context) formatted by format
-    col = tabs_mat[, 2]
-    nmax = max(nchar(col))
-
-    if(any(nchar(col) < nmax)){
-      qui = nchar(col) < nmax
-      str_short = col[qui]
-      tabs_mat[qui, 2] = substr(paste0(str_short, "           "), 1, nmax)
-    }
-
-    tabs_mat[, 3] = gsub(" +$", "", tabs_mat[, 3])
-
-    tabs_fmt = paste(tabs_mat[, 1], tabs_mat[, 2], tabs_mat[, 3])
-
-    text[qui_tabs] = tabs_fmt
-  }
-
-  if(any(sma_is(text, "#---|"))){
-    # we format the sections
-    qui_sec = sma_is(text, "#---|")
-
-    text[qui_sec] = .dsb(".[55k ! .['|'r ? text[qui_sec]].[55*c ! -]]|")
-  }
-
-  # we add the indicator of match
-  if(do_select){
-    text = paste0(arrows, text)
-  }
-
-  message(fit_screen(paste(text, collapse = "\n")))
-}
-
 bespoke_msg = function(x, fun_name = NULL){
   # function to write an error message curated for the current function
   # cat(bespoke_msg('x = 1:5; dsb("test.[3K ? x[-1]]")', ".smagick", FALSE))
@@ -1208,7 +1095,7 @@ eval_dt = function(call, data = list(), frame){
 
 # substitute to sprintf which does not handle char length properly
 # slower but safer
-simple_sma_fill = function(x, n = NULL, symbol = " ", right = FALSE, center = FALSE){
+simple_str_fill = function(x, n = NULL, symbol = " ", right = FALSE, center = FALSE){
   
   x_nc = nchar(x)
   if(is.null(n)){
@@ -1240,3 +1127,32 @@ simple_sma_fill = function(x, n = NULL, symbol = " ", right = FALSE, center = FA
   
   x
 }
+
+
+
+renvir_get = function(key){
+  # Get the values of envir variables
+  # we also evaluate them
+
+  value_raw = Sys.getenv(key)
+
+  if(value_raw == ""){
+      return(NULL)
+  }
+
+  # Any default value should be able to be evaluated "as such"
+  value_clean = gsub("__%%;;", "\n", value_raw)
+  value_clean = gsub("&quot;", '"', value_clean)
+  value_clean = gsub("&apos;", "'", value_clean)
+
+  value = eval(str2lang(value_clean))
+
+  return(value)
+}
+
+is_smagick_root = function(){
+  isTRUE(renvir_get("smagick_ROOT"))
+}
+
+
+

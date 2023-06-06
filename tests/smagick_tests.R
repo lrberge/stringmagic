@@ -59,7 +59,7 @@ txt = smagick("He said: {'f/...'s ? x}")
 test(txt, c("He said: Cogito", "He said: Ergo", "He said: Sum"))
 
 txt = smagick("He said: {'i / [cs]'s ? x}")
-test(txt, c("He said: ogito...Ergo...", "He said: um"))
+test(txt, c("He said: ", "He said: ogito...Ergo...", "He said: um"))
 
 
 
@@ -202,10 +202,10 @@ txt = smagick("A few quotes:\n{Q, 'i/mary | charles & !'get, '  'paste, '\n'c ? 
 test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
 
 x = c("It's me again.", "What do you mean a gain?", "Yes, again!", "Ah AGAIN, I thought A GAIN!")
-index = sma_op(x, "'gain'which.w.i")
+index = str_ops(x, "'gain'which.w.i")
 test(index, c(2, 4))
 
-index = sma_op(x, "'gain & .'is.fixed")
+index = str_ops(x, "'gain & .'is.fixed")
 test(index, c(TRUE, FALSE, FALSE, FALSE))
 
 # conditional
@@ -252,7 +252,7 @@ txt = dsb(".[title.force ? x]")
 test(txt, "Where Is Bryan? Bryan Is In The Kitchen.")
 
 txt = dsb(".[title.force.ignore ? x]")
-test(txt, "Where Is Bryan? Bryan Is In The Kitchen.")
+test(txt, "Where Is Bryan? Bryan Is in the Kitchen.")
 
 x = "results from a new estimator: a new hope"
 txt = dsb(".[title.i ? x]")
@@ -512,22 +512,22 @@ txt = smagick("The number{if(.N>1 ; 's are 'paste.front ; ' is 'paste.front), C 
 test(txt, "The number is 5.")
 
 #
-# append ####
+# insert ####
 #
 
 x = 1:2
-txt = smagick("{'0'append, ''c ? x}")
+txt = smagick("{'0'insert, ''c ? x}")
 test(txt, "012")
 
-txt = smagick("{'0'append.both, ''c ? x}")
+txt = smagick("{'0'insert.both, ''c ? x}")
 test(txt, "0120")
 
-txt = smagick("{'0'append.right, ''c ? x}")
+txt = smagick("{'0'insert.right, ''c ? x}")
 test(txt, "120")
 
 # conditional
 x = c("521", "aebc")
-test(smagick("{''S, ~('0'append, ''c), ' ; 'c ? x}"), "err")
+test(smagick("{''S, ~('0'insert, ''c), ' ; 'c ? x}"), "err")
 
 #
 # fill ####
@@ -583,7 +583,7 @@ test(txt, "They arrived first and sixth.")
 
 x = c(1, 6)
 txt = smagick("They won {ntimes, C ? x}.")
-test(txt, "They won 1 time and 6 times.")
+test(txt, "They won once and 6 times.")
 
 txt = smagick("They won {Ntimes, C ? x}.")
 test(txt, "They won once and six times.")
@@ -616,7 +616,7 @@ x = c("bonjour les gens", "la pluie", "est drue, je rentre")
 txt = smagick("Number of words: {' 'S, ~(len), C ? x}.")
 test(txt, "Number of words: 3, 2 and 4.")
 
-num = sma_op(x, "' 'S, ~(len), num")
+num = str_ops(x, "' 'S, ~(len), num")
 test(num, c(3, 2, 4))
 
 #
@@ -688,7 +688,7 @@ test(txt, "laura-and, charles-and, charly-and and june")
 #
 
 x = "parse55this"
-txt = sma_op(x, "'\\d+'x, num")
+txt = str_ops(x, "'\\d+'x, num")
 test(txt, 55)
 
 x = c("55", "abc")

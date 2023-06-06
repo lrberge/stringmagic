@@ -35,7 +35,7 @@
 #' cars = row.names(mtcars)
 #' 
 #' # let's get the brands starting with an "m"
-#' sma_op(cars, "'i/^m'get, x, unik")
+#' str_op(cars, "'i/^m'get, x, unik")
 #' 
 #' # Explainer:
 #' # 'i/^m'get: keeps only the elements starting with an m,
@@ -48,7 +48,7 @@
 #' 
 #' 
 #' # let's get the 3 largest numbers appearing in the car models
-#' sma_op(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
+#' str_op(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
 #' 
 #' # Explainer:
 #' # '\\d+'x: extracts the first pattern, the pattern meaning "a succession"
@@ -60,7 +60,7 @@
 #' # 3 first: keeps only the first three elements
 #' 
 #' 
-sma_op = function(x, op, pre_unik = NULL){
+str_ops = function(x, op, pre_unik = NULL){
 
   if(missing(x)){
     stop("Argument `x` must be provided. PROBLEM: it is currently missing.")
@@ -85,7 +85,7 @@ sma_op = function(x, op, pre_unik = NULL){
     x_int = to_integer(x)
     x_small = x[!duplicated(x_int)]
 
-    res_small = sma_op(x_small, op, pre_unik = FALSE)
+    res_small = str_ops(x_small, op, pre_unik = FALSE)
     res = res_small[x_int]
   } else {
     operation = paste0("{", op, " ? x}")
@@ -146,9 +146,9 @@ sma_op = function(x, op, pre_unik = NULL){
 #' [regular expression flags](https://javascript.info/regexp-introduction).
 #' 
 #' Here the syntax is "flag1, flag2/pattern". That is: flags are a comma separated list of flag-names 
-#' separated from the pattern with a slash (`/`). Example: `sma_which(c("hello...", "world"), "fixed/.")` returns `1`. 
+#' separated from the pattern with a slash (`/`). Example: `str_which(c("hello...", "world"), "fixed/.")` returns `1`. 
 #' Here the flag "fixed" removes the regular expression meaning of "." which would have otherwise meant *"any character"*.
-#' The no-flag verion `sma_which(c("hello...", "world"), ".")` returns `1:2`.
+#' The no-flag verion `str_which(c("hello...", "world"), ".")` returns `1:2`.
 #' 
 #' Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
 #' comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".
@@ -159,77 +159,77 @@ sma_op = function(x, op, pre_unik = NULL){
 #' (among others) lose their special meaning and are treated for what they are: simple characters. 
 #' + "word" adds word boundaries (`"\\b"` in regex language) to the pattern. Further, the comma (`","`) 
 #' becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example: 
-#' `sma_clean("Am I ambushed?", "wi/am")` leads to " I ambushed?" thanks to the flags "ignore" and "word".
+#' `str_clean("Am I ambushed?", "wi/am")` leads to " I ambushed?" thanks to the flags "ignore" and "word".
 #'
 #' @return
 #' It returns a logical vector of the same length as `x`.
 #' 
-#' The function `sma_which` returns a numeric vector. 
+#' The function `str_which` returns a numeric vector. 
 #' 
 #' @author 
 #' Laurent R. Berge
 #' 
-#' @inheritSection sma_clean seealso
+#' @inheritSection str_clean seealso
 #'
 #' @examples
 #' 
-#' # NOTA: using `sma_get` instead of `sma_is` may lead to a faster understanding 
+#' # NOTA: using `str_get` instead of `str_is` may lead to a faster understanding 
 #' #       of the examples 
 #'
 #' x = dsb("/one, two, one... two, microphone, check")
 #'
 #' # default is regular expression search
 #' # => 3 character items
-#' sma_is(x, "^...$")
+#' str_is(x, "^...$")
 #'
 #' # to trigger fixed search use the flag 'fixed'
-#' sma_is(x, "fixed/...")
+#' str_is(x, "fixed/...")
 #' # you can just use the first letter
-#' sma_is(x, "f/...")
+#' str_is(x, "f/...")
 #'
 #' # to negate, use '!'
-#' sma_is(x, "!f/...")
+#' str_is(x, "!f/...")
 #' # or directly in the pattern
-#' sma_is(x, "f/!...")
+#' str_is(x, "f/!...")
 #'
 #' # you can combine several patterns with "&" or "|"
-#' sma_is(x, "one & c")
-#' sma_is(x, "one | c")
+#' str_is(x, "one & c")
+#' str_is(x, "one | c")
 #' 
 #' #
 #' # word: adds word boundaries
 #' #
 #' 
 #' # compare
-#' sma_is(x, "one")
+#' str_is(x, "one")
 #' # with
-#' sma_is(x, "w/one")
+#' str_is(x, "w/one")
 #' 
 #' # words can be chained with commas (it is like an OR logical operation)
-#' sma_is(x, "w/one, two")
+#' str_is(x, "w/one, two")
 #' # compare with
-#' sma_is(x, "w/one & two")
+#' str_is(x, "w/one & two")
 #' # remember that you can still negate
-#' sma_is(x, "w/one & !two")#' 
+#' str_is(x, "w/one & !two")#' 
 #' 
 #' # you can combine the flags
 #' # compare
-#' sma_is(x, "w/ONE")
+#' str_is(x, "w/ONE")
 #' # with
-#' sma_is(x, "wi/ONE")
+#' str_is(x, "wi/ONE")
 #'
 #' #
-#' # sma_which
+#' # str_which
 #' #
 #'
-#' # it works exactly the same way as sma_is
+#' # it works exactly the same way as str_is
 #' # Which are the items containing an 'e' and an 'o'?
-#' sma_which(x, "e", "o")
+#' str_which(x, "e", "o")
 #' # equivalently
-#' sma_which(x, "e & o")
+#' str_which(x, "e & o")
 #'
 #'
-sma_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
+str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
                   or = FALSE, pattern = NULL){
 
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
@@ -332,8 +332,8 @@ sma_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   res
 }
 
-#' @describeIn sma_is Returns the indexes of the values in which a pattern is detected
-sma_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
+#' @describeIn str_is Returns the indexes of the values in which a pattern is detected
+str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
                      or = FALSE, pattern = NULL){
 
   check_character(pattern, null = TRUE, no_na = TRUE)
@@ -344,37 +344,37 @@ sma_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     pattern = unlist(dots)
   }
 
-  which(sma_is(x, fixed = fixed, ignore.case = ignore.case, word = word, or = or, pattern = pattern))
+  which(str_is(x, fixed = fixed, ignore.case = ignore.case, word = word, or = or, pattern = pattern))
 }
 
 #' Gets elements of a character vector
 #'
 #' Convenient way to get elements from a character vector.
 #'
-#' @inheritParams sma_is
+#' @inheritParams str_is
 #'
 #' @param x A character vector.
 #' @param seq Logical, default is `FALSE`. The argument `pattern` accepts a vector of 
 #' patterns which are combined with an `and` by default. If `seq = TRUE`, then it is like 
-#' if `sma_get` was called sequentially with its results stacked. See examples.
+#' if `str_get` was called sequentially with its results stacked. See examples.
 #' @param seq.unik Logical, default is `FALSE`. The argument `...` (or the argument `pattern`) accepts 
 #' a vector of patterns which are combined with an `and` by default. If `seq.unik = TRUE`, then 
-#' `sma_get` is called sequentially with its results stacked, and `unique()` is 
+#' `str_get` is called sequentially with its results stacked, and `unique()` is 
 #' applied in the end. See examples.
 #' 
 #' @details 
-#' This function is a wrapper to [sma_is()].
+#' This function is a wrapper to [str_is()].
 #' 
-#' @inheritSection sma_is Generic pattern flags
+#' @inheritSection str_is Generic pattern flags
 #' 
 #' @section Caching:
 #' 
 #' In an exploratory stage, it can be useful to quicky get values from a vector with the 
-#' least hassle as possible. Hence `sma_get` implements caching, so that users do not need
+#' least hassle as possible. Hence `str_get` implements caching, so that users do not need
 #' to repeat the value of the argument `x` in successive function calls, and can concentrate
 #' only on the selection patterns.
 #' 
-#' Caching is a feature only available when the user calls `sma_get` from the global environment.
+#' Caching is a feature only available when the user calls `str_get` from the global environment.
 #' If that feature were available in regular code, it would be too dangerous, likely leading to hard to debug bugs. 
 #' Hence caching is disabled when used within code (i.e. inside a function or inside an 
 #' automated script), and function calls without the main argument will lead to errors in such scripts.
@@ -385,7 +385,7 @@ sma_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' @return
 #' It always return a character vector.
 #' 
-#' @inheritSection sma_clean seealso
+#' @inheritSection str_clean seealso
 #' 
 #'
 #' @examples
@@ -393,30 +393,30 @@ sma_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' x = rownames(mtcars)
 #'
 #' # find all Mazda cars
-#' sma_get(x, "Mazda")
+#' str_get(x, "Mazda")
 #' # same with ignore case flag
-#' sma_get(x, "i/mazda")
+#' str_get(x, "i/mazda")
 #' 
 #' # all cars containing a single digit (we use the 'word' flag)
-#' sma_get(x, "w/\\d")
+#' str_get(x, "w/\\d")
 #'
 #' # finds car names without numbers AND containing `u`
-#' sma_get(x, "!\\d", "u")
+#' str_get(x, "!\\d", "u")
 #' # equivalently
-#' sma_get(x, "!\\d & u")
+#' str_get(x, "!\\d & u")
 #'
 #' # Stacks all Mazda and Volvo cars. Mazda first
-#' sma_get(x, "Mazda", "Volvo", seq = TRUE)
+#' str_get(x, "Mazda", "Volvo", seq = TRUE)
 #'
 #' # Stacks all Mazda and Volvo cars. Volvo first
-#' sma_get(x, "Volvo", "Mazda", seq = TRUE)
+#' str_get(x, "Volvo", "Mazda", seq = TRUE)
 #'
 #' # let's get the first word of each car name
-#' car_first = sma_op(x, "extract.first")
+#' car_first = str_op(x, "extract.first")
 #' # we select car brands ending with 'a', then ending with 'i'
-#' sma_get(car_first, "a$", "i$", seq = TRUE)
+#' str_get(car_first, "a$", "i$", seq = TRUE)
 #' # seq.unik is similar to seq but applies unique()
-#' sma_get(car_first, "a$", "i$", seq.unik = TRUE)
+#' str_get(car_first, "a$", "i$", seq.unik = TRUE)
 #' 
 #' #
 #' # flags
@@ -425,14 +425,14 @@ sma_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' # you can combine the flags
 #' x = dsb("/One, two, one... Two!, Microphone, check")
 #' # regular
-#' sma_get(x, "one")
+#' str_get(x, "one")
 #' # ignore case
-#' sma_get(x, "i/one")
+#' str_get(x, "i/one")
 #' # + word boundaries
-#' sma_get(x, "iw/one")
+#' str_get(x, "iw/one")
 #' 
 #' # you can escape the meaning of ! with backslashes
-#' sma_get(x, "\\!")
+#' str_get(x, "\\!")
 #' 
 #' #
 #' # Caching
@@ -445,16 +445,16 @@ sma_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' if(interactive() && identical(sys.frame(), .GlobalEnv)){
 #'    
 #'    # first run, the data is cached
-#'    sma_get(row.names(mtcars), "i/vol")
+#'    str_get(row.names(mtcars), "i/vol")
 #' 
 #'    # now you don't need to specify the data
-#'    sma_get("i/^m & 4")
+#'    str_get("i/^m & 4")
 #' }
 #'
 #'
 #'
 #'
-sma_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
+str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
                    or = FALSE, seq = FALSE, seq.unik = FALSE, pattern = NULL){
 
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
@@ -466,12 +466,12 @@ sma_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   is_caching = FALSE
   if(interactive() && identical(parent.frame(), .GlobalEnv)){
     mc = match.call()
-    if(is.character(mc$x) && !is.null(getOption("stringmagick_sma_get_cache"))){
+    if(is.character(mc$x) && !is.null(getOption("stringmagick_str_get_cache"))){
       is_caching = TRUE
       x_pattern = x
-      x = getOption("stringmagick_sma_get_cache")
+      x = getOption("stringmagick_str_get_cache")
     } else if(length(x) > 1){
-      options(stringmagick_sma_get_cache = x)
+      options(stringmagick_str_get_cache = x)
     }
   }
 
@@ -498,7 +498,7 @@ sma_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 
   if(seq){
     for(i in seq_along(pattern)){
-      value = sma_get(x, pattern = pattern[i], or = or, seq = FALSE, 
+      value = str_get(x, pattern = pattern[i], or = or, seq = FALSE, 
                       fixed = fixed, ignore.case = ignore.case, word = word)
       if(i == 1){
         res = value
@@ -514,7 +514,7 @@ sma_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     return(res)
   }
 
-  index = sma_is(x, fixed = fixed, ignore.case = ignore.case, word = word, pattern = pattern, or = or)
+  index = str_is(x, fixed = fixed, ignore.case = ignore.case, word = word, pattern = pattern, or = or)
   x[index]
 }
 
@@ -545,7 +545,7 @@ sma_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #'  the identifiers are not unique, it is not possible to reconstruct the original texts.
 #' @param fixed Logical, default is `FALSE`. Whether to consider the argument `split` 
 #' as fixed (and not as a regular expression).
-#' @param dt Logical, default is `FALSE`. Whether to return a `data.table`. See also the function `sma_split2dt`.
+#' @param dt Logical, default is `FALSE`. Whether to return a `data.table`. See also the function `str_split2dt`.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -553,7 +553,7 @@ sma_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' ii) `pos`: the position of the text element in the initial string (optional, via add.pos), 
 #' iii) the text element, iv) the identifier(s) (optional, only if `id` was provided).
 #' 
-#' @inheritSection sma_clean seealso
+#' @inheritSection str_clean seealso
 #' 
 #' @examples
 #'
@@ -563,10 +563,10 @@ sma_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' id = c("ws", "jmk")
 #'
 #' # we split at each word
-#' sma_split2df(x, "[[:punct:] ]+")
+#' str_split2df(x, "[[:punct:] ]+")
 #'
 #' # we add the 'id'
-#' sma_split2df(x, "[[:punct:] ]+", id = id)
+#' str_split2df(x, "[[:punct:] ]+", id = id)
 #'
 #' # TO NOTE:
 #' # - the second argument is `data`
@@ -577,7 +577,7 @@ sma_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' # using the formula
 #'
 #' base = data.frame(text = x, my_id = id)
-#' sma_split2df(text ~ my_id, base, "[[:punct:] ]+")
+#' str_split2df(text ~ my_id, base, "[[:punct:] ]+")
 #'
 #' #
 #' # with 2+ identifiers
@@ -585,13 +585,13 @@ sma_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' base = within(mtcars, carname <- rownames(mtcars))
 #'
 #' # we have a message because the identifiers are not unique
-#' sma_split2df(carname ~ am + gear + carb, base, " +")
+#' str_split2df(carname ~ am + gear + carb, base, " +")
 #'
 #' # adding the position of the words & removing the message
-#' sma_split2df(carname ~ am + gear + carb, base, " +", id_unik = FALSE, add.pos = TRUE)
+#' str_split2df(carname ~ am + gear + carb, base, " +", id_unik = FALSE, add.pos = TRUE)
 #'
 #'
-sma_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE,
+str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE,
                         id_unik = TRUE, fixed = FALSE, ignore.case = FALSE,
                         word = FALSE, dt = FALSE, ...){
 
@@ -832,12 +832,12 @@ sma_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
   res
 }
 
-#' @describeIn sma_split2df Splits a string vector and returns a `data.table`
-sma_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE,
+#' @describeIn str_split2df Splits a string vector and returns a `data.table`
+str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE,
                         id_unik = TRUE, fixed = FALSE){
 
   mc = match.call()
-  sma_split2df(x, data = data, split = split, id = id, add.pos = add.pos,
+  str_split2df(x, data = data, split = split, id = id, add.pos = add.pos,
                id_unik = id_unik, fixed = fixed, mc = mc, dt = TRUE)
 }
 
@@ -846,7 +846,7 @@ sma_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #'
 #' Recursively cleans a character vector from several patterns. Quickly handle the 
 #' tedious task of data cleaning by taking advantage of the syntax.
-#' You can also apply all sorts of cleaning operations by summoning [[sma_op]] operations.
+#' You can also apply all sorts of cleaning operations by summoning [[str_op]] operations.
 #'
 #' @param x A character vector.
 #' @param ... Character scalars representing patterns. A pattern is of the form
@@ -859,44 +859,44 @@ sma_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' The flag `total` leads to a *total replacement* of the string if the pattern is found. Use flags
 #' with comma separation ("word, total/pat") or use only their initials ("wt/pat").
 #' 
-#' Starting with an '@' leads to operations in [sma_op]. Ex: "@ascii, l, ws" turns
-#' the string into ASCII, lowers the case and normalizes white spaces (see help of [sma_ops]).
+#' Starting with an '@' leads to operations in [str_op]. Ex: "@ascii, l, ws" turns
+#' the string into ASCII, lowers the case and normalizes white spaces (see help of [str_ops]).
 #' @param pipe Character scalar, default is `" => "`. If thevalue of `pipe` is found in a pattern,
 #' then the string is split w.r.t. the pipe and anything after the pipe becomes the replacement.
 #' 
-#' For example in `sma_clean(x, "e => a")` the default pipe is found in "e => a", so the pattern 
-#' "e" will be replaced with "a". In other terms, this is equivalent to `sma_clean(x, "e", replacement = "a")`.
-#' Example changing the pipe: you can obtain the previous result with `sma_clean(x, "e|>a", pipe = "|>")`.
+#' For example in `str_clean(x, "e => a")` the default pipe is found in "e => a", so the pattern 
+#' "e" will be replaced with "a". In other terms, this is equivalent to `str_clean(x, "e", replacement = "a")`.
+#' Example changing the pipe: you can obtain the previous result with `str_clean(x, "e|>a", pipe = "|>")`.
 #' @param sep Character scalar, default is `",[ \t\n]+"` (which means a comma followed with spaces 
 #' and/or new lines). By default the patterns to be replaced are comma separated, that is 
 #' the pattern is split w.r.t. the argument `sep` and a replacement is done for each sub-pattern.
 #' 
 #' Use `NULL` or the empty string to disable pattern separation.
 #' 
-#' For example: let's look at `sma_clean(x, "w/one, two => three")`. First the flag "word" is extracted from
+#' For example: let's look at `str_clean(x, "w/one, two => three")`. First the flag "word" is extracted from
 #' the pattern (see arg. `...`) as well as the replacement (see arg. `pipe`), leading to "one, two" the 
 #' pattern to be replaced. Then the pattern is split w.r.t. `sep`, leading 
 #' to two patterns "one" and "two". Hence the words (thanks to the flag "w") "one" and "two" from
 #' the string `x` will be replaced with "three".
 #' @param replacement Character scalar, default is the empty string. It represents the default 
 #' value by which the patterns found in the character strings will be replaced. For example
-#' `sma_clean(x, "e", replacement = "a")` turn all letters "e" in `x` into "a".
+#' `str_clean(x, "e", replacement = "a")` turn all letters "e" in `x` into "a".
 #' @param total Logical scalar, default is `FALSE`. If `TRUE`, then when a pattern is found 
 #' in a string, the full string is replaced (instead of just the pattern). Note, *importantly*, 
 #' that when `total = TRUE` you can use logical operators in the patterns.
 #' 
-#' Example: `sma_clean(x, "wi/ & two, three & !four => ", total = TRUE)`
+#' Example: `str_clean(x, "wi/ & two, three & !four => ", total = TRUE)`
 #'
 #' @return
 #' The main usage returns a character vector of the same length as the vector in input.
-#' Note, however, that since you can apply arbitrary [sma_op] operations, the length and type
+#' Note, however, that since you can apply arbitrary [str_op] operations, the length and type
 #' of the final vector may depend on those (if they are used).
 #' 
 #' @author 
 #' Laurent R. Berge
 #' 
 #' @seealso 
-#' A few basic operation: [sma_is()], [sma_get()], [sma_clean()]. Chain basic operations with [sma_op()]. 
+#' A few basic operation: [str_is()], [str_get()], [str_clean()]. Chain basic operations with [str_op()]. 
 #' String interpolation combined with operation chaining: [smagick()].
 #'
 #' @examples
@@ -904,20 +904,20 @@ sma_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' x = c("hello world  ", "it's 5 am....")
 #'
 #' # we clean the o's and the points (we use 'fixed' to trigger fixed-search)
-#' sma_clean(x, c("o", "f/."))
+#' str_clean(x, c("o", "f/."))
 #' # equivalently
-#' sma_clean(x, "fixed / o, .")
+#' str_clean(x, "fixed / o, .")
 #' # equivalently
-#' sma_clean(x, "o, .", fixed = TRUE)
+#' str_clean(x, "o, .", fixed = TRUE)
 #' # equivalently
-#' sma_clean(x, "o", ".", fixed = TRUE)
+#' str_clean(x, "o", ".", fixed = TRUE)
 #' 
 #' #
 #' # chaining operations: example using cars
 #' #
 #' 
 #' cars = row.names(mtcars)
-#' new = sma_clean(cars, 
+#' new = str_clean(cars, 
 #'            # replace strings containing "Maz" with Mazda
 #'            "total / Maz => Mazda", 
 #'            # replace the word 'Merc' with Mercedes
@@ -930,7 +930,7 @@ sma_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' cbind(cars, new)
 #'
 #'
-sma_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+", 
+str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+", 
                      ignore.case = FALSE, fixed = FALSE, word = FALSE, total = FALSE){
 
   x = check_set_character(x, l0 = TRUE)
@@ -962,16 +962,16 @@ sma_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
     di = dots[[i]]
     
     first_char = substr(di, 1, 1)
-    is_sma_op = FALSE
+    is_str_op = FALSE
     if(first_char == "\\" && substr(di, 2, 2) == "@"){
       di = substr(di, 2, nchar(di))
     } else if(first_char == "@" && nchar(di) > 1){
-      is_sma_op = TRUE
+      is_str_op = TRUE
       di = substr(di, 2, nchar(di))
     }
 
-    if(is_sma_op){
-      res = sma_op(res, di)
+    if(is_str_op){
+      res = str_ops(res, di)
       next
     }
 
@@ -1092,7 +1092,7 @@ sma_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' @details 
 #' If you use character filling of the form `sprintf("% 20s", x)` with `x``containing multibyte characters,
 #' you may be suprised that all character strings do not end up at the same lenght (the occurrence of this problem
-#' depends on many things: encodings are a mess). `sma_fill`
+#' depends on many things: encodings are a mess). `str_fill`
 #' uses only base R functions to compensate this. It is slightly slower but, in general, safer. 
 #' 
 #' It also looks a bit like [base::format()], but slightly different (and a bit faster, but more restrictive).
@@ -1100,29 +1100,29 @@ sma_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' @author 
 #' Laurent R. Berge
 #' 
-#' @inheritSection sma_clean seealso
+#' @inheritSection str_clean seealso
 #' 
 #' @examples 
 #' 
 #' x = c("apple", "pineapple") 
 #' 
 #' # simple fill with blank
-#' cat(paste0(sma_fill(x), ":", c(3, 7), "€"), sep = "\n")
+#' cat(paste0(str_fill(x), ":", c(3, 7), "€"), sep = "\n")
 #' 
 #' # center fill
-#' cat(paste0(sma_fill(x, center = TRUE), ":", c(3, 7), "€"), sep = "\n")
+#' cat(paste0(str_fill(x, center = TRUE), ":", c(3, 7), "€"), sep = "\n")
 #' 
 #' # changing the length of the fill and the symbol used for filling
-#' cat(paste0(sma_fill(x), ":", sma_fill(c(3, 7), 3, "0", right = TRUE), "€"), sep = "\n")
+#' cat(paste0(str_fill(x), ":", str_fill(c(3, 7), 3, "0", right = TRUE), "€"), sep = "\n")
 #' 
 #' # na behavior: default/NA/other
 #' x = c("hello", NA) 
-#' sma_fill(x)
-#' sma_fill(x, na = NA)
-#' sma_fill(x, na = "(missing)")
+#' str_fill(x)
+#' str_fill(x, na = NA)
+#' str_fill(x, na = "(missing)")
 #' 
 #' 
-sma_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = FALSE, na = "NA"){
+str_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = FALSE, na = "NA"){
   # Character vectors starting with " " are not well taken care of
 
   x = check_set_character(x, l0 = TRUE)
@@ -1154,7 +1154,7 @@ sma_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = FALS
     return(x)
   }
   
-  x_new = simple_sma_fill(x[qui], n, symbol, right = right, center = center)
+  x_new = simple_str_fill(x[qui], n, symbol, right = right, center = center)
 
   res = x
   res[qui] = x_new
@@ -1236,6 +1236,34 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
   res
 }
 
+format_simple_regex_flags = function(pattern, ignore = FALSE, word = FALSE, fixed = FALSE){
+  
+  new_regex = parse_regex_pattern(pattern, c("ignore", "word", "fixed"), FALSE)
+  
+  pattern = new_regex$patterns
+  is_ignore = "ignore" %in% new_regex$flags || ignore
+  is_word = "word" %in% new_regex$flags || word
+  is_fixed = "fixed" %in% new_regex$flags || fixed
+  
+  if(is_word){
+    items = strsplit(pattern, ",[ \t\n]+")[[1]]
+    if(is_fixed){
+      items = paste0("\\Q", items, "\\E")
+      is_fixed = FALSE
+    }
+    pattern = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
+  }
+
+  if(is_ignore){
+    # ignore case
+    is_fixed = FALSE
+    pattern = paste0("(?i)", pattern)
+  }
+  
+  res = list(pattern = pattern, fixed = is_fixed)
+  
+  return(res)
+}
 
 to_integer = function(x){
   # x: vector or a list of vectors
