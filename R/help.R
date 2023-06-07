@@ -10,9 +10,8 @@
 
 setup_help_compact = function(){
 
-
   msg = c(
-    "# Welcome to smagick help",
+    "# Welcome to smagick compact help (also try smagick(help = TRUE) for more extensive help)",
     "Usage: smagick(s) with 's' a character string",
     " ",
     "# BASIC usage -------------------------|",
@@ -68,7 +67,7 @@ setup_help_compact = function(){
     "  Two condition operators: `if` and `vif`",
     "    - if(cond ; ops_true ; ops_false): ops_true = operations applied if TRUE",
     "    - vif(cond ; verb_true ; verb_false): verb_true = replacement text if TRUE ",
-    "  The condition cond accept the special values '.' (=the variable), ",
+    "  The condition cond accepts the special values '.' (=the variable), ",
     "  '.len' (alias '.N') and `.nchar` (alias `.C`).",
     "",
     "# PLURALIZATION -----------------------|",
@@ -102,7 +101,6 @@ setup_help_compact = function(){
     '  Ex: n = 3 ; smagick("{`n`times.c!$}") -> "$$$". The \'$\' is replicated n times, then collapsed.'
   )
 
-
   options("smagick_help_compact" = msg)
 }
 
@@ -115,7 +113,7 @@ generate_help_extensive = function(){
   mtime_origin = floor(as.numeric(file.info("R/smagick_main.R")["mtime"]))
   mtime_destination = readLines("R/AUTO_help.R", n = 1)
   mtime_destination = str_ops(mtime_destination, "x, num")
-  
+    
   if(mtime_origin <= mtime_destination){
     return(NULL)
   }  
@@ -434,7 +432,7 @@ general_help = function(){
     
     choice_fmt = try(eval(str2lang(.sma("c({choice})"))), silent = TRUE)
     if(inherits(choice_fmt, "try-error")){
-      message(fit_screen(.sma("Sorry the parsing failed, please provided a comma separated ", 
+      message(fit_screen(.sma("Sorry the parsing failed, please provide a comma separated ", 
                               "list of numbers, like '1, 2, 6' for example.")))
     } else {
       break

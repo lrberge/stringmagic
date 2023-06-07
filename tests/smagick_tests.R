@@ -854,4 +854,43 @@ txt = smagick("bon{xplode!jour}")
 test(txt, c("bonj", "bono", "bonu", "bonr"))
 
 
+#
+# errors ####
+#
+
+# the problem is direct for special interpolations: $, #, &
+# for regular operations, this is more complicated:
+# - 
+
+# without nesting
+smagick("hi {there")
+
+smagick("hi {upper ! there")
+
+smagick("hi {S, ''S, ~(first ! bon, jour}")
+
+smagick("hi {$(bon) ! jour}")
+
+smagick("hi {&bonjour}")
+
+smagick("hi {&bonjour ; jour}")
+
+# with nesting
+smagick("hi {&TRUE ; {upper ! jour ; voir}")
+
+smagick("hi {&TRUE ; {upperest ! jour} ; voir}")
+
+smagick("hi {&TRUE ; {upperest ? jour} ; voir}")
+
+smagick("hi {&bonjour ; jour}")
+
+smagick("error operation: {dtime ! ohohoh}")
+
+smagick("error operation: {if(1:5 ; upper ; lower) ! ohohoh}")
+
+smagick("error operation: {if(fakfak; upper ; lower) ! ohohoh}")
+
+smagick("error operation: {if(fakfak%m; upper ; lower) ! ohohoh}")
+
+smagick("error operation: {S, ~(sekg) ! ohohoh, hihihi}")
 

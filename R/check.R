@@ -422,56 +422,215 @@ check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
   res
 }
 
-warn_no_named_dots = function(dots){
-  if(!is.null(names(dots))){
-    args_fun = names(formals(sys.function(sys.parent())))
-    args_fun = setdiff(args_fun, "...")
 
-    dot_names = names(dots)
-    dot_names = dot_names[nchar(dot_names) > 0]
-    sugg_txt = suggest_item(dot_names[1], args_fun, info = "argument")
 
-    warn_up("The arguments in `...` shall not have names. The name{$s, enum.bq ? dot_names}",
-            " may refer to {$(an;some)} argument{$s}?", sugg_txt)
-
+get_smagick_context = function(){
+  # this is specific to functions running within smagick_internal
+  
+  up = 1
+  while(!get0("is_smagick_internal", parent.frame(up), inherits = FALSE, ifnotfound = FALSE)){
+    up = up + 1
+    if(identical(parent.frame(up), .GlobalEnv)){
+      stop("Internal error: is_smagick_internal not found when it should have been.")
+    }
   }
-}
-
-warn_up = function (..., up = 1, immediate. = FALSE, verbatim = FALSE){
-
-  if(verbatim){
-    message = paste0(...)
+  
+  x = get("x", parent.frame(up))
+  is_dsb = get("is_dsb", parent.frame(up))
+  
+  x_parsed = get("x_parsed", parent.frame(up))
+  i = get("i", parent.frame(up))
+  n = get("n", parent.frame(up))
+    
+  xi = x_parsed[[i]]
+  ops = str_ops(xi[[1]], "', 'c, ', ([?!])$ => \\1'r")
+  context_specific = paste0(ops, xi[[2]])
+  
+  browser()
+  
+  if(is_dsb){
+    context_specific = paste0(".[", context_specific, "]")
   } else {
-    message = smagick(..., frame = parent.frame())
+    context_specific = paste0("{", context_specific, "}")
   }
   
-  mc = match.call()
-
-  if (!"up" %in% names(mc)) {
-      up_value = mget("DREAMERR__UP", parent.frame(), ifnotfound = 1)
-
-      up = up_value[[1]]
-  }
-
-  my_call = deparse(sys.calls()[[max(1, sys.nframe() - (1 + up))]])[1]
+  # normalizing newlines or very confusing
+  x = gsub("\n", "\\\\n", x)
+  context_specific = gsub("\n", "\\\\n", context_specific)
   
-  nmax = 50
-  if (nchar(my_call) > nmax){
-    my_call = paste0(substr(my_call, 1, nmax - 1), "...")
+  # normalizing the if-else semi-colon
+  x = gsub("_;;;_", ";", x)
+  context_specific = gsub("_;;;_", ";", context_specific)
+  
+  same_context = gsub(" ", "", x) == gsub(" ", "", context_specific)
+  
+  if(same_context){
+    res = .sma("CONTEXT: Problem found in {bq?context_specific}.")
+  } else {
+    closing = if(is_dsb) "]" else "}"
+    closing_pblm = i == n && paste0(str_x(x, -3), closing) == str_x(context_specific, -4)
+    
+    if(closing_pblm){
+      context_specific = str_trim(context_specific, -1)
+    }
+    
+    res = .sma("CONTEXT: Problem found in {'80|..'k, Q?x},",
+               "\n         when dealing with the interpolation {bq?context_specific}.")
+    
+    attr(res, "closing_pblm") = closing_pblm    
   }
+  
+  res    
+}
+
+check_set_smagick_parsing = function(x, check){
+  # x is a character string to be turned into an R expression
+  
+  if(check){
+    x_call = try(str2lang(x), silent = TRUE)
+  } else {
+    x_call = str2lang(x)
+    return(x_call)
+  }  
+  
+  if(inherits(x_call, "try-error")){
+    
+    context = get_smagick_context()
+    first_char = substr(x, 1, 1)
+    
+    if(isTRUE(attr(context, "closing_pblm"))){
+      msg = .dsb("PROBLEM: Very likely the problem comes from a bracket that has not been closed.",
+                 "\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
+                 ".[Q!Special interpolation: Pluralization]")
       
-  warning("In ", my_call, ":\n ", fit_screen(message),
-          call. = FALSE, immediate. = immediate.)
+    } else if(first_char %in% c("#", "$")){
+      msg = .dsb("PROBLEM: there is a syntax error in the pluralization (the ", 
+                  "interpolation starting with .[bq?first_char]).",
+                  "\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
+                  ".[Q!Interpolation and string operations: Principle]")
+      
+    } else if(first_char == "&"){
+      msg = .dsb("PROBLEM: there is a syntax error in the if-else (the ", 
+                  "interpolation starting with .['^&+'x, bq?x]).",
+                  "\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
+                  ".[Q!Special interpolation: if-else]")
+    } else {
+      if(grepl("[!?]", x)){
+        type = "2 (`{ops ? expr}`) or 3 (`{ops ! verbatim}`)"
+        if(!grepl("!", x)){
+          type = "2 (`{ops ? expr}`)"
+        } else if(!grepl("[?]", x)){
+          type = "3 (`{ops ! verbatim}`)"
+        }
+        
+        extra = .dsb("\nCurrently the interpolation has been parsed as the first case (`{expr}`).",
+                     "\nMaybe there is a syntax mistake preventing it to be interpreted as case .[type]?")
+      } else {
+        extra = "\nCurrently it seems that the expression to be interpolated is not a valid R expression."
+      }
+      
+      help_suggest = .dsb("\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
+                          ".[Q!Operations: General syntax]")
+      
+      msg = .dsb("PROBLEM: The expression could not be parsed. ",
+                  "\nINFO: Interpolations can be of the form `{expr}`, `{op1, op2?expr}`, or", 
+                  " `{op1, op2!verbatim}`. ",
+                  extra, help_suggest)
+    }
+    
+    .stop_hook(context, "\n", msg)
+    
+  }
+  
+  x_call
+}
+
+check_set_smagick_eval = function(call, data, frame, check){
+  # we need to eval the call
+  
+  is_dt = "dt_data" %in% names(attributes(frame))
+  
+  if(!check){
+    if(is_dt){
+      x = eval_dt(call, data, frame)
+    } else {
+      x = eval(call, data, frame)
+    }
+    
+  } else {
+    # now with check = TRUE
+    
+    if(is_dt){
+      x = try(eval_dt(call, data, frame), silent = TRUE)
+    } else {
+      x = try(eval(call, data, frame), silent = TRUE)
+    }
+    
+    if(inherits(x, "try-error")){
+      context = get_smagick_context()
+      call_dp = deparse_short(call)
+      
+      msg = .sma("PROBLEM: The expression {bq?call_dp} could not be evaluated, see error below:",
+                "\n{x}")
+                
+      stop_hook("{context}\n{msg}")
+    }
+  }  
+  
+  if(is.function(x)){
+    context = get_smagick_context()
+    call_dp = deparse_short(call)
+    msg = .sma("EXPECTATION: interpolated variables should be coercible to character strings.",
+               "\nPROBLEM: the expression {bq?call_dp} is a **function**. Please provide a character string.")
+    stop_hook("{context}\n{msg}")
+  }
+  
+  x
 }
 
 
+# oparg: operator's argument
+check_set_oparg_parse = function(argument, operator, check){
+  
+  if(check){
+    call = try(str2lang(argument), silent = TRUE)
+  } else {
+    call = str2lang(argument)
+    return(call)
+  }
+  
+  
+  if(inherits(call, "try-error")){
+    context = get_smagick_context()
+    msg = .sma("EXPECTATION: In operation \"{bq?argument}{operator}\" the argument ",
+               "in backticks is evaluated from the frame.",
+               "\nPROBLEM: {bq?argument} is not a valid R-expression, see parsing error below:",
+               "\n{call}")
+    stop_hook("{context}\n{msg}")
+  }
+  
+  call
+}
 
-setDreamerr_show_stack = function(show_full_stack = FALSE){
-
-  check_logical(show_full_stack, scalar = TRUE, mbt = TRUE)
-
-  options("dreamerr_show_full_stack" = show_full_stack)
-
+check_set_oparg_eval = function(call, frame, operator, check){
+  
+  if(check){
+    x = try(eval(call, frame), silent = TRUE)
+  } else {
+    x = eval(call, frame)
+    return(x)
+  }
+  
+  if(inherits(x, "try-error")){
+    context = get_smagick_context()
+    msg = .sma("EXPECTATION: In operation \"{bq?argument}{operator}\" the argument ",
+               "in backticks is evaluated from the frame.",
+               "\nPROBLEM: {bq?argument} could not be evaluated, see error below:",
+               "\n{call}")
+    stop_hook("{context}\n{msg}")
+  }
+  
+  x
 }
 
 ####
@@ -583,21 +742,32 @@ deparse_long = function(x){
   x_dp
 }
 
+
+####
+#### dreamerr's copies ####
+####
+
+# DO NOT MAKE ANY SUBSTANTIAL CHANGE TO THESE FUNCTIONS!!!
+# They come from dreamerr. If I want to improve them, I should change the ones of dreamerr first
+
+setDreamerr_show_stack = function(show_full_stack = FALSE){
+
+  check_logical(show_full_stack, scalar = TRUE, mbt = TRUE)
+
+  options("dreamerr_show_full_stack" = show_full_stack)
+
+}
+
+set_up = function(.up = 1){
+  if(length(.up) == 1 && is.numeric(.up) && !is.na(.up) && .up == floor(.up) && .up >= 0){
+    assign("DREAMERR__UP", .up, parent.frame())
+  } else {
+    stop("Argument '.up' must be an integer scalar greater or equal to 1. This is currently not the case.")
+  }
+}
+
 set_pblm_hook = function(){
-  assign("STRINGOPS_HOOK", 1, parent.frame())
-}
-
-.stop_hook = function(..., msg = NULL, frame = parent.frame()){
-  # verbatim version
-  up = get_up_hook()
-
-  stop_up(..., up = up + 1, msg = msg, frame = frame, verbatim = TRUE)
-}
-
-stop_hook = function(..., msg = NULL, frame = parent.frame(), verbatim = FALSE){
-  up = get_up_hook()
-
-  stop_up(..., up = up + 1, msg = msg, frame = frame, verbatim = verbatim)
+  assign("SMAGICK_HOOK", 1, parent.frame())
 }
 
 get_up_hook = function(){
@@ -605,7 +775,7 @@ get_up_hook = function(){
   f = parent.frame()
   up = 1
   while(!identical(f, .GlobalEnv)){
-    if(exists("STRINGOPS_HOOK", f)){
+    if(exists("SMAGICK_HOOK", f)){
       break
     }
     up = up + 1
@@ -619,21 +789,17 @@ get_up_hook = function(){
   up
 }
 
+.stop_hook = function(..., msg = NULL, frame = parent.frame()){
+  # verbatim version
+  up = get_up_hook()
 
-####
-#### dreamerr's copies ####
-####
+  stop_up(..., up = up, msg = msg, frame = frame, verbatim = TRUE)
+}
 
-# DO NOT MAKE ANY SUBSTANTIAL CHANGE TO THESE FUNCTIONS!!!
-# They come from dreamerr. If I want to improve them, I should change the ones of dreamerr first
+stop_hook = function(..., msg = NULL, frame = parent.frame(), verbatim = FALSE){
+  up = get_up_hook()
 
-
-set_up = function(.up = 1){
-  if(length(.up) == 1 && is.numeric(.up) && !is.na(.up) && .up == floor(.up) && .up >= 0){
-    assign("DREAMERR__UP", .up, parent.frame())
-  } else {
-    stop("Argument '.up' must be an integer scalar greater or equal to 1. This is currently not the case.")
-  }
+  stop_up(..., up = up, msg = msg, frame = frame, verbatim = verbatim)
 }
 
 stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = FALSE){
@@ -642,8 +808,7 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
     main_msg = paste0(...)
   } else {
     main_msg = .smagick(..., frame = frame)
-  }
-  
+  }  
 
   # up with set_up
   mc = match.call()
@@ -651,6 +816,8 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
     up_value = mget("DREAMERR__UP", parent.frame(), ifnotfound = 1)
     up = up_value[[1]]
   }
+  
+  up = up + 1
 
   show_full_stack = isTRUE(getOption("dreamerr_show_full_stack"))
 
@@ -665,7 +832,8 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
 
   } else {
     # only the original call
-    my_call = deparse(sc[[max(1, sys.parent(1 + up))]])[1] # call can have svl lines
+    my_call = sys.call(sys.parent(up))
+    my_call = deparse(my_call)[1]
     nmax = 50
     if(nchar(my_call) > nmax) my_call = paste0(substr(my_call, 1, nmax - 1), "...")
 
@@ -684,6 +852,62 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
 
   stop(intro, ": \n", main_msg, call. = FALSE)
 
+}
+
+warn_no_named_dots = function(dots){
+  if(!is.null(names(dots))){
+    args_fun = names(formals(sys.function(sys.parent())))
+    args_fun = setdiff(args_fun, "...")
+
+    dot_names = names(dots)
+    dot_names = dot_names[nchar(dot_names) > 0]
+    sugg_txt = suggest_item(dot_names[1], args_fun, info = "argument")
+
+    warn_up("The arguments in `...` shall not have names. The name{$s, enum.bq ? dot_names}",
+            " may refer to {$(an;some)} argument{$s}?", sugg_txt)
+
+  }
+}
+
+.warn_hook = function(..., msg = NULL, frame = parent.frame()){
+  up = get_up_hook()
+
+  warn_up(..., up = up, msg = msg, frame = frame, verbatim = TRUE)
+}
+
+warn_hook = function(..., msg = NULL, frame = parent.frame(), verbatim = FALSE){
+  up = get_up_hook()
+
+  warn_up(..., up = up, msg = msg, frame = frame, verbatim = verbatim)
+}
+
+warn_up = function (..., up = 1, immediate. = FALSE, frame = parent.frame(), verbatim = FALSE){
+
+  if(verbatim){
+    message = paste0(...)
+  } else {
+    message = smagick(..., frame = frame)
+  }
+  
+  mc = match.call()
+
+  if (!"up" %in% names(mc)) {
+      up_value = mget("DREAMERR__UP", parent.frame(), ifnotfound = 1)
+      up = up_value[[1]]
+  }
+  
+  up = up + 1
+  
+  my_call = sys.call(sys.parent(up))
+  my_call = deparse(my_call)[1]
+  
+  nmax = 50
+  if (nchar(my_call) > nmax){
+    my_call = paste0(substr(my_call, 1, nmax - 1), "...")
+  }
+      
+  warning("In ", my_call, ":\n ", fit_screen(message),
+          call. = FALSE, immediate. = immediate.)
 }
 
 
@@ -936,18 +1160,18 @@ isError = function(x){
 ####
 
 
-check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
+check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE, dsb = FALSE){
 
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e),
                                                           conditionMessage(e)), class = "try-error"))
-  if("try-error" %in% class(res)){
+  if(inherits(res, "try-error")){
 
     if(missing(up)){
       # up with set_up
       f = parent.frame()
       up = 1
       while(!identical(f, .GlobalEnv)){
-        if(exists("STRINGOPS_HOOK", f)){
+        if(exists("SMAGICK_HOOK", f)){
           break
         }
         up = up + 1
@@ -959,20 +1183,24 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
       }
     }
     
-    set_up(1 + up)
+    up = up + 1 
     
     if(verbatim){
-      msg = paste0(..., collapse = "")  
+      msg = paste0(..., collapse = "")
     } else {
-      msg = .smagick(..., frame = parent.frame())
+      if(dsb){
+        msg = .dsb(..., frame = parent.frame())
+      } else {
+        msg = .smagick(..., frame = parent.frame())
+      }
     }
     
     if(nchar(msg) == 0){
-      if (missing(arg_name)) {
+      if(missing(arg_name)){
         arg_name = deparse(substitute(expr))
       }
       msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
-      stop_up(msg, res[[2]], verbatim = verbatim, frame = parent.frame())
+      stop_up(msg, res[[2]], verbatim = verbatim, frame = parent.frame(), up = up)
       
     } else {
       call_non_informative = deparse(substitute(expr),100)[1]
@@ -989,22 +1217,34 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
       if (grepl("^in eval\\(str[^:]+:\n", err)) {
         err = sub("^in eval\\(str[^:]+:\n", "", err)
       }
+            
+      # cleaning ugly call repetition
+      current_call = deparse(sys.call(sys.parent(up)))[1]
+      first_err = gsub("\n.+", "", err)
+      if(grepl(substr(current_call, 1, 20), first_err, fixed = TRUE)){
+        err = gsub("^[^\n]+\n", "", err)
+      }
+      
+      # cleaning extra artifacts
+      i_clean = 0
+      msg_split = strsplit(msg, "\n")[[1]]
+      err_split = strsplit(err, "\n")[[1]]
+      while(i_clean < min(length(msg_split), length(err_split))){
+        if(str_x(msg_split[i_clean + 1], 15) == str_x(err_split[i_clean + 1], 15)){
+          i_clean = i_clean + 1
+        } else {
+          break
+        }
+      }
+      
+      for(i in seq_len(i_clean)){
+        err = gsub("^[^\n]+\n", "", err)
+      }
       
       if (!missing(clean)) {
-        if (grepl(" => ", clean)) {
-          clean_split = strsplit(clean, " => ")[[1]]
-          from = clean_split[1]
-          to = clean_split[2]
-        } else {
-          from = clean
-          to = ""
-        }
-        
-        stop_up(msg, "\n  ", call_error, gsub(from, to, err), verbatim = TRUE)
-        
-      } else {
-        stop_up(msg, "\n  ", call_error, err, verbatim = TRUE)
+        err = str_clean(err, clean)
       }
+      stop_up(msg, "\n", call_error, err, verbatim = TRUE, up = up)
     }
   }
   res

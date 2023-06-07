@@ -221,7 +221,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'  (resp. the verbatim of `x`). Otherwise, what to say? Ah, nesting is enabled, and since 
 #' there's over 50 operators, it's a bit complicated to sort you out in this small space. 
 #' But type `smagick("--help")` to prompt a compact help, or use the argument `help = "keyword"`
-#' to obtain a selective help from the main documentation.
+#' (or `help = TRUE`) to obtain a selective help from the main documentation.
 #' @param frame An environment used to evaluate the variables in `"{}"`. By default the variables are
 #' evaluated using the environment from where the function is called.
 #' @param sep Character scalar, default is the empty string `""`. It is used to collapse all
@@ -232,13 +232,25 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' like in `smagick("/one, two, three")` will split the character string after the slash breaking at
 #' each comma followed by spaces or newlines. The previous example leads to the string vector
 #' `c("one", "two", "three")`. 
+#' @param help Character scalar or `TRUE`, default is `NULL`. This argument
+#' is used to generate a dynamic help on the console. If `TRUE`, the user can select which
+#' topic to read from the main documentation, with the possibility to search for keywords and
+#' navigate the help pages. If a character scalar, then a regex search is perfomed on the main
+#' documentation and any section containining a match is displayed. The user can easily
+#' navigate across matches.
+#' @param use_DT Logical, default is `TRUE`. If you use `smagick` in a `data.table` call
+#' and interpolate variables within the `data.table`, you want this argument to be `TRUE`.
+#' It only incurs a small overhead.
+#' @param collapse Character scalar, default is `NULL`. If provided, the character vector
+#' that should be returned is collapsed with the value of this argument. This leads
+#' to return a string of length 1.
 #' 
 #' Any interpolation after the slash is vectorized. Example: `a = 2:3 ; smagick("/x1, x{a}, x4")` leads
 #' to the vector `c("x1", "x2", "x3", "x4")`.
 #' @param collapse Character scalar or `NULL` (default). If provided, the resulting 
 #' character vector will be collapsed into a character scalar using this value as a separator.
 #'
-#'  @details 
+#' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
 #' nested (it may be the most powerful feature), operations can be applied group-wise or conditionally and
 #' operators have sensible defaults. 
@@ -1184,6 +1196,8 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
                                help = NULL, is_root = FALSE,
                                check = FALSE, fun_name = "dsb", plural_value = NULL){
 
+  # flag useful to easily identify this environment (used in error messages)
+  is_smagick_internal = TRUE
 
   if(!is.null(help)){
     if(identical(help, "_COMPACT_")){
@@ -1235,8 +1249,6 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
           attr(frame, "dt_data") = dt_data
       }
     }
-  } else {
-    is_dt = "dt_data" %in% names(attributes(frame))
   }
 
   if(...length() == 0){
@@ -1361,15 +1373,11 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
       operators = xi[[1]]
       xi = xi[[2]]
 
+      # browser()
       if(length(operators) == 0){
 
         # we need to evaluate xi
-        if(check){
-          xi_call = check_expr(str2lang(xi), "The value `", xi,
-                                  "` could not be parsed.")
-        } else {
-          xi_call = str2lang(xi)
-        }
+        xi_call = check_set_smagick_parsing(xi, check)
 
         if(is.character(xi_call)){
           # if a string literal => it's nesting
@@ -1378,19 +1386,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
                                      slash = FALSE, check = check, fun_name = fun_name)
           }
         } else {
-          if(is_dt){
-            if(check){
-              xi = check_expr(eval_dt(xi_call, data, frame), "The value `", xi,
-                                "` could not be evaluated.")
-            } else {
-              xi = eval_dt(xi_call, data, frame)
-            }
-          } else if(check){
-            xi = check_expr(eval(xi_call, data, frame), "The value `", xi,
-                              "` could not be evaluated.")
-          } else {
-            xi = eval(xi_call, data, frame)
-          }
+          xi = check_set_smagick_eval(xi_call, data, frame, check)
         }
 
         if(ANY_PLURAL){
@@ -1519,26 +1515,8 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 
           } else if(!verbatim){
             # evaluation
-            if(is_dt){
-              if(check){
-                xi = check_expr(eval_dt(xi_call, data, frame), "The value `", xi,
-                                  "` could not be evaluated.")
-              } else {
-                xi = eval_dt(xi_call, data, frame)
-              }
-            } else if(check){
-              xi_call = check_expr(str2lang(xi), "The value `", xi,
-                                     "` could not be parsed.")
-              xi = check_expr(eval(xi_call, data, frame), "The value `", xi,
-                                "` could not be evaluated.")
-            } else {
-              xi = eval(str2lang(xi), data, frame)
-            }
-
-            if(is.function(xi)){
-              .stop_hook("`", fun_name, "` cannot coerce functions into strings. Problem: `",
-                      trimws(x_parsed[[i]][[2]]), "` is a function.")
-            }
+            xi_call = check_set_smagick_parsing(xi, check)
+            xi = check_set_smagick_eval(xi_call, data, frame, check)
           }
         }
 
@@ -1578,17 +1556,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
             }
             
             xi_call = str2lang(vars[1])
-            if(is_dt){
-              if(check){
-                xi_val = check_expr(eval_dt(xi_call, data, frame), "The value `", xi,
-                                  "` could not be evaluated.")
-              } else {
-                xi_val = eval_dt(xi_call, data, frame)
-              }
-            } else {
-              xi_val = eval(xi_call, data, frame)
-            }
-
+            xi_val = check_set_smagick_eval(xi_call, data, frame, check)
           }
 
           xi = sop_ifelse(operators, xi, xi_val, fun_name, frame = frame,
@@ -1605,18 +1573,8 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
             op_parsed = sop_char2operator(opi, fun_name)
 
             if(op_parsed$eval){
-              if(check){
-                argument_call = check_expr(str2lang(op_parsed$argument),
-                                           "In operation `", opi, "`, the value `",
-                                           op_parsed$argument, "` could not be parsed.")
-
-                argument = check_expr(eval(argument_call, frame),
-                                      "In operation `", opi, "`, the value `",
-                                      op_parsed$argument, "` could not be evaluated.")
-              } else {
-                argument = eval(str2lang(op_parsed$argument), frame)
-              }
-
+              argument_call = check_set_oparg_parse(op_parsed$argument, opi, check)
+              argument = check_set_oparg_eval(argument_call, frame, opi, check)
             } else {
               argument = op_parsed$argument
             }
@@ -1625,7 +1583,8 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
               xi = check_expr(sop_operators(xi, op_parsed$operator, op_parsed$options, argument,
                                               check = check, frame = frame, conditional_flag = conditional_flag,
                                               is_dsb = is_dsb, fun_name = fun_name),
-                                "The operation {bq, '_;;;_ => ;'R ? opi} failed. Please revise your call.")
+                                get_smagick_context(), " See error below:",
+                                verbatim = TRUE, up = 1)
             } else {
               xi = sop_operators(xi, op_parsed$operator, op_parsed$options, argument, check = check,
                                  frame = frame, conditional_flag = conditional_flag,
@@ -1770,21 +1729,23 @@ sop_char2operator = function(x, fun_name){
     op_parsed$operator = op
     
     if(!op %in% OPERATORS){
+      
+      context = get_smagick_context()
 
       sugg_txt = suggest_item(op, OPERATORS, newline = FALSE, info = "operator")
       
       op = gsub("\n", "\\n", op)
       op = gsub("\t", "\\t", op)
 
-      msg = c("Operations on interpolated strings must be of the form .['arg'op ? x], with `arg` the (optional) argument and `op` an operator.",
-              "\nPROBLEM: `", op, "` is not a valid operator. ", sugg_txt,
-              "\n  Type dsb('--help') for more help or dsb(help = 'word').",
-              "\n  Examples: .[', *'S, 'a => b'r ? var] first splits the variable var by commas then replaces every 'a' with a 'b'",
-              '\n            x = c("king", "kong"); dsb("OMG it\'s .[\'i => o\'r, \'-\'c ? x]!")')
+      msg = .dsb(".[context]",
+              "\nPROBLEM: .[bq?op] is not a valid operator. ", sugg_txt,
+              "\n\nINFO: Operations on interpolated strings must be of the form {'arg'op ? x}, ",
+              "with `arg` the (optional) argument and `op` an operator.",
+              "\nType smagick('--help') for more help or smagick(help = 'word') or smagick(help = TRUE).",
+              "\nExamples: {', *'S, 'a => b'r ? var} first splits the variable var by commas then replaces every 'a' with a 'b'",
+              '\n          x = c("king", "kong"); smagick("OMG it\'s {\'i => o\'r, \'-\'c ? x}!")')
 
-      msg = bespoke_msg(msg)
-
-      .stop_hook(msg = msg)
+      .stop_hook(msg)
     }
 
   }
@@ -3008,8 +2969,11 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     # computing the condition
     # a) parsing
     if(check){
-      cond_parsed = check_expr(str2lang(cond_raw), "The string operation `", op, "` should be of the form ",
-                                 op, "(condition ; true ; false). \nPROBLEM: the condition could not be parsed.")
+      cond_parsed = check_expr(str2lang(cond_raw), 
+            .sma("The string operation {bq?op} should be of the form ",
+                 "{op}(condition ; true ; false). ",
+                 "\nPROBLEM: the condition {bq?cond_raw} could not be parsed, see error below:"), 
+            verbatim = TRUE)
     } else {
       cond_parsed = str2lang(cond_raw)
     }
@@ -3019,9 +2983,13 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       # REGEX
       
       if(check){
-        cond = check_expr(str_is(x, cond_parsed), "The operation is of the form {bq?op}(cond ; true ; false). ",
-                            "When `cond` is a pure character string, the function `str_is` is applied with `cond` being the searched pattern.",
-                            "\nPROBLEM: in {bq ! {op}({'_;;;_ => ;'R ? argument})}, the condition {bq?cond_raw} led to an error.")
+        cond = check_expr(str_is(x, cond_parsed), 
+                  .sma("The operation is of the form {bq?op}(cond ; true ; false). ",
+                  "When `cond` is a pure character string, the function `str_is()` ",
+                  "is applied with `cond` being the searched pattern.",
+                  "\nPROBLEM: in {op}({'_;;;_ => ;'R ? argument}), the condition ",
+                  "{bq?cond_raw} led to an error, see below:"),
+                  verbatim = TRUE)
       } else {
         cond = str_is(x, cond_parsed)
       }      
@@ -3040,9 +3008,12 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
       
       if(check){
-        cond = check_expr(eval(cond_parsed, my_data, frame), "The string operation `", op, "` should be of the form ",
-                                  op, "(condition ; true ; false). \nPROBLEM: the condition `", cond_parsed, 
-                                  "`could not be evaluated.")  
+        cond = check_expr(eval(cond_parsed, my_data, frame), 
+                  .sma("The string operation {bq?op} should be of the form ",
+                       "{op}(condition ; true ; false). ",
+                       "\nPROBLEM: the condition {bq?cond_raw} could not be ",
+                       "evaluated, see error below:"), 
+                   verbatim = TRUE)  
       } else {
         cond = eval(cond_parsed, my_data, frame)
       }
@@ -3050,9 +3021,11 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     
     # further error checking
     if(!length(cond) %in% c(1, length(x))){
-      stop_hook("In {bq?op} operations, the condition (here {bq?cond_raw}) must be either of length 1 (applying to the full string), ",
+      stop_hook("In {bq?op} operations, the condition (here {bq?cond_raw}) must ",
+                "be either of length 1 (applying to the full string), ",
                 "either of the length of the interpolated value.", 
-                "\nPROBLEM: the condition is of length {len?cond} while the interpolated value is of length {len?x}.")
+                "\nPROBLEM: the condition is of length {len.f?cond} while the ",
+                "interpolated value is of length {len?x}.")
     }
     
     if(is.numeric(cond)){
@@ -3062,7 +3035,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     
     if(!is.logical(cond)){
       stop_hook("In {bq?op} operations, the condition (here {bq?cond_raw}) must be logical.",
-                "\nPROBLEM: the condition is not logical, instead it is of class {enum.bq ? class(cond)}.")
+                "\nPROBLEM: the condition is not logical, instead it is of class ",
+                "{enum.bq ? class(cond)}.")
     }
     
     # NA = FALSE
@@ -3117,10 +3091,11 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
                                      conditional_flag = cond_flag, is_dsb, fun_name)
         
         if(is_elementwise && !length(xi) %in% c(0, n_old)){
-          stop_hook("In {bq?op} operations, when conditions are of length > 1, the operations either a) can ",
-                   "remove the string completely (e.g. with `nuke`), or b) must not change the length of the element.",
-                "\nPROBLEM: the original vector is of length {n?n_old} while after ",
-                "the operations it becomes of length {len.f ? xi}")
+          stop_hook("In {bq?op} operations, when conditions are of length > 1, the ",
+                   "operations either a) can remove the string completely ",
+                   "(e.g. with `nuke`), or b) must not change the length of the element.",
+                   "\nPROBLEM: the original vector is of length {n?n_old} while after ",
+                   "the operations it becomes of length {len.f ? xi}")
         }
       } else {
         # verbatim if
@@ -3388,10 +3363,9 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
       # The verb is always last
 
       if(nchar(op) < 2){
-        example = 'Example: x = c("Charles", "Alice"); dsb(".[$Is, enum ? x] crazy? Yes .[$(he:they), are].")'
-        example = bespoke_msg(example, fun_name)
-
-        .stop_hook("In pluralization, `", op, "` is expected to be a verb and verbs must always be composed of at least two letters.\n", example)
+        example = 'Example: x = c("Charles", "Alice"); smagick("{$Is, enum ? x} crazy? Yes {$(he:they), are}.")'
+        .stop_hook("In pluralization, `", op, "` is expected to be a verb ",
+                   "and verbs must always be composed of at least two letters.\n", example)
       }
 
       zero_case = opt_equal(options, c("zero", "0"))
@@ -3495,7 +3469,6 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
       
     msg = smagick("The operator {bq?op} expects a suite of valid operations (format: {bq?op_msg}). ",
                "\nPROBLEM: the operations were not formatted correctly. ", extra)
-    msg = bespoke_msg(msg)
     
     .stop_hook(msg)
   }
@@ -3514,12 +3487,13 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
     if(op_parsed$eval){
       if(check){
         argument_call = check_expr(str2lang(op_parsed$argument), 
-                                     "In the operation `{op}()`, the ",
-                                     "{&length(op_all) == 1 ; operation ; chain of operations} ",
-                                     " {bq?operations_string} led to a problem.", 
-                                     "In operation {bq?opi}, the argument in backticks ", 
-                                     "(equal to {bq?op_parsed$argument}) is evaluated from the calling frame.",
-                                     "\nPROBLEM: the argument could not be parsed.")
+                                   .sma("In the operation `{op}()`, the ",
+                                        "{&length(op_all) == 1 ; operation ; chain of operations} ",
+                                        " {bq?operations_string} led to a problem.", 
+                                        "In operation {bq?opi}, the argument in backticks ", 
+                                        "(equal to {bq?op_parsed$argument}) is evaluated from the calling frame.",
+                                        "\nPROBLEM: the argument could not be parsed."),
+                                    verbatim = TRUE)
 
         argument = check_expr(eval(argument_call, frame),
                               "In the operation `{op}()`, the ",

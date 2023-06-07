@@ -465,9 +465,9 @@ format_difftime = function(x, options){
       # - should I return NA?
 
       if(!opt_equal(options, "silent")){
-        warning(fit_screen(dsb("Operation `dtime` could not be applied since the data",
-                                " was not numeric, nor a POSIX time, nor a time-difference.",
-                                "\n (To avoid this warning, use the option `silent`: `dtime.silent`.)")))
+        warn_hook("Operation `dtime` could not be applied since the data",
+                  " was not numeric, nor a POSIX time, nor a time-difference.",
+                  "\n (To avoid this warning, use the option `silent`: `dtime.silent`.)")
       }
 
       return(rep("(difftime: NA)", length(x)))
