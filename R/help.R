@@ -122,7 +122,7 @@ generate_help_extensive = function(){
   
   smagick_txt = readLines("R/smagick_main.R")
   
-  i_smagick = str_which(smagick_txt, "^sma = smagick = f")
+  i_smagick = str_which(smagick_txt, "^sma.*gick .*= function\\(")
   doc = smagick_txt[1:(i_smagick - 1)]
   i_start_doc = max(str_which(doc, "!^#'")) + 1
   
@@ -242,7 +242,7 @@ format_help = function(pattern = NULL, x = NULL){
     
     pat_parsed = format_simple_regex_flags(p, ignore = TRUE)
     p = pat_parsed$pattern
-    is_fixed = pat_parsed$fixed
+    is_fixedR.  = pat_parsed$fixed
     
     for(j in which(qui)){
       line = text[j]

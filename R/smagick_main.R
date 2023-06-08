@@ -210,9 +210,10 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #### ... smagick ####
 ####
 
-#' Simple and powerful string manipulation with the dot square bracket operator
+#' String interpolation with operation chaining
 #'
-#' Compactly performs many low level string operations. Advanced support for pluralization.
+#' This is firstly a string interpolation tool. On top of this it can apply, and chain, over 50
+#' basic string operations to the interpolated variables. Advanced support for pluralization.
 #'
 #' @param ... Character scalars that will be collapsed with the argument `sep`. To interpolate, you can 
 #' use `"{x}"` within each character string to insert the value of `x` in the string. 
@@ -1165,7 +1166,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #'
 #'
-sma = smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+smagick = sma = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
 
 

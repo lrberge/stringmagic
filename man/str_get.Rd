@@ -178,6 +178,10 @@ if(interactive() && identical(sys.frame(), .GlobalEnv)){
 
 
 }
+\seealso{
+A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
+String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
+}
 \author{
 Laurent R. Berge
 }

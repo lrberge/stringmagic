@@ -77,9 +77,9 @@ The internal function used to find the patterns is \code{\link[base:grep]{base::
 }
 \section{Functions}{
 \itemize{
-\item \code{str_which}: Returns the indexes of the values in which a pattern is detected
-}}
+\item \code{str_which()}: Returns the indexes of the values in which a pattern is detected
 
+}}
 \section{Generic pattern flags}{
 
 
@@ -164,6 +164,10 @@ str_which(x, "e", "o")
 str_which(x, "e & o")
 
 
+}
+\seealso{
+A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
+String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
 }
 \author{
 Laurent R. Berge

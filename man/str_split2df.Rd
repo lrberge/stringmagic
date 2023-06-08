@@ -73,9 +73,9 @@ Splits a character vector and formats the resulting substrings into a data.frame
 }
 \section{Functions}{
 \itemize{
-\item \code{str_split2dt}: Splits a string vector and returns a \code{data.table}
-}}
+\item \code{str_split2dt()}: Splits a string vector and returns a \code{data.table}
 
+}}
 \examples{
 
 x = c("Nor rain, wind, thunder, fire are my daughters.",
@@ -112,4 +112,8 @@ str_split2df(carname ~ am + gear + carb, base, " +")
 str_split2df(carname ~ am + gear + carb, base, " +", id_unik = FALSE, add.pos = TRUE)
 
 
+}
+\seealso{
+A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
+String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
 }

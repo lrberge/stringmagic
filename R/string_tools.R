@@ -24,10 +24,9 @@
 #'  one, depending on the operations performed. 
 #'
 #' @author
-#' Laurent Berge
+#' Laurent R. Berge
 #' 
-#' @seealso 
-#' [smagick()] for interpolation and operations within strings.
+#' @inherit str_clean seealso
 #'
 #' @examples
 #' 
@@ -169,7 +168,7 @@ str_ops = function(x, op, pre_unik = NULL){
 #' @author 
 #' Laurent R. Berge
 #' 
-#' @inheritSection str_clean seealso
+#' @inherit str_clean seealso
 #'
 #' @examples
 #' 
@@ -375,7 +374,7 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' @return
 #' It always return a character vector.
 #' 
-#' @inheritSection str_clean seealso
+#' @inherit str_clean seealso
 #' 
 #'
 #' @examples
@@ -543,7 +542,7 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' ii) `pos`: the position of the text element in the initial string (optional, via add.pos), 
 #' iii) the text element, iv) the identifier(s) (optional, only if `id` was provided).
 #' 
-#' @inheritSection str_clean seealso
+#' @inherit str_clean seealso
 #' 
 #' @examples
 #'
@@ -865,7 +864,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' Laurent R. Berge
 #' 
 #' @seealso 
-#' A few basic operation: [str_is()], [str_get()], [str_clean()]. Chain basic operations with [str_op()]. 
+#' A few basic operation: [str_is()], [str_get()], [str_clean()]. Chain basic operations with [str_ops()]. 
 #' String interpolation combined with operation chaining: [smagick()].
 #'
 #' @examples
@@ -1058,7 +1057,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' @author 
 #' Laurent R. Berge
 #' 
-#' @inheritSection str_clean seealso
+#' @inherit str_clean seealso
 #' 
 #' @examples 
 #' 
