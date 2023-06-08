@@ -1,0 +1,11 @@
+---
+title: "stringmagick: An overview"
+author: "Laurent R. Bergé"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{stringmagick_tour}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+

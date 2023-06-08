@@ -1,0 +1,41 @@
+---
+title: "`smagick`: Magical string interpolation"
+author: "Laurent R. Berge"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{smagick_walkthrough}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+one difficulty with this function is that  it is not of the form fun(arg1, arg2), etc.
+This means that there is no argument help popping when needed. There is even no argument list!
+It makes it them rely on muscle memory. Although the author tried to find names that make 
+sense and can be easily memorized,
+knowing how to use the function right from the start can be challenging.
+This is the price to pay to have highly efficient features.
+So please have a look at what it can achieve to decide whether it's worth the investment.
+Note that the basic features of string interpolation (a la glue) can be learned effortlessly. 
+The (big) rest is only bonus!
+
+### examples
+
+- example of counting the number of words in a text
+- example of writing error messages: error handling
+- parsing R code or any other text:
+  - import données
+  - virer commentaires
+  - virer les lignes vides
+  - concatener avec \n
+  - supprimer les \n quand les virgules sont ouvertes
+  - resplitter avec \n
+
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```

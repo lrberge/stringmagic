@@ -1,0 +1,11 @@
+---
+title: "String tools, magick edition"
+author: "Laurent R. Bergé"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{string_tools}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+

@@ -1,0 +1,47 @@
+---
+title: "Pluralization with `smagick`"
+author: "Laurent R. Bergé"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{pluralization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+R package authors write functions. And, guess what, these functions can fail for various reasons.
+A most hated yet most useful endeavor of package authors is to write proper error handling.
+Error handling is about giving the right information to the user to help him debug as fast as possible.
+It can save them a ton of time and bring them peace of mind (yes, true!).
+
+However, and trust me, writing good error handling is a pain.
+After fishing out the precise cause of the problem (and there can be **many**),
+you need to write a message which contains enough information 
+for the user to understand and solve the problem.
+In other terms, it involves writing for the human behind the computer and not writing for the machine (i.e. code).
+Given how critical error handling is, any tool alleviating its burden is welcome, and 
+that's precisely where this introduction is heading!
+
+The stringmagick package (combined to dreamerr) offers tools to create text messages 
+in a very efficient way.
+In particular, we're interested in pluralization (i.e. putting text in singular/plural 
+depending on context).
+
+This document guides you through some of its pluralization features by means of practical 
+examples. For starters, it is advised to have a look to the introductory smagick vignette.
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Motivating example
+
+
+
+
+
+
