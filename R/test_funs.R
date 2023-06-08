@@ -222,6 +222,32 @@ test = function(x, y, type = "=", tol = 1e-6){
 
 chunk = function(x) cat(toupper(x), "\n\n")
 
+test_contains = function(x, pattern){
+  if(length(x) > 1){
+    stop("Internal error: test_contains only works with vectors of length 1.")
+  }
+  
+  if(!str_is(x, pattern)){
+    stopi("The pattern {bq?pattern} was not found in the following string:", 
+            "\n\n{x}")
+  }
+  
+}
+
+test_err_contains = function(x, pattern){
+  err = try(x, silent = TRUE)
+  if(!inherits(err, "try-error")){
+    x_dp = deparse(substitute(x))[1]
+    stopi("The expression should lead to an error.", 
+            "\nPROBLEM: {bq?x_dp} is not an error.")
+  }
+  
+  if(!str_is(err, pattern)){
+    stopi("The pattern {bq?pattern} was not found in the following error message:", 
+            "\n\n{err}")
+  }
+  
+}
 
 run_test = function(chunk, from){
 
@@ -394,6 +420,11 @@ run_test = function(chunk, from){
       for(var in names(env)){
           assign(var, get(var, env), parent.frame())
       }
+      
+      command = .sma("rstudioapi::navigateToFile({Q?my_file}, {line_fail - offset})")
+      command = str2lang(command)
+      
+      eval(command)
 
   } else {
     n_tests = sum(grepl("^test\\(", test_code))

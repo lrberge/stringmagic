@@ -37,8 +37,8 @@ cpp_parse_regex_pattern <- function(Rstr, parse_logical) {
     .Call(`_stringmagick_cpp_parse_regex_pattern`, Rstr, parse_logical)
 }
 
-cpp_string_ops <- function(Rstr, is_dsb) {
-    .Call(`_stringmagick_cpp_string_ops`, Rstr, is_dsb)
+cpp_smagick_parser <- function(Rstr, is_dsb = FALSE, only_section = FALSE) {
+    .Call(`_stringmagick_cpp_smagick_parser`, Rstr, is_dsb, only_section)
 }
 
 cpp_extract_quote_from_op <- function(Rstr) {
@@ -55,6 +55,10 @@ cpp_parse_simple_operations <- function(Rstr, is_dsb) {
 
 cpp_parse_slash <- function(Rstr, is_dsb) {
     .Call(`_stringmagick_cpp_parse_slash`, Rstr, is_dsb)
+}
+
+cpp_find_closing_problem <- function(Rstr, is_dsb = FALSE) {
+    .Call(`_stringmagick_cpp_find_closing_problem`, Rstr, is_dsb)
 }
 
 cpp_to_integer <- function(x) {

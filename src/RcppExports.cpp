@@ -118,15 +118,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_string_ops
-List cpp_string_ops(SEXP Rstr, bool is_dsb);
-RcppExport SEXP _stringmagick_cpp_string_ops(SEXP RstrSEXP, SEXP is_dsbSEXP) {
+// cpp_smagick_parser
+List cpp_smagick_parser(SEXP Rstr, bool is_dsb, bool only_section);
+RcppExport SEXP _stringmagick_cpp_smagick_parser(SEXP RstrSEXP, SEXP is_dsbSEXP, SEXP only_sectionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
     Rcpp::traits::input_parameter< bool >::type is_dsb(is_dsbSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_string_ops(Rstr, is_dsb));
+    Rcpp::traits::input_parameter< bool >::type only_section(only_sectionSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_smagick_parser(Rstr, is_dsb, only_section));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -176,6 +177,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_find_closing_problem
+SEXP cpp_find_closing_problem(SEXP Rstr, bool is_dsb);
+RcppExport SEXP _stringmagick_cpp_find_closing_problem(SEXP RstrSEXP, SEXP is_dsbSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_dsb(is_dsbSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_find_closing_problem(Rstr, is_dsb));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_to_integer
 IntegerVector cpp_to_integer(SEXP x);
 RcppExport SEXP _stringmagick_cpp_to_integer(SEXP xSEXP) {
@@ -221,11 +234,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_group_rev_index", (DL_FUNC) &_stringmagick_cpp_group_rev_index, 1},
     {"_stringmagick_cpp_recreate_index", (DL_FUNC) &_stringmagick_cpp_recreate_index, 1},
     {"_stringmagick_cpp_parse_regex_pattern", (DL_FUNC) &_stringmagick_cpp_parse_regex_pattern, 2},
-    {"_stringmagick_cpp_string_ops", (DL_FUNC) &_stringmagick_cpp_string_ops, 2},
+    {"_stringmagick_cpp_smagick_parser", (DL_FUNC) &_stringmagick_cpp_smagick_parser, 3},
     {"_stringmagick_cpp_extract_quote_from_op", (DL_FUNC) &_stringmagick_cpp_extract_quote_from_op, 1},
     {"_stringmagick_cpp_parse_operator", (DL_FUNC) &_stringmagick_cpp_parse_operator, 1},
     {"_stringmagick_cpp_parse_simple_operations", (DL_FUNC) &_stringmagick_cpp_parse_simple_operations, 2},
     {"_stringmagick_cpp_parse_slash", (DL_FUNC) &_stringmagick_cpp_parse_slash, 2},
+    {"_stringmagick_cpp_find_closing_problem", (DL_FUNC) &_stringmagick_cpp_find_closing_problem, 2},
     {"_stringmagick_cpp_to_integer", (DL_FUNC) &_stringmagick_cpp_to_integer, 1},
     {"_stringmagick_cpp_combine_clusters", (DL_FUNC) &_stringmagick_cpp_combine_clusters, 2},
     {"_stringmagick_cpp_create_pos", (DL_FUNC) &_stringmagick_cpp_create_pos, 1},

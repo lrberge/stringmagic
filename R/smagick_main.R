@@ -769,9 +769,38 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' "Three matches were found.". If "x = 1", this leads to "One match was found." and if "x = 0" this leads
 #' to "Sorry, nothing found.".
 #' 
-#' @inheritSection str_is Generic pattern flags
+#' @section Escaping and special cases:
 #' 
-#'
+#' The opening and closing brakets, `{}`, are special characters and cannot be used as regular text. 
+#' To bypass their special meaning, you need to escape them with a double backslash.
+#' 
+#' Ex.1: `smagick("open = \\\\{, close = }")` leads to `"open = {, close = }"`.
+#' Ex.2: `smagick("many {5 times.c ! \\\\}}")` leads to `many }}}}}`.
+#' 
+#' You only need to escape the special delimiters which the algorithm is currently looking for.
+#' As you can see, you don't need to escape the closing bracket in Ex.1 since no box
+#' was open. On the other hand, you need to escape it in Ex.2.
+#' 
+#' Alternatively, you can use the function `dsb()` to interpolate with `.[]` instead of `{}`.
+#' You can also use the following hack:
+#' 
+#' Ex.3: smagick("I {'can {write} {{what}} I want'}") leads to `"I can {write} {{what}} I want"`.
+#' 
+#' Since `{expr}` evaluates `expr`, the stuff inside the *box*, you can pass a 
+#' character string and it will stay untouched.
+#' 
+#' In the few operations expecting a semi-colon (if-else and pluralization), it can also be
+#' escaped with a double backslash.
+#' 
+#' In interpolations, the exclamation mark (`!`) signals a verbatim expression. But what
+#' if you use it to mean the logical operation *not* in an operation-free interpolation? 
+#' In that case, you need a hack: use a question mark (`?`) first to indicate to the
+#' algorithm that you want to evaluate the expression. 
+#' 
+#' Ex.4: `smagick("{!TRUE} is {?!TRUE}")` leads to "TRUE is FALSE". The first expression is
+#' taken verbatim while the second is evaluated.
+#' 
+#' @inheritSection str_is Generic pattern flags
 #'
 #' @return
 #' It returns a character vector whose length depends on the elements and operations in the interpolations.
@@ -1313,8 +1342,10 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
     return(x)
 
   } else {
-    x_parsed = cpp_string_ops(x, is_dsb)
-
+    x_parsed = cpp_smagick_parser(x, is_dsb)
+    if(length(x_parsed) == 1 && isTRUE(attr(x_parsed, "error"))){
+      report_smagick_parsing_error(x, x_parsed, is_dsb)
+    }
   }
 
   # NOTE on the parsing:
@@ -1373,18 +1404,13 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
       operators = xi[[1]]
       xi = xi[[2]]
 
-      # browser()
       if(length(operators) == 0){
 
         # we need to evaluate xi
         xi_call = check_set_smagick_parsing(xi, check)
 
         if(is.character(xi_call)){
-          # if a string literal => it's nesting
-          if(grepl(BOX_OPEN, xi_call, fixed = TRUE)){
-            xi = smagick_internal(xi_call, is_dsb = is_dsb, frame = frame, 
-                                     slash = FALSE, check = check, fun_name = fun_name)
-          }
+          xi = xi_call
         } else {
           xi = check_set_smagick_eval(xi_call, data, frame, check)
         }
@@ -1739,11 +1765,8 @@ sop_char2operator = function(x, fun_name){
 
       msg = .dsb(".[context]",
               "\nPROBLEM: .[bq?op] is not a valid operator. ", sugg_txt,
-              "\n\nINFO: Operations on interpolated strings must be of the form {'arg'op ? x}, ",
-              "with `arg` the (optional) argument and `op` an operator.",
-              "\nType smagick('--help') for more help or smagick(help = 'word') or smagick(help = TRUE).",
-              "\nExamples: {', *'S, 'a => b'r ? var} first splits the variable var by commas then replaces every 'a' with a 'b'",
-              '\n          x = c("king", "kong"); smagick("OMG it\'s {\'i => o\'r, \'-\'c ? x}!")')
+              "\n\nINFO: Type smagick('--help') for more help or smagick(help = regex) or smagick(help = TRUE).",
+              "\nEx. of valid stuff: smagick(\"{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
 
       .stop_hook(msg)
     }
@@ -1881,7 +1904,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       # otherwise => dealt with in str_is or str_clean
       # we don't repeat the processing (otherwise => bugs)
       
-      pat_parsed = format_simple_regex_flags(argument, fixed = is_fixed, word = is_word, ignore = is_ignore)
+      pat_parsed = format_simple_regex_flags(argument, fixed = is_fixed, word = is_word, 
+                                             ignore = is_ignore)
       argument = pat_parsed$pattern
       is_fixed = pat_parsed$fixed
     } 

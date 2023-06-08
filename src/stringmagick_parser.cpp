@@ -34,19 +34,42 @@ CUB = 1, DSB = 2
 
 inline bool is_box_open(const int box_type, const char * str, int &i, int n, bool skip = false){
 
+  bool ok_escape = false;
   if(skip && str[i] == '\\'){
+    
     // here we need to 'avoid' the backslash since it is only used to
     // escape the opening box (note that in regex this is not checked)
     if(box_type == DSB && i + 2 < n && str[i + 1] == '.' && str[i + 2] == '['){
-      ++i;
+      ok_escape = true;
     } else if(box_type == CUB && i + 1 < n && str[i + 1] == '{'){
-      ++i;
+      ok_escape = true;
     }
-    return false;
+    
+    if(ok_escape){
+      int j = i - 1;
+      while(j > 0 && str[j--] == '\\'){
+        ok_escape = !ok_escape;
+      }
+      
+      if(ok_escape){
+        ++i;
+        return false; 
+      }
+    }
   }
   
   // we don't skip but we still check for escaping
-  if(i > 1 && str[i - 1] == '\\') return false;
+  if(i >= 1 && str[i - 1] == '\\'){
+    ok_escape = true;
+    int j = i - 2;
+    while(j > 0 && str[j--] == '\\'){
+      ok_escape = !ok_escape;
+    }
+    
+    if(ok_escape){
+      return false;
+    }    
+  }
 
   if(box_type == DSB){
     if(i + 2 < n){
@@ -652,7 +675,7 @@ void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &
 
 void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int n,
                       std::vector<std::string> &operator_vec, std::string &expr_value,
-                      bool &any_plural){
+                      bool &any_plural, std::string &error_msg){
   // modifies the operator and gives the updated i
   // the i should start where to evaluate post separator (if present)
 
@@ -688,7 +711,8 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     std::string closing_box = get_closing_box_string(box_type);
     extract_verbatim(box_type, is_pblm, str, i, n, expr_value, closing_box, true);
     
-    if(i == n){
+    if(is_pblm || i == n){
+      error_msg = "slash operator not ending correctly";
       is_pblm = true;
       return;
     }
@@ -709,7 +733,10 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     
     // step 1: extraction of the condition
     extract_r_expression(is_pblm, str, i, n, operator_tmp, ';');
-    if(is_pblm) return;
+    if(is_pblm){
+      error_msg = "if-else: error extracting condition";
+      return;
+    }
 
     ++i;
 
@@ -725,7 +752,10 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     }
     
     extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ending, false);
-    if(is_pblm) return;
+    if(is_pblm){
+      error_msg = "if-else: error extracting the first part";
+      return;
+    }
 
     bool two_verbatims = str[i] == ';';
 
@@ -744,7 +774,10 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
 
     if(two_verbatims){
       extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, get_closing_box_string(box_type), false);
-      if(is_pblm) return;
+      if(is_pblm){
+        error_msg = "if-else: error extracting the second part";
+        return;
+      } 
 
       operator_vec.push_back(operator_tmp);
     }
@@ -776,6 +809,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
 
         if(in_operator){
           // there was a parsing error. This MUST be without anything before
+          error_msg = "pluralization: operators cannot contain parentheses";
           is_pblm = true;
           return;
         }
@@ -793,13 +827,17 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
         //
 
         extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ";", false);
-        if(is_pblm) return;
+        if(is_pblm){
+          error_msg = "pluralization: (v1;v2) error extracting the first verbatim";
+          return;
+        }
 
         op_first = operator_tmp;
         operator_tmp = "";
         ++i;
 
         if(i + 1 >= n){
+          error_msg = "pluralization: (v1;v2) error extracting the first verbatim";
           is_pblm = true;
           return;
         }
@@ -820,13 +858,17 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
         }
 
         extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ";)", false);
-        if(is_pblm) return;
+        if(is_pblm){
+          error_msg = "pluralization: (v1;v2) error extracting the second verbatim";
+          return;
+        }
 
         op_second = operator_tmp;
         operator_tmp = "";
         ++i;
 
         if(i == n){
+          error_msg = "pluralization: (v1;v2) error extracting the second verbatim";
           is_pblm = true;
           return;
         }
@@ -845,7 +887,10 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
           }
           
           extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")", false);
-          if(is_pblm) return;
+          if(is_pblm){
+            error_msg = "pluralization: (v1;v2;v3) error extracting the third verbatim";
+            return;
+          }
 
           op_third = operator_tmp;
           operator_tmp = "";
@@ -899,6 +944,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     }
 
     if(i == n){
+      error_msg = "pluralization: the interpolation ends incorrectly";
       is_pblm = true;
       return;
     }
@@ -1001,7 +1047,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
 }
 
 // [[Rcpp::export]]
-List cpp_string_ops(SEXP Rstr, bool is_dsb){
+List cpp_smagick_parser(SEXP Rstr, bool is_dsb = false, bool only_section = false){
   // Rstr: string from R of length 1
 
   List res;
@@ -1014,6 +1060,7 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
   bool any_plural = false;
 
   std::string sop_value = "";
+  std::string error_msg = "";
 
   int n = std::strlen(str);
 
@@ -1027,8 +1074,8 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
     }
 
     if(!string_value.empty()){
-      res.push_back(std_string_to_r_string(string_value));  
-    }    
+      res.push_back(std_string_to_r_string(string_value));
+    }
 
     if(i < n){
       // there was one open
@@ -1043,7 +1090,7 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
       std::string expr_value;
 
       // modifies i, expr_value and operator_vec "in place"
-      parse_box(box_type, is_pblm, str, i, n, operator_vec, expr_value, any_plural);
+      parse_box(box_type, is_pblm, str, i, n, operator_vec, expr_value, any_plural, error_msg);
       
       if(is_pblm){
         // the parsing could not be achieved.... 
@@ -1051,22 +1098,57 @@ List cpp_string_ops(SEXP Rstr, bool is_dsb){
         // => Note it is often not really a parsing error but a valid behavior, 
         //    when the operations are empty, like in {bonjour}
         
-        std::vector<std::string> empty_vec;
-        sop_element.push_back(empty_vec);
+        if(error_msg.empty()){
+          // we try to extract an R expression and watch out for a possible extra error
+          std::vector<std::string> empty_vec;
+          sop_element.push_back(empty_vec);
+          
+          is_pblm = false;
+          i = i_start;
+          extract_r_expression(is_pblm, str, i, n, expr_value, get_closing_box_char(box_type));
+          
+          if(is_pblm){
+            error_msg = "no closing bracket";
+          }          
+        }
         
-        is_pblm = false;
-        i = i_start;
-        extract_r_expression(is_pblm, str, i, n, expr_value, get_closing_box_char(box_type));
-        
-        // if we end up with is_pblm again, OK, there will be an error in the R side
-        sop_element.push_back(std_string_to_r_string(expr_value));   
+        if(error_msg.empty()){
+          // we move on
+          sop_element.push_back(std_string_to_r_string(expr_value));   
+        } else {
+          // there is an error and we need to report it now
+          res = List();
+          
+          std::vector<std::string> info_error;
+          info_error.push_back(error_msg);
+          
+          std::string parsed_section = "";
+          for(int k=(i_start-box_type) ; k<=i && k<n ; ++k){
+            parsed_section += str[k];
+          }
+          
+          info_error.push_back(parsed_section);
+          
+          res.push_back(std_string_to_r_string(info_error));
+          res.attr("error") = true;
+          return res;          
+        }        
               
       } else {
         sop_element.push_back(std_string_to_r_string(operator_vec));
         sop_element.push_back(std_string_to_r_string(expr_value));
       }
-
-      res.push_back(sop_element);
+      
+      if(only_section){
+        std::string parsed_section = "";
+        for(int k=(i_start-box_type) ; k<=i && k<n ; ++k){
+          parsed_section += str[k];
+        }
+        res.push_back(std_string_to_r_string(parsed_section));
+      } else {
+        res.push_back(sop_element);  
+      }
+      
       ++i;      
     }
     
@@ -1388,4 +1470,72 @@ SEXP cpp_parse_slash(SEXP Rstr, bool is_dsb){
   
   return std_string_to_r_string(res);
 }
+  
+// [[Rcpp::export]]
+SEXP cpp_find_closing_problem(SEXP Rstr, bool is_dsb = false){
+  
+  const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+  
+  
+  const int box_type = is_dsb ? DSB : CUB;
+  int i = 0;
+  
+  std::string res;
+  std::string tmp;
+  
+  // square brackets and curly brackets
+  int n_cb_open = 0;
+  int n_sb_open = 0;
+  int n_par_open = 0;
 
+  while(i < n){
+
+    while(is_blank(str, i)){
+      // we go to the first non blank
+      ++i;
+    }
+
+    if(is_quote(str, i)){
+      // we get the quote
+      res = str[i];
+      extract_quote(str, i, n, tmp);
+      if(i == n) break;
+      res = "";
+
+    } else if(n_cb_open == 0 && n_sb_open == 0 && n_par_open == 0 && is_box_close(box_type, str, i)){
+      // we're good!
+      res = "";
+      break;
+
+    } else {
+      if(str[i] == '{'){
+        ++n_cb_open;
+      } else if(str[i] == '}'){
+        --n_cb_open;
+      } else if(str[i] == '['){
+        ++n_sb_open;
+      } else if(str[i] == ']'){
+        --n_sb_open;
+      } else if(str[i] == '('){
+        ++n_par_open;
+      } else if(str[i] == ')'){
+        --n_par_open;
+      }
+
+      ++i;
+    }
+  }
+  
+  if(res.empty()){
+    if(n_cb_open > 0){
+      res = "{";
+    } else if(n_sb_open > 0){
+      res = "[";
+    } else if(n_par_open > 0){
+      res = "(";
+    }
+  }
+
+  return std_string_to_r_string(res);
+}

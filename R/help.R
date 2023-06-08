@@ -390,6 +390,7 @@ general_help = function(){
   max_w = getOption("width") / 2 - 5
   
   section_titles = str_ops(section_titles, "`max_w`width, ':01:: 'paste, '\n => \n    'r")
+  n_sec = length(section_titles)
   
   if(length(section_titles) %% 2 == 1){
     section_titles = c(section_titles, " ")
@@ -434,6 +435,8 @@ general_help = function(){
     if(inherits(choice_fmt, "try-error")){
       message(fit_screen(.sma("Sorry the parsing failed, please provide a comma separated ", 
                               "list of numbers, like '1, 2, 6' for example.")))
+    } else if(any(!choice_fmt %in% 1:n_sec)){
+      message(fit_screen(.sma("All numbers must be in between 1 and {n_sec}.")))
     } else {
       break
     }

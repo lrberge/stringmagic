@@ -218,6 +218,8 @@ str_x = function(x, n, from){
     if(!missing(from)) stop("Internal error: you should not provide arg. `from` when `n` is negative.")
     from = nchar(x) + n + 1
     to = nchar(x)
+  } else if(!missing(from)){
+    to = from + n - 1
   } else {
     from = 1
     to = n
@@ -1154,5 +1156,24 @@ is_smagick_root = function(){
   isTRUE(renvir_get("smagick_ROOT"))
 }
 
+fix_newline = function(x){
+  gsub("\n", "\\\\n", x)
+}
 
+is_box_open = function(x, is_dsb){
+  if(is_dsb){
+    substr(x, 1, 2) == ".["
+  } else {
+    substr(x, 1, 2) == "{"
+  }
+}
+
+is_box_close = function(x, is_dsb){
+  n = nchar(x)
+  if(is_dsb){
+    substr(x, n, n) == "]"
+  } else {
+    substr(x, n, n) == "}"
+  }
+}
 

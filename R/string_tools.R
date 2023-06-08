@@ -270,13 +270,14 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     flags = pat_parsed$flags
     all_patterns = pat_parsed$patterns
 
-    is_fixed   = fixed || "fixed" %in% flags
-    is_word    = word  || "word" %in% flags
-    is_ignore  = ignore.case || "ignore" %in% flags
+    is_fixed_origin = fixed || "fixed" %in% flags
+    is_word = word  || "word" %in% flags
+    is_ignore = ignore.case || "ignore" %in% flags
     
     res_current = NULL
     n_pat = length(all_patterns)
     for(j in 1:n_pat){
+      is_fixed = is_fixed_origin
       p = all_patterns[j]
 
       if(n_pat > 1 && main_negate && length(flags) == 0){
@@ -291,21 +292,10 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
           sub_negate = TRUE
           p = substr(p, 2, nchar(p))
         }
-      }      
-
-      if(is_word){
-        items = strsplit(p, ",[ \t\n]+")[[1]]
-        if(is_fixed){
-          items = paste0("\\Q", items, "\\E")
-          is_fixed = FALSE
-        }
-        p = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
-      }
-
-      if(is_ignore){
-        is_fixed = FALSE
-        p = paste0("(?i)", p)
-      }
+      }     
+      
+      p = format_pattern(p, fixed = is_fixed, word = is_word, ignore = is_ignore) 
+      is_fixed = attr(p, "fixed")
 
       res_tmp = grepl(p, x, perl = !is_fixed, fixed = is_fixed)
       if(sub_negate){
@@ -763,33 +753,12 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
   }
   
   # flags
-  pat_parsed = parse_regex_pattern(split, c("word", "ignore", "fixed"), 
-                                   parse_logical = FALSE)
-  flags = pat_parsed$flags
-  split = pat_parsed$patterns
-  
-  is_fixed = fixed || "fixed" %in% flags
-  is_ignore = ignore.case || "ignore" %in% flags
-  is_word = word || "word" %in% flags
-  
-  if(is_word){
-    items = strsplit(split, ",[ \t\n]+")[[1]]
-    if(is_fixed){
-      items = paste0("\\Q", items, "\\E")
-      is_fixed = FALSE
-    }
-    split = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
-  }
+  pat_parsed = format_simple_regex_flags(split, ignore = ignore.case, 
+                                         fixed = fixed, word = word)
+  split = pat_parsed$pattern
+  is_fixed = pat_parsed$fixed
 
-  if(is_ignore){
-    # ignore case
-    is_fixed = FALSE
-    split = paste0("(?i)", split)
-  }
-
-  
-
-  x_split = strsplit(x, split, fixed = fixed, perl = !fixed)
+  x_split = strsplit(x, split, fixed = is_fixed, perl = !is_fixed)
 
   n_all = lengths(x_split)
 
@@ -1027,20 +996,9 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
             p = substr(p, 2, nchar(p))
           }
         }
-
-        if(is_word){
-          items = strsplit(p, ",[ \t\n]+")[[1]]
-          if(is_fixed){
-            items = paste0("\\Q", items, "\\E")
-            is_fixed = FALSE
-          }
-          p = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
-        }
-
-        if(is_ignore){
-          is_fixed = FALSE
-          p = paste0("(?i)", p)
-        }
+        
+        p = format_pattern(p, fixed = is_fixed, word = is_word, ignore = is_ignore)
+        is_fixed = attr(p, "fixed")
 
         if(is_total){
           who_tmp = grepl(p, res, perl = !is_fixed, fixed = is_fixed)
@@ -1245,24 +1203,37 @@ format_simple_regex_flags = function(pattern, ignore = FALSE, word = FALSE, fixe
   is_word = "word" %in% new_regex$flags || word
   is_fixed = "fixed" %in% new_regex$flags || fixed
   
-  if(is_word){
-    items = strsplit(pattern, ",[ \t\n]+")[[1]]
-    if(is_fixed){
-      items = paste0("\\Q", items, "\\E")
-      is_fixed = FALSE
-    }
-    pattern = paste0("\\b(?:", paste0(items, collapse = "|"), ")\\b")
-  }
-
-  if(is_ignore){
-    # ignore case
-    is_fixed = FALSE
-    pattern = paste0("(?i)", pattern)
-  }
-  
+  pattern = format_pattern(pattern, fixed = is_fixed, word = is_word, ignore = is_ignore)
+  is_fixed = attr(pattern, "fixed")
+    
   res = list(pattern = pattern, fixed = is_fixed)
   
   return(res)
+}
+
+format_pattern = function(pattern, fixed, word, ignore){
+
+  if(word){
+    items = strsplit(pattern, ",[ \t\n]+")[[1]]
+    if(fixed){
+      items = paste0("\\Q", items, "\\E")
+      fixed = FALSE
+    }
+    pattern = paste0("\\b(", paste0(items, collapse = "|"), ")\\b")
+  }
+
+  if(ignore){
+    if(fixed){
+      fixed = FALSE
+      pattern = paste0("(?i)\\Q", pattern, "\\E")
+    } else {
+      pattern = paste0("(?i)", pattern)
+    }          
+  }
+  
+  attr(pattern, "fixed") = fixed
+  
+  pattern
 }
 
 to_integer = function(x){

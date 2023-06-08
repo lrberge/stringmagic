@@ -438,21 +438,12 @@ get_smagick_context = function(){
   x = get("x", parent.frame(up))
   is_dsb = get("is_dsb", parent.frame(up))
   
-  x_parsed = get("x_parsed", parent.frame(up))
   i = get("i", parent.frame(up))
   n = get("n", parent.frame(up))
-    
-  xi = x_parsed[[i]]
-  ops = str_ops(xi[[1]], "', 'c, ', ([?!])$ => \\1'r")
-  context_specific = paste0(ops, xi[[2]])
   
-  browser()
-  
-  if(is_dsb){
-    context_specific = paste0(".[", context_specific, "]")
-  } else {
-    context_specific = paste0("{", context_specific, "}")
-  }
+  # we reparse
+  x_parsed = cpp_smagick_parser(x, is_dsb, TRUE)
+  context_specific = x_parsed[[i]]
   
   # normalizing newlines or very confusing
   x = gsub("\n", "\\\\n", x)
@@ -467,17 +458,8 @@ get_smagick_context = function(){
   if(same_context){
     res = .sma("CONTEXT: Problem found in {bq?context_specific}.")
   } else {
-    closing = if(is_dsb) "]" else "}"
-    closing_pblm = i == n && paste0(str_x(x, -3), closing) == str_x(context_specific, -4)
-    
-    if(closing_pblm){
-      context_specific = str_trim(context_specific, -1)
-    }
-    
     res = .sma("CONTEXT: Problem found in {'80|..'k, Q?x},",
                "\n         when dealing with the interpolation {bq?context_specific}.")
-    
-    attr(res, "closing_pblm") = closing_pblm    
   }
   
   res    
@@ -498,12 +480,7 @@ check_set_smagick_parsing = function(x, check){
     context = get_smagick_context()
     first_char = substr(x, 1, 1)
     
-    if(isTRUE(attr(context, "closing_pblm"))){
-      msg = .dsb("PROBLEM: Very likely the problem comes from a bracket that has not been closed.",
-                 "\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
-                 ".[Q!Special interpolation: Pluralization]")
-      
-    } else if(first_char %in% c("#", "$")){
+    if(first_char %in% c("#", "$")){
       msg = .dsb("PROBLEM: there is a syntax error in the pluralization (the ", 
                   "interpolation starting with .[bq?first_char]).",
                   "\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
@@ -532,7 +509,8 @@ check_set_smagick_parsing = function(x, check){
       help_suggest = .dsb("\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
                           ".[Q!Operations: General syntax]")
       
-      msg = .dsb("PROBLEM: The expression could not be parsed. ",
+      msg = .dsb("PROBLEM: The expression could not be parsed, see error below:",
+                 "\n.[x_call]",
                   "\nINFO: Interpolations can be of the form `{expr}`, `{op1, op2?expr}`, or", 
                   " `{op1, op2!verbatim}`. ",
                   extra, help_suggest)
@@ -631,6 +609,144 @@ check_set_oparg_eval = function(call, frame, operator, check){
   }
   
   x
+}
+
+report_smagick_parsing_error = function(x, x_parsed, is_dsb, error = TRUE){
+  
+  x_parsed = x_parsed[[1]]
+  error_msg = x_parsed[1]
+  xi = x_parsed[2]
+  
+  #
+  # getting the context
+  #
+  
+  x = fix_newline(x)
+  xi = fix_newline(xi)
+  
+  same_context = gsub(" ", "", x) == gsub(" ", "", xi)
+  if(same_context){
+    context = .sma("CONTEXT: Problem found in {bq?xi}.")
+  } else {
+    context = .sma("CONTEXT: Problem found in {'80|..'k, Q?x},",
+                   "\n         when dealing with the interpolation {bq?xi}.")
+  }
+  
+  #
+  # the error message
+  #
+  
+  suggest = ""
+  if(error_msg == "slash operator not ending correctly"){
+    if(is_box_open(xi, is_dsb) && !is_box_close(xi, is_dsb)){
+      msg = .sma("PROBLEM: the opening bracket (`{&is_dsb ; .[ ; \\{}`) is not ", 
+                 "matched with a closing bracket (`{&is_dsb ; ] ; \\}}`).",
+                 "\nNOTE: to escape the meaning of the bracket, use a ",
+                 "double backslash: \\\\{&is_dsb ; .[ ; \\{}.")
+      
+      suggest = "INFO: see smagick(help = TRUE) and go to the section 'Escaping and special cases'"
+    } else {
+      # we diagnose the substring
+      if(is_box_open(xi, is_dsb)){
+        xi_small = str_trim(xi, 1)
+      } else {
+        xi_small = str_trim(xi, 1 + is_dsb, 1)
+      }
+      
+      xi_small_parsed = cpp_smagick_parser(xi_small, is_dsb)
+      
+      if(length(xi_small_parsed) == 1 && isTRUE(attr(xi_small_parsed, "error"))){
+        msg = report_smagick_parsing_error(xi_small_parsed, xi_small, is_dsb, FALSE)
+        msg = gsub("^CONTEXT:", "         ", msg)
+      } else {
+        # here I don't knwo what the error can be
+        # in theory, we should not be here
+        stop("Internal error: uncaught parsing error, could you report your smagick() call?")
+      }
+      
+      # We don't add a suggestion since it should be in the 'msg'
+    }
+    
+  } else if(error_msg == "no closing bracket"){
+    if(!is_box_close(xi, is_dsb)){
+      msg = .sma("PROBLEM: the opening bracket (`{&is_dsb ; .[ ; \\{}`) is not ", 
+                 "matched with a closing bracket (`{&is_dsb ; ] ; \\}}`).",
+                 "\nNOTE: to escape the meaning of the bracket, use a ",
+                 "double backslash: \\\\{&is_dsb ; .[ ; \\{}.")
+      suggest = "INFO: see smagick(help = TRUE) and go to the section 'Escaping and special cases'"
+    } else {
+      pblm = cpp_find_closing_problem(xi)
+      pblm = switch(pblm, 
+                    "'" = "a single quote (') open is not closed.",
+                    "\"" = "a double quote (\") open is not closed.",
+                    "`" = "a backtick (`) open is not closed.",
+                    "(" = "a parenthesis (`(`) open is not closed.",
+                    "{" = "a bracket (`{`) open is not closed.",
+                    "[" = "a bracket (`[`) open is not closed.",
+                    "it seems that something open is not closed."
+                    )
+      msg = .sma("PROBLEM: {pblm}")
+    }    
+    
+  } else if(str_x(error_msg, 7) == "if-else"){
+    type = if(str_x(xi, 2, 2 + is_dsb) == "&&") "&&" else "&"
+    syntax = if(type == "&&") "{&&cond ; verb_true}" else "{&cond ; verb_true ; verb_false}"
+    intro = .sma("The syntax of the if-else operation is {syntax}, with ", 
+                 "`verb_.` a verbatim expression (possibly containing interpolations).")
+    
+    if(error_msg == "if-else: error extracting condition"){
+      
+      msg = .sma("{intro}\nPROBLEM: no semi-colon (used to delimit the condition) ",
+                 "was found so the condition could not be parsed.")
+                 
+    } else if(error_msg == "if-else: error extracting the first part"){
+      msg = .sma("{intro}\nPROBLEM: no semi-colon {&type == '&' ; or closing bracket }was ",
+                 "found to delimit `verb_true`.")
+    } else if(error_msg == "if-else: error extracting the second part"){
+      msg = .sma("{intro}\nPROBLEM: no closing bracket was found to delimit `verb_false`.")
+    }
+    
+    suggest = "INFO: see smagick(help = TRUE) and go to the section 'Special interpolation: if-else'"
+    
+  } else {
+    # pluralization
+    
+    suggest = "INFO: see smagick(help = TRUE) and go to the section 'Special interpolation: Pluralization'"
+    type = str_x(xi, 1, 2 + is_dsb)
+    syntax = .dsb("{.[type]op1, op2} or {.[type]op1, op2 ? variable}")
+    
+    if(error_msg == "pluralization: operators cannot contain parentheses"){
+      msg = .sma("In pluralization, the parenthesis is a forbidden character *except* ",
+                 "for the special operation `(v1;v2)` (without any letter before the paren!).",
+                 "\nPROBLEM: a parenthesis was found attached to an operator.")
+      
+    } else if(error_msg == "pluralization: the interpolation ends incorrectly"){
+      msg = .sma("The syntax of the pluralization is {syntax}, with `op` pluralization operations.", 
+                 "\nPROBLEM: The pluralization did not end correctly.")
+    } else {
+      # (v1;v2) case
+      type = str_ops(error_msg, "(first|second|third) x")
+      pblm = switch(type, 
+                    "first" = "The semi-colon to delimit the first part is missing.",
+                    "second" = "The semi-colon or closing parenthesis to delimit the second part is missing.",
+                    "third" = "The closing parenthesis to delimit the third part is missing.")
+      
+      msg = .sma("In pluralizations, the special verbatim operation must be of the ",
+                 "form (v1;v2) or (v1;v2;v3), with `v.` verbatim expressions ", 
+                 "(possibly containing interpolations).",
+                 "\nPROBLEM: the {type} verbatim expression could not be extracted. {pblm}")
+    }
+    
+  }
+  
+  full_msg = .sma("{context}\n{msg}{if(.C>0;'\n'paste) ? suggest}")
+  
+  if(error){
+    .stop_hook(full_msg)
+  } else {
+    return(full_msg)
+  }
+  
 }
 
 ####
@@ -796,6 +912,10 @@ get_up_hook = function(){
   stop_up(..., up = up, msg = msg, frame = frame, verbatim = TRUE)
 }
 
+stopi = function(..., frame = parent.frame()){
+  stop_up(..., up = 1, frame = frame, verbatim = FALSE)
+}
+
 stop_hook = function(..., msg = NULL, frame = parent.frame(), verbatim = FALSE){
   up = get_up_hook()
 
@@ -808,7 +928,7 @@ stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = F
     main_msg = paste0(...)
   } else {
     main_msg = .smagick(..., frame = frame)
-  }  
+  }
 
   # up with set_up
   mc = match.call()
@@ -869,16 +989,20 @@ warn_no_named_dots = function(dots){
   }
 }
 
-.warn_hook = function(..., msg = NULL, frame = parent.frame()){
+.warn_hook = function(..., frame = parent.frame(), immediate. = FALSE){
   up = get_up_hook()
 
-  warn_up(..., up = up, msg = msg, frame = frame, verbatim = TRUE)
+  warn_up(..., up = up, frame = frame, verbatim = TRUE, immediate. = immediate.)
 }
 
-warn_hook = function(..., msg = NULL, frame = parent.frame(), verbatim = FALSE){
+warn_hook = function(..., frame = parent.frame(), immediate. = FALSE, verbatim = FALSE){
   up = get_up_hook()
 
-  warn_up(..., up = up, msg = msg, frame = frame, verbatim = verbatim)
+  warn_up(..., up = up, frame = frame, verbatim = verbatim, immediate. = immediate.)
+}
+
+warni = function(..., frame = parent.frame(), immediate. = FALSE){
+  warn_up(..., up = 1, frame = frame, verbatim = FALSE, immediate. = immediate.)
 }
 
 warn_up = function (..., up = 1, immediate. = FALSE, frame = parent.frame(), verbatim = FALSE){

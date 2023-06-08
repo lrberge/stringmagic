@@ -858,39 +858,34 @@ test(txt, c("bonj", "bono", "bonu", "bonr"))
 # errors ####
 #
 
-# the problem is direct for special interpolations: $, #, &
-# for regular operations, this is more complicated:
-# - 
+test_err_contains(smagick("hi {there"), "bracket")
 
-# without nesting
-smagick("hi {there")
+test_err_contains(smagick("hi {upper ! there"), "bracket")
 
-smagick("hi {upper ! there")
+test_err_contains(smagick("hi {S, ''S, ~(first ! bon, jour}"), "parenthesis")
 
-smagick("hi {S, ''S, ~(first ! bon, jour}")
+test_err_contains(smagick("hi {$(bon) ! jour}"), "if/plurali & (v1")
 
-smagick("hi {$(bon) ! jour}")
+test_err_contains(smagick("hi {&bonjour}"), "semi-colon")
 
-smagick("hi {&bonjour}")
+test_err_contains(smagick("hi {&bonjour ; jour}"), "bonjour & evaluated")
 
-smagick("hi {&bonjour ; jour}")
+test_err_contains(smagick("hi {&TRUE ; {upper ! jour ; voir}"), "closing bracket")
 
-# with nesting
-smagick("hi {&TRUE ; {upper ! jour ; voir}")
+test_err_contains(smagick("hi {&TRUE ; {upperest ! jour} ; voir}"), "w/upper")
 
-smagick("hi {&TRUE ; {upperest ! jour} ; voir}")
+test_err_contains(smagick("hi {&TRUE ; {upperest ? jour} ; voir}"), "jour & evaluated")
 
-smagick("hi {&TRUE ; {upperest ? jour} ; voir}")
+test_err_contains(smagick("hi {&bonjour ; jour}"), "bonjour & not found")
 
-smagick("hi {&bonjour ; jour}")
+test_err_contains(smagick("error operation: {if(1:5 ; upper ; lower) ! ohohoh}"), "w/if & length")
 
-smagick("error operation: {dtime ! ohohoh}")
+test_err_contains(smagick("error operation: {if(fakfak; upper ; lower) ! ohohoh}"), "w/if & evaluated & not found")
 
-smagick("error operation: {if(1:5 ; upper ; lower) ! ohohoh}")
+test_err_contains(smagick("error operation: {if(fakfak%m; upper ; lower) ! ohohoh}"), "w/if & parsed")
 
-smagick("error operation: {if(fakfak; upper ; lower) ! ohohoh}")
+test_err_contains(smagick("error operation: {S, ~(sekg) ! ohohoh, hihihi}"), "not a valid op")
 
-smagick("error operation: {if(fakfak%m; upper ; lower) ! ohohoh}")
+test_err_contains(smagick("/hi, {there"), "bracket & matched & escape")
 
-smagick("error operation: {S, ~(sekg) ! ohohoh, hihihi}")
 

@@ -1,4 +1,4 @@
-# 1686088001
+# 1686215898
 # DO NOT EDIT BY HAND: generated with generate_help_extensive() in help.R
 
 setup_help_extensive = function(){
@@ -127,7 +127,16 @@ txt = c("", "# Interpolation and string operations: Principle ----|",
 "  - `(s1;s2;s3)`: adds verbatim 's1' if zero, 's2' if singular (=1) and 's3' if plural", 
 "  - `(s1;;s3)`: adds verbatim 's1' if zero, 's3' if singular or plural (i.e. >=1)", 
 "", "These case-dependent verbatim values **are interpolated** (if appropriate). In these interpolations you need not refer explicitly to the variable for pluralization interpolations.", 
-"", "Ex.4: `x = 3; smagick(\"{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}\")` leads to \"Three matches were found.\". If \"x = 1\", this leads to \"One match was found.\" and if \"x = 0\" this leads to \"Sorry, nothing found.\"."
+"", "Ex.4: `x = 3; smagick(\"{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}\")` leads to \"Three matches were found.\". If \"x = 1\", this leads to \"One match was found.\" and if \"x = 0\" this leads to \"Sorry, nothing found.\".", 
+"", "# Escaping and special cases ----|", "", "The opening and closing brakets, `{}`, are special characters and cannot be used as regular text. To bypass their special meaning, you need to escape them with a double backslash.", 
+"", "Ex.1: `smagick(\"open = \\\\\\\\{, close = }\")` leads to `\"open = {, close = }\"`. Ex.2: `smagick(\"many {5 times.c ! \\\\\\\\}}\")` leads to `many }}}}}`.", 
+"", "You only need to escape the special delimiters which the algorithm is currently looking for. As you can see, you don't need to escape the closing bracket in Ex.1 since no box was open. On the other hand, you need to escape it in Ex.2.", 
+"", "Alternatively, you can use the function `dsb()` to interpolate with `.[]` instead of `{}`. You can also use the following hack:", 
+"", "Ex.3: smagick(\"I {'can {write} {{what}} I want'}\") leads to `\"I can {write} {{what}} I want\"`.", 
+"", "Since `{expr}` evaluates `expr`, the stuff inside the *box*, you can pass a character string and it will stay untouched.", 
+"", "In the few operations expecting a semi-colon (if-else and pluralization), it can also be escaped with a double backslash.", 
+"", "In interpolations, the exclamation mark (`!`) signals a verbatim expression. But what if you use it to mean the logical operation *not* in an operation-free interpolation? In that case, you need a hack: use a question mark (`?`) first to indicate to the algorithm that you want to evaluate the expression.", 
+"", "Ex.4: `smagick(\"{!TRUE} is {?!TRUE}\")` leads to \"TRUE is FALSE\". The first expression is taken verbatim while the second is evaluated."
 )
 
   options(smagick_help_extensive = txt)
