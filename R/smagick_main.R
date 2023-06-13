@@ -457,18 +457,18 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' leads to "Iris species: setosa, versicolor and virginica.".
 #' + each: repeats each element of the vector `n` times. Option "c" then collapses the full vector 
 #' with the empty string as a separator. Ex.1: `smagick("{/x, y}{2 each ? 1:2}")` leads to the 
-#' vector `c("x1", "y1", "x2", "y2")`. Ex.2: smagick("Large number: 1{5 each.c ! 0}") leads to 
+#' vector `c("x1", "y1", "x2", "y2")`. Ex.2: `smagick("Large number: 1{5 each.c ! 0}")` leads to 
 #' "Large number: 100000".
 #' + times: repeats the vector sequence `n` times. Option "c" then collapses the full vector 
 #' with the empty string as a separator. Example: `smagick("What{6 times.c ! ?}")` leads to "What??????".
 #' + rm: removes elements from the vector. Options: "empty", "blank", "noalpha", "noalnum", "all".
 #' The *optional* argument represents the pattern used to detect strings to be deleted. 
-#' Ex.1: x = c("Luke", "Charles"); smagick("{'i/lu'rm ? x}") leads to "charles". By default it removes
+#' Ex.1: `x = c("Luke", "Charles")`; `smagick("{'i/lu'rm ? x}")` leads to "charles". By default it removes
 #' empty strings. Option "blank" removes strings containing only blank characters (spaces, tab, newline).
 #' Option "noalpha" removes strings not containing letters. Option "noalnum" removes strings not 
 #' containing alpha numeric characters. Option "all" removes all strings (useful in conditions, see 
 #' the dedicated section). If an argument is provided, only the options "empty" and "blank" are available.
-#' Ex.2: `x = c("I want to enter.", "Age?", "21"); smagick("Nightclub conversation: {rm.noalpha, c ! - {x}}")` 
+#' Ex.2: `x = c("I want to enter.", "Age?", "21")`; `smagick("Nightclub conversation: {rm.noalpha, c ! - {x}}")` 
 #' leads to "Nightclub conversation: - I want to enter. - Age?"
 #' + nuke: removes all elements, equivalent to `rm.all` but possibly more explicit (not sure). 
 #' Useful in conditions, see the dedicated section.
@@ -502,9 +502,9 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' back quotes. `x = c("Mark", "Pam"); smagick("Hello {q, C ? x}!")` leads to "Hello 'Mark' and 'Pam'!".
 #' + format, Format: applies the base R's function [base::format()] to the string. 
 #' By default, the values are left aligned, *even numbers* (differently from [base::format()]'s behavior).
-#' The upper case command (`Format`) applies right alignment. Options: "0", "zero", "right", "centre", "center".
+#' The upper case command (`Format`) applies right alignment. Options: "0", "zero", "right", "center".
 #' Options "0" or "zero" fills the blanks with 0s: useful to format numbers. Option "right" right aligns,
-#' and "centre" or "centre" centers the strings.
+#' and "center" centers the strings.
 #' Ex: `x = c(1, 12345); smagick("left: {format.0, q, C ? x}, right: {Format, q, C ? x}")` 
 #' leads to "left: '000001' and '12,345', right: '     1' and '12,345'".
 #' + %: applies [base::sprintf()] formatting. The syntax is 'arg'% with arg an sprintf formatting,
@@ -2172,11 +2172,11 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
   } else if(op %in% c("format", "Format")){
     # Format, % ####
 
-    options = check_set_options(options, c("0", "zero", "right", "center", "centre"))
+    options = check_set_options(options, c("0", "zero", "right", "center"))
 
     is_zero = any(options %in% c("0", "zero"))
     is_right = "right" %in% options || op == "Format" || is_zero
-    is_center = any(options %in% c("center", "centre"))
+    is_center = any(options == "center")
     is_left = !is_right && !is_center
 
     if(is_right){
