@@ -481,6 +481,14 @@ test(smagick("{sort ? x}"), c(1, 3, 5, 8))
 
 test(smagick("{dsort ? x}"), c(8, 5, 3, 1))
 
+# with preprocessing
+x = "Mark is 34, Bianca is 55, Odette is 101, Julie is 21 and Frank is 5"
+txt = smagick("{', | and 's, '\\D'sort, C ? x}")
+test(txt, "Odette is 101, Julie is 21, Mark is 34, and Frank is 5 and Bianca is 55")
+
+txt = smagick("{', | and 's, '\\D'sort.num, C ? x}")
+test(txt, "Frank is 5, Julie is 21, Mark is 34, Bianca is 55 and Odette is 101")
+
 # conditional
 x = c("521", "aebc")
 txt = smagick("{''S, ~(sort, ''c), ' ; 'c ? x}")

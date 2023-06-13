@@ -415,14 +415,23 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' + last: keeps only the last `n` elements. Example: `smagick("Last 3 numbers: {3 last, C ? mtcars$mpg}.")`
 #' leads to "Last 3 numbers: 19.7, 15 and 21.4.". Negative numbers as argument remove the 
 #' last `n` values.
-#' + sort: sorts the vector in increasing order. Example: `x = c("sort", "me") ; smagick("{sort, c ? x}")` 
-#' leads to "me sort". **Important note**: the sorting operation is applied before any character conversion.
+#' + sort: sorts the vector in increasing order. Accepts optional arguments and the option "num". 
+#' Example: `x = c("sort", "me") ; smagick("{sort, c ? x}")` leads to "me sort". 
+#' If an argument is provided, it must be a regex pattern that will be applied to
+#' the vector using [str_clean()]. The sorting will be applied to the modified version of the vector
+#' and the original vector will be ordered according to this sorting. 
+#' Ex: `x = c("Jon Snow", "Khal Drogo")`; `smagick("{'.+ 'sort, C?x}")` leads to 
+#' "Khal Drogo and Jon Snow". The option "num" sorts over a numeric version 
+#' (with silent conversion) of the vector and reorders the original vector accordingly. 
+#' Values which could not be converted are last.
+#' **Important note**: the sorting operation is applied before any character conversion.
 #' If previous operations were applied, it is likely that numeric data were transformed to character.
 #' Note the difference: `x = c(20, 100, 10); smagick("{sort, ' + 'c ? x}")` leads to "10 + 20 + 100"
 #' while `smagick("{n, sort, ' + 'c ? x}")` leads to "10 + 100 + 20" because the operation "n"
 #' first transformed the numeric vector into character.
-#' + dsort: sorts the vector in decreasing order. Example: `smagick("5 = {dsort, ' + 'c ? 2:3}")` 
-#' leads to "5 = 3 + 2". Same note as for the operation "sort".
+#' + dsort: sorts the vector in decreasing order. It accepts an optional argument and 
+#' the option "num". Example: `smagick("5 = {dsort, ' + 'c ? 2:3}")` 
+#' leads to "5 = 3 + 2". See the operation "sort" for a description of the argument and the option.
 #' + rev: reverses the vector. Example: `smagick("{rev, ''c ? 1:3}")` leads to "321".
 #' + unik: makes the string vector unique. Example: `smagick("Iris species: {unik, C ? iris$Species}.")`
 #' leads to "Iris species: setosa, versicolor and virginica.".
@@ -2297,7 +2306,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
 
   } else if(op %in% c("first", "last", "cfirst", "clast")){
-    # first, last, cfirst, clast, rev, sort ####
+    # first, last, cfirst, clast ####
 
     nb = argument
     
@@ -2425,7 +2434,8 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
 
   } else if(op == "rev"){
-
+    # rev, sort, dsort ####
+    
     if(!is.null(group_index) && conditional_flag == 2){
       qui = cpp_group_rev_index(group_index)
       res = x[qui]
@@ -2434,18 +2444,47 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
 
   } else if(op %in% c("sort", "dsort")){
+    
+    is_decreasing = op == "dsort"
+    x2sort = x
+    is_modified = FALSE
+    if(nchar(argument) > 0){
+      is_modified = TRUE
+      x2sort = str_clean(x, argument)
+    }
+    
+    options = check_set_options(options, "num")
+    if("num" %in% options){
+      is_modified = TRUE
+      x2sort = suppressWarnings(as.numeric(x2sort))
+    }
+    
+    if(conditional_flag == 1){
+      # it makes no sense to keep track of the indexes when sorting the full string
+      # ex: a1 b2 => split => a 1 b 2 => sort => a b 1 2
+      # after that, the conditional operations (on a1 and b2) don't make much sense
+      group_index = NULL
+      conditional_flag = 0
+    }
 
     if(!is.null(group_index) && conditional_flag == 2){
-
-      if(op == "dsort"){
-        qui = order(-group_index, x, decreasing = TRUE)
+      
+      if(is_decreasing){
+        new_order = order(-group_index, x2sort, decreasing = TRUE)
       } else {
-        qui = order(group_index, x)
+        new_order = order(group_index, x2sort)
       }
 
-      res = x[qui]
+      res = x[new_order]
+      group_index = cpp_recreate_index(group_index[new_order])
     } else {
-      res = sort(x, decreasing = op == "dsort")
+      if(is_modified){
+        new_order = order(x2sort, decreasing = is_decreasing)
+        res = x[new_order]
+      } else {
+        res = sort(x, decreasing = is_decreasing)
+      }
+      
     }
 
   } else if(op %in% c("paste", "insert")){
