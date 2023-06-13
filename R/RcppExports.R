@@ -49,6 +49,10 @@ cpp_parse_operator <- function(Rstr) {
     .Call(`_stringmagick_cpp_parse_operator`, Rstr)
 }
 
+cpp_extract_pipe <- function(Rstr, check_double = FALSE) {
+    .Call(`_stringmagick_cpp_extract_pipe`, Rstr, check_double)
+}
+
 cpp_parse_simple_operations <- function(Rstr, is_dsb) {
     .Call(`_stringmagick_cpp_parse_simple_operations`, Rstr, is_dsb)
 }

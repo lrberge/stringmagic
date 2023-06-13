@@ -153,6 +153,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_extract_pipe
+List cpp_extract_pipe(SEXP Rstr, bool check_double);
+RcppExport SEXP _stringmagick_cpp_extract_pipe(SEXP RstrSEXP, SEXP check_doubleSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    Rcpp::traits::input_parameter< bool >::type check_double(check_doubleSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_extract_pipe(Rstr, check_double));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_parse_simple_operations
 SEXP cpp_parse_simple_operations(SEXP Rstr, bool is_dsb);
 RcppExport SEXP _stringmagick_cpp_parse_simple_operations(SEXP RstrSEXP, SEXP is_dsbSEXP) {
@@ -237,6 +249,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_smagick_parser", (DL_FUNC) &_stringmagick_cpp_smagick_parser, 3},
     {"_stringmagick_cpp_extract_quote_from_op", (DL_FUNC) &_stringmagick_cpp_extract_quote_from_op, 1},
     {"_stringmagick_cpp_parse_operator", (DL_FUNC) &_stringmagick_cpp_parse_operator, 1},
+    {"_stringmagick_cpp_extract_pipe", (DL_FUNC) &_stringmagick_cpp_extract_pipe, 2},
     {"_stringmagick_cpp_parse_simple_operations", (DL_FUNC) &_stringmagick_cpp_parse_simple_operations, 2},
     {"_stringmagick_cpp_parse_slash", (DL_FUNC) &_stringmagick_cpp_parse_slash, 2},
     {"_stringmagick_cpp_find_closing_problem", (DL_FUNC) &_stringmagick_cpp_find_closing_problem, 2},

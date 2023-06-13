@@ -53,9 +53,10 @@ inline bool is_box_open(const int box_type, const char * str, int &i, int n, boo
       
       if(ok_escape){
         ++i;
-        return false; 
       }
     }
+    
+    return false;
   }
   
   // we don't skip but we still check for escaping
@@ -1353,10 +1354,47 @@ List cpp_parse_operator(SEXP Rstr){
 }
 
 // [[Rcpp::export]]
+List cpp_extract_pipe(SEXP Rstr, bool check_double = false){
+  // we extract up to the first non escaped pipe, pipes can occur afterwards no problem
+  const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
+  int n = std::strlen(str);
+  
+  List res;
+  
+  std::string value;
+  std::string extra;
+  bool is_double = false;
+  
+  int i = 0;
+  while(i < n){
+    if(is_non_escaped_symbol('|', str, i, n, true)){
+      ++i;
+      if(check_double && i < n && str[i] == '|'){
+        ++i;
+        is_double = true;
+      }
+      break;
+    } else {
+      value += str[i++];
+    }
+  }
+  
+  while(i < n){
+    extra += str[i++];
+  }
+  
+  res["value"] = std_string_to_r_string(value);
+  res["extra"] = std_string_to_r_string(extra);
+  res["is_double"] = is_double; 
+  
+  return res;
+}
+
+// [[Rcpp::export]]
 SEXP cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
   // "'-'S, title, C" => c("'-'S", "title", "C")
   
-  const char *str = CHAR(STRING_ELT(Rstr, 0));
+  const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
 
   const int box_type = is_dsb ? DSB : CUB;

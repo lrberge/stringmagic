@@ -553,12 +553,13 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'  will always be of maximum size `n`, while in the first case they can be of length `n + nchar(s)`.
 #'   Ex: `smagick("{4k ! long sentence}")` leads to "long",  `smagick("{'4|..'k ! long sentence}") `
 #' leads to "long..", `smagick("{'4||..'k ! long sentence}")` leads to "lo..".
-#' + fill: fills the character strings up to a size. Options: "right", "center" and a free-form symbol.
+#' + fill: fills the character strings up to a size. Options: "right", "center".
+#' Accepts arguments of the form `'n'` or `'n|s'`, with `n` a number and `s` a symbol. 
 #' Default is left-alignment of the strings. 
-#' Option "right" right aligns and "center" centers the strings. You can pass a free-form symbol
-#' as option, it will be used for the filling. By default if no argument is provided, the
+#' Option "right" right aligns and "center" centers the strings. When using `'n|s'`, the symbol `s`
+#' is used for the filling. By default if no argument is provided, the
 #' maximum size of the character string is used. See help for [str_fill()] for more information.
-#' Ex.1: `smagick("Numbers: {'5'fill.0.right, C ? c(1, 55)}")` leads to "Numbers: 00001 and 00055".
+#' Ex.1: `smagick("Numbers: {'5|0'fill.right, C ? c(1, 55)}")` leads to "Numbers: 00001 and 00055".
 #' + paste: pastes some character to all elements of the string. This operation has no default.
 #' Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
 #' Option "right" pastes on the right and "both" pastes on both sides. Option "front" only 
@@ -597,16 +598,18 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Option "letter" writes the length in words (up to 100). Option "upper" is the same 
 #' as letter but uppercases the first letter. Option "format" add comma separation for thousands.
 #' Example: `smagick("Size = {len.format ? 1:5000}")` leads to "Size = 5,000".
-#' + width: formats the string to fit a given width by cutting at word boundaries. You can add 
-#' a free-form option which will appear at the beginning of the string. If you provide a free-form option
-#' equal to a leading string, by default a trailing white space is added; to remove this 
-#' behavior, add an underscore at the end of the option. 
-#' The argument is either 
+#' + width: formats the string to fit a given width by cutting at word boundaries. 
+#' Accepts arguments of the form `'n'` or `'n|s'`, with `n` a number and `s` a string. 
+#' An argument of the form `'n|s'` will add `s` at the beginning of each line. Further,
+#' by default a trailing white space is added to `s`; to remove this 
+#' behavior, add an underscore at the end of it. 
+#' The argument `n` is either 
 #' an integer giving the target character width (minimum is 15), or it can be a fraction expressing the 
-#' target size as a fraction of the current screen.
+#' target size as a fraction of the current screen. Finally it can be an expression that 
+#' uses the variable `.sw` which will capture the value of the current screen width.
 #' Ex.1: `smagick("{15 width ! this is a long sentence}")` leads to "this is a long\\nsentence".
 #' Ex.2: `smagick("{15 width.#> ! this is a long sentence}")` leads to "#> this is a long\\n#> sentence".
-#' + dtime: displays a formatted time difference. Option "silent" does not report an warning if the
+#' + dtime: displays a formatted time difference. Option "silent" does not report a warning if the
 #' operation fails. It accepts either objects of class `POSIXt` or `difftime`.
 #' Example: `x = Sys.time() ; Sys.sleep(0.5) ; smagick("Time: {dtime ? x}")` leads to something 
 #' like "Time: 514ms".
@@ -2260,33 +2263,11 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     #
     # Keep, enum ####
     #
-
-    argument_split = argument
-    pat = c("_||_", "_|_", "||", "|")
-    for(p in pat){
-      if(grepl(p, argument, fixed = TRUE)){
-        argument_split = strsplit(argument, p, fixed = TRUE)[[1]]
-        break
-      }
-    }
-    is_included = grepl("||", p, fixed = TRUE)
-
-    if(length(argument_split) == 1){
-      nb = argument
-      add = ""
-      is_included = FALSE
-    } else {
-      nb = argument_split[[1]]
-      add = argument_split[[2]]
-    }
-
-    if(!is_numeric_in_char(nb)){
-      msg = paste0("In `dsb`, the operator `", op, "` must first contain a numeric argument, `",
-                   argument, "` does not contain a numeric first.")
-      .stop_hook(bespoke_msg(msg))
-    }
-
-    nb = as.numeric(nb)
+    
+    info = extract_pipe(argument, op, double = TRUE, numeric = TRUE, mbt = TRUE)
+    nb = info$value
+    add = info$extra
+    is_included = info$is_double
 
     if(op == "k"){
       qui = nchar(x) > nb
@@ -2707,28 +2688,26 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     # fill ####
     
     valid_options = c("right", "center")
-    options = check_set_options(options, valid_options, free = TRUE, op = op)
+    options = check_set_options(options, valid_options, op = op)
+    
+    info = extract_pipe(argument, op, double = FALSE, numeric = TRUE, mbt = FALSE)
+    argument = info$value
+    symbol = info$extra
     
     center = "center" %in% options
     right = "right" %in% options
-    symbol = setdiff(options, valid_options)
-    
-    if(length(symbol) == 0){
-      symbol = " "
-    }
     
     if(symbol == ""){
-      # this is how free form . is parsed
-      symbol = "."
+      symbol = " "
     }
     
     if(nchar(symbol) != 1){
       stop_hook("In the operator `fill`, the symbol used to fill must be of length 1.",
                 "\nPROBLEM: the symbol, equal to {bq?symbol}, is of length {n?nchar(symbol)}.",
-                "\nEXAMPLE: to fill with 0s: `fill.0`; of length 10 with underscores on the right: `10 fill._.right`.")
+                "\nEXAMPLE: to fill with 0s: `fill.0`; of length 10 with underscores and right-aligned text: `'10|_'fill.right`.")
     }
     
-    if(nchar(argument) == 0){
+    if(argument == ""){
       argument = NULL
     }
     
@@ -2744,7 +2723,6 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
     
     res = str_fill(x, argument, symbol = symbol, right = right, center = center)
-    
     
   } else if(op == "unik"){
     # unik ####
@@ -2865,27 +2843,27 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
   } else if(op == "width"){
     # width, dtime ####
+    
+    sw = getOption("width")
+    data = list(.sw = sw)
 
-    comment = ""
-    if(length(options) > 0) comment = options[1]
+    info = extract_pipe(argument, op, double = FALSE, numeric = TRUE, data = data, mbt = FALSE)
+    nb = info$value
+    comment = info$extra
+    
+    if(nb == ""){
+      nb = NULL
+    }
 
     if(str_x(comment, -1) == "_"){
-      # the bang means that we don't add a space
+      # the underscore means that we don't add a space
       comment = str_trim(comment, -1)
     } else if(comment != ""){
       comment = paste0(comment, " ")
     }
 
-    nb = argument
-    if(!is_numeric_in_char(nb)){
-      msg = paste0("In `dsb`: the operator `", op, "` must first contain a numeric argument. PROBLEM: `",
-                   argument, "` is not numeric.")
-      .stop_hook(bespoke_msg(msg))
-    }
-    nb = as.numeric(nb)
-
     # code is slow but I don't see why would one want it to be super fast
-    # (only for user-content, not performance/data-analysis concent)
+    # (only for user-content, not performance/data-analysis content)
 
     res = character(length(x))
     for(i in seq_along(x)){

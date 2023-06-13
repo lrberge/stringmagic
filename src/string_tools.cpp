@@ -360,15 +360,20 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
     // send an error if a pattern contains a '/'
     
     // first: we check if the pattern contains '/'
+    // if '/' is escaped, we consider that the user knows what she's doing
+    // so we don't even check the other slashes
+    // we still get all the escaped '/'
     bool is_slash = false;
     for(int j=0 ; j<n ; ++j){
       if(str[j] == '/'){
-        if(j > 0 && str[j - 1] == '\\' && !(j > 1 && str[j - 2] == '\\')){
+        if(is_non_escaped_symbol('/', str, j, n, false)){
+          if(!is_escape){
+            is_slash = true;
+            break;
+          }
+        } else {
           i_skip.push_back(j - 1);
           is_escape = true;
-        } else {
-          is_slash = true;
-          break;
         }
       }
     }

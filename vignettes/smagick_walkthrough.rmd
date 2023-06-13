@@ -172,6 +172,24 @@ smagick("y = {0paste, ' + 'c ? 1:2}")
 smagick("y = the sum of {'x'paste, enum.bq.a ? 1:2}")
 ```
 
+A few operators have two arguments. Pass multiple arguments using a pipe as follows:
+```{r}
+smagick("{'arg1|arg2'op, 'arg1||arg2'op ? x}")
+```
+You can escape the meaning of the pipe as a separator with a double backslash. 
+Some operators accept a double pipe which modifies the behavior of the second argument.
+Here is an example:
+```{r}
+x = "Quels sont ces serpents qui sifflent sur vos têtes?"
+# let's shorten this
+smagick("Oreste: {s, '4|..'k, c, Q ? x}")
+
+rome = c("Rome qui t'a vu naître et que ton coeur adore",
+         "Rome enfin, que je hais parce qu'elle t'honore!")
+# the double pipe triggers a different behavior in this operator
+smagick("Camille: {s, '4||..'k, c, Q ? rome}")
+```
+
 # Regular operations: Reference {#sec_operations_reference}
 
 This section references all `smagick`'s regular operations.
@@ -315,7 +333,7 @@ x = c("Mark", "Lucas", "Markus")
 smagick("Mark is number {'iw/mark'which ? x}.")
 ```
 
-## Operations changing the length or the order:
+## Operations changing the length or the order
 
 + first: keeps only the first `n` elements. 
 
@@ -468,7 +486,7 @@ the new element to the right. Option "both" inserts the new element on the two s
 smagick("{'3'insert.right, ' + 'c ? 1:2}")
 ```
 
-## Formatting operations:
+## Formatting operations
  
 + lower: lower cases the full string.
 + upper: upper cases the full string. Options: "first" and "sentence".
@@ -643,7 +661,7 @@ as option, it will be used for the filling. By default if no argument is provide
 maximum size of the character string is used. See help for str_fill() for more information.
 ```{r}
 life = "full of sound and fury, Signifying nothing"
-smagick("{'[ ,]+'s, fill.center, q, '\n'c ? life}")
+smagick("{'[ ,]+'s, upper.first, fill.center, q, '\n'c ? life}")
 
 # fixing the length and filling with 0s
 smagick("{5 fill.0.right, C ? c(1, 55)}")
@@ -660,51 +678,296 @@ smagick("6 = {'|'paste.both, ' + 'c ? -3:-1}")
 ```
 
 
-#' @section Other operations:
-#' 
-#' 
-#' + num: converts to numeric. Options: "warn", "soft", "rm", "clear". By default, the conversion
-#' is performed silently and elements that failed to convert are turned into NA. 
-#' Option "warns" displays a warning if the conversion to numeric fails. 
-#' Option "soft" does not convert if the conversion of at least one element fails. 
-#' Option "rm" converts and removes the elements that could not be converted. 
-#' Option "clear" turns failed conversions into the empty string, and hence lead to a character vector.
-#' Example: `x = c(5, "six"); smagick("Compare {num, C, q ? x} with {num.rm, C, q ? x}.")` leads to 
-#' "Compare '5 and NA' with '5'.", and `smagick("Compare {num.soft, C, q ? x} with {clear, C, q ? x}.")`
-#' leads to "Compare '5 and six' with '5 and '.".
-#' + enum: enumerates the elements. It creates a single string containing the comma 
-#' separated list of elements.
-#'   If there are more than 7 elements, only the first 6 are shown and the number of
-#'  items left is written.
-#'   For example `smagick("enum ? 1:5")` leads to "1, 2, 3, 4, and 5".
-#'   You can add the following options by appending the letter to enum after a dot:
-#'   + q, Q, or bq: to quote the elements
-#'   + or, nor: to finish with an 'or' (or 'nor') instead of an 'and'
-#'   + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two
-#'   + a number: to tell the number of items to display
-#'   Ex.1: `x = c("Marv", "Nancy"); smagick("The main characters are {enum ? x}.")` leads to 
-#' "The main characters are Marv and Nancy.".
-#'   Ex.2: `x = c("orange", "milk", "rice"); smagick("Shopping list: {enum.i.q ? x}.")` leads to
-#'  "Shopping list: i) 'orange', ii) 'milk', and iii) 'rice'."
-#' + len: gives the length of the vector. Options "letter", "upper", "format".
-#' Option "letter" writes the length in words (up to 100). Option "upper" is the same 
-#' as letter but uppercases the first letter. Option "format" add comma separation for thousands.
-#' Example: `smagick("Size = {len.format ? 1:5000}")` leads to "Size = 5,000".
-#' + width: formats the string to fit a given width by cutting at word boundaries. You can add 
-#' a free-form option which will appear at the beginning of the string. If you provide a free-form option
-#' equal to a leading string, by default a trailing white space is added; to remove this 
-#' behavior, add an underscore at the end of the option. 
-#' The argument is either 
-#' an integer giving the target character width (minimum is 15), or it can be a fraction expressing the 
-#' target size as a fraction of the current screen.
-#' Ex.1: `smagick("{15 width ! this is a long sentence}")` leads to "this is a long\\nsentence".
-#' Ex.2: `smagick("{15 width.#> ! this is a long sentence}")` leads to "#> this is a long\\n#> sentence".
-#' + dtime: displays a formatted time difference. Option "silent" does not report an warning if the
-#' operation fails. It accepts either objects of class `POSIXt` or `difftime`.
-#' Example: `x = Sys.time() ; Sys.sleep(0.5) ; smagick("Time: {dtime ? x}")` leads to something 
-#' like "Time: 514ms".
+## Other operations:
+
++ num: converts to numeric. Options: "warn", "soft", "rm", "clear". By default, the conversion
+is performed silently and elements that fail to convert are turned into NA. 
+Option "warns" displays a warning if the conversion to numeric fails. 
+Option "soft" does not convert if the conversion of at least one element fails, leading to 
+a character vector. 
+Option "rm" converts and removes the elements that could not be converted. 
+Option "clear" turns failed conversions into the empty string, and hence lead to a character vector.
+```{r}
+x = c(5, "six")
+smagick("   origin: {C, q ? x}", 
+        "      num: {num, C, q ? x}", 
+        "   num.rm: {num.rm, C, q ? x}", 
+        " num.soft: {num.soft, C, q ? x}", 
+        "num.clear: {num.clear, C, q ? x}", sep = "\n")
+```
+
++ enum: enumerates the elements. It creates a single string containing the comma 
+separated list of elements.
+If there are more than 7 elements, only the first 6 are shown and the number of
+items left is written.
+```{r}
+smagick("enum ? 1:5")
+```
+You can add the following options:
+  + q, Q, or bq: to quote the elements
+  + or, nor: to finish with an 'or' (or 'nor') instead of an 'and'
+  + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two
+  + a number: to tell the number of items to display
+```{r}
+x = c("Marv", "Nancy")
+smagick("The murderer must be {enum.or ? x}.")
+
+x = c("orange", "milk", "rice")
+smagick("Shopping list: {enum.i.q ? x}.")
+```
 
 
++ len: gives the length of the vector. Options "letter", "upper", "format".
+Option "letter" writes the length in words (up to 100). Option "upper" is the same 
+as letter but uppercases the first letter. Option "format" add comma separation for thousands.
+```{r}
+smagick("Size = {len.format ? 1:5000}")
+```
+
++ width: formats the string to fit a given width by cutting at word boundaries. 
+Accepts arguments of the form `'n'` or `'n|s'`, with `n` a number and `s` a string. 
+An argument of the form `'n|s'` will add `s` at the beginning of each line. Further,
+by default a trailing white space is added to `s`; to remove this 
+behavior, add an underscore at the end of it. 
+The argument `n` is either 
+an integer giving the target character width (minimum is 15), or it can be a fraction expressing the 
+target size as a fraction of the current screen. Finally it can be an expression that 
+uses the variable `.sw` which will capture the value of the current screen width.
+```{r}
+x = "this is a long sentence"
+smagick("------ version 0 ------\n{x}", 
+        "------ version 1 ------\n{15 width ? x}", 
+        "------ version 2 ------\n{'15|#>'width ? x}",
+        "------ version 3 ------\n{'15|#>_'width ? x}", sep = "\n")
+```
+
++ dtime: displays a formatted time difference. Option "silent" does not report a warning if the
+operation fails. It accepts either objects of class `POSIXt` or `difftime`.
+```{r}
+x = Sys.time()
+Sys.sleep(0.15) 
+smagick("Time: {dtime ? x}")
+```
+
+# Group-wise operations
+#' 
+#' In `smagick`, the splitting operation `s` (or `extract`) keeps a memory of the strings 
+#' that were split. Use the tilde operator, of the form `~(op1, op2)`, to apply operations
+#' group-wise, to each of the split strings.
+#' 
+#' Better with an example. `x = c("Oreste, Hermione", "Hermione, Pyrrhus", "Pyrrhus, Andromaque") ;`
+#' `smagick("Troubles ahead: {S, ~(' loves 'c), C ? x}.")` leads to 
+#' "Troubles ahead: Oreste loves Hermione, Hermione loves Pyrrhus and Pyrrhus loves Andromaque.".
+#' 
+#' Almost all operations can be applied group-wise (although only operations changing the order or 
+#' the length of the strings really matter).
+#' 
+#' @section Conditional operations:
+#' 
+#' There are two operators to apply operations conditionally: `if` and `vif`, the latter
+#' standing for *verbatim if*. 
+#' 
+#' The syntax of `if` is `if(cond ; ops_true ; ops_false)` with `cond` a
+#' condition (i.e. logical operation) on the value being interpolated, `ops_true` a comma-separated
+#' sequence of operations if the condition is `TRUE` and `ops_false` an *optional* a sequence of
+#' operations if the condition is `FALSE`.
+#' 
+#' Ex.1: Let's take a sentence, delete words of less than 4 characters, and trim 
+#' words of 7+ characters. 
+#' x = "Songe Cephise a cette nuit cruelle qui fut pour tout un peuple une nuit eternelle"
+#' `smagick("{' 's, if(.nchar<=4 ; nuke ; '7|..'k), c ? x}")`.
+#' Let's break it down. First the sentence is split w.r.t. spaces, leading to a vector
+#' of words. Then we use the special variable `.nchar` in `if`'s condition to refer 
+#' to the number of characters of the current vector (the words). The words with 
+#' less than 4 characters are nuked (i.e. removed), and the other words are
+#' trimmed at 7 characters. Finally the modified vector of words is collapsed with 
+#' the function `c`, leading to the result.
+#' 
+#' The condition `cond` accepts the following special values: `.` (the dot), `.nchar`, `.C`, `.len`, `.N`.
+#' The dot, `.`, refers to the current vector. `.nchar` represent the number of characters 
+#' of the current vector (equivalent to `nchar(.)`). `.C` is an alias to `.nchar`.
+#' `.len` represent the length of the current vector (equivalent to `length(.)`). 
+#' `.N` is an alias to `.len`.
+#' 
+#' If a condition leads to a result of length 1, then the operations are applied to 
+#' the full string vector and not element-wise (as was the case in Ex.1). Contrary to element-wise conditions
+#' for which operations modifying the length of the vectors are forbidden (apart from nuking),
+#' such operations are fine in full-string conditions.
+#' 
+#' Ex.2: `x = smagick("x{1:10}")`; `smagick("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x}")`
+#' leads to "y = x1 + x2 + x3 + ...". the same opration applied to `x = smagick("x{1:4}")`
+#' leads to "y = x1 + x2 + x3 + x4".
+#' 
+#' For `vif`, the syntax is `vif(cond ; verb_true ; verb_false)` with `verb_true`
+#' a verbatim value with which the vector will be replaced if the condition is `TRUE`. 
+#' This is similar for `verb_false`. The condition works as in `if`.
+#' 
+#' Ex.3: `x = c(1, 25, 12, 6) ; smagick("Values: {vif(.<10 ; <10), C ? x}")` leads to 
+#' "Values: <10, 25, 12 and <10". As we can see values lower than 10 are replaced
+#' with "<10" while other values are not modified.
+#' 
+#' Ex.4: `x = smagick("x{1:10}")`; `smagick("y = {vif(.N>4 ; {/{x[1]}, ..., {last?x}}), ' + 'c ? x}")`
+#' leads to "y = x1 + ... + x10".
+#' Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
+#' the full string is replaced with "{/{x[1]}, ..., {last?x}}". Interpolation applies to
+#' such string. Hence the slash operation (see the dedicated section) breaks the string w.r.t.
+#' the commas, leading to the vector `c("{x[1]}", "...", "{last?x}")`. Since the 
+#' string contain curly brackets, interpolation is applied again. This leads to 
+#' the vector `c("x1", "...", "x10")`. Finally, this vector is collapsed with ' + ' leading
+#' to the final string.
+#' Note that there are many ways to get to the same result. Here is another example:
+#' `smagick("y = {vif(.N>4 ; {x[1]} + ... + {last?x} ; {' + 'c ? x}) ? x}")`.
+#' 
+#' The `vif` condition allows the use of '.' to refer to the current value in 
+#' `verb_true` and `verb_false`, as illustrated by the last example:
+#' 
+#' Ex.5: `smagick("{4 last, vif(. %% 2 ; x{.} ; y{rev?.}), C ? 1:11}")`
+#' leads to "y10, x9, y8 and x11".
+#' 
+#' 
+#' @section Special interpolation: The slash:
+#' 
+#' Interpolations starting with a slash are different from regular interpolations. 
+#' Ex.1: `x = 3:4; smagick("{/one, two, {x}}")` leads to the vector `c("one", "two", "3", "4")`.
+#' 
+#' When a "/" is the first character of an interpolation:
+#' - all characters until the closing bracket is taken as verbatim
+#' - the verbatim string is split according to comma separation (formally they are split with `,[ \t\n]+`),
+#' resulting into a vector
+#' - if the vector contains any *box*, extra interpolations are resolved
+#' 
+#' In Ex.1 the string "one, two, {x}" is taken as verbatim and split w.r.t. commas, leading to c("one", "two", "{x}"). 
+#' Since the last element contained an opening box, it is interpolated and inserted into the vector, leading
+#' to the result.
+#' 
+#' By default, thanks to the argument `slash = TRUE`, you can apply the slash operator without
+#' the need of an interpolation box (provided the slash appears as the first character), see the example below. 
+#' 
+#' Ex.2: `x = 3:4; smagick("/one, two, {x}")` also leads to the vector `c("one", "two", "3", "4")`.
+#' 
+#' @section Special interpolation: if-else:
+#' 
+#' Using an ampersand ("&") as the first character of an interpolation leads to an *if-else* operation.
+#' Using two ampersands ("&&") leads to a slightly different operation described at the end of this section.
+#' 
+#' Ex.1: \code{x = 1:5; smagick("x is \{&length(x)<10 ; short ; \{`log10(length(x) - 1)`times, ''c ! very \}long\}")}
+#' leads to "x is short". With `x = 1:50`, it leads to "x is long", and to "x is very very long"
+#' if `x = 1:5000`.
+#' 
+#' The syntax is as follows: `{&cond ; verb_true ; verb_false}` with `cond` a
+#' condition (i.e. logical operation) on the value being interpolated, `verb_true`
+#' a verbatim value with which the vector will be replaced if the condition is `TRUE` and 
+#' `verb_false` an *optional* verbatim value with which the vector will be replaced if the condition is `FALSE`. 
+#' If not provided, `verb_false` is considered to be the empty string unless the operator is 
+#' the double ampersand described at the end of this section.
+#' 
+#' If a condition leads to a result of length 1, the full string is replaced by the verbatim 
+#' expression. Further, this expression will be interpolated if requested. This was the case
+#' in Ex.1 where `varb_false` was interpolated.
+#' 
+#' If the condition's length is greater than 1, then each logical values equal to `TRUE` is replaced
+#' by `verb_true`, and `FALSE` or `NA` values are replaced with `verb_false`. Note,
+#' importantly, that **no interpolation is perfomed in that case**.
+#' 
+#' Ex.2: `x = 1:3 ; smagick("x is {&x == 2 ; two ; not two}")` leads to the vector 
+#' `c("x is not two", "x is two", "x is not two")`.
+#' 
+#' Using the two ampersand operator ("&&") is like the simple ampersand version but the 
+#' default for `verb_false` is the variable used in the condition itself. So the syntax is
+#' {&&cond ; `verb_true`} and *it does not accept* `verb_false`.
+#' 
+#' Ex.3: `i = 3 ; smagick("i = {&&i == 3 ; three}")` leads to "i = three", and to "i = 5" if `i = 5`. 
+#' 
+#' 
+#' @section Special interpolation: Pluralization:
+#' 
+#' There is advanced support for pluralization which greatly facilitates the writing of messages 
+#' in natural language.
+#' 
+#' There are two ways to pluralize: over length or over value. To trigger a "pluralization" interpolation
+#' use as first character:
+#' - `$` to pluralize over the length of a variable (see Ex.2)
+#' - `#` to pluralize over the value of a variable (see Ex.1)
+#' 
+#' Ex.1: `x = 5; smagick("I bought {N?x} book{#s}.")` leads to "I bought five books.". 
+#' If `x = 1`, this leads to "I bought one book.".
+#' 
+#' The syntax is `{#plural_ops ? variable}` or `{#plural_ops}` where `plural_ops` are
+#' specific pluralization operations which will be described below. 
+#' The pluralization is perfomed *always* with respect to the value of a variable. 
+#' You can either add the variable explicitly (`{#plural_ops ? variable}`) or refer
+#' to it implicitly (`{#plural_ops}`). If implicit, then the algorithm will look at the 
+#' previous variable that was interpolated and pluralize over it. This is exaclty what happens in
+#' Ex.1 where `x` was interpolated in `{N?x}` and plural operation `s` in `{#s}` then applied to 
+#' `x`. It was equivalent to have `{#s ? x}`. If a variable wasn't interpolated before, then
+#' the next interpolated variable will be used (see Ex.2). If no variable is interpolated
+#' at all, an error is thrown.
+#' 
+#' Ex.2: `x = c("J.", "M."); smagick("My BFF{$s, are} {C?x}!")` leads to "My BFFs are J. and M.!".
+#' If "x = "S.", this leads to "My BFF is S.!".
+#' 
+#' Pluralizing accepts the following operations:
+#' - s, es: adds an "s" (or "es") if it is plural (> 1), nothing otherwise. Accepts the option `0` or `zero` which 
+#' treats a 0-length or a 0-value as plural.
+#' - y or ies: adds an 'y' if singular and 'ies' if plural (>1). Accepts the option `0` or `zero` which 
+#' treats a 0-length or a 0-value as plural.
+#' - enum: enumerates the elements (see help for the regular operation `enum`)
+#' - n, N, len, Len: add the number of elements ("len") or the value ("n") of the variable as a formatted number or 
+#' in letters (upper case versions). Accepts the options `letter` (to write in letter) 
+#' and `upper` (to uppercase the first letter).
+#' - nth, ntimes: writes the value of the variable as an order (nth) or a frequence (ntimes). Accepts the option `letter`
+#' to write the numbers in letters (uppercase version of the operator does the same).
+#' - is, or any verb: conjugates the verb appropriately
+#' 
+#' You can chain operations, in that case a whitespace is automatically added between them.
+#' 
+#'  Ex.3: `x = c(7, 3, 18); smagick("The winning number{$s, is, enum ? sort(x)}.")`
+#' leads to "The winning numbers are 3, 7 and 18.". With `x = 7` this leads to
+#' "The winning number is 7.".
+#' 
+#' On top of the previous operations, there is a special operation allowing to add verbatim text depending on 
+#' the situation. The syntax is as follows:
+#' - `(s1;s2)`: adds verbatim 's1' if singular and 's2' if plural (>1)
+#' - `(s1;s2;s3)`: adds verbatim 's1' if zero, 's2' if singular (=1) and 's3' if plural
+#' - `(s1;;s3)`: adds verbatim 's1' if zero, 's3' if singular or plural (i.e. >=1)
+#' 
+#' These case-dependent verbatim values **are interpolated** (if appropriate). In these interpolations
+#' you need not refer explicitly to the variable for pluralization interpolations.
+#' 
+#' Ex.4: `x = 3; smagick("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")` leads to 
+#' "Three matches were found.". If "x = 1", this leads to "One match was found." and if "x = 0" this leads
+#' to "Sorry, nothing found.".
+#' 
+#' @section Escaping and special cases:
+#' 
+#' The opening and closing brakets, `{}`, are special characters and cannot be used as regular text. 
+#' To bypass their special meaning, you need to escape them with a double backslash.
+#' 
+#' Ex.1: `smagick("open = \\\\{, close = }")` leads to `"open = {, close = }"`.
+#' Ex.2: `smagick("many {5 times.c ! \\\\}}")` leads to `many }}}}}`.
+#' 
+#' You only need to escape the special delimiters which the algorithm is currently looking for.
+#' As you can see, you don't need to escape the closing bracket in Ex.1 since no box
+#' was open. On the other hand, you need to escape it in Ex.2.
+#' 
+#' Alternatively, you can use the function `dsb()` to interpolate with `.[]` instead of `{}`.
+#' You can also use the following hack:
+#' 
+#' Ex.3: smagick("I {'can {write} {{what}} I want'}") leads to `"I can {write} {{what}} I want"`.
+#' 
+#' Since `{expr}` evaluates `expr`, the stuff inside the *box*, you can pass a 
+#' character string and it will stay untouched.
+#' 
+#' In the few operations expecting a semi-colon (if-else and pluralization), it can also be
+#' escaped with a double backslash.
+#' 
+#' In interpolations, the exclamation mark (`!`) signals a verbatim expression. But what
+#' if you use it to mean the logical operation *not* in an operation-free interpolation? 
+#' In that case, you need a hack: use a question mark (`?`) first to indicate to the
+#' algorithm that you want to evaluate the expression. 
+#' 
+#' Ex.4: `smagick("{!TRUE} is {?!TRUE}")` leads to "TRUE is FALSE". The first expression is
+#' taken verbatim while the second is evaluated.
 
 
 ### examples

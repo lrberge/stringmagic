@@ -1177,3 +1177,44 @@ is_box_close = function(x, is_dsb){
   }
 }
 
+extract_pipe = function(x, op, double = FALSE, numeric = FALSE, data = NULL, mbt = FALSE){
+  # returns:
+  # $value
+  # $extra
+  # $is_double
+  
+  res = cpp_extract_pipe(x, double)
+  
+  if(x == "" || res$value == ""){
+    if(!mbt){
+      return(res)
+    } else {
+      stop_hook("In `smagick`, the operator {bq?op} must take an argument which has no default value.",
+                "\nPROBLEM: no argument is given. Please provide one.")
+    }
+  }
+  
+  value_raw = res$value
+  if(!is.null(data)){
+    # we evaluate
+    new_value = try(eval(str2lang(res$value), data), silent = TRUE)
+    if(inherits(new_value, "try-error")){
+      stop_hook("In `smagick`, the operator {bq?op} must take a numeric argument.",
+                "\nPROBLEM: {bq?res$value} could not be evaluated. See problem below:",
+                "\n{new_value}")
+    }
+    res$value = new_value
+  }
+  
+  if(numeric){
+    if(!is.numeric(res$value) && !is_numeric_in_char(res$value)){
+      stop_hook("In `smagick`, the operator {bq?op} must take a numeric argument.",
+                "\nPROBLEM: {bq?value_raw} is not numeric.")
+    }
+    
+    res$value = as.numeric(res$value)
+  }
+  
+  res
+}
+
