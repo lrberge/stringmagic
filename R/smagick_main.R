@@ -1343,7 +1343,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 
   if(slash && substr(x, 1, 1) == "/"){
     # we apply the "slash" operation
-    x = sop_operators(substr(x, 2, nchar(x)), "/", NULL, "", check = check, frame = frame, 
+    x = sma_operators(substr(x, 2, nchar(x)), "/", NULL, "", check = check, frame = frame, 
                       conditional_flag = 0, is_dsb = is_dsb, fun_name = fun_name)
     return(x)
   } 
@@ -1570,32 +1570,52 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
         #
 
         if(is_plural){
-          xi = sop_pluralize(operators, xi, fun_name, is_dsb, frame, check)
+          xi = sma_pluralize(operators, xi, fun_name, is_dsb, frame, check)
 
         } else if(is_ifelse) {
 
           xi_val = NULL
-          if(operators[1] == "&&"){
-            vars = all.vars(str2lang(xi_raw))
+          vars = all.vars(str2lang(xi_raw))
 
-            if(length(vars) == 0){
+          if(length(vars) == 0){
+            if(operators[1] == "&&"){
               # ERROR
-              form = ".[&& cond ; true]"
-              example = 'Example: x = c(5, 700); dsb("Value: .[&&x > 20 ; > 20]")'
-
-              form = bespoke_msg(form, fun_name)
-              example = bespoke_msg(example, fun_name)
+              form = "{&& cond ; true}"
+              example = '\nEXAMPLE: x = c(5, 700); smagick("Value: {&&x > 20 ; > 20}")'
 
               .stop_hook("The if-else operator `&&`, of the form ", form,
                       ", requires at least one variable to be evaluated in the condition.",
-                      " PROBLEM: no variable could be found.\n", example)
+                      "\nPROBLEM: no variable could be found.", example)
             }
             
-            xi_call = str2lang(vars[1])
-            xi_val = check_set_smagick_eval(xi_call, data, frame, check)
+          } else {
+            do_eval = TRUE
+            if(operators[1] == "&"){
+              do_eval = grepl(BOX_OPEN, operators[3], fixed = TRUE)
+              if(!do_eval && length(operators) == 4){
+                do_eval = grepl(BOX_OPEN, operators[4], fixed = TRUE)
+              }
+            }
+            
+            if(do_eval){
+              xi_call = str2lang(vars[1])
+              xi_val = check_set_smagick_eval(xi_call, data, frame, check)
+            }
+            
+            if(operators[1] == "&&" && length(xi) != length(xi_val)){
+              form = "{&& cond ; true}"
+              example = 'EXAMPLE: x = c(5, 700); smagick("Value: {&&x > 20 ; > 20}")'
+
+              stop_hook("The if-else operator `&&`, of the form {form} ",
+                      "requires that the first variable used in the condition ",
+                      "(here {bq?vars[1]}) is of the same length as the condition.",
+                      "\nPROBLEM: the condition is of length {len.f?xi} while the ",
+                      "variable is of length {len.f?xi_val}.",
+                      "\n{example}")
+            }
           }
 
-          xi = sop_ifelse(operators, xi, xi_val, fun_name, frame = frame,
+          xi = sma_ifelse(operators, xi, xi_val, fun_name, frame = frame,
                           check = check, is_dsb = is_dsb)
         } else {
           #
@@ -1606,7 +1626,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
           
           for(j in seq_along(operators)){
             opi = operators[[j]]
-            op_parsed = sop_char2operator(opi, fun_name)
+            op_parsed = sma_char2operator(opi, fun_name)
 
             if(op_parsed$eval){
               argument_call = check_set_oparg_parse(op_parsed$argument, opi, check)
@@ -1616,13 +1636,13 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
             }
 
             if(check){
-              xi = check_expr(sop_operators(xi, op_parsed$operator, op_parsed$options, argument,
+              xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument,
                                               check = check, frame = frame, conditional_flag = conditional_flag,
                                               is_dsb = is_dsb, fun_name = fun_name),
                                 get_smagick_context(), " See error below:",
                                 verbatim = TRUE, up = 1)
             } else {
-              xi = sop_operators(xi, op_parsed$operator, op_parsed$options, argument, check = check,
+              xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, check = check,
                                  frame = frame, conditional_flag = conditional_flag,
                                  is_dsb = is_dsb, fun_name = fun_name)
             }
@@ -1692,7 +1712,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 }
 
 
-sop_char2operator = function(x, fun_name){
+sma_char2operator = function(x, fun_name){
 
   op_parsed = cpp_parse_operator(x)
 
@@ -1787,7 +1807,7 @@ sop_char2operator = function(x, fun_name){
 }
 
 
-sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
+sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
                          conditional_flag = 0, is_dsb = FALSE, fun_name = "smagick"){
 
   # conditional_flag:  0 nothing
@@ -3298,7 +3318,7 @@ sop_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
 
 
-sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
+sma_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
 
   plural_len = operators[1] == "$"
 
@@ -3444,66 +3464,138 @@ sop_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
   paste(res, collapse = " ")
 }
 
-sop_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
+sma_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
 
-  if(length(xi) == 1 && is.numeric(xi) && !is.na(xi)){
+  if(is.numeric(xi)){
     xi = xi != 0
   }
 
+  amp = operators[1]
+  is_double_amp = amp == "&&"
   if(!is.logical(xi)){
-    form = paste0(".[", operator[1], " cond ; true ; false]")
+    form = "{&cond ; true ; false}"
+    if(is_double_amp) form = "{&&cond ; true}"
+    example = '\nEXAMPLE: x = Sys.time(); smagick("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
 
-    example = 'Example: x = Sys.time(); dsb("Hello .[&format(x, \'%H\') < 20 ; Sun ; Moon]!")'
-    example = bespoke_msg(example, fun_name)
-
-    .stop_hook("The if-else operator `", operator[1], "`, of the form ", form,
+    .stop_hook("The if-else operator `", amp, "`, of the form ", form,
             ", accepts only logical values in the condition. ",
             "PROBLEM: the value is not logical, but of class `",
-            class(xi)[1], "`.\n", example)
+            class(xi)[1], "`.", example)
   }
 
   if(anyNA(xi)){
-    form = paste0(".[", operator[1], " cond ; true ; false]")
+    form = "{&cond ; true ; false}"
+    if(is_double_amp) form = "{&&cond ; true}"
+    example = '\nEXAMPLE: x = Sys.time(); smagick("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
 
-    example = 'Example: x = Sys.time(); dsb("Hello .[&format(x, \'%H\') < 20 ; Sun ; Moon]!")'
-    example = bespoke_msg(example, fun_name)
-
-    .stop_hook("The if-else operator `", operator[1], "`, of the form ", form,
+    .stop_hook("The if-else operator `", amp, "`, of the form ", form,
               ", accepts only non-NA logical values.\n",
-              "PROBLEM: the condition contains NA values.\n", example)
+              "PROBLEM: the condition contains NA values.", example)
   }
 
+  data = NULL
+  BOX_OPEN = if(is_dsb) ".[" else "{"
   true = operators[3]
   false = operators[4]
+  
+  if(is_double_amp && !is.na(false)){
+    .stop_hook("The if-else operator `&&`, of the form ", 
+               "{&&cond ; true} does not accept a 'false' statement (since it will ",
+               "be filled with the value of the variable in the condition). ",
+              "\nFIX: remove the false statement or use the if-else operator `&` (single ampersand).",
+              "\nEXAMPLE: x = 1:5",
+              "           compare smagick(\"{x} = {&x %% 2;odd;even}\")",
+              "\n              to smagick(\"{x} = {&x %% 2;odd}\")",
+              "\n              to smagick(\"{x} = {&&x %% 2;odd}\")")
+  }
+  
   if(is.na(false)) false = ""
+  
+  true = cpp_extract_quote_from_op(true)
+  false = cpp_extract_quote_from_op(false)
+  
+  n_x = length(xi)
+  is_vector = n_x > 1
+  
+  if(is_vector){
+    # if vector: true/false can be vectors
+    for(i in 1:2){
+      log_op = if(i == 1) true else false
+      if(grepl(BOX_OPEN, log_op, fixed = TRUE)){
+        if(is.null(data)){
+          data = list("." = xi_val)
+        }
+        
+        log_op_eval = smagick_internal(log_op, is_dsb = is_dsb, frame = frame, data = data,
+                              slash = FALSE, check = check, fun_name = fun_name, 
+                              plural_value = xi_val)
+        
+        if(!length(log_op) %in% c(1, n_x)){
+          form = "{&cond ; true ; false}"
+          if(is_double_amp) form = "{&&cond ; true}"
+          .stop_hook("The if-else operator of the form {form} accepts values in ",
+                      "{&i==1;true;false} which can be interpolated, as is the case here ",
+                      "for {bq?log_op}.",
+                      "\nThe length of the interpolated value must be equal to 1 or the length ",
+                      "of the condition.",
+                      "PROBLEM: the length of the condition is {n?n_x} while the length of ",
+                      "`{&i==1;true;false}` is {len.format?log_op_eval}.")
+        }
+        
+        if(i == 1){
+          true = log_op_eval
+        } else {
+          false = log_op_eval
+        }        
+      }
+    }
+  }
 
   if(operators[1] == "&"){
     # we replace TRUE and FALSE with the strings, even empty
-
-    true = cpp_extract_quote_from_op(true)
-    false = cpp_extract_quote_from_op(false)
-
-    res = c(false, true)[xi + 1]
+    
+    true_long = length(true) > 1
+    false_long = length(false) > 1
+    
+    if(true_long || false_long){
+       if(true_long){
+        res = true
+        if(false_long){
+          res[xi] = false[xi]
+        } else {
+          res[xi] = false
+        }
+       } else {
+        res = false
+        res[xi] = true
+       }
+       
+       if(anyNA(xi)){
+        res[is.na(xi)] = NA
+       }
+    } else {
+      res = c(false, true)[xi + 1]
+    }
+    
   } else {
-    # we don't touch if there is an empty string
+    # we change only the ones that need to be changed
     res = xi_val
-
-    if(nchar(true) > 0){
-      true = cpp_extract_quote_from_op(true)
+    
+    if(length(true) > 1){
+      res[xi] = true[xi]
+    } else {
       res[xi] = true
     }
-
-    if(nchar(false) > 0){
-      false = cpp_extract_quote_from_op(false)
-      res[!xi] = false
-    }
-
   }
 
   # we allow nestedness only for single values
-  if(length(res) == 1){
-    res = smagick_internal(res, is_dsb = is_dsb, frame = frame,
-                                slash = FALSE, check = check, fun_name = fun_name)
+  if(length(res) == 1 && grepl(BOX_OPEN, res, fixed = TRUE)){
+    if(is.null(data)){
+      data = list("." = xi_val)
+    }
+    res = smagick_internal(res, is_dsb = is_dsb, frame = frame, data = data,
+                           slash = FALSE, check = check, fun_name = fun_name, 
+                           plural_value = xi_val)
   }
 
   res
@@ -3546,7 +3638,7 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
   for(i in seq_along(op_all)){
     opi = op_all[i]
 
-    op_parsed = sop_char2operator(opi, fun_name)
+    op_parsed = sma_char2operator(opi, fun_name)
 
     if(op_parsed$eval){
       if(check){
@@ -3575,14 +3667,14 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
     }
 
     if(check){
-      xi = check_expr(sop_operators(xi, op_parsed$operator, op_parsed$options, argument, 
+      xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
                                       conditional_flag = conditional_flag, is_dsb = is_dsb, fun_name = fun_name),
                                      "In the operation `{op}()`, the ",
                                      "{&length(op_all) == 1 ; operation ; chain of operations} ",
                                      " {bq?operations_string} led to a problem.", 
                                      "\nPROBLEM: the operation {opi} failed. Look up the doc?")
     } else {
-      xi = sop_operators(xi, op_parsed$operator, op_parsed$options, argument, 
+      xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
                          conditional_flag = conditional_flag, is_dsb = is_dsb, fun_name = fun_name)
     }
   }

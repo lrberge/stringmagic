@@ -1035,7 +1035,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     // we add the separator (? or !) as an operator
     operator_vec.push_back(operator_tmp);
     ++i;
-    
+
     std::string closing_box = get_closing_box_string(box_type);
     if(is_eval){
       extract_r_expression(is_pblm, str, i, n, expr_value, closing_box[0]);

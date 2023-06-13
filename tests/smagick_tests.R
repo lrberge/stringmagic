@@ -484,7 +484,7 @@ test(smagick("{dsort ? x}"), c(8, 5, 3, 1))
 # with preprocessing
 x = "Mark is 34, Bianca is 55, Odette is 101, Julie is 21 and Frank is 5"
 txt = smagick("{', | and 's, '\\D'sort, C ? x}")
-test(txt, "Odette is 101, Julie is 21, Mark is 34, and Frank is 5 and Bianca is 55")
+test(txt, "Odette is 101, Julie is 21, Mark is 34, Frank is 5 and Bianca is 55")
 
 txt = smagick("{', | and 's, '\\D'sort.num, C ? x}")
 test(txt, "Frank is 5, Julie is 21, Mark is 34, Bianca is 55 and Odette is 101")
@@ -769,6 +769,16 @@ test(txt, "The values are: 15 and 550.")
 x = c(15, 550)
 txt = dsb("The value is .[&& x > 50 ; > 50]")
 test(txt, c("The value is 15", "The value is > 50"))
+
+# long interpolated true and false
+x = 1:3
+y = letters[1:3]
+txt = smagick("{C ! {&&x %% 2 == 1;{y}}}")
+test(txt, "a, 2 and c")
+
+z = tail(letters, 3)
+txt = smagick("{C ! {&x %% 2 == 1; {y} ; {bq?z}}}")
+test(txt, "`x`,  b and `z`")
 
 #
 # if ####
