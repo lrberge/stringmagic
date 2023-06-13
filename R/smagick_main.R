@@ -510,7 +510,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' + %: applies [base::sprintf()] formatting. The syntax is 'arg'% with arg an sprintf formatting,
 #' or directly the sprint formatting, e.g. `% 5s`. Example: `smagick("pi = {%.3f ? pi}")` leads
 #' to "pi = 3.142".
-#' + stop: removes basic English stopwords (the snowball list is used). 
+#' + stopword: removes basic English stopwords (the snowball list is used). 
 #' The stopwords are replaced with an empty space but the left and right WS are 
 #' untouched. So WS normalization may be needed (see operation `ws`).
 #'   `x = c("He is tall", "He isn't young"); smagick("Is he {stop, ws, C ? x}?")` leads to "Is he tall and young?".
@@ -3016,7 +3016,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     # ascii, stop ####
     res = str_to_ascii(x, options)
 
-  } else if(op == "stop"){
+  } else if(op == "stopword"){
 
     # current limitation: does not work for quoted words
     #                     but quoted words are not stopwords usually
@@ -3729,7 +3729,7 @@ setup_operations = function(){
                 "rev", "sort", "dsort", "ascii", "title",
                 "ws", "tws", "trim", "get", "is", "which",
                 "n", "N", "len", "Len", "width", "dtime",
-                "stop", "nth", "Nth", "ntimes", "Ntimes")
+                "stopword", "nth", "Nth", "ntimes", "Ntimes")
   options("smagick_operations" = sort(OPERATORS))
   options("smagick_operations_origin" = sort(OPERATORS))
 }

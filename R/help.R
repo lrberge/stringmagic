@@ -59,7 +59,7 @@ setup_help_compact = function(){
     "  k, K, last, len[letter, upper, format], lower, n[letter, upper, 0], ",
     "  nth[letter, upper, compact], ntimes[letter, upper], nuke, ",
     "  num[warn, soft, rm, clear], paste[right, front, back], q, Q, r, R, rev,", 
-    "  rm[empty, blank, noalpha, noalnum, all], ' 's, ',[ \\t\\n]+'S, sort[num], stop, times[c], ", 
+    "  rm[empty, blank, noalpha, noalnum, all], ' 's, ',[ \\t\\n]+'S, sort[num], stopword, times[c], ", 
     "  title[force, ignore], trim[right, both], tws, unik, upper[first, sentence],",
     "  which[equal, in], width, ws[punct, digit, isolated], x, X",
     "",
