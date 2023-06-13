@@ -422,15 +422,15 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' leads to "First 3 numbers: 21, 21 and 22.8.". Negative numbers as argument remove the 
 #' first `n` values. You can add a second argument in the form `'n1|n2'first` in which case the first `n1` and last
 #' `n2` values are kept; `n1` and `n2` must be positive numbers.
-#' + K, Ko, KO: keeps only the first `n` elements; has more options than `first`. The syntax is 'n'K, 
-#' 'n|s'K, 'n||s'K. The values Ko and KO only accept the two first syntax (with `n` only).
+#' + K, Ko, KO: keeps only the first `n` elements; has more options than `first`. The syntax is `'n'K`, 
+#' `'n|s'K`, `'n||s'K`. The values Ko and KO only accept the two first syntax (with `n` only).
 #' `n` provides the number of elements to keep. If `s` is provided and the number of 
 #' elements are greater than `n`, then in 'n|s' the string `s` is added at the end, and
 #' if 'n||s' the string s replaces the nth element.
 #'   The string `s` accepts specials values:
 #'   + `:n:` or `:N:` which gives the total number of items in digits or letters (N)
 #'   + `:rest:` or `:REST:` which gives the number of elements that have been truncated in digits or letters (REST)
-#'   Ex: `smagick("'3|:rest: others'K ? 1:200")` leads to the vector `c("1", "2", "3", "197 others")`.
+#'   Ex: `smagick("{'3|:rest: others'K ? 1:200}")` leads to the vector `c("1", "2", "3", "197 others")`.
 #'   + The operator 'n'Ko is like `'n||:rest: others'K` and 'n'KO is like `'n||:REST: others'K`.
 #' + last: keeps only the last `n` elements. Example: `smagick("Last 3 numbers: {3 last, C ? mtcars$mpg}.")`
 #' leads to "Last 3 numbers: 19.7, 15 and 21.4.". Negative numbers as argument remove the 
@@ -2115,10 +2115,10 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     # upper, lower, title, Q, ####
     
     options = check_set_options(options, c("first", "sentence"))
-    
+        
     if("first" %in% options){
       # First letter only, if relevant
-      res = x
+      res = as.character(x)
       substr(res, 1, 1) = toupper(substr(x, 1, 1))  
     } else if("sentence" %in% options){
       # we add upper case like in sentences
