@@ -303,8 +303,8 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' 
 #' (A note in passing. The spaces surrounding the exclamation mark are non necessary,
 #'  but when one space is present on both sides of the `!`, then the verbatim
-#' expression only begins after it. Ex: "{upper! hi}" leads to " HI" while "{upper ! hi}" 
-#' leads to "HI" and "{upper !  hi}" leads to " HI".)
+#' expression only begins after it. Ex: "{upper! hi}" leads to " HI" while `"{upper ! hi}"` 
+#' leads to "HI" and `"{upper !  hi}"` leads to " HI".)
 #' 
 #' The second advantage of verbatim evaluations is *nesting*. Anything in a verbatim 
 #' expression is evaluated with the function `smagick`.
@@ -359,16 +359,16 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Please see the dedicated section for more information on flags.
 #' 
 #' + s, S: splits the string according to a pattern. The two operations have different defaults: `' '` 
-#' for `s` and ',[ \t\n}*' for `S` (i.e. comma separation). 
-#' Ex.1: `smagick("S ! romeo, juliet")` leads to the vector c("romeo", "juliet"). 
+#' for `s` and `',[ \t\n}*'` for `S` (i.e. comma separation). 
+#' Ex.1: `smagick("{S ! romeo, juliet}")` leads to the vector c("romeo", "juliet"). 
 #' Ex.2: `smagick("{'f/+'s, '-'c ! 5 + 2} = 3")` leads to "5 - 2 = 3" (note the flag "fixed" in `s`'s pattern).
 #' + c, C: to concatenate multiple strings into a single one. The two operations are 
-#' identical, only their default change. c: default is ' ', C: default is ', | and '.
+#' identical, only their default change. c: default is `' '`, C: default is `', | and '`.
 #'   The syntax of the argument is 's1' or 's1|s2'. s1 is the string used to concatenate 
 #' (think `paste(x, collapse = s1)`). In arguments of the form `'s1|s2'`, `s2` will be used to concatenate the last two elements. 
 #' Ex.1: `x = 1:4; smagick("Et {' et 'c ? x}!")` leads to "Et 1 et 2 et 3 et 4!".
 #' Ex.2: `smagick("Choose: {', | or 'c ? 2:4}?")` leads to "Choose: 2, 3 or 4?".
-#' + x, X: extracts patterns from a string. Both have the same default: '[[:alnum:]]+'. 
+#' + x, X: extracts patterns from a string. Both have the same default: `'[[:alnum:]]+'`. 
 #' `x` extracts the first match while `X` extracts **all** the matches.
 #'   Ex.1: `x = c("6 feet under", "mahogany") ; smagick("{'\\w{3}'x ? x}")` leads to the vector c("fee", "mah").
 #'   Ex2.: `x = c("6 feet under", "mahogany") ; smagick("{'\\w{3}'X ? x}")` leads to the
@@ -384,15 +384,35 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Ex.1: `smagick("{'e'r ! Where is the letter e?}")` leads to "Whr is th lttr ?".
 #' Ex.2: `smagick("{'(?<!\\b)e => a'R ! Where is the letter e?}")` leads to "Whara is tha lattar e?".
 #' Ex.3: `smagick("{'t/e => here'r ! Where is the letter e?}")` leads to "here".
+#' + clean: replacement with a string. Similar to the operation `r`, except that here the comma is
+#' a pattern separator, see detailed explanations in [str_clean()]. Ex: `smagick("{'f/[, ]'clean ! x[a]}")` 
+#' leads to "xa".
 #' + get: restricts the string only to values respecting a pattern. This operation has no default.
-#' It uses the same syntax as [str_get()] so that you can include logical operations with ' & ' and ' | '.
+#' Accepts the options "equal" and "in".
+#' By default it uses the same syntax as [str_get()] so that you can use regex flags and 
+#' include logical operations with `' & '` and `' | '` to detect patterns.
+#' If the option "equal" is used, a simple string equality with the argument is tested (hence
+#' no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+#' and then set inclusion is tested. 
 #' Example: `x = row.names(mtcars) ; smagick("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, C ? x}")`
 #' leads to "Mercedes models: 240D, 280C, 450SE, 450SL and 450SLC".
 #' + is: detects if a pattern is present in a string, returns a logical vector. This operation has no default.
+#' Accepts the options "equal" and "in".
+#' By default it uses the same syntax as [str_is()] so that you can use regex flags and 
+#' include logical operations with `' & '` and `' | '` to detect patterns.
+#' If the option "equal" is used, a simple string equality with the argument is tested (hence
+#' no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+#' and then set inclusion is tested. 
 #' Mostly useful as the final operation in a [str_op()] call.
 #' Example: `x = c("Mark", "Lucas") ; smagick("Mark? {'i/mark'is, C ? x}")` leads to "Mark? TRUE and FALSE".
 #' + which: returns the index of string containing a specified pattern. With no default, can be applied
-#' to a logical vector directly. Mostly useful as the final operation in a [str_op()] call.
+#' to a logical vector directly. 
+#' By default it uses the same syntax as str_which() so that you can use regex flags and 
+#' include logical operations with `' & '` and `' | '` to detect patterns.
+#' If the option "equal" is used, a simple string equality with the argument is tested (hence
+#' no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+#' and then set inclusion is tested. 
+#' Mostly useful as the final operation in a [str_op()] call.
 #' Ex.1: `x = c("Mark", "Lucas") ; smagick("Mark is number {'i/mark'which ? x}.")` leads to 
 #' "Mark is number 1.".
 #' 
@@ -549,14 +569,14 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' @section Other operations:
 #' 
 #' 
-#' + num: converts to numeric. Options: "warn", "soft", "rm", "clean". By default, the conversion
+#' + num: converts to numeric. Options: "warn", "soft", "rm", "clear". By default, the conversion
 #' is performed silently and elements that failed to convert are turned into NA. 
 #' Option "warns" displays a warning if the conversion to numeric fails. 
 #' Option "soft" does not convert if the conversion of at least one element fails. 
 #' Option "rm" converts and removes the elements that could not be converted. 
-#' Option "clean" turns failed conversions into the empty string, and hence lead to a character vector.
+#' Option "clear" turns failed conversions into the empty string, and hence lead to a character vector.
 #' Example: `x = c(5, "six"); smagick("Compare {num, C, q ? x} with {num.rm, C, q ? x}.")` leads to 
-#' "Compare '5 and NA' with '5'.", and `smagick("Compare {num.soft, C, q ? x} with {num.clean, C, q ? x}.")`
+#' "Compare '5 and NA' with '5'.", and `smagick("Compare {num.soft, C, q ? x} with {clear, C, q ? x}.")`
 #' leads to "Compare '5 and six' with '5 and '.".
 #' + enum: enumerates the elements. It creates a single string containing the comma 
 #' separated list of elements.
@@ -1907,14 +1927,16 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
     }
     
-  } else if(op %in% c("s", "S", "r", "R", "get", "is", "which", "x", "X", "extract")){
-    # split, replace, extract, get, is, which ####
+  } else if(op %in% c("s", "S", "r", "R", "clean", "get", "is", "which", "x", "X", "extract")){
+    # split, replace, clean, extract, get, is, which ####
     
     valid_options = c("word", "ignore", "fixed")
     if(op == "extract"){
       valid_options = c(valid_options, "first")
-    } else if(op %in% c("r", "R")){
+    } else if(op %in% c("r", "R", "clean")){
       valid_options = c(valid_options, "total")
+    } else if(op %in% c("get", "is", "which")){
+      valid_options = c(valid_options, "equal", "in")
     }
 
     options = check_set_options(options, valid_options)
@@ -1974,15 +1996,17 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
       res = unlist(x_split)
       
-    } else if(op %in% c("r", "R")){
+    } else if(op %in% c("r", "R", "clean")){
       is_total = "total" %in% options
 
       pipe = "=>"
       if(grepl(" => ", argument, fixed = TRUE)){
         pipe = " => "
       }
+      
+      sep = if(op == "clean") ",[ \t\n]+" else ""
 
-      res = str_clean(x, argument, pipe = pipe, sep = "", 
+      res = str_clean(x, argument, pipe = pipe, sep = sep, 
                       ignore.case = is_ignore, fixed = is_fixed, word = is_word, 
                       total = is_total)
 
@@ -2004,7 +2028,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
 
       res = unlist(x_list)
-    } else if(argument == "" && op == "which"){
+    } else if(length(argument) == 1 && argument == "" && op == "which"){
       
       if(!is.logical(x)){
         stop_hook("The operation `which` must apply only to logical values.",
@@ -2025,7 +2049,17 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       
     } else {
       # default is str_is
-      res = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      if("equal" %in% options || "in" %in% options){
+        if("equal" %in% options){
+          res = x == argument
+        } else {
+          arg_split = strsplit(argument, ",[ \t\n]+")
+          res = x %in% unlist(arg_split)
+        }
+        
+      } else {
+        res = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      }
 
       if(op %in% c("get", "which")){
 
@@ -2936,7 +2970,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
 
   } else if(op == "num"){
-    options = check_set_options(options, c("warn", "soft", "rm", "clean"))
+    options = check_set_options(options, c("warn", "soft", "rm", "clear"))
 
     # warn: warning if failed conversions
     is_warn = "warn" %in% options
@@ -2944,8 +2978,8 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     is_soft = "soft" %in% options
     # rm: the on numeric are removed
     is_rm = "rm" %in% options
-    # clean: the non numeric are turned into empty strings
-    is_clean = "clean" %in% options
+    # clear: the non numeric are turned into empty strings
+    is_clear = "clear" %in% options
 
     is_valid_num = TRUE
     if(is_warn || is_soft){
@@ -2959,7 +2993,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
     if(is_valid_num || !is_soft){
       res = suppressWarnings(as.numeric(x))
-      if(is_rm || is_clean){
+      if(is_rm || is_clear){
         if(anyNA(res)){
           qui_na = which(is.na(res))
           if(is_rm){
@@ -2969,7 +3003,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
               group_index = cpp_recreate_index(group_index)
             }
           } else { 
-            # is_clean
+            # is_clear
             res[qui_na] = ""
           }
         }
@@ -3684,7 +3718,7 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
 }
 
 setup_operations = function(){
-  OPERATORS = c("/", "s", "S", "x", "X", "extract", "c", "C", "r", "R",
+  OPERATORS = c("/", "s", "S", "x", "X", "extract", "c", "C", "r", "R", "clean",
                 "times", "each", "fill",
                 "~", "if", "vif",
                 "upper", "lower", "q", "Q", "bq", 

@@ -12,7 +12,7 @@
 #' @param x A character vector. If not a character vector but atomistic (i.e. not a list), 
 #' it will be converted to a character vector.
 #' @param op Character **scalar**. Character scalar containing the comma separated values 
-#' of operations to perform to the vector. The 50+ operations are detailed in the help
+#' of operations to perform to the vector. The 50+ operations(op == "clean") ",[ \t\n]+" are detailed in the help
 #' page of [smagick()].
 #' @param pre_unik Logical scalar, default is `NULL`. Whether to first unique the vector 
 #' before applying the possibly costly string operations, and merging back the result. 
