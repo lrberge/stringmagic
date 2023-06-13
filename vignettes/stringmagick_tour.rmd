@@ -9,3 +9,15 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+
+The package stringmagick
+
+
+
+# String interpolation with `smagick`
+
+
+
+# Chaining string operations
+
+# Fast character string detection

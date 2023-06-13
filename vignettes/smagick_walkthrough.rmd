@@ -9,15 +9,522 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-one difficulty with this function is that  it is not of the form fun(arg1, arg2), etc.
-This means that there is no argument help popping when needed. There is even no argument list!
-It makes it them rely on muscle memory. Although the author tried to find names that make 
-sense and can be easily memorized,
-knowing how to use the function right from the start can be challenging.
-This is the price to pay to have highly efficient features.
-So please have a look at what it can achieve to decide whether it's worth the investment.
-Note that the basic features of string interpolation (a la glue) can be learned effortlessly. 
-The (big) rest is only bonus!
+String interpolation is a common feature of many programming languages and is
+used to insert the value of variables directly into character strings.
+This is useful to compose dynamic messages in a natural way. For example
+`"Hello {x}"` will be interpolated as "Hello John" if `x = "John"`.
+hahahaha 
+What if you want to apply some modifications to the variable before insertion?
+Like normalizing the case, trimming at 40 characters, or concatenating? 
+In general, you can't. Well, actually you can but have to use the language's own native tools. 
+And it can be surprising how performing a few basic operations can quickly amount to lot of typing.
+
+The aim of the package `stringmagick` is to simplify and empower string interpolation. 
+With the `smagick` function, you can apply 50+ basic operations to interpolated variables, 
+interpolations can be nested, there is advanced support for pluralization, and much more.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE, 
+  comment = "#>"
+)
+```
+
+# Motivating example
+
+# Basic interpolation
+
+To interpolate a variable, say `x`, simply use `{x}`. 
+
+```{r hello-world}
+x = "world"
+smagick("hello {x}")
+```
+
+As we can see, anything in curly brackets gets interpolated. This behavior is similar
+to the well known function [glue](https://glue.tidyverse.org/) from the tidyverse.
+
+Now let's come to what `smagick` really brings to the table.
+
+# Interpolation with operations: Principle
+
+To any interpolation you can add operations. Let's take the example of the previous section and 
+say we want to display "hello W O R L D". 
+This means upper casing all letters of the interpolated variable and adding a space between 
+each of them. Let's do it:
+
+```{r hw-ops}
+smagick("hello {upper, ''s, c ? x}")
+```
+
+Now let's explain what happened. Within the `{}` *box*, we first write a set of 
+operations, here "upper, ''s, c", then add "?" and finally write 
+the variable to interpolate, "x".  The operations (detailed in [the reference section](#sec_operations_reference))) 
+are `upper`, upper-casing all letters, `''s`: splitting
+with the empty string, `c`: concatenating with spaces the string vector that was just split.
+The question mark means that the expression coming after it is to be evaluated 
+(this is opposed to the exclamation mark presented in the next section).
+
+The syntax is always the same: `{operations ? expression}`, where the operations section
+is a *comma separated* list of operations.
+These operations are of the form `'arg'op`, with `arg` the argument to the operator 
+code `op`. These operations are performed sequentially from left to right.
+
+Some operations, like `upper`, accept options. You attach options to an operation 
+with a dot followed by the option name. Formally: `op.option1.option2`, etc. Example:
+
+```{r ex-ops}
+x = "hi there. what's up? fine."
+smagick("He said: {upper.sentence, Q ? x}")
+```
+
+Both operators and options are partially matched. So `smagick("He said: {up.s, Q ? x}")` would 
+also work. You have more details on the operations syntax in the [syntax section](#sec_syntax). 
+
+# Verbatim interpolation and nesting: Principle
+
+Instead of interpolating a variable, say `x`, with `{x}`, you can use an exclamation 
+mark to trigger varbatim evaluation. For example `smagick("hello {!x}")` would lead to "hello x".
+Please hold on a little bit to see the point.
+
+Verbatim evaluation is a powerful way to apply operations to plain text. For example:
+
+```{r}
+smagick("hello {upper, ''s, c ! world}")
+```
+
+Before moving on, a necessary detail. The spaces surrounding the exclamation mark are non necessary,
+but when one space is present on both sides of the `!`, then the verbatim
+expression only begins after the space. Ex: `"{upper! hi}"` leads to " HI" while `"{upper ! hi}"` 
+leads to "HI" and `"{upper !  hi}"` leads to " HI".
+
+The main advantage, and real power, of verbatim evaluations is *nesting*. Anything in a verbatim 
+expression becomes evaluated with the function `smagick`.
+This means that any *box* will be evaluated as previously described. 
+
+Let's give an example. You want to write the expression of a polynomial of order n: a + bx + cx^2 + etc.
+You can do that with nesting:
+
+```{r}
+n = 2
+smagick("poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}")
+```
+
+How does it work? The verbatim expression (the one following the exclamation mark),
+here `"{letters[1 + 0:n]}x^{0:n}"`, is evaluated with `smagick`.
+`smagick("{letters[1 + 0:n]}x^{0:n}")` leads to the vector `c("ax^0", "bx^1", "cx^2")`.
+
+The operation `' + 'c` then concatenates (or collapses) that vector with ' + '.
+This value is then appended to the previous string.
+
+We could refine by adding a cleaning operation in which we replace "x^0" and "^1" 
+by the empty string. Let's do it:
+
+```{r}
+n = 4
+smagick("poly({n}): {' + 'c, 'f/x^0, ^1'clean ! {letters[1 + 0:n]}x^{0:n}}")
+```
+
+We obtain the desired result. 
+Note that the `clean` operation is explained in the [operations reference section](#sec_operations_reference).
+
+# Regular operations: General syntax {#sec_syntax}
+
+As seen in the previous sections, within a *box* (i.e. `"{}"`), 
+multiple operations can be performed.
+We can do so by stacking the operations codes and in a comma separated enumeration.
+Operations can have arguments, and operations can also have options. The general 
+syntax, with argument and options, is:
+
+```{r, eval=FALSE}
+smagick("{'arg1'op1.optionA.optionB, arg2 op2.optionC, `arg3`op3, 51op4, op5 ? x}")
+```
+
+You can include arguments in four different ways:
+
+1. inside single or double quotes just before the operation name (`arg1` above), 
+1. verbatim, separated with a space, just before the operation name (`arg2` above), 
+1. inside bactick quotes the argument is evaluated from the environment (`arg3` above),
+1. when the argument is an integer it can be juxtaposed to the opeation name (like in `op4` above).
+
+The options are always dot separated and attached to the operation name, they are 
+specific to each operation.
+
+Both the operation name and the option names are partially matched.
+
+Here are examples for each types of arguments:
+```{r}
+# quoted argument
+smagick("y = {'x'paste, ' + 'c ? 1:2}")
+
+# verbatim argument, space separated
+smagick("y = {x paste, ' + 'c ? 1:2}")
+
+# evaluated argument
+x = "z"
+smagick("y = {`x`paste, ' + 'c ? 1:2}")
+
+# digits accolated to the operator
+smagick("y = {0paste, ' + 'c ? 1:2}")
+
+# options bq (back quote) and a to operator enum
+smagick("y = the sum of {'x'paste, enum.bq.a ? 1:2}")
+```
+
+# Regular operations: Reference {#sec_operations_reference}
+
+This section references all `smagick`'s regular operations.
+
+## Basic string operations
+
+This section describes some of the most common string operations: extracting, replacing, collapsing, splitting, etc.
+These functions accept generic flags ("ignore", "fixed", "word") in their patterns (syntax: "flags/pattern"). 
+Please see the dedicated section for more information on flags.
+
+- s, S: splits the string according to a pattern. The two operations have different defaults: `' '` 
+for `s` and `',[ \t\n}*'` for `S` (i.e. comma separation). 
+```{r}
+# 'S' with its default (comma separation)
+smagick("{S ! romeo, juliet}")
+# result with 's' is different
+smagick("{s ! romeo, juliet}")
+# with argument: 's' and 'S' are identical
+# note the flag 'fixed' (`f/`) to remove regex interpretation
+smagick("{'f/+'s, '-'c ! 5 + 2} = 3")
+```
+
++ c, C: to concatenate multiple strings into a single one. The two operations are 
+identical, only their default change. c: default is `' '`, C: default is `', | and '`.
+The syntax of the argument is 's1' or 's1|s2'. s1 is the string used to concatenate 
+(think `paste(x, collapse = s1)`). In arguments of the form `'s1|s2'`, `s2` will be 
+used to concatenate the last two elements. 
+When the elements of the vector are split, each original item is kept in memory 
+so that group-wise operations can be applied. See the section on group-wise operations.
+
+```{r}
+# regular way
+x = 1:4
+smagick("And {' and 'c ? x}!")
+
+# with s2
+smagick("Choose: {', | or 'c ? 2:4}?")
+
+# default of C: enumeration
+wines = c("Saint-Estephe", "Margaux")
+smagick("I like {C?wines}.")
+
+# default of c: space concatenation
+smagick("{s, '.{5,}'get, c ! I don't like short words}")
+```
+
++ extract: extracts multiple patterns from a string, this is an alias to the operation `X` described below.
+Default argument is `'[[:alnum:]]+'`.
+Use the option "first" to extract only the first match for each string (behavior becomes like `x`). 
+When patterns are extracted, each original item is kept in memory 
+so that group-wise operations can be applied. See the section on group-wise operations.
+```{r}
+x = c("margo: 32, 1m75", "luke doe: 27, 1m71")
+smagick("{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}")
+
+# illustrting multiple extractions
+# conditional operation (~()) is detailed in its own section
+x = c("Combien de marins, combien de capitaines.",
+      "Qui sont partis joyeux pour des courses lointaines,",
+      "Dans ce morne horizon se sont évanouis !")
+smagick("Endings with i: {'i\\w*'extract, ~(', 'c), enum.1 ? x}.")
+```
+
++ x, X: extracts patterns from a string. Both have the same default: `'[[:alnum:]]+'`. 
+`x` extracts the first match while `X` extracts **all** the matches.
+
+```{r}
+x = c("6 feet under", "mahogany")
+# single extraction
+smagick("{'\\w{3}'x ? x}")
+# multiple extraction
+smagick("{'\\w{3}'X ? x}")
+```
+
++ r, R: replacement within a string. The two operations are identical and have no default.
+The syntax is `'old'` or `'old => new'` with `'old'` the pattern to find and `new` the 
+replacement. If `new` is missing, it is 
+considered the empty string. On top of regular flags, this operation also accepts 
+the flag "total" which instruct to replace the fulll string in case the pattern is found.
+```{r}
+# regex without replacement (ie removing)
+smagick("{'e'r ! Where is the letter e?}")
+# regex with replacement
+smagick("{'(?<!\\b)e => a'R ! Where is the letter e?}")
+# we replace the full string with the flag total (`t/`)
+x = c("Where is the letter e?", "Not this way!")
+smagick("{'t/e => here!'r ? x}")
+```
+
++ clean: replacement with a string. Similar to the operation `r`, except that here the comma is
+a pattern separator. The argument is of the form `"flags/pattern1, pattern2 => replacement"`. 
+See detailed explanations in str_clean(). 
+
+```{r}
+# we use the fixed pattern to remove the regex meaning
+smagick("{'f/[, ]'clean ! x[a]}")
+```
+
++ get: restricts the string vector to only the values respecting a pattern. This operation has no default.
+Accepts the options "equal" and "in".
+By default it uses the same syntax as str_get() so that you can use regex flags and 
+include logical operations with `' & '` and `' | '`.
+If the option "equal" is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+and then set inclusion is tested. 
+
+```{r}
+x = row.names(mtcars)
+#  we only keep models containing "Merc" and ending with a letter ([[:alpha:]]$)
+smagick("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, C ? x}.")
+
+models = c("Merc 230", "Merc 450SE", "Merc 480")
+# we only ekep the ones in the set
+smagick("Mercedes models: {`models`get.in, C ? x}.")
+```
+
++ is: detects if a pattern is present in a string, returns a logical vector. This operation has no default.
+Mostly useful as the final operation in a str_op() call.
+By default it uses the same syntax as str_is() so that you can use regex flags and 
+include logical operations with `' & '` and `' | '`.
+If the option "equal" is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+and then set inclusion is tested. 
+```{r}
+x = c("Mark", "Lucas")
+# note that we use the flag `i/` to ignore the case
+smagick("Mark? {'i/mark'is, C ? x}")
+```
+
++ which: returns the index of string containing a specified pattern. With no default, can be applied
+to a logical vector directly. 
+By default it uses the same syntax as str_which() so that you can use regex flags and 
+include logical operations with `' & '` and `' | '`.
+If the option "equal" is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+and then set inclusion is tested. 
+Mostly useful as the final operation in a str_op() call.
+```{r}
+x = c("Mark", "Lucas", "Markus")
+# note that we use the flag `i` to ignore the case and `w` to add word boundaries
+smagick("Mark is number {'iw/mark'which ? x}.")
+```
+
+@section Operations changing the length or the order:
+
++ first: keeps only the first `n` elements. Example: `smagick("First 3 numbers: {3 first, C ? mtcars$mpg}.")`
+leads to "First 3 numbers: 21, 21 and 22.8.". Negative numbers as argument remove the 
+first `n` values. You can add a second argument in the form `'n1|n2'first` in which case the first `n1` and last
+`n2` values are kept; `n1` and `n2` must be positive numbers.
+
++ K, Ko, KO: keeps only the first `n` elements; has more options than `first`. The syntax is 'n'K, 
+'n|s'K, 'n||s'K. The values Ko and KO only accept the two first syntax (with `n` only).
+`n` provides the number of elements to keep. If `s` is provided and the number of 
+elements are greater than `n`, then in 'n|s' the string `s` is added at the end, and
+if 'n||s' the string s replaces the nth element.
+  The string `s` accepts specials values:
+  + `:n:` or `:N:` which gives the total number of items in digits or letters (N)
+  + `:rest:` or `:REST:` which gives the number of elements that have been truncated in digits or letters (REST)
+  Ex: `smagick("'3|:rest: others'K ? 1:200")` leads to the vector `c("1", "2", "3", "197 others")`.
+  + The operator 'n'Ko is like `'n||:rest: others'K` and 'n'KO is like `'n||:REST: others'K`.
+
++ last: keeps only the last `n` elements. Example: `smagick("Last 3 numbers: {3 last, C ? mtcars$mpg}.")`
+leads to "Last 3 numbers: 19.7, 15 and 21.4.". Negative numbers as argument remove the 
+last `n` values.
+
++ sort: sorts the vector in increasing order. Accepts optional arguments and the option "num". 
+Example: `x = c("sort", "me") ; smagick("{sort, c ? x}")` leads to "me sort". 
+If an argument is provided, it must be a regex pattern that will be applied to
+the vector using [str_clean()]. The sorting will be applied to the modified version of the vector
+and the original vector will be ordered according to this sorting. 
+Ex: `x = c("Jon Snow", "Khal Drogo")`; `smagick("{'.+ 'sort, C?x}")` leads to 
+"Khal Drogo and Jon Snow". The option "num" sorts over a numeric version 
+(with silent conversion) of the vector and reorders the original vector accordingly. 
+Values which could not be converted are last.
+**Important note**: the sorting operation is applied before any character conversion.
+If previous operations were applied, it is likely that numeric data were transformed to character.
+Note the difference: `x = c(20, 100, 10); smagick("{sort, ' + 'c ? x}")` leads to "10 + 20 + 100"
+while `smagick("{n, sort, ' + 'c ? x}")` leads to "10 + 100 + 20" because the operation "n"
+first transformed the numeric vector into character.
+
++ dsort: sorts the vector in decreasing order. It accepts an optional argument and 
+the option "num". Example: `smagick("5 = {dsort, ' + 'c ? 2:3}")` 
+leads to "5 = 3 + 2". See the operation "sort" for a description of the argument and the option.
+
++ rev: reverses the vector. Example: `smagick("{rev, ''c ? 1:3}")` leads to "321".
+
++ unik: makes the string vector unique. Example: `smagick("Iris species: {unik, C ? iris$Species}.")`
+leads to "Iris species: setosa, versicolor and virginica.".
+
++ each: repeats each element of the vector `n` times. Option "c" then collapses the full vector 
+with the empty string as a separator. Ex.1: `smagick("{/x, y}{2 each ? 1:2}")` leads to the 
+vector `c("x1", "y1", "x2", "y2")`. Ex.2: smagick("Large number: 1{5 each.c ! 0}") leads to 
+"Large number: 100000".
+
++ times: repeats the vector sequence `n` times. Option "c" then collapses the full vector 
+with the empty string as a separator. Example: `smagick("What{6 times.c ! ?}")` leads to "What??????".
+
++ rm: removes elements from the vector. Options: "empty", "blank", "noalpha", "noalnum", "all".
+The *optional* argument represents the pattern used to detect strings to be deleted. 
+Ex.1: x = c("Luke", "Charles"); smagick("{'i/lu'rm ? x}") leads to "charles". By default it removes
+empty strings. Option "blank" removes strings containing only blank characters (spaces, tab, newline).
+Option "noalpha" removes strings not containing letters. Option "noalnum" removes strings not 
+containing alpha numeric characters. Option "all" removes all strings (useful in conditions, see 
+the dedicated section). If an argument is provided, only the options "empty" and "blank" are available.
+Ex.2: `x = c("I want to enter.", "Age?", "21"); smagick("Nightclub conversation: {rm.noalpha, c ! - {x}}")` 
+leads to "Nightclub conversation: - I want to enter. - Age?"
+
++ nuke: removes all elements, equivalent to `rm.all` but possibly more explicit (not sure). 
+Useful in conditions, see the dedicated section.
+Example: `x = c(5, 7, 453, 647); smagick("Small numbers only: {if(.>20 ; nuke), C ? x}")` leads 
+to "Small numbers only: 5 and 7";
+
++ insert: inserts a new element to the vector. Options: "right" and "both". Option "right" adds
+the new element to the right. Option "both" inserts the new element on the two sides of the vector.
+Example: `smagick("{'3'insert.right, ' + 'c ? 1:2}")` leads to "1 + 2 + 3".
+
+
+#' @section Formatting operations:
+#'  
+#' + lower: lower cases the full string.
+#' + upper: upper cases the full string. Options: "first" and "sentence".
+#' Option "first" upper cases only the first character. Option "sentence"
+#' upper cases the first letter after punctuation. 
+#' Ex: `x = "hi. how are you? fine." ; smagick("{upper.sentence ? x}")` leads
+#' to "Hi. How are you? Fine.".
+#' + title: applies a title case to the string. Options: "force" and "ignore".
+#' Option "force" first puts everything to lowercase before applying the title case. 
+#' Option "ignore" ignores a few small prepositions ("a", "the", "of", etc).
+#' Ex: `x = "bryan is in the KITCHEN" ; smagick("{title.force.ignore ? x}")` leads to "Bryan Is in the Kitchen".
+#' + ws: normalizes whitespaces (WS). It trims the whitespaces on the edges and transforms any succession 
+#' of whitespaces into a single one. Can also be used to further clean the string with its options. 
+#' Options: "punct", "digit", "isolated". Option "punct" cleans the punctuation. Option "digit" cleans digits.
+#' Option "isolated" cleans isolated letters. WS normalization always come after any of these options.
+#' **Important note:** punctuation (or digits) are replaced with WS and **not** 
+#' the empty string. This means that `smagick("ws.punct ! Meg's car")` will become "Meg s car".
+#' + trimws: trims the white spaces on both ends of the strings.
+#' + q, Q, bq: to add quotes to the strings. q: single quotes, Q: double quotes, bq: 
+#' back quotes. `x = c("Mark", "Pam"); smagick("Hello {q, C ? x}!")` leads to "Hello 'Mark' and 'Pam'!".
+#' + format, Format: applies the base R's function [base::format()] to the string. 
+#' By default, the values are left aligned, *even numbers* (differently from [base::format()]'s behavior).
+#' The upper case command (`Format`) applies right alignment. Options: "0", "zero", "right", "centre", "center".
+#' Options "0" or "zero" fills the blanks with 0s: useful to format numbers. Option "right" right aligns,
+#' and "centre" or "centre" centers the strings.
+#' Ex: `x = c(1, 12345); smagick("left: {format.0, q, C ? x}, right: {Format, q, C ? x}")` 
+#' leads to "left: '000001' and '12,345', right: '     1' and '12,345'".
+#' + %: applies [base::sprintf()] formatting. The syntax is 'arg'% with arg an sprintf formatting,
+#' or directly the sprint formatting, e.g. `% 5s`. Example: `smagick("pi = {%.3f ? pi}")` leads
+#' to "pi = 3.142".
+#' + stop: removes basic English stopwords (the snowball list is used). 
+#' The stopwords are replaced with an empty space but the left and right WS are 
+#' untouched. So WS normalization may be needed (see operation `ws`).
+#'   `x = c("He is tall", "He isn't young"); smagick("Is he {stop, ws, C ? x}?")` leads to "Is he tall and young?".
+#' + ascii: turns all letters into ASCII with transliteration. Non ASCII elements
+#'  are transformed into question marks. Options: "silent", "utf8". By default, if some conversion fails
+#' a warning is prompted. Option "silent" disables the warning in case of failed conversion. The conversion 
+#' is done with [base::iconv()], option "utf8" indicates that the source endocing is UTF-8, can be useful 
+#' in some cases.
+#' + n: formats integers by adding a comma to separate thousands. Options: "letter", "upper", "0", "zero".
+#' The option "letter" writes the number in letters (large numbers keep their numeric format). The option
+#' "upper" is like the option "letter" but uppercases the first letter. Options "0" or "zero" left pads
+#' numeric vectors with 0s. Ex.1: `x = 5; smagick("He's {N ? x} year old.")` leads to "He's five year old.".
+#' Ex.2: `x = c(5, 12, 52123); smagick("She owes {n.0, '$'paste, C ? x}.")` leads to 
+#' "She owes $5, $12 and $52,123.".
+#' + N: same as `n` but automatically adds the option "letter".
+#' + nth: when applied to a number, these operators write them as a rank. Options: "letter", 
+#' "upper", "compact".
+#' Ex.1: `n = c(3, 7); smagick("They finished {nth, enum ? n}!")` leads to "They finished 3rd and 7th!". 
+#' Option "letter" tries to write the numbers in letters, but note that it stops at 20. Option "upper"
+#' is the same as "letter" but uppercases the first letter. Option "compact" aggregates
+#' consecutive sequences in the form "start_n_th to end_n_th". 
+#' Ex.2: smagick("They arrived {nth.compact ? 5:20}.") leads to "They arrived 5th to 20th.".
+#' Nth: same as `nth`, but automatically adds the option "letter". Example:
+#' `n = c(3, 7); smagick("They finished {Nth, enum ? n}!")` leads to "They finished third and seventh!".
+#' + ntimes: write numbers in the form `n` times. Options: "letter", "upper". Option 
+#' "letter" writes the number in letters (up to 100). Option "upper" does the same as "letter" 
+#' and uppercases the first letter. Example: `smagick("They lost {C ! {ntimes ? c(1, 12)} against {/Real, Barcelona}}.")`
+#' leads to "They lost once against Real and 12 times against Barcelona.".
+#' + Ntimes: same as `ntimes` but automatically adds the option "letter".
+#' Example: `x = 5; smagick("This paper was rejected {Ntimes ? x}...")` leads to
+#' "This paper was rejected five times...".
+#' + cfirst, clast: to select the first/last characters of each element. 
+#'   Ex: smagick("{19 cfirst, 9 clast ! This is a very long sentence}") leads to "very long".
+#' Negative numbers remove the first/last characters.
+#' + k: to keep only the first n characters (like cfirst but with more options). The
+#'  syntax is `nk`, `'n'k`, `'n|s'k` or `'n||s'k` with `n` a number and `s` a string.
+#'   `n` provides the number of characters to keep. Optionnaly, only for strings whose
+#'  length is greater than `n`, after truncation, the string `s` can be appended at the end.
+#'   The difference between 'n|s' and 'n||s' is that in the second case the strings
+#'  will always be of maximum size `n`, while in the first case they can be of length `n + nchar(s)`.
+#'   Ex: `smagick("{4k ! long sentence}")` leads to "long",  `smagick("{'4|..'k ! long sentence}") `
+#' leads to "long..", `smagick("{'4||..'k ! long sentence}")` leads to "lo..".
+#' + fill: fills the character strings up to a size. Options: "right", "center" and a free-form symbol.
+#' Option "right" right aligns and "center" centers the strings. You can pass a free-form symbol
+#' as option, it will be used for the filling. By default if no argument is provided, the
+#' maximum size of the character string is used. See help for [str_fill()] for more information.
+#' Ex.1: `smagick("Numbers: {'5'fill.0.right, C ? c(1, 55)}")` leads to "Numbers: 00001 and 00055".
+#' + paste: pastes some character to all elements of the string. This operation has no default.
+#' Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
+#' Option "right" pastes on the right and "both" pastes on both sides. Option "front" only 
+#' pastes on the first element while option "back" only pastes on the last element. Option "delete"
+#' first replaces all elements with the empty string.
+#' Example: `smagick("6 = {'|'paste.both, ' + 'c ? -3:-1}")` leads to "6 = |-3| + |-2| + |-1|".
+#' 
+#' 
+#' @section Other operations:
+#' 
+#' 
+#' + num: converts to numeric. Options: "warn", "soft", "rm", "clear". By default, the conversion
+#' is performed silently and elements that failed to convert are turned into NA. 
+#' Option "warns" displays a warning if the conversion to numeric fails. 
+#' Option "soft" does not convert if the conversion of at least one element fails. 
+#' Option "rm" converts and removes the elements that could not be converted. 
+#' Option "clear" turns failed conversions into the empty string, and hence lead to a character vector.
+#' Example: `x = c(5, "six"); smagick("Compare {num, C, q ? x} with {num.rm, C, q ? x}.")` leads to 
+#' "Compare '5 and NA' with '5'.", and `smagick("Compare {num.soft, C, q ? x} with {clear, C, q ? x}.")`
+#' leads to "Compare '5 and six' with '5 and '.".
+#' + enum: enumerates the elements. It creates a single string containing the comma 
+#' separated list of elements.
+#'   If there are more than 7 elements, only the first 6 are shown and the number of
+#'  items left is written.
+#'   For example `smagick("enum ? 1:5")` leads to "1, 2, 3, 4, and 5".
+#'   You can add the following options by appending the letter to enum after a dot:
+#'   + q, Q, or bq: to quote the elements
+#'   + or, nor: to finish with an 'or' (or 'nor') instead of an 'and'
+#'   + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two
+#'   + a number: to tell the number of items to display
+#'   Ex.1: `x = c("Marv", "Nancy"); smagick("The main characters are {enum ? x}.")` leads to 
+#' "The main characters are Marv and Nancy.".
+#'   Ex.2: `x = c("orange", "milk", "rice"); smagick("Shopping list: {enum.i.q ? x}.")` leads to
+#'  "Shopping list: i) 'orange', ii) 'milk', and iii) 'rice'."
+#' + len: gives the length of the vector. Options "letter", "upper", "format".
+#' Option "letter" writes the length in words (up to 100). Option "upper" is the same 
+#' as letter but uppercases the first letter. Option "format" add comma separation for thousands.
+#' Example: `smagick("Size = {len.format ? 1:5000}")` leads to "Size = 5,000".
+#' + width: formats the string to fit a given width by cutting at word boundaries. You can add 
+#' a free-form option which will appear at the beginning of the string. If you provide a free-form option
+#' equal to a leading string, by default a trailing white space is added; to remove this 
+#' behavior, add an underscore at the end of the option. 
+#' The argument is either 
+#' an integer giving the target character width (minimum is 15), or it can be a fraction expressing the 
+#' target size as a fraction of the current screen.
+#' Ex.1: `smagick("{15 width ! this is a long sentence}")` leads to "this is a long\\nsentence".
+#' Ex.2: `smagick("{15 width.#> ! this is a long sentence}")` leads to "#> this is a long\\n#> sentence".
+#' + dtime: displays a formatted time difference. Option "silent" does not report an warning if the
+#' operation fails. It accepts either objects of class `POSIXt` or `difftime`.
+#' Example: `x = Sys.time() ; Sys.sleep(0.5) ; smagick("Time: {dtime ? x}")` leads to something 
+#' like "Time: 514ms".
+
+## Basic string operations
+
+## Basic string operations
+
+
 
 ### examples
 
