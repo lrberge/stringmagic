@@ -532,7 +532,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Option "letter" tries to write the numbers in letters, but note that it stops at 20. Option "upper"
 #' is the same as "letter" but uppercases the first letter. Option "compact" aggregates
 #' consecutive sequences in the form "start_n_th to end_n_th". 
-#' Ex.2: smagick("They arrived {nth.compact ? 5:20}.") leads to "They arrived 5th to 20th.".
+#' Ex.2: `smagick("They arrived {nth.compact ? 5:20}.")` leads to "They arrived 5th to 20th.".
 #' Nth: same as `nth`, but automatically adds the option "letter". Example:
 #' `n = c(3, 7); smagick("They finished {Nth, enum ? n}!")` leads to "They finished third and seventh!".
 #' + ntimes: write numbers in the form `n` times. Options: "letter", "upper". Option 
@@ -543,10 +543,10 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Example: `x = 5; smagick("This paper was rejected {Ntimes ? x}...")` leads to
 #' "This paper was rejected five times...".
 #' + cfirst, clast: to select the first/last characters of each element. 
-#'   Ex: smagick("{19 cfirst, 9 clast ! This is a very long sentence}") leads to "very long".
+#'   Ex: `smagick("{19 cfirst, 9 clast ! This is a very long sentence}")` leads to "very long".
 #' Negative numbers remove the first/last characters.
-#' + k: to keep only the first n characters (like cfirst but with more options). The
-#'  syntax is `nk`, `'n'k`, `'n|s'k` or `'n||s'k` with `n` a number and `s` a string.
+#' + k: to keep only the first n characters (like `cfirst` but with more options). The
+#'  argument can be of the form `'n'k`, `'n|s'k` or `'n||s'k` with `n` a number and `s` a string.
 #'   `n` provides the number of characters to keep. Optionnaly, only for strings whose
 #'  length is greater than `n`, after truncation, the string `s` can be appended at the end.
 #'   The difference between 'n|s' and 'n||s' is that in the second case the strings
@@ -554,6 +554,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'   Ex: `smagick("{4k ! long sentence}")` leads to "long",  `smagick("{'4|..'k ! long sentence}") `
 #' leads to "long..", `smagick("{'4||..'k ! long sentence}")` leads to "lo..".
 #' + fill: fills the character strings up to a size. Options: "right", "center" and a free-form symbol.
+#' Default is left-alignment of the strings. 
 #' Option "right" right aligns and "center" centers the strings. You can pass a free-form symbol
 #' as option, it will be used for the filling. By default if no argument is provided, the
 #' maximum size of the character string is used. See help for [str_fill()] for more information.
@@ -2716,9 +2717,14 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       symbol = " "
     }
     
+    if(symbol == ""){
+      # this is how free form . is parsed
+      symbol = "."
+    }
+    
     if(nchar(symbol) != 1){
       stop_hook("In the operator `fill`, the symbol used to fill must be of length 1.",
-                "\nPROBLEM: the symbol, equal to {bq?symbol}, is of length {len?symbol}.",
+                "\nPROBLEM: the symbol, equal to {bq?symbol}, is of length {n?nchar(symbol)}.",
                 "\nEXAMPLE: to fill with 0s: `fill.0`; of length 10 with underscores on the right: `10 fill._.right`.")
     }
     
@@ -2800,11 +2806,12 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     } else if(op == "n"){
       is_zero = any(options %in% c("0", "zero"))
       # we force the conversion to numeric
+      mark = if(is_zero) "" else ","
       if(is.numeric(x)){
         if(is_letter){
           res = n_letter(x)
         } else {
-          res = format(x, big.mark = ",")
+          res = format(x, big.mark = mark)
           
           if(is_zero){
             res = gsub(" ", "0", res, fixed = TRUE)
@@ -2820,7 +2827,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         if(is_letter){
           res_num = n_letter(num_val)
         } else {
-          res_num = format(num_val, big.mark = ",")
+          res_num = format(num_val, big.mark = mark)
           if(is_zero){
             res_num = gsub(" ", "0", res_num, fixed = TRUE)
           } else {            
