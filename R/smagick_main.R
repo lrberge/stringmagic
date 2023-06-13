@@ -514,7 +514,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' The stopwords are replaced with an empty space but the left and right WS are 
 #' untouched. So WS normalization may be needed (see operation `ws`).
 #'   `x = c("He is tall", "He isn't young"); smagick("Is he {stop, ws, C ? x}?")` leads to "Is he tall and young?".
-#' + ascii: turns all letters into ASCII with transliteration. Non ASCII elements
+#' + ascii: turns all letters into ASCII with transliteration. Failed translations
 #'  are transformed into question marks. Options: "silent", "utf8". By default, if some conversion fails
 #' a warning is prompted. Option "silent" disables the warning in case of failed conversion. The conversion 
 #' is done with [base::iconv()], option "utf8" indicates that the source endocing is UTF-8, can be useful 
@@ -522,7 +522,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' + n: formats integers by adding a comma to separate thousands. Options: "letter", "upper", "0", "zero".
 #' The option "letter" writes the number in letters (large numbers keep their numeric format). The option
 #' "upper" is like the option "letter" but uppercases the first letter. Options "0" or "zero" left pads
-#' numeric vectors with 0s. Ex.1: `x = 5; smagick("He's {N ? x} year old.")` leads to "He's five year old.".
+#' numeric vectors with 0s. Ex.1: `x = 5; smagick("He's {N ? x} years old.")` leads to "He's five years old.".
 #' Ex.2: `x = c(5, 12, 52123); smagick("She owes {n.0, '$'paste, C ? x}.")` leads to 
 #' "She owes $5, $12 and $52,123.".
 #' + N: same as `n` but automatically adds the option "letter".
@@ -2805,7 +2805,12 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
           res = n_letter(x)
         } else {
           res = format(x, big.mark = ",")
-          res = cpp_trimws_in_place(res)
+          
+          if(is_zero){
+            res = gsub(" ", "0", res, fixed = TRUE)
+          } else {            
+            res = cpp_trimws_in_place(res)
+          }
         }
       } else {
         x_num = suppressWarnings(as.numeric(x))
