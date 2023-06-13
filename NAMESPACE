@@ -2,13 +2,13 @@ useDynLib(stringmagick, .registration = TRUE)
 
 # str_*
 export(str_ops, str_is, str_which, str_get, str_clean, str_split2df,
-       str_split2dt)
+       str_split2dt, str_fill)
 
 # dsb
 export(dsb, .dsb)
 
 # smagick
-export(smagick, .smagick, .sma)
+export(smagick, sma, .smagick, .sma)
 
 # Methods
 S3method(print, smagick)

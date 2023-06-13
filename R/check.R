@@ -4,7 +4,6 @@
 # ~: checking functions
 #----------------------------------------------#
 
-# string.ops will be an import of dreamerr, so I cannot use dreamerr here
 
 # NOTE: it's unusual for me but there will be A LOT of code duplication
 #       the objective is to limit the most possible the overheads, hence this decision
@@ -213,9 +212,6 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
       nullable = if(null) "(nullable) " else ""
       stop_up("The ", nullable, "argument `", x_dp, "` must be a character scalar.\n",
               " PROBLEM: it is not of length 1, it is of length ", length(x), ".")
-      # .[length(x)]
-      # .[len, n ? x]
-      # .[Len ? x]
     }
   }
 
@@ -278,7 +274,6 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       mc_dots = mc[["..."]]
       value = deparse_short(mc_dots[[i]])
 
-      # really, this is gibberish: who can understand the code?
       nm = smagick(" ({if(.C<4 ; erase) ! {nm} = }{value})")
 
       if(grepl("try(...", elem, fixed = TRUE)){
@@ -316,7 +311,6 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       mc_dots = mc[["..."]]
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
-      # really, this is gibberish: who can understand the code?
       info_call = .smagick("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up("In the argument `...`, all elements must be scalars (i.e. of length 1).\nPROBLEM: ",
@@ -344,7 +338,6 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       mc_dots = mc[["..."]]
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
-      # really, this is gibberish: who can understand the code?
       info_call = smagick("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       cls_pblm = sapply(dots[i_pblm], function(x) dsb(".[bq ! .[enum ? class(x)]]"))
@@ -377,7 +370,6 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       mc_dots = mc[["..."]]
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
-      # really, this is gibberish: who can understand the code?
       info_call = smagick("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up(dsb("In the argument `...`, all elements must be without NA.\nPROBLEM: ",
@@ -863,8 +855,6 @@ deparse_long = function(x){
 #### dreamerr's copies ####
 ####
 
-# DO NOT MAKE ANY SUBSTANTIAL CHANGE TO THESE FUNCTIONS!!!
-# They come from dreamerr. If I want to improve them, I should change the ones of dreamerr first
 
 setDreamerr_show_stack = function(show_full_stack = FALSE){
 
@@ -878,7 +868,8 @@ set_up = function(.up = 1){
   if(length(.up) == 1 && is.numeric(.up) && !is.na(.up) && .up == floor(.up) && .up >= 0){
     assign("DREAMERR__UP", .up, parent.frame())
   } else {
-    stop("Argument '.up' must be an integer scalar greater or equal to 1. This is currently not the case.")
+    stop("Argument '.up' must be an integer scalar greater or equal to 1. ",
+         "This is currently not the case.")
   }
 }
 
@@ -1331,14 +1322,14 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE, dsb 
 
       call_error = deparse(res[[1]], 100)[1]
 
-      if (call_error == call_non_informative || call_error == "NULL" || grepl("^(doTry|eval)", call_error)) {
+      if(call_error == call_non_informative || call_error == "NULL" || grepl("^(doTry|eval)", call_error)){
         call_error = ""
       } else {
         call_error = paste0("In ", call_error, ": ")
       }
 
       err = res[[2]]
-      if (grepl("^in eval\\(str[^:]+:\n", err)) {
+      if(grepl("^in eval\\(str[^:]+:\n", err)){
         err = sub("^in eval\\(str[^:]+:\n", "", err)
       }
             
@@ -1365,7 +1356,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE, dsb 
         err = gsub("^[^\n]+\n", "", err)
       }
       
-      if (!missing(clean)) {
+      if(!missing(clean)){
         err = str_clean(err, clean)
       }
       stop_up(msg, "\n", call_error, err, verbatim = TRUE, up = up)
