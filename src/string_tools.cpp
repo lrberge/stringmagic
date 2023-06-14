@@ -15,8 +15,8 @@ inline void append_r_str(std::string &x, SEXP &Rstr_vec, int i = 0){
 SEXP cpp_paste_conditional(SEXP x, IntegerVector id,
                            std::string sep = "", std::string sep_last = ""){
 
-  int n = max(id);
-  std::vector<std::string> res(n);
+  int n_id = max(id);
+  std::vector<std::string> res(n_id);
   int n_x = Rf_length(x);
 
   if(n_x == 0){
@@ -33,7 +33,7 @@ SEXP cpp_paste_conditional(SEXP x, IntegerVector id,
     if(id[i] == id_current){
 
       if(is_sep && i > 0 && id[i - 1] == id_current){
-        if(is_last && (i + 1 > n || id[i + 1] != id_current)){
+        if(is_last && (i + 1 > n_x || id[i + 1] != id_current)){
           tmp += sep_last;
         } else {
           tmp += sep;
