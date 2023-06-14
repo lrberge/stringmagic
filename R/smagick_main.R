@@ -674,7 +674,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' Ex.4: `x = smagick("x{1:10}")`; `smagick("y = {vif(.N>4 ; {/{x[1]}, ..., {last?x}}), ' + 'c ? x}")`
 #' leads to "y = x1 + ... + x10".
 #' Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
-#' the full string is replaced with "{/{x[1]}, ..., {last?x}}". Interpolation applies to
+#' the full string is replaced with `"{/{x[1]}, ..., {last?x}}"`. Interpolation applies to
 #' such string. Hence the slash operation (see the dedicated section) breaks the string w.r.t.
 #' the commas, leading to the vector `c("{x[1]}", "...", "{last?x}")`. Since the 
 #' string contain curly brackets, interpolation is applied again. This leads to 
@@ -1569,10 +1569,12 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 
 
         if(!is_xi_done){
-          if(verbatim && grepl(BOX_OPEN, xi, fixed = TRUE)){
-            xi = smagick_internal(xi, is_dsb = is_dsb, frame = frame, slash = FALSE,
-                                     vectorize = concat_nested, check = check, fun_name = fun_name)
-
+          if(verbatim){
+            # for the slash operation, we delay the interpolation
+            if(operators[1] != "/" && grepl(BOX_OPEN, xi, fixed = TRUE)){
+              xi = smagick_internal(xi, is_dsb = is_dsb, frame = frame, slash = FALSE,
+                                      vectorize = concat_nested, check = check, fun_name = fun_name)
+            }
           } else if(!verbatim){
             # evaluation
             xi_call = check_set_smagick_parsing(xi, check)
