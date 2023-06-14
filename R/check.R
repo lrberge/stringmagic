@@ -501,8 +501,10 @@ check_set_smagick_parsing = function(x, check){
       help_suggest = .dsb("\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
                           ".[Q!Operations: General syntax]")
       
-      msg = .dsb("PROBLEM: The expression could not be parsed, see error below:",
-                 "\n.[x_call]",
+      x_call_clean = gsub("Error in str2[^:]+: ?", "Error when parsing: ", x_call)
+      
+      msg = .dsb("PROBLEM: The expression .[bq?x] could not be parsed, see error below:",
+                 "\n.[x_call_clean]",
                   "\nINFO: Interpolations can be of the form `{expr}`, `{op1, op2?expr}`, or", 
                   " `{op1, op2!verbatim}`. ",
                   extra, help_suggest)
@@ -539,9 +541,10 @@ check_set_smagick_eval = function(call, data, frame, check){
     if(inherits(x, "try-error")){
       context = get_smagick_context()
       call_dp = deparse_short(call)
+      x_clean = gsub("^Error in eva[^:]+: ?", "Error: ", x)
       
       msg = .sma("PROBLEM: The expression {bq?call_dp} could not be evaluated, see error below:",
-                "\n{x}")
+                "\n{x_clean}")
                 
       stop_hook("{context}\n{msg}")
     }
@@ -582,21 +585,21 @@ check_set_oparg_parse = function(argument, operator, check){
   call
 }
 
-check_set_oparg_eval = function(call, frame, operator, check){
+check_set_oparg_eval = function(call, data, frame, operator, check){
   
   if(check){
-    x = try(eval(call, frame), silent = TRUE)
+    x = try(eval(call, data, frame), silent = TRUE)
   } else {
-    x = eval(call, frame)
+    x = eval(call, data, frame)
     return(x)
   }
   
   if(inherits(x, "try-error")){
     context = get_smagick_context()
-    msg = .sma("EXPECTATION: In operation \"{bq?argument}{operator}\" the argument ",
+    msg = .sma("EXPECTATION: In operation {bq?operator} the argument ",
                "in backticks is evaluated from the frame.",
-               "\nPROBLEM: {bq?argument} could not be evaluated, see error below:",
-               "\n{call}")
+               "\nPROBLEM: {bq?deparse_short(call)} could not be evaluated, see error below:",
+               "\n{x}")
     stop_hook("{context}\n{msg}")
   }
   
@@ -636,7 +639,7 @@ report_smagick_parsing_error = function(x, x_parsed, is_dsb, error = TRUE){
                  "\nNOTE: to escape the meaning of the bracket, use a ",
                  "double backslash: \\\\{&is_dsb ; .[ ; \\{}.")
       
-      suggest = "INFO: see smagick(help = TRUE) and go to the section 'Escaping and special cases'"
+      suggest= "INFO: see smagick(help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
       # we diagnose the substring
       if(is_box_open(xi, is_dsb)){
