@@ -1,23 +1,191 @@
 ---
-title: "stringmagick: An overview"
+title: "`stringmagick`: An overview"
 author: "Laurent R. Bergé"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    theme: journal
+    highlight: haddock
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{stringmagick_tour}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
 
-The package stringmagick
+# we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
+library(stringmagick)
 
+options("smagick_str_get_forced_caching" = TRUE)
+```
 
+Text is everywhere in data science, so better be equipped with the right tools!
+The package `stringmagick` offers several functions to empower and streamline low level 
+operations on text data.
+
+This short vignette provides a quick tour of `stringmagick` tools 
+and links to the associated documentations.
 
 # String interpolation with `smagick`
 
+The function `smagick` is the *raison d'être* of this package. It offers *magical*
+string interpolation.
+
+For the record, string interpolation is a feature common to many programming languages, 
+it is about inserting values from a variable directly in a character string.
+For example if `x = "Sam"`, then `"Hi {x}!"` becomes "Hi Sam!".
+
+`smagick` enables to perform *any arbitrary operation* to the variables we interpolate. 
+This opens the door to many possibilities, and makes the composition
+of complex character strings a piece of cake. 
+By default over 50 basic operations are available, but the user can seamlessly add any she wants.
+It supports nesting, has advanced support for pluralization, and much more. 
+
+Like any powerful tool (looking at you *regular expressions*), it has its own syntax,
+its own commands, and will require practice before mastering it. To minimize learning costs, 
+great effort has been spent on error handling, with error
+messages hopefully explaining where the problems are and how to solve them. So fear not 
+trying out stuff!
+
+If interested, here is the [documentation](LINK_TO_SMAGICK) and next comes an example. 
+
+## Example
+
+Here's a set of stuff I do with my kids and my associated self-assessed sikll level:
+
+```{r}
+skills = c("managing to lose at chance-based board games: 8/10", 
+           "making them clean their mess: 3/10", 
+           "being OK with cooking stuff they don't eat: 9/10", 
+           "navigating the grocery store without tears: 5/10",
+           "maximizing swing push strength while (mostly) avoiding falls: 7/10")
+```
+
+Now say I want to write a small message and then display the first `n` of those skills
+by decreasing skill order, with `n` an arbitrary number. Here's how it could be done:
+```{r}
+library(stringmagick)
+n = 3
+smagick("My {&n>1;{N?.} }best skill{#s} with kids:\n",
+        "{'^\\D+'dsort, `n`first, ' - 'paste, '\n'c ? skills}")
+
+# with another number
+n = 1
+smagick("My {&n>1;{N?.} }best skill{#s} with kids:\n",
+        "{'^\\D+'dsort, `n`first, ' - 'paste, '\n'c ? skills}")
+```
+
+To understand how this works, please have a look at the [dedicated vignette](LINK_TO_SMAGICK).
+
+Even if it looks esoteric at first sight, writing this kind of dynamic messages is very common,
+especially when developping packages.
+
+**Tip:** One way to figure out the value added of `smagick` is trying to write this (seemingly simple) 
+message with alternative tools. 
+
+# Other string tools
+
+On top of `smagick`, this package offers a few functions providing new ways to tackle old problems:
+
+- [how to](#fun_clean) efficiently **and** *explicitly* perform manifold string cleaning operations
+- [how to](#fun_detect) detect the presence of several regular expressions at once
+- [how to](#fun_chain) chain basic string operations without exploding the number of lines of code
+
+## Cleaning text: Quick and easy please {#fun_clean}
+
+One common (and tedious) task in data sciencce is *cleaning* character strings. 
+The function `str_clean` is specialized in cleaning and has a dedicated syntax.
+
+Use `"pat1, pat2 => r"` to replace the regex patterns `pat1` and `pat2` with the value `r`.
+Use `"@op1, op2"` to use `smagick` operations.
+
+To illustrate this function, since real data science problems are a tiny bit dull, 
+allow me to use a French classic:
+
+```{r}
+tragedy = c("P: Grâces au ciel, mes mains ne sont point criminelles.",
+            "Plût aux dieux que mon coeur fût innocent comme elles !", 
+            "...",
+            "P: Quel fruit espères-tu de tant de violence ?",
+            "Tu frémiras d'horreur si je romps le silence.",
+            "O: Et que me direz-vous, qui ne cède, grands dieux !",
+            "À l'horreur de vous voir expirer à mes yeux ?",
+            "P: Quand tu sauras mon crime, et le sort qui m'accable,",
+            "Je n'en mourrai pas moins, j'en mourrai plus coupable.")
+
+# Cleaning a text
+str_clean(tragedy, 
+          # use smagick to: turn to ascii with transliteration, lower the case
+          # remove the punctuation + isolated letters + normalize the whitespaces, 
+          # remove empty strings
+          "@ascii, lower, ws.punct.isolated, rm",
+          # remove a few French stopwords (I use the 'word' flag with w/)
+          "w/au, aux, mes?, que, mon, comme, elles?, quel, tu, de, si, je, le, et, qui, en",
+          # manually stem some verbs
+          "fremiras => fremir", "w/sont, fut => etre", "w/plut => plaire", "mourrai => mourir",
+          # still stemming, note that you can use regex groupings as usual
+          "romps => rompre", "sauras => savoir", "\\b(accable|cede|espere)s? => \\1r",
+          # renormalizing the whitespaces
+          "@ws")
+```
+
+## Fast character string detection {#fun_detect}
+
+When you want to detect a single pattern in a string, `base::grepl` or 
+`stringr::str_detect` works pretty well. You feed a regex, and done. 
+But what if you want to detect the presence, at the same time, of two distinct regular expressions.
+This quickly becomes messier (try to get the examples below with a single `grepl` call!).
+
+For pattern detection, `stringmagick` offers three functions: `str_is`, `str_which` and `str_get`.
+Their syntax is as follows: `"pat1 & !pat2 | pat3"` with `patx` a regular expression. 
+This example means: find the elements that: contain `pat1` and do not contain `pat2`, 
+or contain `pat3`. See the examples below:
+
+```{r}
+cars = row.names(mtcars)
+# Looking at the cars
+smagick("Cars from the `mtcars` data set:\n{sort, C, 80 width ? cars}.")
+
+# cars containing 'a', 'e', 'i' and 'o'
+str_get(cars, "a & e & i & o")
+
+# in interactive mode, str_get keeps the previous item in memory, 
+# so you can avoid providing the first argument
+
+# cars not containing any digit nor the letter 'e'
+str_get("!\\d & !e")
+```
+
+## Chaining string operations {#fun_chain}
+
+If you want to apply a sequence of operations to a single character vector,
+you can use `str_ops`. It has access to all operations available to `smagick`.
+
+```{r}
+cars = row.names(mtcars)
+# Looking at the cars
+smagick("Cars from the `mtcars` data set:\n{sort, C, 80 width ? cars}.")
+
+# let's get the brands starting with an "m"
+str_ops(cars, "'i/^m'get, x, unik")
+
+# let's get the 3 largest numbers appearing in the car models
+str_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
+```
 
 
-# Chaining string operations
 
-# Fast character string detection
