@@ -38,7 +38,7 @@
 #' cars = row.names(mtcars)
 #' 
 #' # let's get the brands starting with an "m"
-#' str_op(cars, "'i/^m'get, x, unik")
+#' str_ops(cars, "'i/^m'get, x, unik")
 #' 
 #' # Explainer:
 #' # 'i/^m'get: keeps only the elements starting with an m,
@@ -51,7 +51,7 @@
 #' 
 #' 
 #' # let's get the 3 largest numbers appearing in the car models
-#' str_op(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
+#' str_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
 #' 
 #' # Explainer:
 #' # '\\d+'x: extracts the first pattern, the pattern meaning "a succession"
@@ -300,7 +300,35 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
       p = format_pattern(p, fixed = is_fixed, word = is_word, ignore = is_ignore) 
       is_fixed = attr(p, "fixed")
 
-      res_tmp = grepl(p, x, perl = !is_fixed, fixed = is_fixed)
+      # res_tmp = grepl(p, x, perl = !is_fixed, fixed = is_fixed)
+      
+      res_tmp = tryCatch(grepl(p, x, perl = !is_fixed, fixed = is_fixed), 
+                         error = function(e) structure(conditionMessage(e), class = "try-error"),
+                         warning = function(w) structure(conditionMessage(w), class = "try-warning"))
+        
+      is_warn = inherits(res_tmp, "try-warning")
+      warn_msg = ""
+      if(is_warn){
+        # is there an error?
+        warn_msg = res_tmp
+        res_tmp = tryCatch(suppressWarnings(grepl(p, x, perl = !is_fixed, fixed = is_fixed)), 
+                           error = function(e) structure(conditionMessage(e), class = "try-error"))
+      }
+      
+      if(inherits(res_tmp, "try-error")){
+        stopi("CONTEXT: {&n_pat>1;evaluation of {Q?pat}\n         }",
+              "pattern = {Q?p} ",
+              "\nEXPECTATION: the pattern must be a valid regular expression",
+              "\nPROBLEM: `grepl` led to an error, see below:",
+              "\n{res_tmp}",
+              "{&nchar(warn_msg) > 0;\n{.}}")
+      } else if(is_warn){
+        warni("CONTEXT: {&n_pat>1;evaluation of {Q?pat}\n         }",
+              "pattern = {Q?p} ",
+              "\nA warning was raised when evaluating the pattern:",
+              "\n{warn_msg}", immediate. = TRUE)
+      }
+      
       if(sub_negate){
         res_tmp = !res_tmp
       }
@@ -457,7 +485,8 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   
   # data caching in interactive mode
   is_caching = FALSE
-  if(interactive() && identical(parent.frame(), .GlobalEnv)){
+  is_forced_caching = isTRUE(getOption("smagick_str_get_forced_caching"))
+  if(is_forced_caching || (interactive() && identical(parent.frame(), .GlobalEnv))){
     mc = match.call()
     if(is.character(mc$x) && !is.null(getOption("stringmagick_str_get_cache"))){
       is_caching = TRUE
@@ -818,7 +847,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #'
 #' Recursively cleans a character vector from several patterns. Quickly handle the 
 #' tedious task of data cleaning by taking advantage of the syntax.
-#' You can also apply all sorts of cleaning operations by summoning [[str_op]] operations.
+#' You can also apply all sorts of cleaning operations by summoning [str_op()] operations.
 #'
 #' @param x A character vector.
 #' @param ... Character scalars representing patterns. A pattern is of the form
@@ -831,8 +860,8 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' The flag `total` leads to a *total replacement* of the string if the pattern is found. Use flags
 #' with comma separation ("word, total/pat") or use only their initials ("wt/pat").
 #' 
-#' Starting with an '@' leads to operations in [str_op]. Ex: "@ascii, l, ws" turns
-#' the string into ASCII, lowers the case and normalizes white spaces (see help of [str_ops]).
+#' Starting with an '@' leads to operations in [str_op()]. Ex: "@ascii, lower, ws" turns
+#' the string into ASCII, lowers the case and normalizes white spaces (see help of [str_ops()]).
 #' @param pipe Character scalar, default is `" => "`. If thevalue of `pipe` is found in a pattern,
 #' then the string is split w.r.t. the pipe and anything after the pipe becomes the replacement.
 #' 
@@ -861,7 +890,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #'
 #' @return
 #' The main usage returns a character vector of the same length as the vector in input.
-#' Note, however, that since you can apply arbitrary [str_op] operations, the length and type
+#' Note, however, that since you can apply arbitrary [str_op()] operations, the length and type
 #' of the final vector may depend on those (if they are used).
 #' 
 #' @author 
@@ -931,7 +960,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 
   res = x
   for(i in seq_along(dots)){
-    di = dots[[i]]
+    di = di_raw = dots[[i]]
     
     first_char = substr(di, 1, 1)
     is_str_op = FALSE
@@ -1003,8 +1032,36 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
         p = format_pattern(p, fixed = is_fixed, word = is_word, ignore = is_ignore)
         is_fixed = attr(p, "fixed")
 
-        if(is_total){
-          who_tmp = grepl(p, res, perl = !is_fixed, fixed = is_fixed)
+        if(is_total){          
+          who_tmp = tryCatch(grepl(p, res, perl = !is_fixed, fixed = is_fixed), 
+                         error = function(e) structure(conditionMessage(e), class = "try-error"),
+                         warning = function(w) structure(conditionMessage(w), class = "try-warning"))
+            
+          is_warn = inherits(who_tmp, "try-warning")
+          warn_msg = ""
+          if(is_warn){
+            # is there an error?
+            warn_msg = who_tmp
+            who_tmp = tryCatch(suppressWarnings(grepl(p, res, perl = !is_fixed, fixed = is_fixed)), 
+                           error = function(e) structure(conditionMessage(e), class = "try-error"))
+          }
+          
+          if(inherits(who_tmp, "try-error")){
+            stopi("CONTEXT: evaluation of {Q?di_raw}",
+                  "\n         pattern     = {Q?p} ",
+                  "\n         replacement = {Q?replacement}",
+                  "\nEXPECTATION: the pattern must be a valid regular expression",
+                  "\nPROBLEM: `grepl` led to an error, see below:",
+                  "\n{who_tmp}",
+                  "{&nchar(warn_msg) > 0;\n{.}}")
+          } else if(is_warn){
+            warni("CONTEXT: evaluation of {Q?di_raw}",
+                  "\n         pattern     = {Q?p} ",
+                  "\n         replacement = {Q?replacement}",
+                  "\nA warning was raised when evaluating the pattern:",
+                  "\n{warn_msg}", immediate. = TRUE)
+          }
+          
           if(negate){
             who_tmp = !who_tmp
           }
@@ -1018,7 +1075,38 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
             }
           }
         } else {
-          res = gsub(p, replacement, res, perl = !is_fixed, fixed = is_fixed)
+          # shallow copy for error handling
+          # I'm not sure it's useful: I think P(error|warning) = 100%, but well
+          # you never know... 
+          res_save = res
+          res = tryCatch(gsub(p, replacement, res, perl = !is_fixed, fixed = is_fixed), 
+                         error = function(e) structure(conditionMessage(e), class = "try-error"),
+                         warning = function(w) structure(conditionMessage(w), class = "try-warning"))
+            
+          is_warn = inherits(res, "try-warning")
+          warn_msg = ""
+          if(is_warn){
+            # is there an error?
+            warn_msg = res
+            res = tryCatch(suppressWarnings(gsub(p, replacement, res_save, perl = !is_fixed, fixed = is_fixed)), 
+                           error = function(e) structure(conditionMessage(e), class = "try-error"))
+          }
+          
+          if(inherits(res, "try-error")){
+            stopi("CONTEXT: evaluation of {Q?di_raw}",
+                  "\n         pattern     = {Q?p} ",
+                  "\n         replacement = {Q?replacement}",
+                  "\nEXPECTATION: the pattern must be a valid regular expression",
+                  "\nPROBLEM: `gsub` led to an error, see below:",
+                  "\n{res}",
+                  "{&nchar(warn_msg) > 0;\n{.}}")
+          } else if(is_warn){
+            warni("CONTEXT: evaluation of {Q?di_raw}",
+                  "\n         pattern     = {Q?p} ",
+                  "\n         replacement = {Q?replacement}",
+                  "\nA warning was raised when evaluating the pattern:",
+                  "\n{warn_msg}", immediate. = TRUE)
+          }
         }
       }
       
