@@ -1620,7 +1620,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
         if(is_plural){
           xi = sma_pluralize(operators, xi, fun_name, is_dsb, frame, check)
 
-        } else if(is_ifelse) {
+        } else if(is_ifelse){
 
           xi_val = NULL
           vars = all.vars(str2lang(xi_raw))
@@ -1660,6 +1660,14 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
                       "\nPROBLEM: the condition is of length {len.f?xi} while the ",
                       "variable is of length {len.f?xi_val}.",
                       "\n{example}")
+            }
+          }
+          
+          if(ANY_PLURAL){
+            # we save the variable over which the ifelse is done
+            x_values_all[[i]] = xi_val
+            if(i != i_candidate){
+              x_values_all[[i_candidate]] = xi_val
             }
           }
 
