@@ -2,10 +2,195 @@
 title: "String tools, magick edition"
 author: "Laurent R. Bergé"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    theme: journal
+    highlight: haddock
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: yes
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{string_tools}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+
+
+# Regex flags
+
+All functions in `stringmagick` accept optional regex flags when regular expressions
+are expected. These flags are similar, but not identical, 
+to [regular regex flags](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#advanced_searching_with_flags).
+
+## Regex flags: Syntax
+
+Use `"flag1, flag2/regex"` to add the flags `flag1` and `flag2` to the regular expression `regex`.
+For example `"ignore, fixed/dt["` will add the flags `ignore` and `fixed` to the regex `dt[`.
+
+Alternatively, use only the initials of the flags. Hence, `"if/dt["` would also add the 
+flags `ignore` and `fixed`.
+
+If the regex does not contain a slash (`/`), no flags are added. If your regex should 
+contain a slash, see the [section on escaping](#flag_escaping).
+
+Ex.1: let's find lines containing `"dt["`:
+```{r}
+code = c("DT = as.data.table(iris)", 
+         "DT[, sma('PL/SL = {Petal.Length / Sepal.Length}')]")
+
+str_get(code, "if/dt[")
+```
+
+## Regex flags: Reference
+
+The available flags are:
+
+- [ignore](#flag_ignore): always available
+- [fixed](#flag_fixed): always available
+- [word](#flag_word): always available
+- [total](#flag_total): only available in functions performing a replacement
+
+### ignore {#flag_ignore}
+
+The flag "ignore" leads to a case-insensitive search. 
+
+Ex: let's extract words starting with the last letters of the alphabet.
+```{r}
+unhappy = "Rumble thy bellyful! Spit, fire! spout, rain!
+Nor rain, wind, thunder, fire are my daughters.
+I tax not you, you elements, with unkindness.
+I never gave you kingdom, call'd you children,
+You owe me no subscription. Then let fall
+Your horrible pleasure. Here I stand your slave,
+A poor, infirm, weak, and despis'd old man."
+
+# the ignore flag allows to retain words starting with the
+# upper cased letters
+smagick("{'i/\\b[r-z]\\w+'extract, c, 60 width ? unhappy}")
+```
+
+*Technically*, the [perl](https://www.pcre.org/) expression `"(?i)"` is added at the 
+beginning of the pattern.
+
+### fixed {#flag_fixed}
+
+The flag "fixed" removes any special regular expression meaning from the pattern, 
+and treats it as verbatim.
+
+Ex: let's fix the equation by changing the operators. 
+```{r}
+x = "50 + 5 * 5 = 40"
+str_clean(x, "f/+, * => -")
+
+# Without the fixed flag, we would have gotten an error since '+'
+# has a special meaning in regular expressions
+
+# Here's the error
+try(str_clean(x, "+, * => -"))
+```
+
+Technically, if "fixed" is the only flag, then the functions `base::grepl` or `base::gsub`
+are run with the argument `fixed = TRUE`. If there are also the flags "ignore" or "word", 
+the pattern is nested into the perl boundaries `\\Q` and `\\E` which strip any special meaning
+from the pattern.
+
+### word {#flag_word}
+
+The flag "word" :
+
+- add word boundaries to the pattern
+- accepts comma-separated enumerations of words which are concatenated with a logical 'or'
+
+The logic of accepting comma-separated enumerations is to increase readability.
+For example, with the flag "word", `"is, are, were"` is equivalent to `"is|are|were"`.
+
+Ex: we erase a few words from Alfred de Vigny's poem.
+```{r}
+le_mont_des_oliviers = "S'il est vrai qu'au Jardin sacré des Écritures,
+Le Fils de l'homme ai dit ce qu'on voit rapporté ;
+Muet, aveugle et sourd au cri des créatures,
+Si le Ciel nous laissa comme un monde avorté,
+Alors le Juste opposera le dédain à l'absence
+Et ne répondra plus que par un froid silence
+Au silence éternel de la Divinité."
+
+# we erase a few words from this poem
+smagick("{'wi/et, le, il, au, des?, ce => _'r ? le_mont_des_oliviers}")
+```
+
+*Technically*, first the pattern is split with respect to `",[ \t\n]"`, then all elements
+are collapsed with `"|"`. If the flag was also present, each element is first wrapped 
+into `"\\Q"` and `"\\E"`. Finally, we add parentheses (to enable capture) and word 
+boundaries (`"\\b"`) on both sides.
+
+
+### total {#flag_total}
+
+The flag "total" is only available to functions performing a replacement. 
+In that case, if a pattern is detected, *the full character string* is replaced 
+(instead of just the pattern). 
+
+Ex: let's replace 
+```{r}
+cars = head(row.names(mtcars))
+print(cars)
+
+str_clean(cars, "ti/mazda => Mazda: sold out!")
+```
+
+*Technically*, instead of using `gsub` to replace the pattern, `grepl` is used
+to detect which element contains the pattern. Each element with the pattern
+is then substituted with the pattern.
+
+## Escaping flags: How to and a word of caution with paths {#flag_escaping}
+
+If your regular expression contains a slash (`"/"`), this will come in conflict
+with the parsing of the optional flags. 
+At the moment a `/` is present in a pattern, the algorithm will throw an error
+if the expected flags are not written correctly.
+
+To use a slash in the regex without adding flags there are two solutions:
+
+- start the pattern with a `"/"`. This is considered the empty flag and will be discared.
+- escape the first `"/"` with a double backslash
+
+Ex: let's invert the numerator and denominator of a division.
+```{r}
+eq = "5/x = 3/2"
+# a) escaping with empty flags
+str_clean(eq, "/(\\d)/(\\w) => \\2/\\1")
+
+# b) escaping with backslashes
+str_clean(eq, "(\\d)\\/(\\w) => \\2/\\1")
+```
+
+**Warning:** when applying regular expressions on file paths, the escaping 
+of the slash can be highly confusing. This is a limitation of the current implementation 
+of the optional flags. For example `"/[^/]+$"` looks like a legit regex to get 
+the parent folder, but it won't work as expected within `stringmagick`. 
+To behave as expected, you would need to write `"//[^/]+$"` which looks weird, 
+or `"\\/[^/]+$"`.
+
+
+# Chaining string operations
+
+str_ops
+
+# I need to clean character vectors: Quick and clear please!
+
+str_clean
+
+# Intuivite detection of regex patterns
+
+str_is/str_which/str_get
+
+
+
 
