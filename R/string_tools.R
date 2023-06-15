@@ -299,8 +299,6 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
       
       p = format_pattern(p, fixed = is_fixed, word = is_word, ignore = is_ignore) 
       is_fixed = attr(p, "fixed")
-
-      # res_tmp = grepl(p, x, perl = !is_fixed, fixed = is_fixed)
       
       res_tmp = tryCatch(grepl(p, x, perl = !is_fixed, fixed = is_fixed), 
                          error = function(e) structure(conditionMessage(e), class = "try-error"),
@@ -316,14 +314,16 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
       }
       
       if(inherits(res_tmp, "try-error")){
-        stopi("CONTEXT: {&n_pat>1;evaluation of {Q?pat}\n         }",
+        pat_raw = pattern[i]
+        stopi("CONTEXT: {&p != pat_raw;evaluation of {Q?pat_raw}\n         }",
               "pattern = {Q?p} ",
               "\nEXPECTATION: the pattern must be a valid regular expression",
               "\nPROBLEM: `grepl` led to an error, see below:",
               "\n{res_tmp}",
               "{&nchar(warn_msg) > 0;\n{.}}")
       } else if(is_warn){
-        warni("CONTEXT: {&n_pat>1;evaluation of {Q?pat}\n         }",
+        pat_raw = pattern[i]
+        warni("CONTEXT: {&p != pat_raw;evaluation of {Q?pat_raw}\n         }",
               "pattern = {Q?p} ",
               "\nA warning was raised when evaluating the pattern:",
               "\n{warn_msg}", immediate. = TRUE)
