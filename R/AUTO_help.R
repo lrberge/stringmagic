@@ -1,4 +1,4 @@
-# 1686740577
+# 1686748468
 # DO NOT EDIT BY HAND: generated with generate_help_extensive() in help.R
 
 setup_help_extensive = function(){
@@ -101,12 +101,13 @@ txt = c("", "# Interpolation and string operations: Principle ----|",
 "", "By default, thanks to the argument `slash = TRUE`, you can apply the slash operator without the need of an interpolation box (provided the slash appears as the first character), see the example below.", 
 "", "Ex.2: `x = 3:4; smagick(\"/one, two, {x}\")` also leads to the vector `c(\"one\", \"two\", \"3\", \"4\")`.", 
 "", "# Special interpolation: if-else ----|", "", "Using an ampersand (\"&\") as the first character of an interpolation leads to an *if-else* operation. Using two ampersands (\"&&\") leads to a slightly different operation described at the end of this section.", 
-"", "Ex.1: \\code{x = 1:5; smagick(\"x is \\{&length(x)<10 ; short ; \\{`log10(length(x) - 1)`times, ''c ! very \\}long\\}\")} leads to \"x is short\". With `x = 1:50`, it leads to \"x is long\", and to \"x is very very long\" if `x = 1:5000`.", 
 "", "The syntax is as follows: `{&cond ; verb_true ; verb_false}` with `cond` a condition (i.e. logical operation) on the value being interpolated, `verb_true` a verbatim value with which the vector will be replaced if the condition is `TRUE` and `verb_false` an *optional* verbatim value with which the vector will be replaced if the condition is `FALSE`. If not provided, `verb_false` is considered to be the empty string unless the operator is the double ampersand described at the end of this section.", 
-"", "If a condition leads to a result of length 1, the full string is replaced by the verbatim expression. Further, this expression will be interpolated if requested. This was the case in Ex.1 where `varb_false` was interpolated.", 
+"", "Ex.1: `x = 1:5`; \\code{smagick(\"x is {&length(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}\")} leads to \"x is short\". With `x = 1:50`, it leads to \"x is long\", and to \"x is very very long\" if `x = 1:5000`.", 
+"", "If a condition leads to a result of length 1, the full string is replaced by the verbatim expression. Further, this expression will be interpolated if requested. This was the case in Ex.1 where `verb_false` was interpolated.", 
 "", "If the condition's length is greater than 1, then each logical values equal to `TRUE` is replaced by `verb_true`, and `FALSE` or `NA` values are replaced with `verb_false`. Note, importantly, that **no interpolation is perfomed in that case**.", 
 "", "Ex.2: `x = 1:3 ; smagick(\"x is {&x == 2 ; two ; not two}\")` leads to the vector `c(\"x is not two\", \"x is two\", \"x is not two\")`.", 
-"", "Using the two ampersand operator (\"&&\") is like the simple ampersand version but the default for `verb_false` is the variable used in the condition itself. So the syntax is {&&cond ; `verb_true`} and *it does not accept* `verb_false`.", 
+"", "In that example, when x is odd, it is replaced with \"odd\", and when even it is replaced with the elements of y.", 
+"", "Using the two ampersand operator (\"&&\") is like the simple ampersand version but the default for `verb_false` is the variable used in the condition itself. So the syntax is `{&&cond ; verb_true}` and *it does not accept* `verb_false`.", 
 "", "Ex.3: `i = 3 ; smagick(\"i = {&&i == 3 ; three}\")` leads to \"i = three\", and to \"i = 5\" if `i = 5`.", 
 "", "# Special interpolation: Pluralization ----|", "", "There is advanced support for pluralization which greatly facilitates the writing of messages in natural language.", 
 "", "There are two ways to pluralize: over length or over value. To trigger a \"pluralization\" interpolation use as first character:", 

@@ -12,12 +12,16 @@
 #' @param x A character vector. If not a character vector but atomistic (i.e. not a list), 
 #' it will be converted to a character vector.
 #' @param op Character **scalar**. Character scalar containing the comma separated values 
-#' of operations to perform to the vector. The 50+ operations(op == "clean") ",[ \t\n]+" are detailed in the help
+#' of operations to perform to the vector. The 50+ operations are detailed in the help
 #' page of [smagick()].
 #' @param pre_unik Logical scalar, default is `NULL`. Whether to first unique the vector 
 #' before applying the possibly costly string operations, and merging back the result. 
 #' For very large vectors with repeated values the time gained can be substantial. By 
 #' default, this is `TRUE` for vector of length 1M or more.
+#' 
+#' @details 
+#' This function is a simple wrapper around smagick. Formally, `str_ops(x, "op1, op2")`
+#' is equivalent to `smagick("{op1, op2 ? x}")`.
 #'
 #' @return
 #' In general it returns a character vector. It may be of a length different from the original
@@ -38,12 +42,12 @@
 #' 
 #' # Explainer:
 #' # 'i/^m'get: keeps only the elements starting with an m,
-#' #            i/ is the 'regex-flag' ignore to ignore the case
+#' #            i/ is the 'regex-flag' "ignore" to ignore the case
 #' #            ^m means "starts with an m" in regex language
 #' # x: extracts the first pattern. The default pattern is "[[:alnum:]]+"
 #' #    which means an alpha-numeric word
 #' # unik: applies unique() to the vector
-#' # => see help in ?smagick() for more details on the operations
+#' # => see help in ?smagick for more details on the operations
 #' 
 #' 
 #' # let's get the 3 largest numbers appearing in the car models

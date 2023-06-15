@@ -8,14 +8,14 @@ smagick_register(fun, alias, valid_options = NULL)
 }
 \arguments{
 \item{fun}{A function which must have at least the arguments 'x' and '...'.
-Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'conditional_flag'.
+Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'group_flag'.
 This function must return a vector.
 This function will be internally called by \code{smagick} in the form
-\code{fun(x, argument, options, group, conditional_flag)}.\code{x}: the value to which the
+\code{fun(x, argument, options, group, group_flag)}.\code{x}: the value to which the
 operation applies. \code{argument}: the quoted \code{smagick} argument (always character).
 \code{options}: a character vector of \code{smagick} options. The two last arguments are of use
 only in group-wise operations if \code{fun} changes the lengths of vectors. \code{group}: an index of
-the group to which belongs each observation (integer). \code{conditional_flag}: value between 0
+the group to which belongs each observation (integer). \code{group_flag}: value between 0
 and 2; 0: no grouping operation requested; 1: keep track of groups; 2: apply grouping.}
 
 \item{alias}{Character scalar, the name of the operation.}
@@ -39,7 +39,7 @@ fun_emph = function(x, ...) paste0("*", x, "*")
 smagick_register(fun_emph, "emph")
 
 # C) use it
-x = dsb("/right, now")
+x = smagick("/right, now")
 smagick("Take heed, {emph, c? x}.")
 
 #
@@ -54,12 +54,12 @@ fun_emph = function(x, options, ...) {
 
 smagick_register(fun_emph, "emph", "strong")
 
-x = dsb("/right, now")
+x = smagick("/right, now")
 smagick("Take heed, {emph.strong, c? x}.")
 
 #
 # now let's add an argument
-fun_emph = function(x, argument, options, ...) {
+fun_emph = function(x, argument, options, ...){
   arg = argument
   if(nchar(arg) == 0) arg = "*"
   
@@ -72,7 +72,7 @@ fun_emph = function(x, argument, options, ...) {
 
 smagick_register(fun_emph, "emph", "strong")
 
-x = dsb("/right, now")
+x = smagick("/right, now")
 smagick("Take heed, {'_'emph.s, c? x}.")
 
 

@@ -8,7 +8,7 @@
   setup_operations()
   
   # generating functions (only if root)
-  generate_help_extensive()
+  # generate_help_extensive()
 
   # help
   setup_help_compact()

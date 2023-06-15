@@ -1,7 +1,7 @@
 Package: stringmagick
 Type: Package
 Title: Character String Operations and Interpolation, but with Magick
-Version: 0.1.0
+Version: 1.0.0
 Author@R: 
   person(given = "Laurent",
                    family = "Berge",
@@ -12,7 +12,7 @@ Author@R:
 Imports: Rcpp(>= 1.0.5)
 Suggests: knitr, data.table
 LinkingTo: Rcpp
-Description: Performs complex string operations compactly and efficiently. Supports string interpolation jointly with over 40 string operations. Also enhances regular string operations (like `grep` and co).
+Description: Performs complex string operations compactly and efficiently. Supports string interpolation jointly with over 50 string operations. Also enhances regular string functions (like `grep` and co).
 SystemRequirements: C++11
 License: MIT
 Encoding: UTF-8

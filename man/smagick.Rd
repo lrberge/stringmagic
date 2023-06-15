@@ -65,8 +65,9 @@ like in \code{smagick("/one, two, three")} will split the character string after
 each comma followed by spaces or newlines. The previous example leads to the string vector
 \code{c("one", "two", "three")}.}
 
-\item{collapse}{Character scalar or \code{NULL} (default). If provided, the resulting
-character vector will be collapsed into a character scalar using this value as a separator.}
+\item{collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
+that should be returned is collapsed with the value of this argument. This leads
+to return a string of length 1.}
 
 \item{help}{Character scalar or \code{TRUE}, default is \code{NULL}. This argument
 is used to generate a dynamic help on the console. If \code{TRUE}, the user can select which
@@ -88,13 +89,20 @@ basic string operations to the interpolated variables. Advanced support for plur
 }
 \details{
 There are over 50 basic string operations, it supports pluralization, string operations can be
-nested (it may be the most powerful feature), operations can be applied group-wise or conditionally and
+nested, operations can be applied group-wise or conditionally and
 operators have sensible defaults.
-
-You can also declare your own basic operations with \code{\link[=smagick_register]{smagick_register()}}.
+(it may be the most powerful feature)
+You can also declare your own operations with \code{\link[=smagick_register]{smagick_register()}}. They will be
+seamlessly integrated to \code{smagick}.
 
 Access a compact help on the console with \code{smagick("--help")} or use the argument \code{help} to which
 you can pass keywords or regular expressions and fecth select pieces from the main documentation.
+
+This function is compatible with calls within a \code{data.table}. Note that it
+shouldn't work (try \href{https://glue.tidyverse.org/index.html}{glue} for instance)!
+To make it work, we made use of how \code{data.table} works internally and, since we used stuff
+not exposed in its API, it is by construction unstable. \code{smagick} has been tested, and works, on
+\code{data.table} version 1.14.2.
 }
 \section{Methods (by generic)}{
 \itemize{
@@ -153,8 +161,8 @@ Verbatim evaluation is a powerful way to apply operations to plain text. For exa
 
 (A note in passing. The spaces surrounding the exclamation mark are non necessary,
 but when one space is present on both sides of the \code{!}, then the verbatim
-expression only begins after it. Ex: "{upper! hi}" leads to " HI" while "{upper ! hi}"
-leads to "HI" and "{upper !  hi}" leads to " HI".)
+expression only begins after it. Ex: "{upper! hi}" leads to " HI" while \code{"{upper ! hi}"}
+leads to "HI" and \code{"{upper !  hi}"} leads to " HI".)
 
 The second advantage of verbatim evaluations is \emph{nesting}. Anything in a verbatim
 expression is evaluated with the function \code{smagick}.
@@ -213,16 +221,16 @@ These functions accept generic flags ("ignore", "fixed", "word") in their patter
 Please see the dedicated section for more information on flags.
 \itemize{
 \item s, S: splits the string according to a pattern. The two operations have different defaults: \code{' '}
-for \code{s} and ',[ \t\n}*' for \code{S} (i.e. comma separation).
-Ex.1: \code{smagick("S ! romeo, juliet")} leads to the vector c("romeo", "juliet").
+for \code{s} and \code{',[ \\t\\n}*'} for \code{S} (i.e. comma separation).
+Ex.1: \code{smagick("{S ! romeo, juliet}")} leads to the vector c("romeo", "juliet").
 Ex.2: \code{smagick("{'f/+'s, '-'c ! 5 + 2} = 3")} leads to "5 - 2 = 3" (note the flag "fixed" in \code{s}'s pattern).
 \item c, C: to concatenate multiple strings into a single one. The two operations are
-identical, only their default change. c: default is ' ', C: default is ', | and '.
+identical, only their default change. c: default is \code{' '}, C: default is \code{', | and '}.
 The syntax of the argument is 's1' or 's1|s2'. s1 is the string used to concatenate
 (think \code{paste(x, collapse = s1)}). In arguments of the form \code{'s1|s2'}, \code{s2} will be used to concatenate the last two elements.
 Ex.1: \verb{x = 1:4; smagick("Et \{' et 'c ? x\}!")} leads to "Et 1 et 2 et 3 et 4!".
 Ex.2: \code{smagick("Choose: {', | or 'c ? 2:4}?")} leads to "Choose: 2, 3 or 4?".
-\item x, X: extracts patterns from a string. Both have the same default: '[\link{:alnum:}]+'.
+\item x, X: extracts patterns from a string. Both have the same default: \code{'[[:alnum:]]+'}.
 \code{x} extracts the first match while \code{X} extracts \strong{all} the matches.
 Ex.1: \verb{x = c("6 feet under", "mahogany") ; smagick("\{'\\\\w\{3\}'x ? x\}")} leads to the vector c("fee", "mah").
 Ex2.: \verb{x = c("6 feet under", "mahogany") ; smagick("\{'\\\\w\{3\}'X ? x\}")} leads to the
@@ -238,15 +246,35 @@ replace the fulll string in case the pattern is found.
 Ex.1: \code{smagick("{'e'r ! Where is the letter e?}")} leads to "Whr is th lttr ?".
 Ex.2: \code{smagick("{'(?<!\\\\b)e => a'R ! Where is the letter e?}")} leads to "Whara is tha lattar e?".
 Ex.3: \code{smagick("{'t/e => here'r ! Where is the letter e?}")} leads to "here".
+\item clean: replacement with a string. Similar to the operation \code{r}, except that here the comma is
+a pattern separator, see detailed explanations in \code{\link[=str_clean]{str_clean()}}. Ex: \code{smagick("{'f/[, ]'clean ! x[a]}")}
+leads to "xa".
 \item get: restricts the string only to values respecting a pattern. This operation has no default.
-It uses the same syntax as \code{\link[=str_get]{str_get()}} so that you can include logical operations with ' & ' and ' | '.
+Accepts the options "equal" and "in".
+By default it uses the same syntax as \code{\link[=str_get]{str_get()}} so that you can use regex flags and
+include logical operations with \code{' & '} and \code{' | '} to detect patterns.
+If the option "equal" is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+and then set inclusion is tested.
 Example: \verb{x = row.names(mtcars) ; smagick("Mercedes models: \{'Merc & [[:alpha:]]$'get, '^.+ 'r, C ? x\}")}
 leads to "Mercedes models: 240D, 280C, 450SE, 450SL and 450SLC".
 \item is: detects if a pattern is present in a string, returns a logical vector. This operation has no default.
+Accepts the options "equal" and "in".
+By default it uses the same syntax as \code{\link[=str_is]{str_is()}} so that you can use regex flags and
+include logical operations with \code{' & '} and \code{' | '} to detect patterns.
+If the option "equal" is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+and then set inclusion is tested.
 Mostly useful as the final operation in a \code{\link[=str_op]{str_op()}} call.
 Example: \verb{x = c("Mark", "Lucas") ; smagick("Mark? \{'i/mark'is, C ? x\}")} leads to "Mark? TRUE and FALSE".
 \item which: returns the index of string containing a specified pattern. With no default, can be applied
-to a logical vector directly. Mostly useful as the final operation in a \code{\link[=str_op]{str_op()}} call.
+to a logical vector directly.
+By default it uses the same syntax as str_which() so that you can use regex flags and
+include logical operations with \code{' & '} and \code{' | '} to detect patterns.
+If the option "equal" is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+and then set inclusion is tested.
+Mostly useful as the final operation in a \code{\link[=str_op]{str_op()}} call.
 Ex.1: \verb{x = c("Mark", "Lucas") ; smagick("Mark is number \{'i/mark'which ? x\}.")} leads to
 "Mark is number 1.".
 }
@@ -259,8 +287,8 @@ Ex.1: \verb{x = c("Mark", "Lucas") ; smagick("Mark is number \{'i/mark'which ? x
 leads to "First 3 numbers: 21, 21 and 22.8.". Negative numbers as argument remove the
 first \code{n} values. You can add a second argument in the form \verb{'n1|n2'first} in which case the first \code{n1} and last
 \code{n2} values are kept; \code{n1} and \code{n2} must be positive numbers.
-\item K, Ko, KO: keeps only the first \code{n} elements; has more options than \code{first}. The syntax is 'n'K,
-'n|s'K, 'n||s'K. The values Ko and KO only accept the two first syntax (with \code{n} only).
+\item K, Ko, KO: keeps only the first \code{n} elements; has more options than \code{first}. The syntax is \verb{'n'K},
+\verb{'n|s'K}, \verb{'n||s'K}. The values Ko and KO only accept the two first syntax (with \code{n} only).
 \code{n} provides the number of elements to keep. If \code{s} is provided and the number of
 elements are greater than \code{n}, then in 'n|s' the string \code{s} is added at the end, and
 if 'n||s' the string s replaces the nth element.
@@ -268,37 +296,46 @@ The string \code{s} accepts specials values:
 \itemize{
 \item \verb{:n:} or \verb{:N:} which gives the total number of items in digits or letters (N)
 \item \verb{:rest:} or \verb{:REST:} which gives the number of elements that have been truncated in digits or letters (REST)
-Ex: \code{smagick("'3|:rest: others'K ? 1:200")} leads to the vector \code{c("1", "2", "3", "197 others")}.
+Ex: \code{smagick("{'3|:rest: others'K ? 1:200}")} leads to the vector \code{c("1", "2", "3", "197 others")}.
 \item The operator 'n'Ko is like \verb{'n||:rest: others'K} and 'n'KO is like \verb{'n||:REST: others'K}.
 }
 \item last: keeps only the last \code{n} elements. Example: \code{smagick("Last 3 numbers: {3 last, C ? mtcars$mpg}.")}
 leads to "Last 3 numbers: 19.7, 15 and 21.4.". Negative numbers as argument remove the
 last \code{n} values.
-\item sort: sorts the vector in increasing order. Example: \verb{x = c("sort", "me") ; smagick("\{sort, c ? x\}")}
-leads to "me sort". \strong{Important note}: the sorting operation is applied before any character conversion.
+\item sort: sorts the vector in increasing order. Accepts optional arguments and the option "num".
+Example: \verb{x = c("sort", "me") ; smagick("\{sort, c ? x\}")} leads to "me sort".
+If an argument is provided, it must be a regex pattern that will be applied to
+the vector using \code{\link[=str_clean]{str_clean()}}. The sorting will be applied to the modified version of the vector
+and the original vector will be ordered according to this sorting.
+Ex: \code{x = c("Jon Snow", "Khal Drogo")}; \code{smagick("{'.+ 'sort, C?x}")} leads to
+"Khal Drogo and Jon Snow". The option "num" sorts over a numeric version
+(with silent conversion) of the vector and reorders the original vector accordingly.
+Values which could not be converted are last.
+\strong{Important note}: the sorting operation is applied before any character conversion.
 If previous operations were applied, it is likely that numeric data were transformed to character.
 Note the difference: \verb{x = c(20, 100, 10); smagick("\{sort, ' + 'c ? x\}")} leads to "10 + 20 + 100"
 while \code{smagick("{n, sort, ' + 'c ? x}")} leads to "10 + 100 + 20" because the operation "n"
 first transformed the numeric vector into character.
-\item dsort: sorts the vector in decreasing order. Example: \code{smagick("5 = {dsort, ' + 'c ? 2:3}")}
-leads to "5 = 3 + 2". Same note as for the operation "sort".
+\item dsort: sorts the vector in decreasing order. It accepts an optional argument and
+the option "num". Example: \code{smagick("5 = {dsort, ' + 'c ? 2:3}")}
+leads to "5 = 3 + 2". See the operation "sort" for a description of the argument and the option.
 \item rev: reverses the vector. Example: \code{smagick("{rev, ''c ? 1:3}")} leads to "321".
 \item unik: makes the string vector unique. Example: \code{smagick("Iris species: {unik, C ? iris$Species}.")}
 leads to "Iris species: setosa, versicolor and virginica.".
 \item each: repeats each element of the vector \code{n} times. Option "c" then collapses the full vector
 with the empty string as a separator. Ex.1: \code{smagick("{/x, y}{2 each ? 1:2}")} leads to the
-vector \code{c("x1", "y1", "x2", "y2")}. Ex.2: smagick("Large number: 1{5 each.c ! 0}") leads to
+vector \code{c("x1", "y1", "x2", "y2")}. Ex.2: \code{smagick("Large number: 1{5 each.c ! 0}")} leads to
 "Large number: 100000".
 \item times: repeats the vector sequence \code{n} times. Option "c" then collapses the full vector
 with the empty string as a separator. Example: \code{smagick("What{6 times.c ! ?}")} leads to "What??????".
 \item rm: removes elements from the vector. Options: "empty", "blank", "noalpha", "noalnum", "all".
 The \emph{optional} argument represents the pattern used to detect strings to be deleted.
-Ex.1: x = c("Luke", "Charles"); smagick("{'i/lu'rm ? x}") leads to "charles". By default it removes
+Ex.1: \code{x = c("Luke", "Charles")}; \code{smagick("{'i/lu'rm ? x}")} leads to "charles". By default it removes
 empty strings. Option "blank" removes strings containing only blank characters (spaces, tab, newline).
 Option "noalpha" removes strings not containing letters. Option "noalnum" removes strings not
 containing alpha numeric characters. Option "all" removes all strings (useful in conditions, see
 the dedicated section). If an argument is provided, only the options "empty" and "blank" are available.
-Ex.2: \verb{x = c("I want to enter.", "Age?", "21"); smagick("Nightclub conversation: \{rm.noalpha, c ! - \{x\}\}")}
+Ex.2: \code{x = c("I want to enter.", "Age?", "21")}; \code{smagick("Nightclub conversation: {rm.noalpha, c ! - {x}}")}
 leads to "Nightclub conversation: - I want to enter. - Age?"
 \item nuke: removes all elements, equivalent to \code{rm.all} but possibly more explicit (not sure).
 Useful in conditions, see the dedicated section.
@@ -334,19 +371,19 @@ the empty string. This means that \code{smagick("ws.punct ! Meg's car")} will be
 back quotes. \verb{x = c("Mark", "Pam"); smagick("Hello \{q, C ? x\}!")} leads to "Hello 'Mark' and 'Pam'!".
 \item format, Format: applies the base R's function \code{\link[base:format]{base::format()}} to the string.
 By default, the values are left aligned, \emph{even numbers} (differently from \code{\link[base:format]{base::format()}}'s behavior).
-The upper case command (\code{Format}) applies right alignment. Options: "0", "zero", "right", "centre", "center".
+The upper case command (\code{Format}) applies right alignment. Options: "0", "zero", "right", "center".
 Options "0" or "zero" fills the blanks with 0s: useful to format numbers. Option "right" right aligns,
-and "centre" or "centre" centers the strings.
+and "center" centers the strings.
 Ex: \verb{x = c(1, 12345); smagick("left: \{format.0, q, C ? x\}, right: \{Format, q, C ? x\}")}
 leads to "left: '000001' and '12,345', right: '     1' and '12,345'".
 \item \%: applies \code{\link[base:sprintf]{base::sprintf()}} formatting. The syntax is 'arg'\% with arg an sprintf formatting,
 or directly the sprint formatting, e.g. \verb{\% 5s}. Example: \code{smagick("pi = {\%.3f ? pi}")} leads
 to "pi = 3.142".
-\item stop: removes basic English stopwords (the snowball list is used).
+\item stopword: removes basic English stopwords (the snowball list is used).
 The stopwords are replaced with an empty space but the left and right WS are
 untouched. So WS normalization may be needed (see operation \code{ws}).
 \verb{x = c("He is tall", "He isn't young"); smagick("Is he \{stop, ws, C ? x\}?")} leads to "Is he tall and young?".
-\item ascii: turns all letters into ASCII with transliteration. Non ASCII elements
+\item ascii: turns all letters into ASCII with transliteration. Failed translations
 are transformed into question marks. Options: "silent", "utf8". By default, if some conversion fails
 a warning is prompted. Option "silent" disables the warning in case of failed conversion. The conversion
 is done with \code{\link[base:iconv]{base::iconv()}}, option "utf8" indicates that the source endocing is UTF-8, can be useful
@@ -354,7 +391,7 @@ in some cases.
 \item n: formats integers by adding a comma to separate thousands. Options: "letter", "upper", "0", "zero".
 The option "letter" writes the number in letters (large numbers keep their numeric format). The option
 "upper" is like the option "letter" but uppercases the first letter. Options "0" or "zero" left pads
-numeric vectors with 0s. Ex.1: \verb{x = 5; smagick("He's \{N ? x\} year old.")} leads to "He's five year old.".
+numeric vectors with 0s. Ex.1: \verb{x = 5; smagick("He's \{N ? x\} years old.")} leads to "He's five years old.".
 Ex.2: \verb{x = c(5, 12, 52123); smagick("She owes \{n.0, '$'paste, C ? x\}.")} leads to
 "She owes $5, $12 and $52,123.".
 \item N: same as \code{n} but automatically adds the option "letter".
@@ -364,7 +401,7 @@ Ex.1: \verb{n = c(3, 7); smagick("They finished \{nth, enum ? n\}!")} leads to "
 Option "letter" tries to write the numbers in letters, but note that it stops at 20. Option "upper"
 is the same as "letter" but uppercases the first letter. Option "compact" aggregates
 consecutive sequences in the form "start_n_th to end_n_th".
-Ex.2: smagick("They arrived {nth.compact ? 5:20}.") leads to "They arrived 5th to 20th.".
+Ex.2: \code{smagick("They arrived {nth.compact ? 5:20}.")} leads to "They arrived 5th to 20th.".
 Nth: same as \code{nth}, but automatically adds the option "letter". Example:
 \verb{n = c(3, 7); smagick("They finished \{Nth, enum ? n\}!")} leads to "They finished third and seventh!".
 \item ntimes: write numbers in the form \code{n} times. Options: "letter", "upper". Option
@@ -375,21 +412,23 @@ leads to "They lost once against Real and 12 times against Barcelona.".
 Example: \verb{x = 5; smagick("This paper was rejected \{Ntimes ? x\}...")} leads to
 "This paper was rejected five times...".
 \item cfirst, clast: to select the first/last characters of each element.
-Ex: smagick("{19 cfirst, 9 clast ! This is a very long sentence}") leads to "very long".
+Ex: \code{smagick("{19 cfirst, 9 clast ! This is a very long sentence}")} leads to "very long".
 Negative numbers remove the first/last characters.
-\item k: to keep only the first n characters (like cfirst but with more options). The
-syntax is \code{nk}, \verb{'n'k}, \verb{'n|s'k} or \verb{'n||s'k} with \code{n} a number and \code{s} a string.
+\item k: to keep only the first n characters (like \code{cfirst} but with more options). The
+argument can be of the form \verb{'n'k}, \verb{'n|s'k} or \verb{'n||s'k} with \code{n} a number and \code{s} a string.
 \code{n} provides the number of characters to keep. Optionnaly, only for strings whose
 length is greater than \code{n}, after truncation, the string \code{s} can be appended at the end.
 The difference between 'n|s' and 'n||s' is that in the second case the strings
 will always be of maximum size \code{n}, while in the first case they can be of length \code{n + nchar(s)}.
 Ex: \code{smagick("{4k ! long sentence}")} leads to "long",  \code{smagick("{'4|..'k ! long sentence}") }
 leads to "long..", \code{smagick("{'4||..'k ! long sentence}")} leads to "lo..".
-\item fill: fills the character strings up to a size. Options: "right", "center" and a free-form symbol.
-Option "right" right aligns and "center" centers the strings. You can pass a free-form symbol
-as option, it will be used for the filling. By default if no argument is provided, the
+\item fill: fills the character strings up to a size. Options: "right", "center".
+Accepts arguments of the form \code{'n'} or \code{'n|s'}, with \code{n} a number and \code{s} a symbol.
+Default is left-alignment of the strings.
+Option "right" right aligns and "center" centers the strings. When using \code{'n|s'}, the symbol \code{s}
+is used for the filling. By default if no argument is provided, the
 maximum size of the character string is used. See help for \code{\link[=str_fill]{str_fill()}} for more information.
-Ex.1: \code{smagick("Numbers: {'5'fill.0.right, C ? c(1, 55)}")} leads to "Numbers: 00001 and 00055".
+Ex.1: \code{smagick("Numbers: {'5|0'fill.right, C ? c(1, 55)}")} leads to "Numbers: 00001 and 00055".
 \item paste: pastes some character to all elements of the string. This operation has no default.
 Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
 Option "right" pastes on the right and "both" pastes on both sides. Option "front" only
@@ -402,14 +441,14 @@ Example: \code{smagick("6 = {'|'paste.both, ' + 'c ? -3:-1}")} leads to "6 = |-3
 \section{Other operations}{
 
 \itemize{
-\item num: converts to numeric. Options: "warn", "soft", "rm", "clean". By default, the conversion
+\item num: converts to numeric. Options: "warn", "soft", "rm", "clear". By default, the conversion
 is performed silently and elements that failed to convert are turned into NA.
 Option "warns" displays a warning if the conversion to numeric fails.
 Option "soft" does not convert if the conversion of at least one element fails.
 Option "rm" converts and removes the elements that could not be converted.
-Option "clean" turns failed conversions into the empty string, and hence lead to a character vector.
+Option "clear" turns failed conversions into the empty string, and hence lead to a character vector.
 Example: \verb{x = c(5, "six"); smagick("Compare \{num, C, q ? x\} with \{num.rm, C, q ? x\}.")} leads to
-"Compare '5 and NA' with '5'.", and \code{smagick("Compare {num.soft, C, q ? x} with {num.clean, C, q ? x}.")}
+"Compare '5 and NA' with '5'.", and \code{smagick("Compare {num.soft, C, q ? x} with {clear, C, q ? x}.")}
 leads to "Compare '5 and six' with '5 and '.".
 \item enum: enumerates the elements. It creates a single string containing the comma
 separated list of elements.
@@ -431,16 +470,18 @@ Ex.2: \verb{x = c("orange", "milk", "rice"); smagick("Shopping list: \{enum.i.q 
 Option "letter" writes the length in words (up to 100). Option "upper" is the same
 as letter but uppercases the first letter. Option "format" add comma separation for thousands.
 Example: \code{smagick("Size = {len.format ? 1:5000}")} leads to "Size = 5,000".
-\item width: formats the string to fit a given width by cutting at word boundaries. You can add
-a free-form option which will appear at the beginning of the string. If you provide a free-form option
-equal to a leading string, by default a trailing white space is added; to remove this
-behavior, add an underscore at the end of the option.
-The argument is either
+\item width: formats the string to fit a given width by cutting at word boundaries.
+Accepts arguments of the form \code{'n'} or \code{'n|s'}, with \code{n} a number and \code{s} a string.
+An argument of the form \code{'n|s'} will add \code{s} at the beginning of each line. Further,
+by default a trailing white space is added to \code{s}; to remove this
+behavior, add an underscore at the end of it.
+The argument \code{n} is either
 an integer giving the target character width (minimum is 15), or it can be a fraction expressing the
-target size as a fraction of the current screen.
+target size as a fraction of the current screen. Finally it can be an expression that
+uses the variable \code{.sw} which will capture the value of the current screen width.
 Ex.1: \code{smagick("{15 width ! this is a long sentence}")} leads to "this is a long\\nsentence".
 Ex.2: \code{smagick("{15 width.#> ! this is a long sentence}")} leads to "#> this is a long\\n#> sentence".
-\item dtime: displays a formatted time difference. Option "silent" does not report an warning if the
+\item dtime: displays a formatted time difference. Option "silent" does not report a warning if the
 operation fails. It accepts either objects of class \code{POSIXt} or \code{difftime}.
 Example: \verb{x = Sys.time() ; Sys.sleep(0.5) ; smagick("Time: \{dtime ? x\}")} leads to something
 like "Time: 514ms".
@@ -510,7 +551,7 @@ with "<10" while other values are not modified.
 Ex.4: \code{x = smagick("x{1:10}")}; \code{smagick("y = {vif(.N>4 ; {/{x[1]}, ..., {last?x}}), ' + 'c ? x}")}
 leads to "y = x1 + ... + x10".
 Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
-the full string is replaced with "{/{x\link{1}}, ..., {last?x}}". Interpolation applies to
+the full string is replaced with \code{"{/{x[1]}, ..., {last?x}}"}. Interpolation applies to
 such string. Hence the slash operation (see the dedicated section) breaks the string w.r.t.
 the commas, leading to the vector \code{c("{x[1]}", "...", "{last?x}")}. Since the
 string contain curly brackets, interpolation is applied again. This leads to
@@ -534,10 +575,10 @@ Ex.1: \verb{x = 3:4; smagick("\{/one, two, \{x\}\}")} leads to the vector \code{
 
 When a "/" is the first character of an interpolation:
 \itemize{
-\item all characters until the closing bracket is taken as verbatim
+\item all characters until the closing bracket are taken as verbatim
 \item the verbatim string is split according to comma separation (formally they are split with \verb{,[ \\t\\n]+}),
 resulting into a vector
-\item if the vector contains any \emph{box}, extra interpolations are resolved
+\item if the vector contains any \emph{box}, extra interpolations are resolved and appended to the vector
 }
 
 In Ex.1 the string "one, two, {x}" is taken as verbatim and split w.r.t. commas, leading to c("one", "two", "{x}").
@@ -554,10 +595,6 @@ Ex.2: \verb{x = 3:4; smagick("/one, two, \{x\}")} also leads to the vector \code
 Using an ampersand ("&") as the first character of an interpolation leads to an \emph{if-else} operation.
 Using two ampersands ("&&") leads to a slightly different operation described at the end of this section.
 
-Ex.1: \code{x = 1:5; smagick("x is \{&length(x)<10 ; short ; \{`log10(length(x) - 1)`times, ''c ! very \}long\}")}
-leads to "x is short". With \code{x = 1:50}, it leads to "x is long", and to "x is very very long"
-if \code{x = 1:5000}.
-
 The syntax is as follows: \verb{\{&cond ; verb_true ; verb_false\}} with \code{cond} a
 condition (i.e. logical operation) on the value being interpolated, \code{verb_true}
 a verbatim value with which the vector will be replaced if the condition is \code{TRUE} and
@@ -565,9 +602,13 @@ a verbatim value with which the vector will be replaced if the condition is \cod
 If not provided, \code{verb_false} is considered to be the empty string unless the operator is
 the double ampersand described at the end of this section.
 
+Ex.1: \code{x = 1:5}; \code{smagick("x is {&length(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")}
+leads to "x is short". With \code{x = 1:50}, it leads to "x is long", and to "x is very very long"
+if \code{x = 1:5000}.
+
 If a condition leads to a result of length 1, the full string is replaced by the verbatim
 expression. Further, this expression will be interpolated if requested. This was the case
-in Ex.1 where \code{varb_false} was interpolated.
+in Ex.1 where \code{verb_false} was interpolated.
 
 If the condition's length is greater than 1, then each logical values equal to \code{TRUE} is replaced
 by \code{verb_true}, and \code{FALSE} or \code{NA} values are replaced with \code{verb_false}. Note,
@@ -576,9 +617,12 @@ importantly, that \strong{no interpolation is perfomed in that case}.
 Ex.2: \verb{x = 1:3 ; smagick("x is \{&x == 2 ; two ; not two\}")} leads to the vector
 \code{c("x is not two", "x is two", "x is not two")}.
 
+In that example, when x is odd, it is replaced with "odd", and when even it is
+replaced with the elements of y.
+
 Using the two ampersand operator ("&&") is like the simple ampersand version but the
 default for \code{verb_false} is the variable used in the condition itself. So the syntax is
-{&&cond ; \code{verb_true}} and \emph{it does not accept} \code{verb_false}.
+\verb{\{&&cond ; verb_true\}} and \emph{it does not accept} \code{verb_false}.
 
 Ex.3: \verb{i = 3 ; smagick("i = \{&&i == 3 ; three\}")} leads to "i = three", and to "i = 5" if \code{i = 5}.
 
@@ -911,12 +955,14 @@ smagick("{'|'paste.both, ' + 'c ! x{1:4}}")
 
 
 # Enumerations
-acad = smagick("/you like admin, you enjoy working on weekends, you really love emails")
+acad =gick("/you like admin, you enjoy working on weekends, you really love emails")
 smagick("Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}.")
 
+# You can also use the enum command
+smagick("Main reasons to pursue an academic career:\n {enum.i ? acad}.")
 
 #
-# stop: removes basic English stopwords
+# stopword: removes basic English stopwords
 # the list is from the Snowball project:
 #  http://snowball.tartarus.org/algorithms/english/stop.txt
 
@@ -1061,7 +1107,22 @@ smagick("Why do you develop packages? For {`dollar`times.c ! $}?",
     "For money? No... for {upper,''s, c ? reason}!", sep = "\n")
 
 
+#
+# COMPATIBILITY WITH data.table ####
+# 
 
+# smagick is compatible with data.table (tested on version 1.14.2)
+
+if(requireNamespace("data.table")){
+  library(data.table)
+  dt_iris = as.data.table(iris)
+  dt_small = dt_iris[, .(species_PL = sma("{first, 10 fill.c ? Species}: {\%.1f ? mean(Petal.Length)}")), 
+                     by = Species]
+  print(dt_small)
+}
+
+
+   
 
 }
 \seealso{

@@ -23,14 +23,14 @@ print.smagick = function(x, ...){
 #' Extends the capabilities of [smagick()] by adding any custom operation
 #' 
 #' @param fun A function which must have at least the arguments 'x' and '...'. 
-#' Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'conditional_flag'.
+#' Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'group_flag'.
 #' This function must return a vector.
 #' This function will be internally called by `smagick` in the form 
-#' `fun(x, argument, options, group, conditional_flag)`.`x`: the value to which the 
+#' `fun(x, argument, options, group, group_flag)`.`x`: the value to which the 
 #' operation applies. `argument`: the quoted `smagick` argument (always character). 
 #' `options`: a character vector of `smagick` options. The two last arguments are of use
 #' only in group-wise operations if `fun` changes the lengths of vectors. `group`: an index of
-#' the group to which belongs each observation (integer). `conditional_flag`: value between 0
+#' the group to which belongs each observation (integer). `group_flag`: value between 0
 #' and 2; 0: no grouping operation requested; 1: keep track of groups; 2: apply grouping.
 #' @param alias Character scalar, the name of the operation.
 #' @param valid_options A character vector or NULL (default). Represents a list of 
@@ -56,7 +56,7 @@ print.smagick = function(x, ...){
 #' smagick_register(fun_emph, "emph")
 #' 
 #' # C) use it
-#' x = dsb("/right, now")
+#' x = smagick("/right, now")
 #' smagick("Take heed, {emph, c? x}.")
 #' 
 #' #
@@ -71,12 +71,12 @@ print.smagick = function(x, ...){
 #' 
 #' smagick_register(fun_emph, "emph", "strong")
 #' 
-#' x = dsb("/right, now")
+#' x = smagick("/right, now")
 #' smagick("Take heed, {emph.strong, c? x}.")
 #' 
 #' #
 #' # now let's add an argument
-#' fun_emph = function(x, argument, options, ...) {
+#' fun_emph = function(x, argument, options, ...){
 #'   arg = argument
 #'   if(nchar(arg) == 0) arg = "*"
 #'   
@@ -89,7 +89,7 @@ print.smagick = function(x, ...){
 #' 
 #' smagick_register(fun_emph, "emph", "strong")
 #' 
-#' x = dsb("/right, now")
+#' x = smagick("/right, now")
 #' smagick("Take heed, {'_'emph.s, c? x}.")
 #' 
 #' 
@@ -121,7 +121,7 @@ smagick_register = function(fun, alias, valid_options = NULL){
               "\nPROBLEM: it has no argument {enum.bq.or?arg_missing}.")
   }
 
-  valid_args = dsb("/x, argument, options, group, conditional_flag")
+  valid_args = dsb("/x, argument, options, group, group_flag")
   arg_pblm = setdiff(setdiff(fun_args, "..."), valid_args)
   if(length(arg_pblm) > 0){
     stop_hook("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
@@ -245,21 +245,23 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' @param collapse Character scalar, default is `NULL`. If provided, the character vector
 #' that should be returned is collapsed with the value of this argument. This leads
 #' to return a string of length 1.
-#' 
-#' Any interpolation after the slash is vectorized. Example: `a = 2:3 ; smagick("/x1, x{a}, x4")` leads
-#' to the vector `c("x1", "x2", "x3", "x4")`.
-#' @param collapse Character scalar or `NULL` (default). If provided, the resulting 
-#' character vector will be collapsed into a character scalar using this value as a separator.
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
-#' nested (it may be the most powerful feature), operations can be applied group-wise or conditionally and
+#' nested, operations can be applied group-wise or conditionally and
 #' operators have sensible defaults. 
-#' 
-#' You can also declare your own basic operations with [smagick_register()].
+#'  (it may be the most powerful feature)
+#' You can also declare your own operations with [smagick_register()]. They will be 
+#' seamlessly integrated to `smagick`.
 #'
 #' Access a compact help on the console with `smagick("--help")` or use the argument `help` to which
 #' you can pass keywords or regular expressions and fecth select pieces from the main documentation.
+#' 
+#' This function is compatible with calls within a `data.table`. Note that it 
+#' shouldn't work (try [glue](https://glue.tidyverse.org/index.html) for instance)!
+#' To make it work, we made use of how `data.table` works internally and, since we used stuff 
+#' not exposed in its API, it is by construction unstable. `smagick` has been tested, and works, on
+#' `data.table` version 1.14.2.
 #' 
 #' @section Interpolation and string operations: Principle:
 #' 
@@ -699,7 +701,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' - all characters until the closing bracket are taken as verbatim
 #' - the verbatim string is split according to comma separation (formally they are split with `,[ \t\n]+`),
 #' resulting into a vector
-#' - if the vector contains any *box*, extra interpolations are resolved
+#' - if the vector contains any *box*, extra interpolations are resolved and appended to the vector
 #' 
 #' In Ex.1 the string "one, two, {x}" is taken as verbatim and split w.r.t. commas, leading to c("one", "two", "{x}"). 
 #' Since the last element contained an opening box, it is interpolated and inserted into the vector, leading
@@ -1050,12 +1052,14 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' 
 #'
 #' # Enumerations
-#' acad = smagick("/you like admin, you enjoy working on weekends, you really love emails")
+#' acad =gick("/you like admin, you enjoy working on weekends, you really love emails")
 #' smagick("Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}.")
-#'
+#' 
+#' # You can also use the enum command
+#' smagick("Main reasons to pursue an academic career:\n {enum.i ? acad}.")
 #'
 #' #
-#' # stop: removes basic English stopwords
+#' # stopword: removes basic English stopwords
 #' # the list is from the Snowball project:
 #' #  http://snowball.tartarus.org/algorithms/english/stop.txt
 #'
@@ -1198,9 +1202,24 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' reason = "glory"
 #' smagick("Why do you develop packages? For {`dollar`times.c ! $}?",
 #'     "For money? No... for {upper,''s, c ? reason}!", sep = "\n")
+#' 
+#' 
+#' #
+#' # COMPATIBILITY WITH data.table ####
+#' # 
+#' 
+#' # smagick is compatible with data.table (tested on version 1.14.2)
+#' 
+#' if(requireNamespace("data.table")){
+#'   library(data.table)
+#'   dt_iris = as.data.table(iris)
+#'   dt_small = dt_iris[, .(species_PL = sma("{first, 10 fill.c ? Species}: {%.1f ? mean(Petal.Length)}")), 
+#'                      by = Species]
+#'   print(dt_small)
+#' }
 #'
 #'
-#'
+#'    
 #'
 smagick = sma = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
@@ -1371,7 +1390,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
   if(slash && substr(x, 1, 1) == "/"){
     # we apply the "slash" operation
     x = sma_operators(substr(x, 2, nchar(x)), "/", NULL, "", check = check, frame = frame, 
-                      conditional_flag = 0, is_dsb = is_dsb, fun_name = fun_name)
+                      group_flag = 0, is_dsb = is_dsb, fun_name = fun_name)
     return(x)
   } 
   
@@ -1651,7 +1670,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
           # REGULAR OPERATORS
           #
 
-          conditional_flag = any(str_x(operators, 1) == "~")
+          group_flag = any(str_x(operators, 1) == "~")
           
           for(j in seq_along(operators)){
             opi = operators[[j]]
@@ -1666,13 +1685,13 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 
             if(check){
               xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument,
-                                              check = check, frame = frame, conditional_flag = conditional_flag,
+                                              check = check, frame = frame, group_flag = group_flag,
                                               is_dsb = is_dsb, fun_name = fun_name),
                                 get_smagick_context(), " See error below:",
                                 verbatim = TRUE, up = 1)
             } else {
               xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, check = check,
-                                 frame = frame, conditional_flag = conditional_flag,
+                                 frame = frame, group_flag = group_flag,
                                  is_dsb = is_dsb, fun_name = fun_name)
             }
           }
@@ -1837,9 +1856,9 @@ sma_char2operator = function(x, fun_name){
 
 
 sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
-                         conditional_flag = 0, is_dsb = FALSE, fun_name = "smagick"){
+                         group_flag = 0, is_dsb = FALSE, fun_name = "smagick"){
 
-  # conditional_flag:  0 nothing
+  # group_flag:  0 nothing
   #                    1 keep track of conditional things
   #                    2 apply conditional
 
@@ -1892,7 +1911,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
       argument = arg_split[[1]]
       if(length(arg_split) == 1){
-        # case qith escape \\|
+        # case with escape \\|
         is_last = grepl("(?<!\\\\)\\|$", argument, perl = TRUE)
         if(is_last){
           sep_last = ""
@@ -1909,7 +1928,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
     sep = argument
 
-    if(!is.null(group_index) && conditional_flag == 2){
+    if(!is.null(group_index) && group_flag == 2){
       if(!is.character(x)){
         x = as.character(x)
       }
@@ -1930,7 +1949,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         res = paste(x, collapse = sep)
       }
 
-      if(conditional_flag == 1){
+      if(group_flag == 1){
         group_index = NULL
       }
 
@@ -1987,7 +2006,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       
       fix_empty = any(x == "")
 
-      if(conditional_flag != 0){
+      if(group_flag != 0){
         # we keep track of the group index
         x_len_all = lengths(x_split)
         
@@ -2028,7 +2047,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
       x_list = regmatches(x, gregexpr(argument, x, fixed = is_fixed, perl = !is_fixed))
 
-      if(conditional_flag != 0){
+      if(group_flag != 0){
         # we keep track of the group index
         x_len_all = lengths(x_list)
         # I could avoid the last line... later
@@ -2047,10 +2066,10 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
       res = which(x)
 
-      if(conditional_flag == 1){
+      if(group_flag == 1){
         group_index = group_index[res]
         group_index = cpp_recreate_index(group_index)
-      } else if(conditional_flag == 2){
+      } else if(group_flag == 2){
         stop_hook("The operation `which` cannot be applied in ",
                   "conditional statements (inside `~()`).",
                   "\nFIX: simply put this operation after the conditional statement.")
@@ -2072,10 +2091,10 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
       if(op %in% c("get", "which")){
 
-        if(conditional_flag == 1){
+        if(group_flag == 1){
           group_index = group_index[res]
           group_index = cpp_recreate_index(group_index)
-        } else if(conditional_flag == 2){
+        } else if(group_flag == 2){
           stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
                     "conditional statements (inside `~()`).",
                     "\nFIX: simply put this operation after or before the conditional statement.")
@@ -2245,6 +2264,10 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
     is_both = opt_equal(options, "both")
     is_right = any(c("r", "right") %in% options) || nb < 0
+    
+    if(!is.character(x)){
+      x = as.character(x)
+    }
 
     nx = nchar(x)
     if(is_both){
@@ -2275,6 +2298,9 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     is_included = info$is_double
 
     if(op == "k"){
+      if(!is.character(x)){
+        x = as.character(x)
+      }
       qui = nchar(x) > nb
       res = substr(x, 1, nb)
 
@@ -2293,7 +2319,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       } else {
         res = if(nb < length(x)) x[1:nb] else x
         
-        if(conditional_flag == 2){
+        if(group_flag == 2){
           stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
                     "conditional statements (inside `~()`).",
                     "\nFIX: simply put this operation after or before the conditional statement.")
@@ -2332,7 +2358,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     # but I don't see a use case for large vectors....
     # we use enum for smallish things so it should be OK.
 
-    if(!is.null(group_index) && conditional_flag == 2){
+    if(!is.null(group_index) && group_flag == 2){
 
       res = unname(tapply(x, group_index, enum_main, options = options))
       group_index = seq_along(group_index)
@@ -2340,7 +2366,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     } else {
       res = enum_main(x, options = options)
 
-      if(conditional_flag == 1){
+      if(group_flag == 1){
         group_index = NULL
       }
 
@@ -2384,6 +2410,10 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     if(str_x(op, 1) == "c"){
       # we select the first/last characters
       
+      if(!is.character(x)){
+        x = as.character(x)
+      }
+      
       if(nb < 0){
         nb = abs(nb)
         nx = nchar(x)
@@ -2404,7 +2434,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     } else {
       # we select the first/last elements
 
-      if(!is.null(group_index) && conditional_flag == 2){
+      if(!is.null(group_index) && group_flag == 2){
         is_last = op == "last"
         qui = cpp_find_first_index(group_index, nb, is_last)
         
@@ -2467,7 +2497,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
           }
         }
 
-        if(conditional_flag == 1){
+        if(group_flag == 1){
           # this operation destroys the groups
           group_index = NULL
         }
@@ -2477,7 +2507,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
   } else if(op == "rev"){
     # rev, sort, dsort ####
     
-    if(!is.null(group_index) && conditional_flag == 2){
+    if(!is.null(group_index) && group_flag == 2){
       qui = cpp_group_rev_index(group_index)
       res = x[qui]
     } else {
@@ -2500,15 +2530,15 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       x2sort = suppressWarnings(as.numeric(x2sort))
     }
     
-    if(conditional_flag == 1){
+    if(group_flag == 1){
       # it makes no sense to keep track of the indexes when sorting the full string
       # ex: a1 b2 => split => a 1 b 2 => sort => a b 1 2
       # after that, the conditional operations (on a1 and b2) don't make much sense
       group_index = NULL
-      conditional_flag = 0
+      group_flag = 0
     }
 
-    if(!is.null(group_index) && conditional_flag == 2){
+    if(!is.null(group_index) && group_flag == 2){
       
       if(is_decreasing){
         new_order = order(-group_index, x2sort, decreasing = TRUE)
@@ -2637,7 +2667,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     } else if(op == "insert"){
       # inserts an ELEMENT at the beginning/end
       
-      if(conditional_flag == 2){
+      if(group_flag == 2){
         stop_hook("The operation `{q?argument}{op}` cannot be applied in ",
                   "conditional statements (inside `~()`).",
                   "\nFIX: simply put this operation after or before the conditional statement.")
@@ -2732,7 +2762,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
   } else if(op == "unik"){
     # unik ####
 
-    if(!is.null(group_index) && conditional_flag == 2){
+    if(!is.null(group_index) && group_flag == 2){
 
       # not really fast 
       # => to be improved
@@ -2746,7 +2776,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       
       res = unique(x)
 
-      if(conditional_flag == 1){
+      if(group_flag == 1){
         group_index = NULL
       }
 
@@ -2825,11 +2855,11 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     } else if(op == "len"){
 
       # if conditional: lengths of all the groups
-      if(!is.null(group_index) && conditional_flag == 2){
+      if(!is.null(group_index) && group_flag == 2){
         res = tabulate(group_index)
         group_index = seq_along(res)
       } else {
-        if(conditional_flag == 1){
+        if(group_flag == 1){
           group_index = 1
         }
 
@@ -2959,7 +2989,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     }
 
     res = x[qui]
-    if(!is.null(group_index) && conditional_flag != 0){
+    if(!is.null(group_index) && group_flag != 0){
       group_index = group_index[qui]
       group_index = cpp_recreate_index(group_index)
     }
@@ -2993,7 +3023,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
           qui_na = which(is.na(res))
           if(is_rm){
             res = res[-qui_na]
-            if(!is.null(group_index) && conditional_flag != 0){
+            if(!is.null(group_index) && group_flag != 0){
               group_index = group_index[-qui_na]
               group_index = cpp_recreate_index(group_index)
             }
@@ -3114,6 +3144,9 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         if(v %in% c(".N", ".len")){
           my_data[[v]] = length(x)
         } else if(v %in% c(".nchar", ".C")){
+          if(!is.character(x)){
+            x = as.character(x)
+          }
           my_data[[v]] = nchar(x)
         } else if(v == "."){
           my_data[[v]] = x
@@ -3201,7 +3234,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         n_old = length(xi)
         cond_flag = +grepl("~(", instruction, fixed = TRUE)
         xi = apply_simple_operations(xi, op, instruction, check, frame, 
-                                     conditional_flag = cond_flag, is_dsb, fun_name)
+                                     group_flag = cond_flag, is_dsb, fun_name)
         
         if(is_elementwise && !length(xi) %in% c(0, n_old)){
           stop_hook("In {bq?op} operations, when conditions are of length > 1, the ",
@@ -3232,7 +3265,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       
       if(length(x_true) == 0 && length(x_false) == 0){
         res = character(0)
-        if(conditional_flag != 0){
+        if(group_flag != 0){
           group_index = NULL
         }
       } else if(length(x_true) == 0){
@@ -3243,7 +3276,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
           res = x_false  
         }
         
-        if(conditional_flag != 0){
+        if(group_flag != 0){
           group_index = group_index[!cond]
         }
       } else if(length(x_false) == 0){
@@ -3254,7 +3287,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
           res = x_true
         }
         
-        if(conditional_flag != 0){
+        if(group_flag != 0){
           group_index = group_index[cond]
         }
       } else {
@@ -3295,7 +3328,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
   } else if(op == "~"){
     # Conditional: ~ ####
     res = apply_simple_operations(x, op, argument, check, frame, 
-                                  conditional_flag = 2, is_dsb, fun_name)
+                                  group_flag = 2, is_dsb, fun_name)
                                   
     group_index = attr(res, "group_index")
 
@@ -3312,7 +3345,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
 
       tmp = fun(x = x, argument = argument, options = options, group = group_index, 
-                conditional_flag = conditional_flag)
+                group_flag = group_flag)
 
       if(is.list(tmp)){
         if(!all(c("x", "group") %in% names(tmp))){
@@ -3632,7 +3665,7 @@ sma_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
 
 
 apply_simple_operations = function(x, op, operations_string, check = FALSE, frame = NULL, 
-                                 conditional_flag = 0, is_dsb = FALSE, fun_name = "smagick"){
+                                 group_flag = 0, is_dsb = FALSE, fun_name = "smagick"){
                                   
   op_all = cpp_parse_simple_operations(operations_string, is_dsb)
     
@@ -3697,14 +3730,14 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
 
     if(check){
       xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
-                                      conditional_flag = conditional_flag, is_dsb = is_dsb, fun_name = fun_name),
+                                      group_flag = group_flag, is_dsb = is_dsb, fun_name = fun_name),
                                      "In the operation `{op}()`, the ",
                                      "{&length(op_all) == 1 ; operation ; chain of operations} ",
                                      " {bq?operations_string} led to a problem.", 
                                      "\nPROBLEM: the operation {opi} failed. Look up the doc?")
     } else {
       xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
-                         conditional_flag = conditional_flag, is_dsb = is_dsb, fun_name = fun_name)
+                         group_flag = group_flag, is_dsb = is_dsb, fun_name = fun_name)
     }
   }
 

@@ -9,7 +9,13 @@ export(dsb, .dsb)
 
 # smagick
 export(smagick, sma, .smagick, .sma)
+export(smagick_register)
 
 # Methods
 S3method(print, smagick)
 
+#
+# imports
+#
+
+importFrom(Rcpp, evalCpp)

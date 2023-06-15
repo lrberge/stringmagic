@@ -26,6 +26,10 @@ one, depending on the operations performed.
 \description{
 Simple tool to perform multiple operations to character vectors.
 }
+\details{
+This function is a simple wrapper around smagick. Formally, \code{str_ops(x, "op1, op2")}
+is equivalent to \code{smagick("{op1, op2 ? x}")}.
+}
 \examples{
 
 # data on car models
@@ -36,12 +40,12 @@ str_op(cars, "'i/^m'get, x, unik")
 
 # Explainer:
 # 'i/^m'get: keeps only the elements starting with an m,
-#            i/ is the 'regex-flag' ignore to ignore the case
+#            i/ is the 'regex-flag' "ignore" to ignore the case
 #            ^m means "starts with an m" in regex language
 # x: extracts the first pattern. The default pattern is "[[:alnum:]]+"
 #    which means an alpha-numeric word
 # unik: applies unique() to the vector
-# => see help in ?smagick() for more details on the operations
+# => see help in ?smagick for more details on the operations
 
 
 # let's get the 3 largest numbers appearing in the car models
