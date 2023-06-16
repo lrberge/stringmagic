@@ -260,9 +260,8 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   for(i in seq_along(pattern)){
     pat = pattern[i]
     first_char = substr(pat, 1, 1)
-    
-    
-    pat_parsed = parse_regex_pattern(pat, c("fixed", "word", "ignore", "verbatim"))
+        
+    pat_parsed = parse_regex_pattern(pat, c("fixed", "word", "ignore"))
     is_or = pat_parsed$is_or
     flags = pat_parsed$flags
     all_patterns = pat_parsed$patterns
@@ -270,7 +269,7 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     negate_all = pat_parsed$is_not
 
     is_fixed_origin = fixed || "fixed" %in% flags
-    is_word = word  || "word" %in% flags
+    is_word = word || "word" %in% flags
     is_ignore = ignore.case || "ignore" %in% flags
     
     res_current = NULL
@@ -991,10 +990,10 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 
       if(is_total){
         # we allow logical operations when the replacement is in full
-        pat_parsed = parse_regex_pattern(pat, c("ignore", "fixed", "word", "total"), 
-                                          parse_logical = TRUE)
+        pat_parsed = parse_regex_pattern(pat, NULL, parse_logical = TRUE, parse_flags = FALSE)
         pat = pat_parsed$patterns
         is_or = pat_parsed$is_or
+        is_negate_all = pat_parsed$is_not
       }
 
       who_current = NULL
@@ -1002,14 +1001,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
         p = pat[k]
 
         if(is_total){
-          negate = FALSE
-          first_char = substr(p, 1, 1)
-          if(first_char == "\\" && substr(p, 2, 2) == "!"){
-            p = substr(p, 2, nchar(p))
-          } else if(first_char == "!" && nchar(p) > 1){
-            negate = TRUE
-            p = substr(p, 2, nchar(p))
-          }
+          negate = is_negate_all[k]
         }
         
         p = format_pattern(p, fixed = is_fixed, word = is_word, ignore = is_ignore)
@@ -1199,11 +1191,11 @@ str_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = FALS
 #### dedicated utilities ####
 ####
 
-parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
+parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE, parse_logical = TRUE){
   # in: "fw/hey!, bonjour, a[i]"
   # common authorized_flags: c("fixed", "word", "ignore")
 
-  info_pattern = cpp_parse_regex_pattern(pattern, parse_logical = parse_logical)
+  info_pattern = cpp_parse_regex_pattern(pattern, parse_flags = parse_flags, parse_logical = parse_logical)
   
   if(!is.null(info_pattern$error)){
     main_msg = .sma("Problem found in the regex pattern {'50|..'k, Q ? pattern}.",
@@ -1219,7 +1211,10 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
                     .sma("the flag list contains a non ",
                         "valid character in position {info_pattern$error_extra} ",
                         "({`info_pattern$error_extra`cfirst, clast, bq ? pattern}). ",
-                        "Flags must only consist of lower case letters followed by a comma or a slash."), 
+                        "Flags must only consist of lower case letters followed by a comma or a slash."),
+                "flag starts with ! and no logical parsing" = 
+                    .sma("You cannot use the '!' before the flags. Only the functions `str_is`, `str_which` and ", 
+                         "`str_get` accept this operation before the flags."), 
                  "flag empty" = 
                     .sma("The {Nth ? info_pattern$error_extra} flag is empty. ", 
                          "Flags must only consist of lower case letters followed by a comma or a slash."))
@@ -1273,7 +1268,7 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
 
 format_simple_regex_flags = function(pattern, ignore = FALSE, word = FALSE, fixed = FALSE){
   
-  new_regex = parse_regex_pattern(pattern, c("ignore", "word", "fixed"), FALSE)
+  new_regex = parse_regex_pattern(pattern, c("ignore", "word", "fixed"), parse_logical = FALSE)
   
   pattern = new_regex$patterns
   is_ignore = "ignore" %in% new_regex$flags || ignore

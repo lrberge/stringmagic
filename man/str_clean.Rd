@@ -29,8 +29,8 @@ Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' 
 The flag \code{total} leads to a \emph{total replacement} of the string if the pattern is found. Use flags
 with comma separation ("word, total/pat") or use only their initials ("wt/pat").
 
-Starting with an '@' leads to operations in \link{str_op}. Ex: "@ascii, l, ws" turns
-the string into ASCII, lowers the case and normalizes white spaces (see help of \link{str_ops}).}
+Starting with an '@' leads to operations in \code{\link[=str_op]{str_op()}}. Ex: "@ascii, lower, ws" turns
+the string into ASCII, lowers the case and normalizes white spaces (see help of \code{\link[=str_ops]{str_ops()}}).}
 
 \item{replacement}{Character scalar, default is the empty string. It represents the default
 value by which the patterns found in the character strings will be replaced. For example
@@ -63,13 +63,13 @@ Example: \code{str_clean(x, "wi/ & two, three & !four => ", total = TRUE)}}
 }
 \value{
 The main usage returns a character vector of the same length as the vector in input.
-Note, however, that since you can apply arbitrary \link{str_op} operations, the length and type
+Note, however, that since you can apply arbitrary \code{\link[=str_op]{str_op()}} operations, the length and type
 of the final vector may depend on those (if they are used).
 }
 \description{
 Recursively cleans a character vector from several patterns. Quickly handle the
 tedious task of data cleaning by taking advantage of the syntax.
-You can also apply all sorts of cleaning operations by summoning [\link{str_op}] operations.
+You can also apply all sorts of cleaning operations by summoning \code{\link[=str_op]{str_op()}} operations.
 }
 \examples{
 

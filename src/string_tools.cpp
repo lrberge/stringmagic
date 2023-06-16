@@ -332,7 +332,7 @@ inline bool is_regex_logical(const char *str, int i, int n){
 }
 
 // [[Rcpp::export]]
-List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
+List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
   // Limitation: multibyte strings are not handled properly
   //  in: "fixed, word/test"
   // out: -      flags: c("fixed", "word")
@@ -374,12 +374,12 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   // Note that the general "not" only works when there are flags
   // => so we need to bookkeep
   bool is_not_gnl = false;
-  if(parse_logical && str[0] == '!'){
+  if(parse_flags && parse_logical && str[0] == '!'){
     is_not_gnl = true;
     i = 1;
   }
   
-  bool is_empty_flag = str[i] == '/';
+  bool is_empty_flag = parse_flags && str[i] == '/';
   bool is_not = false;
   bool is_escape = false;
   std::vector<int> i_skip;
@@ -390,7 +390,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
     i += 1;
   }
   
-  if(!is_empty_flag){
+  if(parse_flags && !is_empty_flag){
     // parsing the flags
     // since flag parsing can be dangerous, I thoroughly
     // send an error if a pattern contains a '/'
@@ -416,7 +416,12 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
     if(is_slash){
       // at the end of this loop, i points at the beginning of the pattern
       
-      if(is_blank(str[0])){
+      if(!parse_logical && str[i] == '!'){
+        res["error"] = "flag starts with ! and no logical parsing";
+        return res;
+      }
+      
+      if(is_blank(str[i])){
         res["error"] = "flag starting with space";
         return res;
       }

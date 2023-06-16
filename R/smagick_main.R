@@ -261,7 +261,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' shouldn't work (try [glue](https://glue.tidyverse.org/index.html) for instance)!
 #' To make it work, we made use of how `data.table` works internally and, since we used stuff 
 #' not exposed in its API, it is by construction unstable. `smagick` has been tested, and works, on
-#' `data.table` version 1.14.2.
+#' `data.table` version 1.14.2 (2021-09-27) and version 1.14.8 (2023-02-17).
 #' 
 #' @section Interpolation and string operations: Principle:
 #' 

@@ -281,9 +281,11 @@ run_test = function(chunk, from){
   # We remove the counters for the lines with open parenthesis, like in
   # sum(x,
   #     y)
+  # dt[, a :=
+  #        32 + b]
   # since this leads to parsing errors
 
-  i_open = which(grepl(",[[:blank:]]*$", code_LINE))
+  i_open = which(grepl("[,=][[:blank:]]*$", code_LINE))
 
   if(length(i_open)) i_open = i_open + 1
 

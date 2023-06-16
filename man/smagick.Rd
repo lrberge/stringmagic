@@ -102,7 +102,7 @@ This function is compatible with calls within a \code{data.table}. Note that it
 shouldn't work (try \href{https://glue.tidyverse.org/index.html}{glue} for instance)!
 To make it work, we made use of how \code{data.table} works internally and, since we used stuff
 not exposed in its API, it is by construction unstable. \code{smagick} has been tested, and works, on
-\code{data.table} version 1.14.2.
+\code{data.table} version 1.14.2 (2021-09-27) and version 1.14.8 (2023-02-17).
 }
 \section{Methods (by generic)}{
 \itemize{

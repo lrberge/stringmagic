@@ -33,8 +33,8 @@ cpp_recreate_index <- function(id) {
     .Call(`_stringmagick_cpp_recreate_index`, id)
 }
 
-cpp_parse_regex_pattern <- function(Rstr, parse_logical) {
-    .Call(`_stringmagick_cpp_parse_regex_pattern`, Rstr, parse_logical)
+cpp_parse_regex_pattern <- function(Rstr, parse_flags, parse_logical) {
+    .Call(`_stringmagick_cpp_parse_regex_pattern`, Rstr, parse_flags, parse_logical)
 }
 
 cpp_smagick_parser <- function(Rstr, is_dsb = FALSE, only_section = FALSE) {

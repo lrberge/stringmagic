@@ -1219,3 +1219,17 @@ extract_pipe = function(x, op, double = FALSE, numeric = FALSE, data = NULL, mbt
   res
 }
 
+
+extract_first = function(x, pattern, fixed = FALSE){
+  if(length(x) != 1){
+    stop("Internal error: x must be of length 1.")
+  }
+  
+  x_pat = regexpr(pattern, x, fixed = fixed, perl = !fixed)
+  
+  x1 = substr(x, min(1, x_pat - 1), x_pat - 1)
+  x2 = substr(x, x_pat + attr(x_pat, "match.length"), 1e5)
+  
+  c(x1, x2)
+}
+

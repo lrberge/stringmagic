@@ -36,7 +36,7 @@ is equivalent to \code{smagick("{op1, op2 ? x}")}.
 cars = row.names(mtcars)
 
 # let's get the brands starting with an "m"
-str_op(cars, "'i/^m'get, x, unik")
+str_ops(cars, "'i/^m'get, x, unik")
 
 # Explainer:
 # 'i/^m'get: keeps only the elements starting with an m,
@@ -49,7 +49,7 @@ str_op(cars, "'i/^m'get, x, unik")
 
 
 # let's get the 3 largest numbers appearing in the car models
-str_op(cars, "'\\\\d+'x, rm, unik, num, dsort, 3 first")
+str_ops(cars, "'\\\\d+'x, rm, unik, num, dsort, 3 first")
 
 # Explainer:
 # '\\d+'x: extracts the first pattern, the pattern meaning "a succession"

@@ -107,14 +107,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_parse_regex_pattern
-List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical);
-RcppExport SEXP _stringmagick_cpp_parse_regex_pattern(SEXP RstrSEXP, SEXP parse_logicalSEXP) {
+List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical);
+RcppExport SEXP _stringmagick_cpp_parse_regex_pattern(SEXP RstrSEXP, SEXP parse_flagsSEXP, SEXP parse_logicalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    Rcpp::traits::input_parameter< bool >::type parse_flags(parse_flagsSEXP);
     Rcpp::traits::input_parameter< bool >::type parse_logical(parse_logicalSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_parse_regex_pattern(Rstr, parse_logical));
+    rcpp_result_gen = Rcpp::wrap(cpp_parse_regex_pattern(Rstr, parse_flags, parse_logical));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -245,7 +246,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagick_cpp_find_first_index", (DL_FUNC) &_stringmagick_cpp_find_first_index, 3},
     {"_stringmagick_cpp_group_rev_index", (DL_FUNC) &_stringmagick_cpp_group_rev_index, 1},
     {"_stringmagick_cpp_recreate_index", (DL_FUNC) &_stringmagick_cpp_recreate_index, 1},
-    {"_stringmagick_cpp_parse_regex_pattern", (DL_FUNC) &_stringmagick_cpp_parse_regex_pattern, 2},
+    {"_stringmagick_cpp_parse_regex_pattern", (DL_FUNC) &_stringmagick_cpp_parse_regex_pattern, 3},
     {"_stringmagick_cpp_smagick_parser", (DL_FUNC) &_stringmagick_cpp_smagick_parser, 3},
     {"_stringmagick_cpp_extract_quote_from_op", (DL_FUNC) &_stringmagick_cpp_extract_quote_from_op, 1},
     {"_stringmagick_cpp_parse_operator", (DL_FUNC) &_stringmagick_cpp_parse_operator, 1},
