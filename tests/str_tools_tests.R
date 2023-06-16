@@ -60,19 +60,28 @@ val = str_is(x, "one | c", fixed = TRUE)
 test(val, c(TRUE, FALSE, TRUE, TRUE, TRUE))
 
 # escaping
-x = dsb("/hey!, /twitter, !##!")
+x = dsb("/hey!, /twitter, !##!, a & b, c | d")
 
-val = str_is(x, "\\/t")
-test(val, c(FALSE, TRUE, FALSE))
+val = str_which(x, "\\/t")
+test(val, 2)
 
-val = str_is(x, "//t")
-test(val, c(FALSE, TRUE, FALSE))
+val = str_which(x, "//t")
+test(val, 2)
 
-val = str_is(x, "!\\/")
-test(val, c(TRUE, FALSE, TRUE))
+val = str_which(x, "!\\/")
+test(val, c(1, 3:5))
 
-val = str_is(x, "\\!")
-test(val, c(TRUE, FALSE, TRUE))
+val = str_which(x, "\\!")
+test(val, c(1, 3))
+
+val = str_which(x, "a \\& b")
+test(val, 4)
+
+val = str_which(x, "f/twi |  \\|  | \\!")
+test(val, c(1:3, 5))
+
+val = str_which(x, "!f/!! & e")
+test(val, c(1, 3:5))
 
 # other
 test(str_is("bonjour", "fixed/---|"), FALSE)

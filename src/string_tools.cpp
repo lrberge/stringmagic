@@ -313,6 +313,24 @@ inline bool is_inside(std::vector<int> v, int key){
   return std::find(v.begin(), v.end(), key) != v.end();
 }
 
+inline bool is_escaped_regex_logical(const char *str, int i, int n){
+  //    in: "hey \\&"
+  // pos i:        ^
+  // we look before i
+  // THIS IS AN EXTREMELY SPECIALIZED FUNCTION
+  // true iff " \\& "
+  
+  if(i < 2 || i + 1 >= n || str[i - 1] != '\\' || str[i + 1] != ' ') return false;
+  return str[i - 2] == ' ';  
+}
+
+inline bool is_regex_logical(const char *str, int i, int n){
+  // true: " & "
+  //    i:   ^
+  
+  return i >= 1 && i + 1 < n && str[i - 1] == ' ' && str[i + 1] == ' ';
+}
+
 // [[Rcpp::export]]
 List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   // Limitation: multibyte strings are not handled properly
@@ -471,57 +489,50 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   std::vector<bool> is_or_all;
   std::vector<bool> is_not_all;
   bool is_or_tmp = false;
-  bool is_new_pattern = true;
 
   while(i < n){
     // beginning of the pattern => is there a not?
     is_not = false;
-    if(parse_logical && is_new_pattern && is_non_escaped_symbol('!', str, i, n, true)){
+    if(parse_logical && is_non_escaped_symbol('!', str, i, n, true)){
       is_not = true;
       ++i;
     }
-    is_new_pattern = false;
     
-    while(i < n && !(parse_logical && (str[i] == '&' || str[i] == '|'))){
+    while(i < n){
       if(is_escape && is_inside(i_skip, i)){
         ++i;
         continue;
       }
+      
+      if(parse_logical && (str[i] == '&' || str[i] == '|')){
+        if(is_escaped_regex_logical(str, i, n)){
+          // we remove the escape
+          pat_tmp.pop_back();
+        } else if(is_regex_logical(str, i, n)){
+          // we flush
+          pat_tmp.pop_back();
+          patterns.push_back(pat_tmp);
+          is_or_all.push_back(is_or_tmp);
+          is_not_all.push_back(is_not);
+          
+          pat_tmp = "";
+          is_or_tmp = str[i] == '|';
+          i += 2;
+          
+          break;
+        }        
+      }
+      
       pat_tmp += str[i++];
     }
-
+    
+    // the last item
     if(i == n){
       patterns.push_back(pat_tmp);
       is_or_all.push_back(is_or_tmp);
       is_not_all.push_back(is_not);
-    } else {
-      if(i > 1 && str[i - 1] == ' ' && i + 2 < n && str[i + 1] == ' '){
-        //                                 v
-        //                                 not a typo (we expect stuff after the operator)
-        // this is a logical operator
-        
-        // we flush
-        pat_tmp.pop_back();
-        patterns.push_back(pat_tmp);
-        is_or_all.push_back(is_or_tmp);
-        is_not_all.push_back(is_not);
-        is_new_pattern = true;
-
-        pat_tmp = "";
-        is_or_tmp = str[i] == '|';
-        i += 2;
-      } else {
-        if(is_escape && is_inside(i_skip, i)){
-          ++i;
-          continue;
-        }
-        pat_tmp += str[i++];
-        if(i == n){
-          patterns.push_back(pat_tmp);
-          is_or_all.push_back(is_or_tmp);
-        }
-      }
     }
+    
   }
   
   if(patterns.empty()){
