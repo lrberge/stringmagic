@@ -41,6 +41,9 @@ knitr::opts_chunk$set(
   collapse = TRUE, 
   comment = "#>"
 )
+
+# we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
+library(stringmagick)
 ```
 
 # Motivating examples and advice for reading
