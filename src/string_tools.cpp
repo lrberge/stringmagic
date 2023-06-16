@@ -317,19 +317,26 @@ inline bool is_inside(std::vector<int> v, int key){
 List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   // Limitation: multibyte strings are not handled properly
   //  in: "fixed, word/test"
-  // out: -    flags: c("fixed", "word")
-  //      - patterns: "test"
-  //      -    is_or: FALSE
+  // out: -      flags: c("fixed", "word")
+  //      -   patterns: "test"
+  //      -      is_or: FALSE
+  //      -     is_not: FALSE
+  //      - is_not_gnl: FALSE
   //
-  //  in: "test & wordle"
-  // out: -    flags: ""
-  //      - patterns: c("test", "wordle")
-  //      -    is_or: c(FALSE, FALSE)
+  //  in: "test & !wordle"
+  // out: -      flags: ""
+  //      -   patterns: c("test", "wordle")
+  //      -      is_or: c(FALSE, FALSE)
+  //      -     is_not: c(FALSE, TRUE)
+  //      - is_not_gnl: FALSE
   //
-  //  in: "fiw / test | wordle"
-  // out: -    flags: "fiw"
-  //      - patterns: c("test", "wordle")
-  //      -    is_or: c(FALSE, TRUE)
+  //  in: "!fiw / test | wordle"
+  // out: -      flags: "fiw"
+  //      -   patterns: c("test", "wordle")
+  //      -      is_or: c(FALSE, TRUE)
+  //      -     is_not: c(FALSE, TRUE)
+  //      - is_not_gnl: TRUE
+  //
 
    if(Rf_length(Rstr) != 1) stop("Internal error in cpp_parse_regex_pattern: the vector must be of length 1.");
 
@@ -346,12 +353,23 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   // flags
   //
   
-  bool is_empty_flag = str[0] == '/';
+  // Note that the general "not" only works when there are flags
+  // => so we need to bookkeep
+  bool is_not_gnl = false;
+  if(parse_logical && str[0] == '!'){
+    is_not_gnl = true;
+    i = 1;
+  }
+  
+  bool is_empty_flag = str[i] == '/';
+  bool is_not = false;
   bool is_escape = false;
   std::vector<int> i_skip;
+  bool is_slash = false;
   
   if(is_empty_flag){
-    i = 1;
+    is_slash = true;
+    i += 1;
   }
   
   if(!is_empty_flag){
@@ -363,7 +381,6 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
     // if '/' is escaped, we consider that the user knows what she's doing
     // so we don't even check the other slashes
     // we still get all the escaped '/'
-    bool is_slash = false;
     for(int j=0 ; j<n ; ++j){
       if(str[j] == '/'){
         if(is_non_escaped_symbol('/', str, j, n, false)){
@@ -432,25 +449,38 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
       }
       
     }
-    
-    
   }  
 
   // saving the flags
   res["flags"] = std_string_to_r_string(flags);
   
+  // is_not_gnl: only works in the presence of flags, even the empty one
+  if(is_not_gnl && !is_slash){
+    is_not_gnl = false;
+    i = 0;
+  }
+  
   //
   // logical operators
   //
 
-  // now we go for the " & " and the " | "
+  // now we go for the " & ", the " | " and the "!"
 
   std::vector<std::string> patterns;
   std::string pat_tmp;
   std::vector<bool> is_or_all;
+  std::vector<bool> is_not_all;
   bool is_or_tmp = false;
+  bool is_new_pattern = true;
 
   while(i < n){
+    // beginning of the pattern => is there a not?
+    is_not = false;
+    if(parse_logical && is_new_pattern && is_non_escaped_symbol('!', str, i, n, true)){
+      is_not = true;
+      ++i;
+    }
+    is_new_pattern = false;
     
     while(i < n && !(parse_logical && (str[i] == '&' || str[i] == '|'))){
       if(is_escape && is_inside(i_skip, i)){
@@ -463,6 +493,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
     if(i == n){
       patterns.push_back(pat_tmp);
       is_or_all.push_back(is_or_tmp);
+      is_not_all.push_back(is_not);
     } else {
       if(i > 1 && str[i - 1] == ' ' && i + 2 < n && str[i + 1] == ' '){
         //                                 v
@@ -473,6 +504,8 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
         pat_tmp.pop_back();
         patterns.push_back(pat_tmp);
         is_or_all.push_back(is_or_tmp);
+        is_not_all.push_back(is_not);
+        is_new_pattern = true;
 
         pat_tmp = "";
         is_or_tmp = str[i] == '|';
@@ -494,10 +527,13 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_logical){
   if(patterns.empty()){
     patterns.push_back("");
     is_or_all.push_back(false);
+    is_not_all.push_back(false);
   }
 
   res["patterns"] = std_string_to_r_string(patterns);
   res["is_or"] = is_or_all;
+  res["is_not"] = is_not_all;
+  res["is_not_gnl"] = is_not_gnl;
 
   return res;
 }

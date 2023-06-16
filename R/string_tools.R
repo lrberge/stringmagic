@@ -260,18 +260,14 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   for(i in seq_along(pattern)){
     pat = pattern[i]
     first_char = substr(pat, 1, 1)
-    main_negate = FALSE
-    if(first_char == "\\" && substr(pat, 2, 2) == "!"){
-      pat = substr(pat, 2, nchar(pat))
-    } else if(first_char == "!" && nchar(pat) > 1){
-      main_negate = TRUE
-      pat = substr(pat, 2, nchar(pat))
-    }
+    
     
     pat_parsed = parse_regex_pattern(pat, c("fixed", "word", "ignore", "verbatim"))
     is_or = pat_parsed$is_or
     flags = pat_parsed$flags
     all_patterns = pat_parsed$patterns
+    main_negate = pat_parsed$is_not_gnl
+    negate_all = pat_parsed$is_not
 
     is_fixed_origin = fixed || "fixed" %in% flags
     is_word = word  || "word" %in% flags
@@ -282,20 +278,7 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     for(j in 1:n_pat){
       is_fixed = is_fixed_origin
       p = all_patterns[j]
-
-      if(n_pat > 1 && main_negate && length(flags) == 0){
-        main_negate = FALSE
-        sub_negate = TRUE        
-      } else {
-        first_char = substr(p, 1, 1)
-        sub_negate = FALSE
-        if(first_char == "\\" && substr(p, 2, 2) == "!"){
-          p = substr(p, 2, nchar(p))
-        } else if(first_char == "!" && nchar(p) > 1){
-          sub_negate = TRUE
-          p = substr(p, 2, nchar(p))
-        }
-      }     
+      sub_negate = negate_all[j]
       
       p = format_pattern(p, fixed = is_fixed, word = is_word, ignore = is_ignore) 
       is_fixed = attr(p, "fixed")
@@ -1230,7 +1213,8 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
                  "flag starting with space" = "flags cannot start with a space.", 
                  "flags list is too long" = 
                     .sma("the flag list is too long, ",
-                         "most likely they are no flags.\nFIX? start with a slash."), 
+                         "most likely they are no flags.\nFIX? start with a slash or escape the slash",
+                         "with a double backslash."), 
                  "non valid character at position" = 
                     .sma("the flag list contains a non ",
                         "valid character in position {info_pattern$error_extra} ",
@@ -1247,7 +1231,8 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
                     " 'if/dt[' leads to the same results.", 
                     "\n      Start with a slash to remove the meaning of the slash and suppress the parsing",
                     " of flags. Ex.1: '/hey/': no flag, pattern is 'hey/'.",
-                    " To have a slash as a pattern, double it: '//': no flag, pattern is '/'.")
+                    " To have a slash as a pattern, double it:  '//': no flag, pattern is '/'.",
+                    "                            or escape it: '\\\\/': no flag, pattern is '/'")
     
     full_msg = .sma(main_msg, msg, note_rm)
     
@@ -1280,7 +1265,8 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_logical = TRUE){
     info_pattern = cpp_parse_regex_pattern(pattern, FALSE)
   }
 
-  res = list(flags = flags, patterns = info_pattern$patterns, is_or = info_pattern$is_or)
+  res = list(flags = flags, patterns = info_pattern$patterns, is_or = info_pattern$is_or,
+             is_not_gnl = info_pattern$is_not_gnl, is_not = info_pattern$is_not)
 
   res
 }
