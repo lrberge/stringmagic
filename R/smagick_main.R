@@ -1480,6 +1480,10 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 
         n_op = length(operators)
         verbatim = operators[n_op] %in% c("!", "/")
+        
+        if(operators[1] %in% c("&", "&&")){
+          data[["len"]] = function(x) length(x)
+        }
 
         is_ifelse = FALSE
         concat_nested = FALSE
