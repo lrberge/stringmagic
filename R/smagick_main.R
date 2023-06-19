@@ -1223,7 +1223,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #'    
 #'
-smagick = sma = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
 
 
@@ -1261,8 +1261,11 @@ smagick = sma = function(..., frame = parent.frame(), sep = "", vectorize = FALS
   res
 }
 
+#' @describeIn smagick Alias to `smagick`.
+sma = smagick
 
-.sma = .smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+#' @describeIn smagick Like `smagick` but without any error handling to save a few ms
+.smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                 check = FALSE, slash = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
@@ -1272,6 +1275,9 @@ smagick = sma = function(..., frame = parent.frame(), sep = "", vectorize = FALS
                       vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".smagick")
 }
+
+#' @describeIn smagick Alias to `.smagick`.
+.sma = .smagick
 
 ####
 #### Internal ####

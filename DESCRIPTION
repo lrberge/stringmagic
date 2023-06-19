@@ -3,12 +3,8 @@ Type: Package
 Title: Character String Operations and Interpolation, Magick Edition
 Version: 1.0.0
 Authors@R: 
-  person(given = "Laurent",
-                   family = "Berge",
-                   middle = "R",
-                   role = c("aut", "cre"),
-                   email = "laurent.berge@u-bordeaux.fr",
-                   c(ORCID = "3-2736-1917"))
+  person(given = "Laurent R", family = "Berge", role = c("aut", "cre"), email = "laurent.berge@u-bordeaux.fr",
+         comment = c(ORCID = "3-2736-1917"))
 Imports: Rcpp(>= 1.0.5)
 Suggests: knitr, data.table
 LinkingTo: Rcpp
