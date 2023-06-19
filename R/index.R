@@ -24,6 +24,7 @@
 #' @name _index_
 #' @rdname stringmagick
 #' @aliases stringmagick stringmagick-package
+#' @keywords internal
 #' 
 NULL
 

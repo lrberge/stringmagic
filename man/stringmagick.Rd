@@ -27,3 +27,4 @@ specialized functions to:
 
 See more in the \url{dedicated vignette}.
 }
+\keyword{internal}
