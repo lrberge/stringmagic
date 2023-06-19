@@ -46,107 +46,19 @@ str_to_ascii = function(x, options){
   }
 
   if(nbfail > 0){
-    # We manually remove the problems
-    x_manual = ascii_convert_manual(x[which_failed])
-
-    x_conv[which_failed] = x_manual
-
-    # if necessary, we update the isFailed attribute
-    if("isFailed" %in% names(attributes(x_manual))){
-      ANY_FAILED = TRUE
-      attr(x_conv, "isFailed") = which_failed[attr(x_manual, "isFailed")]
-
-      if(!is_silent){
-        warning(fit_screen(smagick("When transforming to ASCII, there {#was, n ? nbfail} failed encoding{#s}. ",
-                    "Attribute `isFailed` is created (note that you can only access it if the variable is not transformed).",
-                    "\n(Ignore this message with the `silent` option [ex: `ascii.silent`]. Pass the native encoding as an option?)")))
-      }
+    
+    if(!is_silent){
+      warni("When transforming to ASCII, there {#was, n ? nbfail} failed encoding{#s}. ",
+            "Attribute `isFailed` is created (note that you can only access it if the variable is not transformed).",
+            "\n(Ignore this message with the `silent` option [ex: `ascii.silent`]. Pass the native encoding as an option?)")
     }
+    
+    # we add the failures
+    attr(x_conv, "isFailed") = which_failed
   }
 
   x_conv
 }
-
-
-ascii_convert_manual = function(x, type = c("all", "upper", "lower")){
-  # This is an internal function that translates some characters into ascii
-  # such characters could not be transformed using iconv
-  # You can find country specific characters in http://german.typeit.org/
-
-  type = match.arg(type)
-
-  #
-  # Lower characters
-  #
-
-  from_lower = c("á|à|å|æ|ä|â|ã|ą",
-                 "é|è|ë|ê",
-                 "í|ï|î",
-                 "ó|ò|ô|ø|œ|õ",
-                 "ú|ü|û|ù",
-                 "ç",
-                 "ñ",
-                 "ß|ś")
-
-  to_lower = c("a", "e", "i", "o", "u", "c", "n", "s")
-
-  #
-  # Upper characters
-  #
-
-  # toupper(from_lower)
-  from_upper = c("Á|À|Å|Æ|Ä|Â|Ã",
-                 "É|È|Ë|Ê",
-                 "Í|Ï|Î",
-                 "Ó|Ò|Ô|Ø|Œ|Õ",
-                 "Ú|Ü|Û|Ù",
-                 "Ÿ",
-                 "Ç",
-                 "Ñ",
-                 "ß")
-
-  to_upper = c("A", "E", "I", "O", "U", "Y", "C", "N", "S")
-
-  #
-  # Go!
-  #
-
-  from = c(from_upper, from_lower)
-  to = c(to_upper, to_lower)
-
-  for(i in 1:length(from)){
-    x = gsub(from[i], to[i], x, perl = TRUE)
-  }
-
-  # We check for the remaining problems
-  x_conv = iconv(x, to = "ASCII")
-  which_failed = which(is.na(x_conv))
-  nb_failed = length(which_failed)
-
-  if(nb_failed > 0){
-
-    x_new = iconv(x[which_failed], to = "ASCII//TRANSLIT//IGNORE")
-
-    # We check AGAIN for the remaining problems
-    which_failed_special = which(nchar(x[which_failed]) != nchar(x_new))
-    nb_failed = length(which_failed_special)
-
-    # For the failed encodings, we just replace the failed values by underscores
-    # We don't let the value of "ASCII//TRANSLIT//IGNORE" because it can be very problematic
-    if(nb_failed > 0) x_new[which_failed_special] = iconv(x[which_failed][which_failed_special], to = "ASCII", sub = "_")
-
-    x[which_failed] = x_new
-
-    if(nb_failed > 0){
-      # warning("There has been ", nb_failed, " failed encoding. Attribute isFailed is created to track the problems.")
-      attr(x, "isFailed") = which_failed
-    }
-
-  }
-
-  return(x)
-}
-
 
 
 ####
