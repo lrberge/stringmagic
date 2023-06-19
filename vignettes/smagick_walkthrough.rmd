@@ -70,7 +70,7 @@ If you discover this package, since it's a lot of content, here's some advice:
 
 - read the first sections completely ([regular interpolation](#sec_basic), 
 [interpolation with operations](#sec_interpol), [verbatim and nesting](#sec_verbatim), and 
-[the opeartions syntax](#sec_syntax)). They're short.
+[the operations syntax](#sec_syntax)). They're short.
 - skim the [operations reference](#sec_operations_reference)
 
 And you should be good to go for some basic usage. 
@@ -117,17 +117,17 @@ smagick("hello {upper, ''s, c ? x}")
 ```
 
 Now let's explain what happened. Within the `{}` *box*, we first write a set of 
-operations, here "upper, ''s, c", then add "?" and finally write 
-the variable to interpolate, "x".  The operations (detailed in [the reference section](#sec_operations_reference)) 
-are `upper`, upper-casing all letters, `''s`: splitting
-with the empty string, `c`: concatenating with spaces the string vector that was just split.
+operations, here `upper, ''s, c`, then add `?` and finally write 
+the variable to interpolate, `x`.  The operations (detailed in [the reference section](#sec_operations_reference)) 
+are `upper`, to upper-case all letters, `''s`: to split
+with the empty string, `c`: to concatenate the vector that was just split with spaces (`' '`).
 The question mark means that the expression coming after it is to be evaluated 
 (this is opposed to the exclamation mark presented in the next section).
 
 The syntax is always the same: `{operations ? expression}`, where the operations section
 is a *comma separated* list of operations.
 These operations are of the form `'arg'op`, with `arg` the argument to the operator 
-code `op`. These operations are performed sequentially from left to right.
+`op`. These operations are performed sequentially from left to right.
 
 Some operations, like `upper`, accept options. You attach options to an operation 
 with a dot followed by the option name. Formally: `op.option1.option2`, etc. Example:
@@ -143,7 +143,8 @@ also work. You have more details on the operations syntax in the [syntax section
 # Verbatim interpolation and nesting: Principle {#sec_verbatim}
 
 Instead of interpolating a variable, say `x`, with `{x}`, you can use an exclamation 
-mark to trigger varbatim evaluation. For example `smagick("hello {!x}")` would lead to "hello x".
+mark to trigger verbatim evaluation. For example `smagick("hello {!x}")` would lead to "hello x". 
+(To use `!` as a regular logical operator, see the [section on special cases](#sec_special_cases).)
 Please hold on a little bit to see the point.
 
 Verbatim evaluation is a powerful way to apply operations to plain text. For example:
@@ -154,14 +155,24 @@ smagick("hello {upper, ''s, c ! world}")
 
 Before moving on, a necessary detail. The spaces surrounding the exclamation mark are non necessary,
 but when one space is present on both sides of the `!`, then the verbatim
-expression only begins after the space. Ex: `"{upper! hi}"` leads to " HI" while `"{upper ! hi}"` 
-leads to "HI" and `"{upper !  hi}"` leads to " HI".
+expression only begins after the space. This is illustrated below
+```{r}
+# The decorative space in verbatim mode
+smagick("{upper, Q! hi}", 
+        #       ^                      => adds a space before 'hi'
+        "{upper, Q ! hi}", 
+        #      ^ ^                     => no space added (ie decorative space)
+        "{upper, Q !  hi}", sep = "\n")
+        #      ^ ^^                    => adds a space before 'hi'
+```
+
+### Nesting
 
 The main advantage, and real power, of verbatim evaluations is *nesting*. Anything in a verbatim 
 expression becomes evaluated with the function `smagick`.
 This means that any *box* will be evaluated as previously described. 
 
-Let's give an example. You want to write the expression of a polynomial of order n: a + bx + cx^2 + etc.
+Let's give an example. You want to write the expression of a polynomial of order `n`: `a + bx + cx^2 + etc`.
 You can do that with nesting:
 
 ```{r}
@@ -173,10 +184,10 @@ How does it work? The verbatim expression (the one following the exclamation mar
 here `"{letters[1 + 0:n]}x^{0:n}"`, is evaluated with `smagick`.
 `smagick("{letters[1 + 0:n]}x^{0:n}")` leads to the vector `c("ax^0", "bx^1", "cx^2")`.
 
-The operation `' + 'c` then concatenates (or collapses) that vector with ' + '.
+The operation `' + 'c` then concatenates (or collapses) that vector with `' + '`.
 This value is then appended to the previous string.
 
-We could refine by adding a cleaning operation in which we replace "x^0" and "^1" 
+We could refine by adding a cleaning operation in which we replace `"x^0"` and `"^1"` 
 by the empty string. Let's do it:
 
 ```{r}
@@ -191,7 +202,7 @@ Note that the `clean` operation is explained in the [operations reference sectio
 
 As seen in the previous sections, within a *box* (i.e. `"{}"`), 
 multiple operations can be performed.
-We can do so by stacking the operations codes and in a comma separated enumeration.
+We can do so by stacking the operations in a comma separated enumeration.
 Operations can have arguments, and operations can also have options. The general 
 syntax, with argument and options, is:
 
@@ -207,7 +218,7 @@ You can include arguments in four different ways:
 
 1. inside single or double quotes just before the operation name (`arg1` above), 
 1. verbatim, separated with a space, just before the operation name (`arg2` above), 
-1. inside bactick quotes the argument is evaluated from the environment (`arg3` above),
+1. inside bactick quotes, which will trigger evaluation of the argument from the environment (`arg3` above),
 1. when the argument is an integer it can be juxtaposed to the opeation name (like in `op4` above).
 
 The options are always dot separated and attached to the operation name, they are 
@@ -259,7 +270,9 @@ This section references all `smagick`'s regular operations.
 
 ## Basic string operations
 
-This section describes some of the most common string operations: extracting, replacing, collapsing, splitting, etc.
+This section describes some of the most common string operations: extracting, 
+replacing, collapsing, splitting, etc. Because they are so common, many of these 
+operations have a name composed of just one letter.
 These functions accept generic flags ("ignore", "fixed", "word") in their patterns (syntax: "flags/pattern"). 
 Please see the dedicated section for more information on flags.
 
