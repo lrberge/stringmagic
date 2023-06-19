@@ -108,10 +108,10 @@ On top of `smagick`, this package offers a few functions providing new ways to t
 ## Cleaning text: Quick and easy please {#fun_clean}
 
 One common (and tedious) task in data sciencce is *cleaning* character strings. 
-The function `str_clean` is specialized in cleaning and has a dedicated syntax.
+The function `str_clean` is specialized in cleaning and has a dedicated syntax:
 
-Use `"pat1, pat2 => r"` to replace the regex patterns `pat1` and `pat2` with the value `r`.
-Use `"@op1, op2"` to use `smagick` operations.
+- use `"pat1, pat2 => r"` to replace the regex patterns `pat1` and `pat2` with the value `r`.
+- use `"@op1, op2"` to use `smagick` operations.
 
 To illustrate this function, since real data science problems are a tiny bit dull, 
 allow me to use a French classic:

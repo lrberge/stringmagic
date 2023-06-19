@@ -8,9 +8,9 @@ output:
     highlight: haddock
     number_sections: yes
     toc: yes
-    toc_depth: 3
+    toc_depth: 2
     toc_float:
-      collapsed: yes
+      collapsed: no
       smooth_scroll: no
   pdf_document:
     toc: yes
@@ -22,12 +22,35 @@ vignette: >
 ---
 
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
 
-# Regex flags
+# we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
+library(stringmagick)
+
+options("smagick_str_get_forced_caching" = TRUE)
+```
+
+This vignette describes `stringmagick` tools for handling character vectors. 
+For a quick start, here are the sections describing:
+
+- how to [detect complex regex (=regular expression) patterns](#detect_funs)
+- how to easily, and clearly, [chain multiple string operations](#sec_ops)
+- how to efficiently, and clearly, [clean character strings](#sec_clean)
+
+This vignette is also a reference for i) the [optional regex flags](#sec_regex) available to all
+`stringmagick` regular expressions, and ii) the [logical combination of regular expressions](#detect_logic).
+
+
+# Regex flags {#sec_regex}
 
 All functions in `stringmagick` accept optional regex flags when regular expressions
-are expected. These flags are similar, but not identical, 
-to [regular regex flags](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#advanced_searching_with_flags).
+are expected. The idea is similar to 
+[regular regex flags](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#advanced_searching_with_flags),
+but the flags are different in name and effect.
 
 ## Regex flags: Syntax
 
@@ -40,7 +63,7 @@ flags `ignore` and `fixed`.
 If the regex does not contain a slash (`/`), no flags are added. If your regex should 
 contain a slash, see the [section on escaping](#flag_escaping).
 
-Ex.1: let's find lines containing `"dt["`:
+Ex: let's find lines containing `"dt["`:
 ```{r}
 code = c("DT = as.data.table(iris)", 
          "DT[, sma('PL/SL = {Petal.Length / Sepal.Length}')]")
@@ -73,6 +96,7 @@ A poor, infirm, weak, and despis'd old man."
 
 # the ignore flag allows to retain words starting with the
 # upper cased letters
+# ex: getting words starting with the letter 'r' to 'z'
 smagick("{'i/\\b[r-z]\\w+'extract, c, 60 width ? unhappy}")
 ```
 
@@ -89,14 +113,14 @@ Ex: let's fix the equation by changing the operators.
 x = "50 + 5 * 5 = 40"
 str_clean(x, "f/+, * => -")
 
-# Without the fixed flag, we would have gotten an error since '+'
-# has a special meaning in regular expressions
+# Without the fixed flag, we would have gotten an error since '+' or '*'
+# have a special meaning in regular expressions and expects something before
 
 # Here's the error
 try(str_clean(x, "+, * => -"))
 ```
 
-Technically, if "fixed" is the only flag, then the functions `base::grepl` or `base::gsub`
+*Technically*, if "fixed" is the only flag, then the functions `base::grepl` or `base::gsub`
 are run with the argument `fixed = TRUE`. If there are also the flags "ignore" or "word", 
 the pattern is nested into the perl boundaries `\\Q` and `\\E` which strip any special meaning
 from the pattern.
@@ -105,13 +129,13 @@ from the pattern.
 
 The flag "word" :
 
-- add word boundaries to the pattern
+- adds word boundaries to the pattern
 - accepts comma-separated enumerations of words which are concatenated with a logical 'or'
 
 The logic of accepting comma-separated enumerations is to increase readability.
-For example, with the flag "word", `"is, are, were"` is equivalent to `"is|are|were"`.
+For example, with the flag "word", `"is, are, were"` is equivalent to `"\\b(is|are|were)\\b"`.
 
-Ex: we erase a few words from Alfred de Vigny's poem.
+Ex: we hide a few words from Alfred de Vigny's poem.
 ```{r}
 le_mont_des_oliviers = "S'il est vrai qu'au Jardin sacré des Écritures,
 Le Fils de l'homme ai dit ce qu'on voit rapporté ;
@@ -121,12 +145,12 @@ Alors le Juste opposera le dédain à l'absence
 Et ne répondra plus que par un froid silence
 Au silence éternel de la Divinité."
 
-# we erase a few words from this poem
+# we hide a few words from this poem
 smagick("{'wi/et, le, il, au, des?, ce => _'r ? le_mont_des_oliviers}")
 ```
 
-*Technically*, first the pattern is split with respect to `",[ \t\n]"`, then all elements
-are collapsed with `"|"`. If the flag was also present, each element is first wrapped 
+*Technically*, first the pattern is split with respect to `",[ \t\n]+"`, then all elements
+are collapsed with `"|"`. If the flag "fixed" was also present, each element is first wrapped 
 into `"\\Q"` and `"\\E"`. Finally, we add parentheses (to enable capture) and word 
 boundaries (`"\\b"`) on both sides.
 
@@ -137,19 +161,33 @@ The flag "total" is only available to functions performing a replacement.
 In that case, if a pattern is detected, *the full character string* is replaced 
 (instead of just the pattern). 
 
-Ex: let's replace 
+Ex: let's replace a few car models.
 ```{r}
-cars = head(row.names(mtcars))
-print(cars)
+cars_small = head(row.names(mtcars))
+print(cars_small)
 
-str_clean(cars, "ti/mazda => Mazda: sold out!")
+str_clean(cars_small, "ti/mazda => Mazda: sold out!")
 ```
 
-*Technically*, instead of using `gsub` to replace the pattern, `grepl` is used
-to detect which element contains the pattern. Each element with the pattern
-is then substituted with the pattern.
+On top of this, the "total" flag allows to perform logical operations across
+several regex patterns. You have more information on this in the [dedicated section](#detect_logic).
+In a nutshell, you can write `"pat1 & !pat2 | pat3"` with `"patx"` regular 
+expresion patterns. This means: contains `pat1` and does not contain `pat2`,
+or contains `pat3`.
 
-## Escaping flags: How to and a word of caution with paths {#flag_escaping}
+Ex: detect car brands with a digit and no 'e'.
+```{r}
+cars_small = head(row.names(mtcars))
+print(cars_small)
+
+str_clean(cars_small, "ti/\\d & !e => I don't like that brand!")
+```
+
+*Technically*, instead of using `gsub` to replace the pattern, [`str_is`](#detect_funs) is used
+to detect which element contains the pattern. Each element with the pattern
+is then substituted with the replacement.
+
+## Escaping flags: How to, and a word of caution with paths {#flag_escaping}
 
 If your regular expression contains a slash (`"/"`), this will come in conflict
 with the parsing of the optional flags. 
@@ -178,19 +216,302 @@ the parent folder, but it won't work as expected within `stringmagick`.
 To behave as expected, you would need to write `"//[^/]+$"` which looks weird, 
 or `"\\/[^/]+$"`.
 
-
-# Chaining string operations
-
-str_ops
-
-# I need to clean character vectors: Quick and clear please!
-
-str_clean
-
 # Intuivite detection of regex patterns
 
-str_is/str_which/str_get
+Detecting a single regex pattern is pretty straightforward with regular tools
+like `base::grepl` or `stringr::str_detect`. Things become more complicated
+when we want to detect the presence of multiple patterns. 
 
+`stringmagick` offers three functions with an intuitive syntax to deal with 
+complex pattern detection:
 
+- [str_is](#detect_funs): returns a logical vector
+- [str_which](#detect_funs): returns the indexes of the matches
+- [str_get](#detect_funs): returns the matches
+
+As described in the next section., these tools benefit from a streamlined syntax to 
+logically combine several regex patterns. 
+
+## Logically combining regex patterns {#detect_logic}
+
+Assume `"pat1"` and `"pat2"` are two regular expression patterns and we want 
+to test whether the string `x` contains a combination of these patterns. 
+Then:
+
+- `"pat1 & pat2"` = `x` contains `pat1` AND `x` contains `pat2`
+- `"pat1 | pat2"` = `x` contains `pat1` OR `x` contains `pat2`
+- `"!pat1"` = `x` does not contain `pat1`
+- `"!pat1 & pat2"` = `x` does not contain `pat1` AND `x` contains `pat2`
+
+Hence the three logial operators are:
+
+- `" & "`: logical AND, it **must** be a space + an ampersand + a space 
+(just the `&` does not work)
+- `" | "`: logical OR, it **must** be a space + a pipe + a space 
+(just the `|` does not work)
+- `"!"`: logical NOT, it works only when it is the first character of the pattern.
+Note that anything after it (including spaces and other `!`) *is part of the regular expression*
+
+The parsing of the logical elements is done before any regex interpretation. 
+The logical evaluations are done from left to right and are sequentially combined. 
+
+You **cannot** combine logical statements with parentheses. 
+
+For example: `"hello | (world & my lady)"` leads to: `x` contains `"hello"` or contains `"(world"`, 
+and contains `"my lady)"`. The two latter are invalid regexes but can make sense if you
+have the flag "fixed" turned on. To escape the meaning of the logical operators, 
+see the [dedicated section](#logical_escape).
+
+In general, the logical `"not"` always apply to a single pattern and **not** to the full pattern.
+But see the [section on flags](#logical_flags) for an exception.
+
+### Escaping the meaning of the logical operators {#logical_escape}
+
+To escape the meaning of the logical operators, there are two solutions to 
+escape them:
+
+- use two backslashes just before the operator: `"a \\& b"` means `x`
+contains `"a & b"`
+- use a regex hack: the previous example is equivalent to `"a [&] b"` in regex parlance
+and won't be parsed as a logical AND
+
+### How do regex flags work with logically combined regexes? {#logical_flags}
+
+When you add flags to a pattern, these apply to *all* regex sub-patterns. 
+This means that `"f/( | )"` treats the two parentheses as "fixed". 
+*You cannot add flags specific to a single sub-pattern.*
+
+The functions `str_is`, `str_which` and `str_get` accept a negation before the 
+flags (they're the only ones).   
+In that case, the result of all the sub-patterns is negated. You can add the
+empty flag to make this work without flags. For example `"!/a & b & c"` means `x` does not contain
+(`a` AND `b` AND `c`). 
+
+## Pattern detection with `str_is`, `str_which` and `str_get` {#detect_funs}
+
+Use `str_is`, `str_which` and `str_get` to detect patterns in character vectors and obtain either 
+a logical vector, an integer vector, or the values.
+
+In this section we give examples for `str_get` which hopefully will be explicit 
+enough to illustrate how it works. For the record, `str_get` uses `str_is` internally so
+these examples are equivalent with `str_is` or `str_which`. 
+
+Ex.1: series of examples using the *recommended syntax*.
+```{r}
+cars = row.names(mtcars)
+smagick("All cars from mtcars:\n{C, 60 width ? cars}")
+
+# cars with an 'a', an 'e', an 'i', and an 'o', all in lower case
+str_get(cars, "a & e & i & o")
+
+# cars with no 'e' and at least one digit
+str_get(cars, "!e & \\d")
+
+# we use the empty flag trick to negate the full pattern
+# NOT(cars with an 'e' AND one digit)
+str_get(cars, "!/e & \\d")
+
+# flags apply to all
+# contains the 'words' 2, 9 or l
+# alternative syntax for flags: "wi/2 | 9 | l"
+str_get(cars, "word, ignore/2 | 9 | l")
+```
+
+The default syntax is `str_get(x, ...)` (same for `str_is` and `str_which`), 
+where `...` contains any number of patterns
+to detect. By default the results of these pattern detections are combined with 
+a logical AND. To combine them with a logical OR, you need to use the argument
+`or = TRUE`. You can also pass the flags as regular function arguments. They then
+apply to all patterns.
+
+Ex.2: replication of Ex.1 using an alternative syntax.
+```{r}
+# str_get(cars, "a & e & i & o")
+# cars with an 'a', an 'e', an 'i', and an 'o', all in lower case
+str_get(cars, "a", "e", "i", "o")
+
+# str_get(cars, "!e & \\d")
+# cars with no 'e' and at least one digit
+str_get(cars, "!e", "\\d")
+
+# str_get(cars, "!/e & \\d")
+# This example cannot be replicated directly, we need to apply logical equivalence
+str_get(cars, "!e", "!\\d", or = TRUE)
+
+# str_get(cars, "wi/2 | 9 | l")
+# contains the 'words' 2, 9 or l
+str_get(cars, "2", "9", "l", or = TRUE, word = TRUE, ignore.case = TRUE)
+```
+
+### Specificities of `srt_get` {#detect_get}
+
+On top of the detection previously described, the function `srt_get` changes its 
+behavior with the arguments `seq` or `seq.unik`. It also supports [automatic caching](#get_caching).
+
+#### Sequentially appending results
+
+As seen previously, patterns in `...` are combined with a logical AND. If you set
+`seq = TRUE`, this behavior changes. The results of each pattern becomes stacked 
+sequentially. Schematically, you obtain the vector `c(x_that_contains_pat1, x_that_contains_pat2, etc)`
+with `pat1` the first pattern in `...`, `pat2` the second pattern, etc.
+
+Using `seq.unik = TRUE` is like `seq` but applies the function `unique()` at the end.
+
+Ex: sequentially combining results.
+```{r}
+# cars without digits, then cars with 2 'a's or 2 'e's and a digit
+str_get(cars, "!\\d", "i/a.+a | e.+e & \\d", seq = TRUE)
+
+# let's get the first word of each car name
+car_first = str_ops(cars, "extract.first")
+# we select car brands ending with 'a', then ending with 'i'
+str_get(car_first, "a$", "i$", seq = TRUE)
+# seq.unik is similar to seq but applies unique()
+str_get(car_first, "a$", "i$", seq.unik = TRUE)
+```
+
+#### Caching {#get_caching}
+
+At the exploration stage, we often run the same command with a few
+variations on the same data set. Acknowledging this, `str_get` supports the caching
+of the data argument in interactive use. This means that the user can concentrate in
+the pattern to find and need not bother to write the data from where to fectch the
+values. Note that `str_get` is the only `stringmagick` function to have this
+ability.
+
+Caching is always enabled, you don't need to do anything.
+
+Ex: caching of the data.
+```{r}
+# Since we used `car_first` in the previous example, we don't need to provide
+# it explicitly now
+# => brands containing 'M' and ending with 'a' or 'i'; brands containing 'M'
+str_get("M & [ai]$", "M", seq.unik = TRUE)
+```
+
+# Chaining string operations with `str_ops` {#sec_ops}
+
+Formatting text data often requires applying many functions
+(be it for parsing, text analysis, etc). 
+Even for simple tasks, the number of operations can quickly balloon, adding many
+lines of code, reducing readability, and all this for basic processing.
+
+The function `str_ops` tries to solve this problem. 
+It has access to all (50+) [`smagick` operations](LINK_TO_SMAGICK_OPS), allowing for
+a compact and readable way to chain basic operations on character strings.
+
+Below are a few motivating examples.
+
+Ex.1: Parsing data.
+```{r}
+# parsing an input: extracting the numbers
+input = "8.5in, 5.5, .5 cm"
+str_ops(input, "','s, tws, '^\\. => 0.'r, '^\\D+|\\D+$'r, num")
+# Explanation------------------------------------------------------------------|
+# ','s: splitting w.r.t. ','                                                   |
+# tws: trimming the whitespaces                                                |
+# '^\\. => 0.'r: adds a 0 to strings starting with '.'                         |
+# '^\\D+|\\D+$'r: removes non-digits on both ends of the string                |
+# num: converts to numeric                                                     |
+
+# now extracting the units
+str_ops(input, "','s, '^[ \\d.]+'r, tws")
+# Explanation------------------------------------------------------------------|
+# ','s: splitting w.r.t. ','                                                   |
+# '^[ \\d.]+'r: removes the ' ', digit and '.' at the beginning of the string  |
+# tws: trimming the whitespaces                                                |
+```
+
+Ex.2: extracing information from text.
+```{r}
+# Now using the car data
+cars = row.names(mtcars)
+
+# let's get the brands starting with an "m"
+str_ops(cars, "'i/^m'get, x, unik")
+# Explanation------------------------------------------------------------------|
+# 'i/^m'get: keeps only the elements starting with an m,                       |
+#            i/ is the 'regex-flag' "ignore" to ignore the case                |
+#            ^m means "starts with an m" in regex language                     |
+# x: extracts the first pattern. The default pattern is "[[:alnum:]]+"         |
+#    which means an alpha-numeric word                                         |
+# unik: applies unique() to the vector                                         |
+
+# let's get the 3 largest numbers appearing in the car models
+str_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
+# Explanation------------------------------------------------------------------|
+# '\\d+'x: extracts the first pattern, the pattern meaning "a succession"      |
+#          of digits in regex language                                         |
+# rm: removes elements equal to the empty string (default behavior)            |
+# unik: applies unique() to the vector                                         |
+# num: converts to numeric                                                     |
+# dsort: sorts in decreasing order                                             |
+# 3 first: keeps only the first three element                                  |
+```
+
+As you can see, an operation that would take multiple lines to read and understand
+now can be read from left to right in a single line.
+
+# `str_clean`: One function to clean them all {#sec_clean}
+
+The function `str_clean` streamlines the cleaning of character vectors by providing:
+
+- i) a specialized syntax to replace multiple regex patterns, 
+- ii) a direct access to many low level string operations, and 
+- iii) the ability to chain these two operations. 
+
+## Cleaning syntax
+
+This function is of the form `str_clean(x, ...)` with `x` the vector to clean and
+`...` any number of cleaning operations which can be of two types:
+
+1. use `"pat1, pat2 => replacement"` to replace the regex patterns `pat1` and `pat2` 
+with the value `replacement`.
+1. use `"@op1, op2"` to perform any arbitrary sequence of [`smagick` operation](LINK TO SMAGICK)
+
+In the operation `"pat1, pat2 => replacement"`, the pattern is first split with respect
+to the pipe, `" => "` (change it with argument `pipe`), to get `replacement`. 
+Then the pattern is split with respect to commas (i.e. `",[ \t\n]+"`, change it with argument `sep`) 
+to get `pat1` and `pat2`. A sequence of `base::gsub` calls is performed to replace each
+`patx` with `replacement`. 
+
+By default the replacement is the empty string. This means that writting `"pat1, pat2"`
+will lead to erasing these two patterns.
+
+If a pattern starts with an `"@"`, the subsequent character string is sent to `str_ops`.
+For example `"@ascii, lower"` is equivalent to `str_ops(x, "ascii, lower")` which 
+turns `x` to ASCII and lowers the case. 
+
+## Example of text cleaning {#clean_example}
+
+```{r}
+monologue = c("For who would bear the whips and scorns of time",
+              "Th' oppressor's wrong, the proud man's contumely,",
+              "The pangs of despis'd love, the law's delay,",
+              "The insolence of office, and the spurns",
+              "That patient merit of th' unworthy takes,",
+              "When he himself might his quietus make",
+              "With a bare bodkin? Who would these fardels bear,",
+              "To grunt and sweat under a weary life,",
+              "But that the dread of something after death-",
+              "The undiscover'd country, from whose bourn",
+              "No traveller returns- puzzles the will,",
+              "And makes us rather bear those ills we have",
+              "Than fly to others that we know not of?")
+
+# Cleaning a text
+str_clean(monologue, 
+          # use smagick to: lower the case and remove basic stopwords
+          "@lower, stopword",
+          # remove a few extra stopwords(we use the flag word 'w/')
+          "w/th, 's",
+          # manually stem some verbs
+          "despis'd => despise", "undiscover'd => undiscover", "(m|t)akes => \\1ake",
+          # still stemming: dropping the ending 's' for words of 4+ letters, except for quietus
+          "(\\w{3,}[^u])s\\b => \\1",
+          # normalizing the whitespaces + removing punctuation
+          "@ws.punct")
+
+```
 
 
