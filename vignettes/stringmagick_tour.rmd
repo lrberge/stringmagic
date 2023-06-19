@@ -1,5 +1,5 @@
 ---
-title: "`stringmagick`: An overview"
+title: "`stringmagick`: A quick tour"
 author: "Laurent R. Bergé"
 date: "`r Sys.Date()`"
 output:
