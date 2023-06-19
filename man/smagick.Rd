@@ -5,6 +5,9 @@
 \alias{dsb}
 \alias{.dsb}
 \alias{smagick}
+\alias{sma}
+\alias{.smagick}
+\alias{.sma}
 \title{String interpolation with operation chaining}
 \usage{
 \method{print}{smagick}(x, ...)
@@ -39,6 +42,37 @@ smagick(
   collapse = NULL,
   help = NULL,
   use_DT = TRUE
+)
+
+sma(
+  ...,
+  frame = parent.frame(),
+  sep = "",
+  vectorize = FALSE,
+  slash = TRUE,
+  collapse = NULL,
+  help = NULL,
+  use_DT = TRUE
+)
+
+.smagick(
+  ...,
+  frame = parent.frame(),
+  sep = "",
+  vectorize = FALSE,
+  check = FALSE,
+  slash = FALSE,
+  use_DT = FALSE
+)
+
+.sma(
+  ...,
+  frame = parent.frame(),
+  sep = "",
+  vectorize = FALSE,
+  check = FALSE,
+  slash = FALSE,
+  use_DT = FALSE
 )
 }
 \arguments{
@@ -114,6 +148,12 @@ not exposed in its API, it is by construction unstable. \code{smagick} has been 
 \item \code{dsb()}: Like \code{smagick} but interpolation is with the dot-square-bracket ".[]"
 
 \item \code{.dsb()}: Like \code{dsb} but without error handling (leads to slightly faster run times).
+
+\item \code{sma()}: Alias to \code{smagick}.
+
+\item \code{.smagick()}: Like \code{smagick} but without any error handling to save a few ms
+
+\item \code{.sma()}: Alias to \code{.smagick}.
 
 }}
 \section{Interpolation and string operations}{
@@ -602,7 +642,9 @@ a verbatim value with which the vector will be replaced if the condition is \cod
 If not provided, \code{verb_false} is considered to be the empty string unless the operator is
 the double ampersand described at the end of this section.
 
-Ex.1: \code{x = 1:5}; \code{smagick("x is {&length(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")}
+Note that in \code{cond}, you can use the function \code{len}, an alias to \code{length}.
+
+Ex.1: \code{x = 1:5}; \code{smagick("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")}
 leads to "x is short". With \code{x = 1:50}, it leads to "x is long", and to "x is very very long"
 if \code{x = 1:5000}.
 

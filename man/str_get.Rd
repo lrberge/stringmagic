@@ -135,7 +135,7 @@ str_get(x, "Mazda", "Volvo", seq = TRUE)
 str_get(x, "Volvo", "Mazda", seq = TRUE)
 
 # let's get the first word of each car name
-car_first = str_op(x, "extract.first")
+car_first = str_ops(x, "extract.first")
 # we select car brands ending with 'a', then ending with 'i'
 str_get(car_first, "a$", "i$", seq = TRUE)
 # seq.unik is similar to seq but applies unique()

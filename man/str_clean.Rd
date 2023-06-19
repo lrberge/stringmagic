@@ -76,9 +76,9 @@ You can also apply all sorts of cleaning operations by summoning \code{\link[=st
 x = c("hello world  ", "it's 5 am....")
 
 # we clean the o's and the points (we use 'fixed' to trigger fixed-search)
-str_clean(x, c("o", "f/."))
+str_clean(x, "o", "f/.")
 # equivalently
-str_clean(x, "fixed / o, .")
+str_clean(x, "fixed/o, .")
 # equivalently
 str_clean(x, "o, .", fixed = TRUE)
 # equivalently
@@ -91,7 +91,7 @@ str_clean(x, "o", ".", fixed = TRUE)
 cars = row.names(mtcars)
 new = str_clean(cars, 
            # replace strings containing "Maz" with Mazda
-           "total / Maz => Mazda", 
+           "total/Maz => Mazda", 
            # replace the word 'Merc' with Mercedes
            "wi/merc => Mercedes",
            # replace strings containing "Merc" and a digit followed with an 'S'
