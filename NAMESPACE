@@ -19,3 +19,5 @@ S3method(print, smagick)
 #
 
 importFrom(Rcpp, evalCpp)
+
+importFrom("utils", "as.roman", "capture.output", "head", "tail")

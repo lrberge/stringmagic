@@ -9,7 +9,29 @@
 #### User-level ####
 ####
 
-#' @describeIn smagick Simple print function for objects of class `smagick`
+#' Simple print function for objects of class `smagick`
+#' 
+#' Print `smagick` character vectors in a nice way.
+#' 
+#' @method print smagick
+#' 
+#' x A `smagick` object, obtained from the function `smagick`.
+#' ... Not currently used.
+#' 
+#' @author 
+#' Laurent Berge
+#' 
+#' @inherit str_clean seealso 
+#' 
+#' @examples 
+#' 
+#' cars = row.names(mtcars)
+#' 
+#' print(cars)
+#' 
+#' smagick("/The first cars are:, {6 first ? cars}")
+#' 
+#' 
 print.smagick = function(x, ...){
   if(length(x) == 0){
     print(character(0))
@@ -318,7 +340,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' "poly(2): ax^0 + bx^1 + cx^2".
 #' 
 #' How does it work? The verbatim expression (the one following the exclamation mark),
-#'  here "{letters[1 + 0:n]}x^{0:n}", is evaluated with `smagick`.
+#'  here `"{letters[1 + 0:n]}x^{0:n}"`, is evaluated with `smagick`.
 #' `smagick("{letters[1 + 0:n]}x^{0:n}")` leads to the vector c("ax^0", "bx^1", "cx^2").
 #' 
 #' The operation `' + 'c` then concatenates (or collapses) that vector with ' + '.
@@ -405,7 +427,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' If the option "equal" is used, a simple string equality with the argument is tested (hence
 #' no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
 #' and then set inclusion is tested. 
-#' Mostly useful as the final operation in a [str_op()] call.
+#' Mostly useful as the final operation in a [str_ops()] call.
 #' Example: `x = c("Mark", "Lucas") ; smagick("Mark? {'i/mark'is, C ? x}")` leads to "Mark? TRUE and FALSE".
 #' + which: returns the index of string containing a specified pattern. With no default, can be applied
 #' to a logical vector directly. 
@@ -414,7 +436,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' If the option "equal" is used, a simple string equality with the argument is tested (hence
 #' no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
 #' and then set inclusion is tested. 
-#' Mostly useful as the final operation in a [str_op()] call.
+#' Mostly useful as the final operation in a [str_ops()] call.
 #' Ex.1: `x = c("Mark", "Lucas") ; smagick("Mark is number {'i/mark'which ? x}.")` leads to 
 #' "Mark is number 1.".
 #' 
@@ -847,7 +869,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' It returns a character vector whose length depends on the elements and operations in the interpolations.
 #' 
 #' @seealso 
-#' If you want to apply a chain of operations on a single vector, see [str_op()] which 
+#' If you want to apply a chain of operations on a single vector, see [str_ops()] which 
 #' may be more appropriate.
 #'
 #' @examples
@@ -1054,7 +1076,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' 
 #'
 #' # Enumerations
-#' acad =gick("/you like admin, you enjoy working on weekends, you really love emails")
+#' acad = smagick("/you like admin, you enjoy working on weekends, you really love emails")
 #' smagick("Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}.")
 #' 
 #' # You can also use the enum command
@@ -1123,7 +1145,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #' #
 #' # times, each
-#' They accept the option c to collapse with the empty string
+#' # They accept the option c to collapse with the empty string
 #'
 #' smagick("N{10 times.c ! o}!")
 #'

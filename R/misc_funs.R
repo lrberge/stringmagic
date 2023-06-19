@@ -422,7 +422,7 @@ enum_main = function(x, options){
   if(length(qui) > 0){
     if(length(qui) > 1){
       stop_hook("In `enum`, you cannot use more than one quote keyword ",
-                "(q, Q, or bq) in the enumeration. PROBLEM: `", op, "` is not valid.")
+                "(q, Q, or bq) in the enumeration. ")
     }
 
     q = options[qui]
@@ -1025,36 +1025,6 @@ apply_star_operation = function(x, all_operations){
   txt
 }
 
-fill_the_placeholders = function(pattern, varnames){
-  # the pattern contains placeholders
-  # there are filled with 'names'
-  # varnames can be either a list, either a vector
-
-  if(!is.list(varnames)){
-    varnames = list(varnames)
-  }
-
-  pattern_parsed_stars = cpp_parse_name_stars(pattern)
-
-  is_star = pattern_parsed_stars$is_star
-  text = pattern_parsed_stars$info
-
-  new_names_list = vector("list", length(is_star))
-  index_name = 0
-  n_elements = length(is_star)
-  for(j in 1:n_elements){
-    if(!is_star[j]){
-      new_names_list[[j]] = text[[j]]
-    } else {
-      index_name = index_name + 1
-      new_names_list[[j]] = apply_star_operation(varnames[[index_name]], text[[j]])
-    }
-  }
-
-  res = do.call(paste0, new_names_list)            
-  
-  res  
-}
 
 
 duplicated_xy = function(x, y){
@@ -1231,5 +1201,11 @@ extract_first = function(x, pattern, fixed = FALSE){
   x2 = substr(x, x_pat + attr(x_pat, "match.length"), 1e5)
   
   c(x1, x2)
+}
+
+
+setNames = function(x, nm){
+  names(x) = nm
+  x
 }
 

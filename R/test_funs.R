@@ -341,19 +341,27 @@ run_test = function(chunk, from){
       n_chunks = length(qui)
 
       if(!missing(from)){
-          check_value_plus(from, "match | integer scalar no na", .choices = chunk_names)
+        if(is.character(from)){
+          from = check_set_options(from, chunk_names, "test_fun")[1]
+        } else {
+          check_numeric(from, scalar = TRUE, integer = TRUE)
+        }
 
-          if(is.numeric(from)){
-              if(any(from > n_chunks)){
-                  stop("There are maximum ", n_chunks, " chunks.")
-              }
-              chunk_select = from:n_chunks
-          } else {
-              chunk_select = which(chunk_names %in% from):n_chunks
+        if(is.numeric(from)){
+          if(any(from > n_chunks)){
+            stop("There are maximum ", n_chunks, " chunks.")
           }
+          chunk_select = from:n_chunks
+        } else {
+          chunk_select = which(chunk_names %in% from):n_chunks
+        }
 
       } else {
-          check_value_plus(chunk, "multi match | integer vector no na", .choices = chunk_names)
+        if(is.character(from)){
+          chunk = check_set_options(chunk, chunk_names, "test_fun")
+        } else {
+          check_numeric(chunk, scalar = TRUE, integer = TRUE)
+        }
 
           if(is.numeric(chunk)){
               if(any(chunk > n_chunks)){

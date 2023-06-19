@@ -29,7 +29,7 @@ Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' 
 The flag \code{total} leads to a \emph{total replacement} of the string if the pattern is found. Use flags
 with comma separation ("word, total/pat") or use only their initials ("wt/pat").
 
-Starting with an '@' leads to operations in \code{\link[=str_op]{str_op()}}. Ex: "@ascii, lower, ws" turns
+Starting with an '@' leads to operations in \code{\link[=str_ops]{str_ops()}}. Ex: "@ascii, lower, ws" turns
 the string into ASCII, lowers the case and normalizes white spaces (see help of \code{\link[=str_ops]{str_ops()}}).}
 
 \item{replacement}{Character scalar, default is the empty string. It represents the default
@@ -55,6 +55,16 @@ pattern to be replaced. Then the pattern is split w.r.t. \code{sep}, leading
 to two patterns "one" and "two". Hence the words (thanks to the flag "w") "one" and "two" from
 the string \code{x} will be replaced with "three".}
 
+\item{ignore.case}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, then case insensitive search is triggered.}
+
+\item{fixed}{Logical scalar, default is \code{FALSE}. Whether to trigger a fixed search instead of a
+regular expression search (default).}
+
+\item{word}{Logical scalar, default is \code{FALSE}. If \code{TRUE} then a) word boundaries are added to the pattern,
+and b) patterns can be chained by separating them with a comma, they are combined with an OR logical operation.
+Example: if \code{word = TRUE}, then pattern = "The, mountain" will select strings containing either the word
+'The' or the word 'mountain'.}
+
 \item{total}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, then when a pattern is found
 in a string, the full string is replaced (instead of just the pattern). Note, \emph{importantly},
 that when \code{total = TRUE} you can use logical operators in the patterns.
@@ -63,13 +73,13 @@ Example: \code{str_clean(x, "wi/ & two, three & !four => ", total = TRUE)}}
 }
 \value{
 The main usage returns a character vector of the same length as the vector in input.
-Note, however, that since you can apply arbitrary \code{\link[=str_op]{str_op()}} operations, the length and type
+Note, however, that since you can apply arbitrary \code{\link[=str_ops]{str_ops()}} operations, the length and type
 of the final vector may depend on those (if they are used).
 }
 \description{
 Recursively cleans a character vector from several patterns. Quickly handle the
 tedious task of data cleaning by taking advantage of the syntax.
-You can also apply all sorts of cleaning operations by summoning \code{\link[=str_op]{str_op()}} operations.
+You can also apply all sorts of cleaning operations by summoning \code{\link[=str_ops]{str_ops()}} operations.
 }
 \examples{
 

@@ -34,7 +34,7 @@ check_logical = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
     nullable = if(null) "(nullable) " else ""
     type = if(scalar) "scalar" else "vector"
     stop_up("The ", nullable, "argument `", x_dp, "` must be a logical ", type, ".",
-            " PROBLEM: it is not logical, it is of class ", enum(class(x)), ".")
+            " PROBLEM: it is not logical, it is of class {enum?class(x)}.")
   }
 
   len_x = length(x)
@@ -84,7 +84,7 @@ check_numeric = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
     type = if(integer) "an integer" else "a numeric"
     
     stop_up("The ", nullable, "argument `", x_dp, "` must be ", type, " ", vector_type, ".",
-            " PROBLEM: it is not {'^.+ 'r ? type} it is of class ", enum(class(x)), ".")
+            " PROBLEM: it is not {'^.+ 'r ? type} it is of class {enum?class(x)}.")
   }
 
   len_x = length(x)
@@ -145,7 +145,7 @@ check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = 
     nullable = if(null) "(nullable) " else ""
     type = if(scalar) "scalar" else "vector"
     stop_up("The ", nullable, "argument `", x_dp, "` must be a character ", type, ".",
-            " PROBLEM: it is not character, it is of class ", enum(class(x)), ".")
+            " PROBLEM: it is not character, it is of class {enum?class(x)}.")
   }
 
   len_x = length(x)
@@ -233,7 +233,7 @@ check_envir = function(x){
   if(!inherits(x, "environment")){
     x_dp = deparse_short(substitute(x))
     stop_up("The argument `", x_dp, "` must be an environment (ex: parent.frame()). ",
-            "PROBLEM: it is not an environment, it is of class ", enum(class(x)), ".")
+            "PROBLEM: it is not an environment, it is of class {enum?class(x)}.")
   }
 
 }
@@ -1112,169 +1112,6 @@ fit_screen = function(msg, width = NULL, leading_ws = TRUE, leader = ""){
   }
 
   paste(res, collapse = "\n")
-}
-
-
-enum = function (x, type, verb = FALSE, s = FALSE, past = FALSE, or = FALSE,
-                 start_verb = FALSE, quote = FALSE, enum = FALSE, other = "", nmax = 7){
-  # function that enumerates items and add verbs
-  # in argument type, you can have a mix of the different arguments, all separated with a "."
-
-  if(length(x) == 0) return("");
-
-  if(!missing(type)){
-    args = strsplit(type, "\\.")[[1]]
-    s = "s" %in% args
-    past = "past" %in% args
-    or = "or" %in% args
-    start_verb = "start" %in% args
-    quote = "quote" %in% args
-    enum = any(grepl("^enum", args))
-    if(enum){
-      arg_enum = args[grepl("^enum", args)][1]
-      if(grepl("i", arg_enum)){
-        enum = "i"
-      } else if(grepl("I", arg_enum)){
-        enum = "I"
-      } else if(grepl("a", arg_enum)){
-        enum = "a"
-      } else if(grepl("A", arg_enum)){
-        enum = "A"
-      } else if(grepl("1", arg_enum)){
-        enum = "1"
-      } else {
-        enum = "i"
-      }
-
-      args = args[!grepl("^enum", args)]
-    }
-
-    is_other = any(grepl("^other\\(", args))
-    if(is_other){
-      arg_other = args[grepl("^other\\(", args)][1]
-      other = gsub("^.+\\(|\\).*", "", arg_other)
-
-      args = args[!grepl("^other", args)]
-    }
-
-    # Now the verb
-    verb = setdiff(args, c("s", "past", "or", "start", "quote"))
-    if(length(verb) == 0){
-      verb = "no"
-    } else {
-      verb = verb[1]
-    }
-
-  } else {
-    verb = as.character(verb)
-
-    enum = match.arg(as.character(enum), c("i", "a", "1", "I", "A", "FALSE", "TRUE"))
-    if(enum == "TRUE") enum = "i"
-  }
-
-  n = length(x)
-
-  # Ensuring it's not too long
-  if(n > nmax){
-
-    nmax = nmax - 1
-
-    other = trimws(other)
-    if(nchar(other) > 0){
-      other = paste0(other, " ", n - nmax, " others")
-    } else {
-      other = paste0(n - nmax, " others")
-    }
-
-    if(quote){
-      x = c(paste0("'", x[1:nmax], "'"), other)
-    } else {
-      x = c(x[1:nmax], other)
-    }
-
-    n = length(x)
-  } else if(quote){
-    x = paste0("'", x, "'")
-  }
-
-  # The verb
-  if(verb == "FALSE"){
-    verb = "no"
-  } else if(verb %in% c("be", "are")){
-    verb = "is"
-  } else if(verb == "have"){
-    verb = "has"
-  } else if(verb == "does"){
-    verb = "do"
-  } else if(verb %in% c("do not", "does not", "don't", "doesn't")){
-    verb = "do not"
-  } else if(verb %in% c("is not", "are not", "isn't", "aren't")){
-    verb = "is not"
-  } else if(verb %in% c("was", "were")){
-    verb = "is"
-    past = TRUE
-  }
-
-  if(past){
-    if(verb %in% c("no", "is", "is not", "has", "do", "do not")){
-      verb_format = switch(verb, is = ifunit(n, " was", " were"), "is not" = ifunit(n, " wasn't", " weren't"), no = "", has=" had", do = "did", "do not" = " didn't")
-    } else {
-      verb_format = paste0(" ", verb, "ed")
-    }
-  } else {
-    if(verb %in% c("no", "is", "is not", "has", "do", "do not")){
-      verb_format = switch(verb, is = ifunit(n, " is", " are"), "is not" = ifunit(n, " isn't", " aren't"), no = "", has = ifunit(n, " has", " have"), do = ifunit(n, " does", " do"), "do not" = ifunit(n, " doesn't", " don't"))
-    } else {
-      verb_format = ifelse(n == 1, paste0(" ", verb, "s"), paste0(" ", verb))
-    }
-
-  }
-
-  if (s) {
-    startWord = ifelse(n == 1, " ", "s ")
-  } else {
-    startWord = ""
-  }
-
-  if(enum != "FALSE"){
-    enum_comma = ","
-
-    if(enum == "i"){
-      enum_all = strsplit("i.ii.iii.iv.v.vi.vii.viii.ix.x.xi.xii.xiii.xiv.xv", "\\.")[[1]][1:n]
-    } else if(enum == "I"){
-      enum_all = toupper(strsplit("i.ii.iii.iv.v.vi.vii.viii.ix.x.xi.xii.xiii.xiv.xv", "\\.")[[1]][1:n])
-    } else if(enum == "a"){
-      enum_all = base::letters[1:n]
-    } else if(enum == "A"){
-      enum_all = base::LETTERS[1:n]
-    } else if(enum == "1"){
-      enum_all = 1:n
-    }
-
-    enum_all = paste0(enum_all, ") ")
-  } else {
-    enum_comma = ""
-    enum_all = rep("", n)
-  }
-
-  if (n == 1) {
-    if(!start_verb){
-      res = paste0(startWord, x, verb_format)
-    } else {
-      res = paste0(startWord, gsub(" ", "", verb_format), " ", x)
-    }
-
-  } else {
-    and_or = ifelse(or, " or ", " and ")
-    if(!start_verb){
-      res = paste0(startWord, paste0(enum_all[-n], x[-n], collapse = ", "), enum_comma, and_or, enum_all[n], x[n], verb_format)
-    } else {
-      res = paste0(startWord, gsub(" ", "", verb_format), " ", paste0(x[-n], collapse = ", "), and_or, x[n])
-    }
-
-  }
-
-  res
 }
 
 isError = function(x){

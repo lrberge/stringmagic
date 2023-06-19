@@ -20,12 +20,12 @@ str_get(
 \item{x}{A character vector.}
 
 \item{...}{Character scalars representing the patterns to be found. By default they are (perl) regular-expressions.
-Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: '[\link{:alpha:}] & \\d' gets strings
+Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: \code{'[[:alpha:]] & \\\\d'} gets strings
 containing both letters and numbers). You can negate by adding a \code{!} first (ex: \code{"!sepal$"} will
 return \code{TRUE} for strings that do not end with \code{"sepal"}).
 Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore').
-Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT\link{i = 5}" (flags 'ignore' + 'fixed').
+Shortcut: use the first letters of the flags. Ex: "if/dt[" would get \code{"DT[i = 5]"} (flags 'ignore' + 'fixed').
 The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the
 pattern. See the documentation of this argument.}
 
@@ -53,12 +53,12 @@ applied in the end. See examples.}
 
 \item{pattern}{(If provided, elements of \code{...} are ignored.) A character vector representing the
 patterns to be found. By default a (perl) regular-expression search is triggered.
-Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: '[\link{:alpha:}] & \\d' gets strings
+Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: \code{'[[:alpha:]] & \\\\d'} gets strings
 containing both letters and numbers). You can negate by adding a \code{!} first (ex: \code{"!sepal$"} will
 return \code{TRUE} for strings that do not end with \code{"sepal"}).
 Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore').
-Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT\link{i = 5}" (flags 'ignore' + 'fixed').
+Shortcut: use the first letters of the flags. Ex: "if/dt[" would get \code{"DT[i = 5]"} (flags 'ignore' + 'fixed').
 The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the
 pattern. See the documentation of this argument.}
 }

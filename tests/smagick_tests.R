@@ -8,6 +8,9 @@
 # - should go through all the branches
 # - I test the conditional operations inside the operators when relevant
 
+library(stringmagick)
+test = stringmagick:::test
+test_err_contains = stringmagick:::test_err_contains
 
 #
 # slash ####

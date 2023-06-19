@@ -4,7 +4,9 @@
 # ~: test for auxilliary tools
 #------------------------------------------------------------------------------#
 
-
+library(stringmagick)
+test = stringmagick:::test
+test_err_contains = stringmagick:::test_err_contains
 
 
 ####
@@ -141,7 +143,7 @@ test(val, c("hella warld  ", "it's 5 am!!!!"))
 val = str_clean(x, "w/hello, it => _")
 test(val, c("_ world  ", "_'s 5 am...."))
 
-# total + str_op
+# total + str_ops
 val = str_clean(x, "it/Hell => Heaven", "@'f/...'rm")
 test(val, "Heaven")
 

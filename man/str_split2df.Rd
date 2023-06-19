@@ -59,6 +59,13 @@ the identifiers are not unique, it is not possible to reconstruct the original t
 \item{fixed}{Logical, default is \code{FALSE}. Whether to consider the argument \code{split}
 as fixed (and not as a regular expression).}
 
+\item{ignore.case}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, then case insensitive search is triggered.}
+
+\item{word}{Logical scalar, default is \code{FALSE}. If \code{TRUE} then a) word boundaries are added to the pattern,
+and b) patterns can be chained by separating them with a comma, they are combined with an OR logical operation.
+Example: if \code{word = TRUE}, then pattern = "The, mountain" will select strings containing either the word
+'The' or the word 'mountain'.}
+
 \item{dt}{Logical, default is \code{FALSE}. Whether to return a \code{data.table}. See also the function \code{str_split2dt}.}
 
 \item{...}{Not currently used.}

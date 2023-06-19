@@ -242,7 +242,7 @@ format_help = function(pattern = NULL, x = NULL){
     
     pat_parsed = format_simple_regex_flags(p, ignore = TRUE)
     p = pat_parsed$pattern
-    is_fixedR.  = pat_parsed$fixed
+    is_fixed  = pat_parsed$fixed
     
     for(j in which(qui)){
       line = text[j]
@@ -296,7 +296,7 @@ format_help = function(pattern = NULL, x = NULL){
   # if small: we print the full text
   if(length(text) < 10){
     msg(text, 1, 500)
-    return(invsible(NULL))
+    return(invisible(NULL))
   }
   
   message(.sma("Welcome to smagick dynamic help:\n", 

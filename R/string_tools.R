@@ -111,24 +111,24 @@ str_ops = function(x, op, pre_unik = NULL){
 #'
 #' @param x A character vector.
 #' @param ... Character scalars representing the patterns to be found. By default they are (perl) regular-expressions.
-#' Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: '[[:alpha:]] & \\d' gets strings
+#' Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: `'[[:alpha:]] & \\d'` gets strings
 #' containing both letters and numbers). You can negate by adding a `!` first (ex: `"!sepal$"` will 
 #' return `TRUE` for strings that do not end with `"sepal"`).
 #' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 #' Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore'). 
-#' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT[i = 5]" (flags 'ignore' + 'fixed').
+#' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get `"DT[i = 5]"` (flags 'ignore' + 'fixed').
 #' The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the 
 #' pattern. See the documentation of this argument.
 #' @param or Logical, default is `FALSE`. In the presence of two or more patterns, 
 #' whether to combine them with a logical "or" (the default is to combine them with a logical "and").
 #' @param pattern (If provided, elements of `...` are ignored.) A character vector representing the 
 #' patterns to be found. By default a (perl) regular-expression search is triggered. 
-#' Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: '[[:alpha:]] & \\d' gets strings
+#' Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: `'[[:alpha:]] & \\d'` gets strings
 #' containing both letters and numbers). You can negate by adding a `!` first (ex: `"!sepal$"` will 
 #' return `TRUE` for strings that do not end with `"sepal"`).
 #' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
 #' Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore'). 
-#' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get "DT[i = 5]" (flags 'ignore' + 'fixed').
+#' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get `"DT[i = 5]"` (flags 'ignore' + 'fixed').
 #' The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the 
 #' pattern. See the documentation of this argument.
 #' @param fixed Logical scalar, default is `FALSE`. Whether to trigger a fixed search instead of a 
@@ -526,6 +526,8 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' Splits a character vector into a data frame
 #'
 #' Splits a character vector and formats the resulting substrings into a data.frame
+#' 
+#' @inheritParams str_is
 #'
 #' @param x A character vector or a two-sided formula. If a two-sided formula, then the 
 #' argument `data` must be provided since the variables will be fetched in there. 
@@ -805,7 +807,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 
   if(dt){
     if(requireNamespace("data.table", quietly = TRUE)){
-      setDT(res)
+      data.table::setDT(res)
     } else {
       stop("To return a `data.table`, you need the `data.table` package to be installed. Currently this is not the case.",
            "\nUse install.packages('data.table')?")
@@ -829,7 +831,9 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #'
 #' Recursively cleans a character vector from several patterns. Quickly handle the 
 #' tedious task of data cleaning by taking advantage of the syntax.
-#' You can also apply all sorts of cleaning operations by summoning [str_op()] operations.
+#' You can also apply all sorts of cleaning operations by summoning [str_ops()] operations.
+#' 
+#' @inheritParams str_is
 #'
 #' @param x A character vector.
 #' @param ... Character scalars representing patterns. A pattern is of the form
@@ -842,7 +846,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' The flag `total` leads to a *total replacement* of the string if the pattern is found. Use flags
 #' with comma separation ("word, total/pat") or use only their initials ("wt/pat").
 #' 
-#' Starting with an '@' leads to operations in [str_op()]. Ex: "@ascii, lower, ws" turns
+#' Starting with an '@' leads to operations in [str_ops()]. Ex: "@ascii, lower, ws" turns
 #' the string into ASCII, lowers the case and normalizes white spaces (see help of [str_ops()]).
 #' @param pipe Character scalar, default is `" => "`. If thevalue of `pipe` is found in a pattern,
 #' then the string is split w.r.t. the pipe and anything after the pipe becomes the replacement.
@@ -872,7 +876,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #'
 #' @return
 #' The main usage returns a character vector of the same length as the vector in input.
-#' Note, however, that since you can apply arbitrary [str_op()] operations, the length and type
+#' Note, however, that since you can apply arbitrary [str_ops()] operations, the length and type
 #' of the final vector may depend on those (if they are used).
 #' 
 #' @author 
@@ -945,15 +949,15 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
     di = di_raw = dots[[i]]
     
     first_char = substr(di, 1, 1)
-    is_str_op = FALSE
+    is_str_ops = FALSE
     if(first_char == "\\" && substr(di, 2, 2) == "@"){
       di = substr(di, 2, nchar(di))
     } else if(first_char == "@" && nchar(di) > 1){
-      is_str_op = TRUE
+      is_str_ops = TRUE
       di = substr(di, 2, nchar(di))
     }
 
-    if(is_str_op){
+    if(is_str_ops){
       res = str_ops(res, di)
       next
     }

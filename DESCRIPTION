@@ -3,14 +3,16 @@ Type: Package
 Title: Character String Operations and Interpolation, Magick Edition
 Version: 1.0.0
 Authors@R: 
-  person(given = "Laurent R", family = "Berge", role = c("aut", "cre"), email = "laurent.berge@u-bordeaux.fr",
-         comment = c(ORCID = "3-2736-1917"))
-Imports: Rcpp(>= 1.0.5)
+  c(person(given = "Laurent R", family = "Berge", role = c("aut", "cre"), email = "laurent.berge@u-bordeaux.fr",
+         comment = c(ORCID = "3-2736-1917")))
+Imports: Rcpp(>= 1.0.5), utils
 Suggests: knitr, data.table
 LinkingTo: Rcpp
 Description: Performs complex string operations compactly and efficiently. Supports string interpolation jointly with over 50 string operations. Also enhances regular string functions (like `grep` and co).
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
+BugReports: https://github.com/lrberge/stringmagick/issues
+URL: https://lrberge.github.io/stringmagick/, https://github.com/lrberge/stringmagick
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
