@@ -1346,7 +1346,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 
     if(length(x) > 1){
       stop_hook("`", fun_name, "` can only be applied to character scalars. ",
-                "Problem: the argument is of length ",
+                "\nPROBLEM: the argument is of length ",
            length(x), "")
     }
 
@@ -1360,8 +1360,9 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 
     if(any(lengths(dots) > 1)){
       qui = which(lengths(dots) > 1)[1]
-      stop_hook("`", fun_name, "` can only be applied to character scalars. Problem: The ", n_th(qui),
-           " elment in ... is of length ", length(dots[[qui]]), ".")
+      stop_hook("`", fun_name, "` can only be applied to character scalars.",
+                "\nPROBLEM: The ", n_th(qui),
+                " elment in ... is of length ", length(dots[[qui]]), ".")
     }
 
     if(!vectorize){
@@ -1786,7 +1787,8 @@ sma_char2operator = function(x, fun_name){
   if(nchar(op) == 0){
     .stop_hook("In ", fun_name, ", if a quoted value is present, the operators must ",
               "be of the form 'value'op, ",
-              "with 'op' an operator. Problem: In `", x, "` the operator is missing.")
+              "with 'op' an operator. ",
+              "\nPROBLEM: In `", x, "` the operator is missing.")
   }
   
   argument = op_parsed$argument

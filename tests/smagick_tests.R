@@ -906,6 +906,25 @@ test_err_contains(smagick("error operation: {S, ~(sekg) ! ohohoh, hihihi}"), "no
 
 test_err_contains(smagick("/hi, {there"), "bracket & matched & escape")
 
+#
+# multi line expressions ####
+#
+
+txt = smagick("The solution to x + 32 = 5 is {
+     y = 32
+     z = 5
+     z - y
+}")
+test(txt, "The solution to x + 32 = 5 is -27")
+
+txt = smagick("First letters: {
+     x = head(letters)
+     fun = function(z){
+          paste(z, collapse = '')
+     }
+     fun(x)
+}")
+test(txt, "First letters: abcdef")
 
 #
 # data.table ####

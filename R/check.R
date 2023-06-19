@@ -461,9 +461,9 @@ check_set_smagick_parsing = function(x, check){
   # x is a character string to be turned into an R expression
   
   if(check){
-    x_call = try(str2lang(x), silent = TRUE)
+    x_call = try(parse(text = x, keep.source = FALSE), silent = TRUE)
   } else {
-    x_call = str2lang(x)
+    x_call = parse(text = x, keep.source = FALSE)
     return(x_call)
   }  
   
