@@ -1082,18 +1082,20 @@ if the condition is `FALSE`.
 If not provided, `verb_false` is considered to be the *empty string* unless the operator is 
 the double ampersand described (`&&`) at the end of this section.
 
+Note that in `cond`, you can use the function `len`, an alias to `length`.
+
 Ex.1: we take a vector and compose a message depending on its length. If its length is
 lower than 10 then we write the message "x is short", otherwise we write "x is long",
 and insert "very" depending on the number of digits.
 ```{r}
 x = 1:5
-smagick("x is {&length(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
+smagick("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
 
 x = 1:50
-smagick("x is {&length(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
+smagick("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
 
 x = 1:5000
-smagick("x is {&length(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
+smagick("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
 ```
 
 If a condition leads to a result of length 1, the full string is replaced by the verbatim 

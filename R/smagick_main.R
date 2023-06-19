@@ -724,7 +724,9 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' If not provided, `verb_false` is considered to be the empty string unless the operator is 
 #' the double ampersand described at the end of this section.
 #' 
-#' Ex.1: `x = 1:5`; \code{smagick("x is {&length(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")}
+#' Note that in `cond`, you can use the function `len`, an alias to `length`.
+#' 
+#' Ex.1: `x = 1:5`; \code{smagick("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")}
 #' leads to "x is short". With `x = 1:50`, it leads to "x is long", and to "x is very very long"
 #' if `x = 1:5000`.
 #' 
