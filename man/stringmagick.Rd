@@ -14,8 +14,8 @@ on-the-fly, any arbitrary string operation.
 It supports over 50 basic operations, seamless customization, nesting,
 pluralization, and much more. Writing complex character strings has never been that easy!
 
-To get an overview of the package: \url{take the tour}. To get started with smagick,
-see \url{the vignette}.
+To get an overview of the package: \href{https://lrberge.github.io/stringmagick/articles/stringmagick_tour.html}{take the tour}. To get started with smagick,
+see \href{https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html}{the vignette}.
 
 This package also enhances regular string functions (like grep and co) with
 specialized functions to:
@@ -25,6 +25,6 @@ specialized functions to:
 \item clean character string vectors
 }
 
-See more in the \url{dedicated vignette}.
+See more in the \href{https://lrberge.github.io/stringmagick/articles/string_tools.html}{dedicated vignette}.
 }
 \keyword{internal}

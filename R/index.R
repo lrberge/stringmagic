@@ -8,8 +8,8 @@
 #' It supports over 50 basic operations, seamless customization, nesting, 
 #' pluralization, and much more. Writing complex character strings has never been that easy!
 #' 
-#' To get an overview of the package: [take the tour](). To get started with smagick,
-#'  see [the vignette]().
+#' To get an overview of the package: [take the tour](https://lrberge.github.io/stringmagick/articles/stringmagick_tour.html). To get started with smagick,
+#'  see [the vignette](https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html).
 #' 
 #' This package also enhances regular string functions (like grep and co) with
 #'  specialized functions to:
@@ -18,7 +18,7 @@
 #' - chain basic string operations
 #' - clean character string vectors
 #' 
-#' See more in the [dedicated vignette]().
+#' See more in the [dedicated vignette](https://lrberge.github.io/stringmagick/articles/string_tools.html).
 #' 
 #' 
 #' @name _index_

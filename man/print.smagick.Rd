@@ -6,12 +6,13 @@
 \usage{
 \method{print}{smagick}(x, ...)
 }
+\arguments{
+\item{x}{A \code{smagick} object, obtained from the function \code{smagick}.}
+
+\item{...}{Not currently used.}
+}
 \description{
 Print \code{smagick} character vectors in a nice way.
-}
-\details{
-x A \code{smagick} object, obtained from the function \code{smagick}.
-... Not currently used.
 }
 \examples{
 

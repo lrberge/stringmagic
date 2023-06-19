@@ -67,7 +67,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/lrberge/stringmagick/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -87,7 +94,7 @@ Bergé</h4>
             
             <h4 data-toc-skip class="date">2023-06-19</h4>
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagick/blob/HEAD/vignettes/stringmagick_tour.rmd" class="external-link"><code>vignettes/stringmagick_tour.rmd</code></a></small>
       <div class="hidden name"><code>stringmagick_tour.rmd</code></div>
 
     </div>
@@ -122,7 +129,8 @@ before mastering it. To minimize learning costs, great effort has been
 spent on error handling, with error messages hopefully explaining where
 the problems are and how to solve them. So fear not trying out
 stuff!</p>
-<p>If interested, here is the <a href="LINK_TO_SMAGICK">documentation</a> and next comes an example.</p>
+<p>If interested, here is the <a href="https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html" class="external-link">documentation</a>
+and next comes an example.</p>
 <div class="section level3">
 <h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h3>
@@ -138,7 +146,7 @@ self-assessed sikll level:</p>
 <code>n</code> of those skills by decreasing skill order, with
 <code>n</code> an arbitrary number. Here’s how it could be done:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">stringmagick</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/stringmagick/" class="external-link">stringmagick</a></span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"My {&amp;n&gt;1;{N?.} }best skill{#s} with kids:\n"</span>,</span>
 <span>        <span class="st">"{'^\\D+'dsort, `n`first, ' - 'paste, '\n'c ? skills}"</span><span class="op">)</span></span>
@@ -153,7 +161,8 @@ self-assessed sikll level:</p>
 <span>        <span class="st">"{'^\\D+'dsort, `n`first, ' - 'paste, '\n'c ? skills}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; My best skill with kids:</span></span>
 <span><span class="co">#&gt;  - being OK with cooking stuff they don't eat: 9/10</span></span></code></pre></div>
-<p>To understand how this works, please have a look at the <a href="LINK_TO_SMAGICK">dedicated vignette</a>.</p>
+<p>To understand how this works, please have a look at the <a href="https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html" class="external-link">dedicated
+vignette</a>.</p>
 <p>Even if it looks esoteric at first sight, writing this kind of
 dynamic messages is very common, especially when developping
 packages.</p>
@@ -178,6 +187,8 @@ regular expressions at once</li>
 <a href="#fun_chain">how to</a> chain basic string operations
 without exploding the number of lines of code</li>
 </ul>
+<p>Here we provide an overview, for more information, see the <a href="https://lrberge.github.io/stringmagick/articles/string_tools.html" class="external-link">associated
+vignette</a>.</p>
 <div class="section level3">
 <h3 id="fun_clean">Cleaning text: Quick and easy please<a class="anchor" aria-label="anchor" href="#fun_clean"></a>
 </h3>

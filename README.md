@@ -5,8 +5,8 @@ and to apply, on-the-fly, any arbitrary string operation.
 It supports over 50 basic operations, seamless customization, nesting, pluralization, and much more.
 Writing complex character strings has never been that easy!
 
-To get an overview of the package: [take the tour](LINK_TOUR). 
-To get started with `smagick`, see [the vignette](LINK_SMAGICK).
+To get an overview of the package: [take the tour](https://lrberge.github.io/stringmagick/articles/stringmagick_tour.html). 
+To get started with `smagick`, see [the vignette](https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html).
 
 This package also enhances regular string functions (like `grep` and co) with specialized functions to:
 
@@ -14,4 +14,4 @@ This package also enhances regular string functions (like `grep` and co) with sp
 - chain basic string operations
 - clean character string vectors
 
-See more in the [dedicated vignette](LINK SMAGICK).
+See more in the [dedicated vignette](https://lrberge.github.io/stringmagick/articles/string_tools.html).

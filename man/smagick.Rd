@@ -35,6 +35,7 @@ smagick(
   frame = parent.frame(),
   sep = "",
   vectorize = FALSE,
+  check = TRUE,
   slash = TRUE,
   collapse = NULL,
   help = NULL,
@@ -46,6 +47,7 @@ sma(
   frame = parent.frame(),
   sep = "",
   vectorize = FALSE,
+  check = TRUE,
   slash = TRUE,
   collapse = NULL,
   help = NULL,
@@ -110,6 +112,10 @@ navigate across matches.}
 \item{use_DT}{Logical, default is \code{TRUE}. If you use \code{smagick} in a \code{data.table} call
 and interpolate variables within the \code{data.table}, you want this argument to be \code{TRUE}.
 It only incurs a small overhead.}
+
+\item{check}{Logical scalar, default is TRUE. Whether to enable error-handling.
+Without errorhandling you can save something of the order of 40ms. Useful only
+in long loops.}
 }
 \value{
 It returns a character vector whose length depends on the elements and operations in the interpolations.

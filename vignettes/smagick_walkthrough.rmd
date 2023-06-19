@@ -274,7 +274,7 @@ This section describes some of the most common string operations: extracting,
 replacing, collapsing, splitting, etc. Because they are so common, many of these 
 operations have a name composed of just one letter.
 These functions accept generic flags ("ignore", "fixed", "word") in their patterns (syntax: "flags/pattern"). 
-Please see the dedicated section for more information on flags.
+For more information on regex flags, see the [dedicated section](https://lrberge.github.io/stringmagick/articles/string_tools.html).
 
 ### s, S
 

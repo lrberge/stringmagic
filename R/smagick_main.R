@@ -15,8 +15,8 @@
 #' 
 #' @method print smagick
 #' 
-#' x A `smagick` object, obtained from the function `smagick`.
-#' ... Not currently used.
+#' @param x A `smagick` object, obtained from the function `smagick`.
+#' @param ... Not currently used.
 #' 
 #' @author 
 #' Laurent Berge
@@ -267,6 +267,9 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' @param collapse Character scalar, default is `NULL`. If provided, the character vector
 #' that should be returned is collapsed with the value of this argument. This leads
 #' to return a string of length 1.
+#' @param check Logical scalar, default is TRUE. Whether to enable error-handling. 
+#' Without errorhandling you can save something of the order of 40ms. Useful only
+#' in long loops.
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
@@ -284,6 +287,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' To make it work, we made use of how `data.table` works internally and, since we used stuff 
 #' not exposed in its API, it is by construction unstable. `smagick` has been tested, and works, on
 #' `data.table` version 1.14.2 (2021-09-27) and version 1.14.8 (2023-02-17).
+#' 
 #' 
 #' @section Interpolation and string operations: Principle:
 #' 
@@ -1245,7 +1249,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #'    
 #'
-smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, check = TRUE,
                slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
 
 

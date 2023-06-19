@@ -397,7 +397,7 @@ Even for simple tasks, the number of operations can quickly balloon, adding many
 lines of code, reducing readability, and all this for basic processing.
 
 The function `str_ops` tries to solve this problem. 
-It has access to all (50+) [`smagick` operations](LINK_TO_SMAGICK_OPS), allowing for
+It has access to all (50+) [`smagick` operations](https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html#sec_operations_reference), allowing for
 a compact and readable way to chain basic operations on character strings.
 
 Below are a few motivating examples.
@@ -467,7 +467,7 @@ This function is of the form `str_clean(x, ...)` with `x` the vector to clean an
 
 1. use `"pat1, pat2 => replacement"` to replace the regex patterns `pat1` and `pat2` 
 with the value `replacement`.
-1. use `"@op1, op2"` to perform any arbitrary sequence of [`smagick` operation](LINK TO SMAGICK)
+1. use `"@op1, op2"` to perform any arbitrary sequence of [`smagick` operation](https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html#sec_operations_reference)
 
 In the operation `"pat1, pat2 => replacement"`, the pattern is first split with respect
 to the pipe, `" => "` (change it with argument `pipe`), to get `replacement`. 

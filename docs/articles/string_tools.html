@@ -67,7 +67,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/lrberge/stringmagick/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -86,7 +93,7 @@ Bergé</h4>
             
             <h4 data-toc-skip class="date">2023-06-19</h4>
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagick/blob/HEAD/vignettes/string_tools.rmd" class="external-link"><code>vignettes/string_tools.rmd</code></a></small>
       <div class="hidden name"><code>string_tools.rmd</code></div>
 
     </div>
@@ -585,7 +592,7 @@ for parsing, text analysis, etc). Even for simple tasks, the number of
 operations can quickly balloon, adding many lines of code, reducing
 readability, and all this for basic processing.</p>
 <p>The function <code>str_ops</code> tries to solve this problem. It has
-access to all (50+) <a href="LINK_TO_SMAGICK_OPS"><code>smagick</code>
+access to all (50+) <a href="https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html#sec_operations_reference" class="external-link"><code>smagick</code>
 operations</a>, allowing for a compact and readable way to chain basic
 operations on character strings.</p>
 <p>Below are a few motivating examples.</p>
@@ -666,7 +673,8 @@ cleaning operations which can be of two types:</p>
 <li>use <code>"pat1, pat2 =&gt; replacement"</code> to replace the regex
 patterns <code>pat1</code> and <code>pat2</code> with the value
 <code>replacement</code>.</li>
-<li>use <code>"@op1, op2"</code> to perform any arbitrary sequence of <a href="LINK%20TO%20SMAGICK"><code>smagick</code> operation</a>
+<li>use <code>"@op1, op2"</code> to perform any arbitrary sequence of <a href="https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html#sec_operations_reference" class="external-link"><code>smagick</code>
+operation</a>
 </li>
 </ol>
 <p>In the operation <code>"pat1, pat2 =&gt; replacement"</code>, the

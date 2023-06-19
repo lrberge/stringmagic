@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>`smagick`: Magical string interpolation • stringmagick</title>
+<title>`smagick`: Magical string interpolation • fixest</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -32,7 +32,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">stringmagick</a>
+        <a class="navbar-link" href="../index.html">fixest</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
@@ -50,13 +50,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/stringmagick_tour.html">`stringmagick`: A quick tour</a>
+    </li>
+    <li class="divider">
+    </li>
+<li class="dropdown-header">Guides</li>
+    <li>
       <a href="../articles/smagick_walkthrough.html">`smagick`: Magical string interpolation</a>
     </li>
     <li>
-      <a href="../articles/stringmagick_tour.html">`stringmagick`: An overview</a>
-    </li>
-    <li>
-      <a href="../articles/string_tools.html">String tools, magick edition</a>
+      <a href="../articles/string_tools.html">String tools: Magick edition</a>
     </li>
   </ul>
 </li>
@@ -64,7 +67,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/lrberge/stringmagick/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -85,7 +95,7 @@ Berge</h4>
             
             <h4 data-toc-skip class="date">2023-06-19</h4>
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagick/blob/HEAD/vignettes/smagick_walkthrough.rmd" class="external-link"><code>vignettes/smagick_walkthrough.rmd</code></a></small>
       <div class="hidden name"><code>smagick_walkthrough.rmd</code></div>
 
     </div>
@@ -115,7 +125,7 @@ pluralization, and much more.</p>
 like gibberish when first discovering it: it will make sense
 later!):</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">stringmagick</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/stringmagick/" class="external-link">stringmagick</a></span><span class="op">)</span></span>
 <span><span class="va">name</span> <span class="op">=</span> <span class="st">"john doe"</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Hi {title ? name}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Hi John Doe.</span></span>
@@ -375,8 +385,9 @@ operations.</p>
 extracting, replacing, collapsing, splitting, etc. Because they are so
 common, many of these operations have a name composed of just one
 letter. These functions accept generic flags (“ignore”, “fixed”, “word”)
-in their patterns (syntax: “flags/pattern”). Please see the dedicated
-section for more information on flags.</p>
+in their patterns (syntax: “flags/pattern”). For more information on
+regex flags, see the <a href="https://lrberge.github.io/stringmagick/articles/string_tools.html" class="external-link">dedicated
+section</a>.</p>
 <div class="section level4">
 <h4 id="s-s">s, S<a class="anchor" aria-label="anchor" href="#s-s"></a>
 </h4>
@@ -1131,11 +1142,11 @@ and ii) two + a number: to tell the number of items to display</p>
 <span><span class="co"># default is at 7</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"x{sample(100, 30)}"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum ? x}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The problematic variables are x3, x4, x12, x13, x14, x16 and 24 others.</span></span>
+<span><span class="co">#&gt; The problematic variables are x4, x8, x9, x10, x19, x24 and 24 others.</span></span>
 <span></span>
 <span><span class="co"># you can augment or reduce the numbers to display with an option</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum.3 ? x}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The problematic variables are x3, x4 and 28 others.</span></span></code></pre></div>
+<span><span class="co">#&gt; The problematic variables are x4, x8 and 28 others.</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="len-len">len, Len<a class="anchor" aria-label="anchor" href="#len-len"></a>
@@ -1197,7 +1208,7 @@ a warning if the operation fails. It accepts either objects of class
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.15</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Time: {dtime ? x}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Time: 153ms</span></span></code></pre></div>
+<span><span class="co">#&gt; Time: 157ms</span></span></code></pre></div>
 </div>
 </div>
 </div>

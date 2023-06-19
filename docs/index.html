@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Character String Operations and Interpolation, Magick Edition • stringmagick</title>
+<title>Character String Operations and Interpolation, Magick Edition • fixest</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -32,7 +32,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="index.html">stringmagick</a>
+        <a class="navbar-link" href="index.html">fixest</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
@@ -50,13 +50,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="articles/stringmagick_tour.html">`stringmagick`: A quick tour</a>
+    </li>
+    <li class="divider">
+    </li>
+<li class="dropdown-header">Guides</li>
+    <li>
       <a href="articles/smagick_walkthrough.html">`smagick`: Magical string interpolation</a>
     </li>
     <li>
-      <a href="articles/stringmagick_tour.html">`stringmagick`: An overview</a>
-    </li>
-    <li>
-      <a href="articles/string_tools.html">String tools, magick edition</a>
+      <a href="articles/string_tools.html">String tools: Magick edition</a>
     </li>
   </ul>
 </li>
@@ -64,7 +67,14 @@
   <a href="news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/lrberge/stringmagick/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -79,22 +89,32 @@
 
 <p>The <code>stringmagick</code> package introduces a new language tailored to create complex character strings. Use the function <code>smagick</code> to interpolate a variable inside a character string and to apply, on-the-fly, any arbitrary string operation.</p>
 <p>It supports over 50 basic operations, seamless customization, nesting, pluralization, and much more. Writing complex character strings has never been that easy!</p>
-<p>To get an overview of the package: <a href="LINK_TOUR">take the tour</a>. To get started with <code>smagick</code>, see <a href="LINK_SMAGICK">the vignette</a>.</p>
+<p>To get an overview of the package: <a href="https://lrberge.github.io/stringmagick/articles/stringmagick_tour.html" class="external-link">take the tour</a>. To get started with <code>smagick</code>, see <a href="https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html" class="external-link">the vignette</a>.</p>
 <p>This package also enhances regular string functions (like <code>grep</code> and co) with specialized functions to:</p>
 <ul>
 <li>detect combinations of regular expressions</li>
 <li>chain basic string operations</li>
 <li>clean character string vectors</li>
 </ul>
-<p>See more in the <a href="LINK%20SMAGICK">dedicated vignette</a>.</p>
+<p>See more in the <a href="https://lrberge.github.io/stringmagick/articles/string_tools.html" class="external-link">dedicated vignette</a>.</p>
 
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="license">
+    <div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/lrberge/stringmagick/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/lrberge/stringmagick/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a></li>
+<li>
+<a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a>
+</li>
 </ul>
 </div>
 

@@ -53,7 +53,7 @@ str_ops(cars, "'\\\\d+'x, rm, unik, num, dsort, 3 first")
 
 # Explainer:
 # '\\d+'x: extracts the first pattern, the pattern meaning "a succession"
-           of digits in regex language
+#          of digits in regex language
 # rm: removes elements equal to the empty string (default behavior)
 # unik: applies unique() to the vector
 # num: converts to numeric
