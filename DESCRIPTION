@@ -1,11 +1,11 @@
 Package: stringmagick
 Type: Package
-Title: Character String Operations and Interpolation, but Using Magick
+Title: Character String Operations and Interpolation, Magick Edition
 Version: 1.0.0
-Author@R: 
+Authors@R: 
   person(given = "Laurent",
                    family = "Berge",
-                   middle = "R"
+                   middle = "R",
                    role = c("aut", "cre"),
                    email = "laurent.berge@u-bordeaux.fr",
                    c(ORCID = "3-2736-1917"))
