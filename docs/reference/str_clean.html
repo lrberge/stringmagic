@@ -43,6 +43,9 @@ You can also apply all sorts of cleaning operations by summoning str_op() operat
       <a href="../articles/string_tools.html">String tools, magick edition</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -153,27 +156,11 @@ String interpolation combined with operation chaining: <code><a href="smagick.ht
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hello world  "</span>, <span class="st">"it's 5 am...."</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># we clean the o's and the points (we use 'fixed' to trigger fixed-search)</span></span></span>
-<span class="r-in"><span><span class="fu">str_clean</span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"o"</span>, <span class="st">"f/."</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">str_clean</span><span class="op">(</span><span class="va">x</span>, <span class="st">"o"</span>, <span class="st">"f/."</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hell wrld  " "it's 5 am"  </span>
 <span class="r-in"><span><span class="co"># equivalently</span></span></span>
-<span class="r-in"><span><span class="fu">str_clean</span><span class="op">(</span><span class="va">x</span>, <span class="st">"fixed / o, ."</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> in parse_regex_pattern(di, c("ignore", "fixed", "wor...: </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> Problem found in the regex pattern "fixed / o, .".</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> PROBLEM: the flag list contains a non valid character in position 6 (`</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> `). Flags must only consist of lower case letters followed by a comma or</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> a slash.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> INFO: Regular expression flags must be of the form: 'flag1,</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> flag2/pattern' where a flag must consist of only lower case letters. Ex:</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> 'ignore, fixed/dt[' leads to the flags 'ignore' and 'fixed' and to the</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> pattern '.['.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       Alternatively, collate the first letters of the flags: 'if/dt['</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       leads to the same results.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       Start with a slash to remove the meaning of the slash and suppress</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       the parsing of flags. Ex.1: '/hey/': no flag, pattern is 'hey/'.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       To have a slash as a pattern, double it:  '//': no flag, pattern</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       is '/'.                            or escape it: '\\/': no flag,</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       pattern is '/'</span>
+<span class="r-in"><span><span class="fu">str_clean</span><span class="op">(</span><span class="va">x</span>, <span class="st">"fixed/o, ."</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hell wrld  " "it's 5 am"  </span>
 <span class="r-in"><span><span class="co"># equivalently</span></span></span>
 <span class="r-in"><span><span class="fu">str_clean</span><span class="op">(</span><span class="va">x</span>, <span class="st">"o, ."</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hell wrld  " "it's 5 am"  </span>
@@ -188,65 +175,48 @@ String interpolation combined with operation chaining: <code><a href="smagick.ht
 <span class="r-in"><span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">new</span> <span class="op">=</span> <span class="fu">str_clean</span><span class="op">(</span><span class="va">cars</span>, </span></span>
 <span class="r-in"><span>           <span class="co"># replace strings containing "Maz" with Mazda</span></span></span>
-<span class="r-in"><span>           <span class="st">"total / Maz =&gt; Mazda"</span>, </span></span>
+<span class="r-in"><span>           <span class="st">"total/Maz =&gt; Mazda"</span>, </span></span>
 <span class="r-in"><span>           <span class="co"># replace the word 'Merc' with Mercedes</span></span></span>
 <span class="r-in"><span>           <span class="st">"wi/merc =&gt; Mercedes"</span>,</span></span>
 <span class="r-in"><span>           <span class="co"># replace strings containing "Merc" and a digit followed with an 'S'</span></span></span>
 <span class="r-in"><span>           <span class="st">"t/Merc &amp; \\dS =&gt; Mercedes S!"</span>,</span></span>
 <span class="r-in"><span>           <span class="co"># put to lower case, remove isolated characters and normalize white spaces</span></span></span>
 <span class="r-in"><span>           <span class="st">"@lower, ws.isolated"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> in parse_regex_pattern(di, c("ignore", "fixed", "wor...: </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> Problem found in the regex pattern "total / Maz".</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> PROBLEM: the flag list contains a non valid character in position 6 (`</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> `). Flags must only consist of lower case letters followed by a comma or</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> a slash.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> INFO: Regular expression flags must be of the form: 'flag1,</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> flag2/pattern' where a flag must consist of only lower case letters. Ex:</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> 'ignore, fixed/dt[' leads to the flags 'ignore' and 'fixed' and to the</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> pattern '.['.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       Alternatively, collate the first letters of the flags: 'if/dt['</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       leads to the same results.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       Start with a slash to remove the meaning of the slash and suppress</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       the parsing of flags. Ex.1: '/hey/': no flag, pattern is 'hey/'.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       To have a slash as a pattern, double it:  '//': no flag, pattern</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       is '/'.                            or escape it: '\\/': no flag,</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>       pattern is '/'</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">cars</span>, <span class="va">new</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       cars                  new</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] "Mazda RX4"           ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] "Mazda RX4 Wag"       ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] "Datsun 710"          ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] "Hornet 4 Drive"      ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] "Hornet Sportabout"   ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] "Valiant"             ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] "Duster 360"          ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] "Merc 240D"           ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] "Merc 230"            ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] "Merc 280"            ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] "Merc 280C"           ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] "Merc 450SE"          ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] "Merc 450SL"          ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] "Merc 450SLC"         ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] "Cadillac Fleetwood"  ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] "Lincoln Continental" ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] "Chrysler Imperial"   ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] "Fiat 128"            ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19,] "Honda Civic"         ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [20,] "Toyota Corolla"      ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [21,] "Toyota Corona"       ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22,] "Dodge Challenger"    ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [23,] "AMC Javelin"         ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [24,] "Camaro Z28"          ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25,] "Pontiac Firebird"    ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [26,] "Fiat X1-9"           ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [27,] "Porsche 914-2"       ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [28,] "Lotus Europa"        ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [29,] "Ford Pantera L"      ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [30,] "Ferrari Dino"        ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31,] "Maserati Bora"       ?  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [32,] "Volvo 142E"          ?  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       cars                  new                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] "Mazda RX4"           "mazda"              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] "Mazda RX4 Wag"       "mazda"              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] "Datsun 710"          "datsun 710"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] "Hornet 4 Drive"      "hornet drive"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] "Hornet Sportabout"   "hornet sportabout"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] "Valiant"             "valiant"            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] "Duster 360"          "duster 360"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] "Merc 240D"           "mercedes 240d"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] "Merc 230"            "mercedes 230"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] "Merc 280"            "mercedes 280"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] "Merc 280C"           "mercedes 280c"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] "Merc 450SE"          "mercedes s!"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] "Merc 450SL"          "mercedes s!"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] "Merc 450SLC"         "mercedes s!"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] "Cadillac Fleetwood"  "cadillac fleetwood" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] "Lincoln Continental" "lincoln continental"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] "Chrysler Imperial"   "chrysler imperial"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] "Fiat 128"            "fiat 128"           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19,] "Honda Civic"         "honda civic"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [20,] "Toyota Corolla"      "toyota corolla"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [21,] "Toyota Corona"       "toyota corona"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [22,] "Dodge Challenger"    "dodge challenger"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [23,] "AMC Javelin"         "amc javelin"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [24,] "Camaro Z28"          "camaro z28"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25,] "Pontiac Firebird"    "pontiac firebird"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [26,] "Fiat X1-9"           "fiat x1-9"          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [27,] "Porsche 914-2"       "porsche 914-2"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [28,] "Lotus Europa"        "lotus europa"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [29,] "Ford Pantera L"      "ford pantera"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [30,] "Ferrari Dino"        "ferrari dino"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31,] "Maserati Bora"       "maserati bora"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [32,] "Volvo 142E"          "volvo 142e"         </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

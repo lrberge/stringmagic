@@ -41,6 +41,9 @@
       <a href="../articles/string_tools.html">String tools, magick edition</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -225,14 +228,13 @@ String interpolation combined with operation chaining: <code><a href="smagick.ht
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Volvo 142E"    "Mazda RX4"     "Mazda RX4 Wag"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># let's get the first word of each car name</span></span></span>
-<span class="r-in"><span><span class="va">car_first</span> <span class="op">=</span> <span class="fu">str_op</span><span class="op">(</span><span class="va">x</span>, <span class="st">"extract.first"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in str_op(x, "extract.first"):</span> could not find function "str_op"</span>
+<span class="r-in"><span><span class="va">car_first</span> <span class="op">=</span> <span class="fu"><a href="str_ops.html">str_ops</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"extract.first"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># we select car brands ending with 'a', then ending with 'i'</span></span></span>
 <span class="r-in"><span><span class="fu">str_get</span><span class="op">(</span><span class="va">car_first</span>, <span class="st">"a$"</span>, <span class="st">"i$"</span>, seq <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in check_set_character(x, mbt = TRUE, l0 = TRUE):</span> object 'car_first' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Mazda"    "Mazda"    "Honda"    "Toyota"   "Toyota"   "Ferrari"  "Maserati"</span>
 <span class="r-in"><span><span class="co"># seq.unik is similar to seq but applies unique()</span></span></span>
 <span class="r-in"><span><span class="fu">str_get</span><span class="op">(</span><span class="va">car_first</span>, <span class="st">"a$"</span>, <span class="st">"i$"</span>, seq.unik <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in check_set_character(x, mbt = TRUE, l0 = TRUE):</span> object 'car_first' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Mazda"    "Honda"    "Toyota"   "Ferrari"  "Maserati"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># flags</span></span></span>

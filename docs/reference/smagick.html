@@ -42,6 +42,9 @@ basic string operations to the interpolated variables. Advanced support for plur
       <a href="../articles/string_tools.html">String tools, magick edition</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -95,6 +98,37 @@ basic string operations to the interpolated variables. Advanced support for plur
 <span>  collapse <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  help <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  use_DT <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">sma</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  frame <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  sep <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  slash <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  collapse <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  help <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  use_DT <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.smagick</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  frame <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  sep <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  check <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  slash <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  use_DT <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.sma</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  frame <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  sep <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  check <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  slash <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  use_DT <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -186,6 +220,9 @@ not exposed in its API, it is by construction unstable. <code>smagick</code> has
     
 <ul><li><p><code>dsb()</code>: Like <code>smagick</code> but interpolation is with the dot-square-bracket ".[]"</p></li>
 <li><p><code>.dsb()</code>: Like <code>dsb</code> but without error handling (leads to slightly faster run times).</p></li>
+<li><p><code>sma()</code>: Alias to <code>smagick</code>.</p></li>
+<li><p><code>.smagick()</code>: Like <code>smagick</code> but without any error handling to save a few ms</p></li>
+<li><p><code>.sma()</code>: Alias to <code>.smagick</code>.</p></li>
 </ul></div>
     <div id="interpolation-and-string-operations">
     <h2>Interpolation and string operations</h2>
@@ -622,7 +659,8 @@ a verbatim value with which the vector will be replaced if the condition is <cod
 <code>verb_false</code> an <em>optional</em> verbatim value with which the vector will be replaced if the condition is <code>FALSE</code>.
 If not provided, <code>verb_false</code> is considered to be the empty string unless the operator is
 the double ampersand described at the end of this section.</p>
-<p>Ex.1: <code>x = 1:5</code>; <code>smagick("x is {&amp;length(x)&lt;10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")</code>
+<p>Note that in <code>cond</code>, you can use the function <code>len</code>, an alias to <code>length</code>.</p>
+<p>Ex.1: <code>x = 1:5</code>; <code>smagick("x is {&amp;len(x)&lt;10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")</code>
 leads to "x is short". With <code>x = 1:50</code>, it leads to "x is long", and to "x is very very long"
 if <code>x = 1:5000</code>.</p>
 <p>If a condition leads to a result of length 1, the full string is replaced by the verbatim

@@ -60,6 +60,9 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
 </div>
@@ -145,7 +148,7 @@ some advice:</p>
 <ul>
 <li>read the first sections completely (<a href="#sec_basic">regular
 interpolation</a>, <a href="#sec_interpol">interpolation with
-operations</a>, <a href="#sec_verbatim">verbatim and nesting</a>, and <a href="#sec_syntax">the opeartions syntax</a>). They’re short.</li>
+operations</a>, <a href="#sec_verbatim">verbatim and nesting</a>, and <a href="#sec_syntax">the operations syntax</a>). They’re short.</li>
 <li>skim the <a href="#sec_operations_reference">operations
 reference</a>
 </li>
@@ -200,21 +203,21 @@ adding a space between each of them. Let’s do it:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"hello {upper, ''s, c ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; hello W O R L D</span></span></code></pre></div>
 <p>Now let’s explain what happened. Within the <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code>
-<em>box</em>, we first write a set of operations, here “upper, ’’s, c”,
-then add “?” and finally write the variable to interpolate, “x”. The
-operations (detailed in <a href="#sec_operations_reference">the
-reference section</a>) are <code>upper</code>, upper-casing all letters,
-<code>''s</code>: splitting with the empty string, <code>c</code>:
-concatenating with spaces the string vector that was just split. The
-question mark means that the expression coming after it is to be
-evaluated (this is opposed to the exclamation mark presented in the next
-section).</p>
+<em>box</em>, we first write a set of operations, here
+<code>upper, ''s, c</code>, then add <code>?</code> and finally write
+the variable to interpolate, <code>x</code>. The operations (detailed in
+<a href="#sec_operations_reference">the reference section</a>) are
+<code>upper</code>, to upper-case all letters, <code>''s</code>: to
+split with the empty string, <code>c</code>: to concatenate the vector
+that was just split with spaces (<code>' '</code>). The question mark
+means that the expression coming after it is to be evaluated (this is
+opposed to the exclamation mark presented in the next section).</p>
 <p>The syntax is always the same:
 <code>{operations ? expression}</code>, where the operations section is
 a <em>comma separated</em> list of operations. These operations are of
 the form <code>'arg'op</code>, with <code>arg</code> the argument to the
-operator code <code>op</code>. These operations are performed
-sequentially from left to right.</p>
+operator <code>op</code>. These operations are performed sequentially
+from left to right.</p>
 <p>Some operations, like <code>upper</code>, accept options. You attach
 options to an operation with a dot followed by the option name.
 Formally: <code>op.option1.option2</code>, etc. Example:</p>
@@ -230,9 +233,11 @@ more details on the operations syntax in the <a href="#sec_syntax">syntax sectio
 <h2 id="sec_verbatim">Verbatim interpolation and nesting: Principle<a class="anchor" aria-label="anchor" href="#sec_verbatim"></a>
 </h2>
 <p>Instead of interpolating a variable, say <code>x</code>, with
-<code>{x}</code>, you can use an exclamation mark to trigger varbatim
+<code>{x}</code>, you can use an exclamation mark to trigger verbatim
 evaluation. For example <code>smagick("hello {!x}")</code> would lead to
-“hello x”. Please hold on a little bit to see the point.</p>
+“hello x”. (To use <code>!</code> as a regular logical operator, see the
+<a href="#sec_special_cases">section on special cases</a>.) Please hold
+on a little bit to see the point.</p>
 <p>Verbatim evaluation is a powerful way to apply operations to plain
 text. For example:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -241,17 +246,29 @@ text. For example:</p>
 <p>Before moving on, a necessary detail. The spaces surrounding the
 exclamation mark are non necessary, but when one space is present on
 both sides of the <code>!</code>, then the verbatim expression only
-begins after the space. Ex: <code>"{upper! hi}"</code> leads to ” HI”
-while <code>"{upper ! hi}"</code> leads to “HI” and
-<code>"{upper !  hi}"</code> leads to ” HI”.</p>
+begins after the space. This is illustrated below</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The decorative space in verbatim mode</span></span>
+<span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{upper, Q! hi}"</span>, </span>
+<span>        <span class="co">#       ^                      =&gt; adds a space before 'hi'</span></span>
+<span>        <span class="st">"{upper, Q ! hi}"</span>, </span>
+<span>        <span class="co">#      ^ ^                     =&gt; no space added (ie decorative space)</span></span>
+<span>        <span class="st">"{upper, Q !  hi}"</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; " HI"</span></span>
+<span><span class="co">#&gt; "HI"</span></span>
+<span><span class="co">#&gt; " HI"</span></span>
+<span>        <span class="co">#      ^ ^^                    =&gt; adds a space before 'hi'</span></span></code></pre></div>
+<div class="section level4">
+<h4 id="nesting">Nesting<a class="anchor" aria-label="anchor" href="#nesting"></a>
+</h4>
 <p>The main advantage, and real power, of verbatim evaluations is
 <em>nesting</em>. Anything in a verbatim expression becomes evaluated
 with the function <code>smagick</code>. This means that any <em>box</em>
 will be evaluated as previously described.</p>
 <p>Let’s give an example. You want to write the expression of a
-polynomial of order n: a + bx + cx^2 + etc. You can do that with
-nesting:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+polynomial of order <code>n</code>: <code>a + bx + cx^2 + etc</code>.
+You can do that with nesting:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; poly(2): ax^0 + bx^1 + cx^2</span></span></code></pre></div>
@@ -261,11 +278,12 @@ evaluated with <code>smagick</code>.
 <code>smagick("{letters[1 + 0:n]}x^{0:n}")</code> leads to the vector
 <code>c("ax^0", "bx^1", "cx^2")</code>.</p>
 <p>The operation <code>' + 'c</code> then concatenates (or collapses)
-that vector with ’ + ’. This value is then appended to the previous
-string.</p>
+that vector with <code>' + '</code>. This value is then appended to the
+previous string.</p>
 <p>We could refine by adding a cleaning operation in which we replace
-“x^0” and “^1” by the empty string. Let’s do it:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code>"x^0"</code> and <code>"^1"</code> by the empty string. Let’s do
+it:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"poly({n}): {' + 'c, 'f/x^0, ^1'clean ! {letters[1 + 0:n]}x^{0:n}}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; poly(4): a + bx + cx^2 + dx^3 + ex^4</span></span></code></pre></div>
@@ -273,15 +291,16 @@ string.</p>
 operation is explained in the <a href="#op_clean">operations reference
 section</a>.</p>
 </div>
+</div>
 <div class="section level2">
 <h2 id="sec_syntax">Regular operations: General syntax<a class="anchor" aria-label="anchor" href="#sec_syntax"></a>
 </h2>
 <p>As seen in the previous sections, within a <em>box</em>
 (i.e. <code>"{}"</code>), multiple operations can be performed. We can
-do so by stacking the operations codes and in a comma separated
-enumeration. Operations can have arguments, and operations can also have
-options. The general syntax, with argument and options, is:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+do so by stacking the operations in a comma separated enumeration.
+Operations can have arguments, and operations can also have options. The
+general syntax, with argument and options, is:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'arg1'op1.optionA.optionB, arg2 op2.optionC, </span></span>
 <span><span class="st">          `arg3`op3, 51op4, op5 ? x}"</span><span class="op">)</span></span></code></pre></div>
 <p>Any blanks after the commas are discarded (inclusing tabs and
@@ -293,8 +312,8 @@ lines, as above.</p>
 (<code>arg1</code> above),</li>
 <li>verbatim, separated with a space, just before the operation name
 (<code>arg2</code> above),</li>
-<li>inside bactick quotes the argument is evaluated from the environment
-(<code>arg3</code> above),</li>
+<li>inside bactick quotes, which will trigger evaluation of the argument
+from the environment (<code>arg3</code> above),</li>
 <li>when the argument is an integer it can be juxtaposed to the opeation
 name (like in <code>op4</code> above).</li>
 </ol>
@@ -304,7 +323,7 @@ name, they are specific to each operation.</p>
 This means, for example, that command <code>"upper.first"</code> is
 equivalent to <code>"up.f"</code>.</p>
 <p>Here are examples for each types of arguments:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># quoted argument</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"y = {'x'paste, ' + 'c ? 1:2}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; y = x1 + x2</span></span>
@@ -327,12 +346,12 @@ equivalent to <code>"up.f"</code>.</p>
 <span><span class="co">#&gt; y = the sum of a) `x1`, and b) `x2`</span></span></code></pre></div>
 <p>A few operators have two arguments. Pass multiple arguments using a
 pipe as follows:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'arg1|arg2'op, 'arg1||arg2'op ? x}"</span><span class="op">)</span></span></code></pre></div>
 <p>You can escape the meaning of the pipe as a separator with a double
 backslash. Some operators accept a double pipe which modifies the
 behavior of the second argument. Here is an example:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"Quels sont ces serpents qui sifflent sur vos têtes?"</span></span>
 <span><span class="co"># let's shorten this</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Oreste: {s, '4|..'k, c, Q ? x}"</span><span class="op">)</span></span>
@@ -353,10 +372,11 @@ operations.</p>
 <h3 id="basic-string-operations">Basic string operations<a class="anchor" aria-label="anchor" href="#basic-string-operations"></a>
 </h3>
 <p>This section describes some of the most common string operations:
-extracting, replacing, collapsing, splitting, etc. These functions
-accept generic flags (“ignore”, “fixed”, “word”) in their patterns
-(syntax: “flags/pattern”). Please see the dedicated section for more
-information on flags.</p>
+extracting, replacing, collapsing, splitting, etc. Because they are so
+common, many of these operations have a name composed of just one
+letter. These functions accept generic flags (“ignore”, “fixed”, “word”)
+in their patterns (syntax: “flags/pattern”). Please see the dedicated
+section for more information on flags.</p>
 <div class="section level4">
 <h4 id="s-s">s, S<a class="anchor" aria-label="anchor" href="#s-s"></a>
 </h4>
@@ -365,7 +385,7 @@ different defaults: <code>' '</code> for <code>s</code> and
 <code>',[ \t\n}*'</code> for <code>S</code> (i.e. comma separation).</p>
 <p>When character strings are split, their identity is kept in memory so
 that group-wise operations can be applied. See the <a href="#sec_group_wise">section on group-wise operations</a>.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 'S' with its default (comma separation)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{S ! romeo, juliet}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; romeo</span></span>
@@ -406,7 +426,7 @@ the argument is ‘s1’ or ‘s1|s2’. s1 is the string used to concatenate
 last two elements. When the elements of the vector are split, each
 original item is kept in memory so that group-wise operations can be
 applied. See the section on group-wise operations.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># regular way</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"And {' and 'c ? x}!"</span><span class="op">)</span></span>
@@ -438,7 +458,7 @@ match for each string.</p>
 string is kept in memory so that group-wise operations can be applied.
 See the <a href="#sec_group_wise">section on group-wise
 operations</a>.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"margo: 32, 1m75"</span>, <span class="st">"luke doe: 27, 1m71"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; margo is 32</span></span>
@@ -475,7 +495,7 @@ regex flags. The default for <code>new</code> is the empty string. On
 top of regular regex flags, this operation also accepts the flag “total”
 which instruct to replace the fulll string in case the pattern is
 found.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># regex without replacement (ie removing)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'e'r ! Where is the letter e?}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Whr is th lttr ?</span></span>
@@ -498,7 +518,7 @@ found.</p>
 argument is of the form
 <code>"flags/pattern1, pattern2 =&gt; replacement"</code>. See detailed
 explanations in str_clean().</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># we use the fixed pattern to remove the regex meaning</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'f/[, ]'clean ! x[a]}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; xa</span></span></code></pre></div>
@@ -514,7 +534,7 @@ flags and include logical operations between regex patterns with
 used, a simple string equality with the argument is tested (hence no
 flags are accepted). If the option “in” is used, the argument is first
 split with respect to commas and then set inclusion is tested.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
 <span><span class="co">#  we only keep models containing "Merc" and ending with a letter ([[:alpha:]]$)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Mercedes models: {'Merc &amp; [[:alpha:]]$'get, '^.+ 'r, C ? x}."</span><span class="op">)</span></span>
@@ -537,7 +557,7 @@ between regex patterns with <code>' &amp; '</code> and
 equality with the argument is tested (hence no flags are accepted). If
 the option “in” is used, the argument is first split with respect to
 commas and then set inclusion is tested.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Mark"</span>, <span class="st">"Lucas"</span><span class="op">)</span></span>
 <span><span class="co"># note that we use the flag `i/` to ignore the case</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Mark? {'i/mark'is, C ? x}"</span><span class="op">)</span></span>
@@ -555,7 +575,7 @@ used, a simple string equality with the argument is tested (hence no
 flags are accepted). If the option “in” is used, the argument is first
 split with respect to commas and then set inclusion is tested. Mostly
 useful as the final operation in a str_op() call.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Mark"</span>, <span class="st">"Lucas"</span>, <span class="st">"Markus"</span><span class="op">)</span></span>
 <span><span class="co"># note that we use the flag `i` to ignore the case and `w` to add word boundaries</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Mark is number {'iw/mark'which ? x}."</span><span class="op">)</span></span>
@@ -569,7 +589,7 @@ useful as the final operation in a str_op() call.</p>
 <h4 id="first">first<a class="anchor" aria-label="anchor" href="#first"></a>
 </h4>
 <p>Keeps only the first <code>n</code> elements.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"First 3 mpg values: {3 first, C ? mtcars$mpg}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; First 3 mpg values: 21, 21 and 22.8.</span></span>
 <span></span>
@@ -584,7 +604,7 @@ useful as the final operation in a str_op() call.</p>
 You can add a second argument in the form <code>'n1|n2'first</code> in
 which case the first <code>n1</code> and last <code>n2</code> values are
 kept; <code>n1</code> and <code>n2</code> must be positive numbers.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Letters in the middle: {13 first, 5 last, C ? letters}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Letters in the middle: i, j, k, l and m.</span></span>
 <span></span>
@@ -609,7 +629,7 @@ the string <code>s</code> is added at the end, and if
 letters (N) + <code>:rest:</code> or <code>:REST:</code> which gives the
 number of elements that have been truncated in digits or letters
 (REST)</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># basic use</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"First 3 letters: {'3'K, q, C ? letters}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; First 3 letters: 'a', 'b' and 'c'.</span></span>
@@ -623,7 +643,7 @@ number of elements that have been truncated in digits or letters
 </h4>
 <p>Keeps only the last <code>n</code> elements. Negative numbers as
 argument remove the last <code>n</code> values.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Last 3 mpg values: {3 last, C ? mtcars$mpg}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Last 3 mpg values: 19.7, 15 and 21.4.</span></span>
 <span></span>
@@ -635,7 +655,7 @@ argument remove the last <code>n</code> values.</p>
 </h4>
 <p>Sorts the vector in increasing order. Accepts an optional argument
 and the option “num”.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sort"</span>, <span class="st">"me"</span><span class="op">)</span></span>
 <span><span class="co"># basic use</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{sort, c ? x}"</span><span class="op">)</span></span>
@@ -644,7 +664,7 @@ and the option “num”.</p>
 applied to the vector using str_clean(). The sorting will be applied to
 the modified version of the vector and the original vector will be
 ordered according to this sorting.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># first modifying the string before sorting</span></span>
 <span><span class="co"># here the regex first removes the first word, meaning that we sort on the last names</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Jon Snow"</span>, <span class="st">"Khal Drogo"</span><span class="op">)</span></span>
@@ -653,7 +673,7 @@ ordered according to this sorting.</p>
 <p>The option “num” sorts over a numeric version (with silent
 conversion) of the vector and reorders the original vector accordingly.
 Values which could not be converted are last.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"Mark is 34, Bianca is 55, Odette is 101, Julie is 21 and Frank is 5"</span></span>
 <span><span class="co"># sort on the "character string" number</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{', | and 's, '\\D'sort, C ? x}"</span><span class="op">)</span></span>
@@ -665,7 +685,7 @@ Values which could not be converted are last.</p>
 <p><strong>Important note</strong>: the sorting operation is applied
 before any character conversion. If previous operations were applied, it
 is likely that numeric data were transformed to character.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># note the difference</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co"># sorting on numeric</span></span>
@@ -681,7 +701,7 @@ is likely that numeric data were transformed to character.</p>
 <p>Sorts the vector in decreasing order. It accepts an optional argument
 and the option “num”. See the operation “sort” for a description of the
 argument and the option.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"5 = {dsort, ' + 'c ? 2:3}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 5 = 3 + 2</span></span></code></pre></div>
 </div>
@@ -689,7 +709,7 @@ argument and the option.</p>
 <h4 id="rev">rev<a class="anchor" aria-label="anchor" href="#rev"></a>
 </h4>
 <p>Reverses the vector.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{rev, ''c ? 1:3}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 321</span></span></code></pre></div>
 </div>
@@ -697,7 +717,7 @@ argument and the option.</p>
 <h4 id="unik">unik<a class="anchor" aria-label="anchor" href="#unik"></a>
 </h4>
 <p>Makes the string vector unique.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Iris species: {unik, upper.first, C ? iris$Species}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Iris species: Setosa, Versicolor and Virginica.</span></span></code></pre></div>
 </div>
@@ -706,7 +726,7 @@ argument and the option.</p>
 </h4>
 <p>Repeats each element of the vector <code>n</code> times. Option “c”
 then collapses the full vector with the empty string as a separator.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># note: the slash special operations splits wrt to commas (see dedicated section)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{/x, y}{2 each ? 1:2}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; x1</span></span>
@@ -723,7 +743,7 @@ then collapses the full vector with the empty string as a separator.</p>
 </h4>
 <p>Repeats the vector sequence <code>n</code> times. Option “c” then
 collapses the full vector with the empty string as a separator.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"What{6 times.c ! ?}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; What??????</span></span></code></pre></div>
 </div>
@@ -733,7 +753,7 @@ collapses the full vector with the empty string as a separator.</p>
 <p>Removes elements from the vector. Options: “empty”, “blank”,
 “noalpha”, “noalnum”, “all”. The <em>optional</em> argument represents
 the pattern used to detect strings to be deleted.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Luke"</span>, <span class="st">"Charles"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'i/lu'rm ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Charles</span></span></code></pre></div>
@@ -744,7 +764,7 @@ removes strings not containing alpha numeric characters. Option “all”
 removes all strings (useful in conditions, see the dedicated section).
 If an argument is provided, only the options “empty” and “blank” are
 available.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I want to enter."</span>, <span class="st">"Age?"</span>, <span class="st">"21."</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Nightclub conversation: {rm.noalpha, c ! - {x}}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Nightclub conversation: - I want to enter. - Age?</span></span></code></pre></div>
@@ -754,7 +774,7 @@ available.</p>
 </h4>
 <p>Removes all elements, equivalent to <code>rm.all</code> but possibly
 more explicit. Useful in conditions, see the dedicated section.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">453</span>, <span class="fl">647</span><span class="op">)</span></span>
 <span><span class="co"># here we use a condition: see the dedicated section for more information</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Small numbers only: {if(.&gt;20 ; nuke), C ? x}."</span><span class="op">)</span></span>
@@ -766,7 +786,7 @@ more explicit. Useful in conditions, see the dedicated section.</p>
 <p>Inserts a new element to the vector. Options: “right” and “both”.
 Option “right” adds the new element to the right. Option “both” inserts
 the new element on the two sides of the vector.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'3'insert.right, ' + 'c ? 1:2}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 1 + 2 + 3</span></span></code></pre></div>
 </div>
@@ -778,7 +798,7 @@ the new element on the two sides of the vector.</p>
 <h4 id="lower">lower<a class="anchor" aria-label="anchor" href="#lower"></a>
 </h4>
 <p>Lower cases the full string.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"MesSeD uP CaSe"</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"from a {x} to {lower?x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; from a MesSeD uP CaSe to messed up case</span></span></code></pre></div>
@@ -789,7 +809,7 @@ the new element on the two sides of the vector.</p>
 <p>Upper cases the full string. Options: “first” and “sentence”. Option
 “first” upper cases only the first character. Option “sentence” upper
 cases the first letter after punctuation.</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"hi. how are you? fine."</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{upper.sentence ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Hi. How are you? Fine.</span></span></code></pre></div>
@@ -801,7 +821,7 @@ cases the first letter after punctuation.</p>
 Option “force” first puts everything to lowercase before applying the
 title case. Option “ignore” ignores a few small prepositions (“a”,
 “the”, “of”, etc).</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"bryan is in the KITCHEN"</span></span>
 <span></span>
 <span><span class="co"># default: respects upper cases</span></span>
@@ -829,7 +849,7 @@ note:</strong> punctuation (or digits) are replaced with WS and
 <strong>not</strong> the empty string. This means that
 <code>smagick("ws.punct ! Meg's car")</code> will become “Meg s
 car”.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"   I    should? review 85 4 this text!!"</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"v0: {x}"</span>, </span>
 <span>        <span class="st">"v1: {ws ? x}"</span>,</span>
@@ -852,7 +872,7 @@ car”.</p>
 </h4>
 <p>To add quotes to the strings. q: single quotes, Q: double quotes, bq:
 back quotes.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Mark"</span>, <span class="st">"Pam"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Hello {q, C ? x}!"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Hello 'Mark' and 'Pam'!</span></span></code></pre></div>
@@ -867,7 +887,7 @@ from [base::format()]’s behavior). The upper case command
 “right”, “center”. Options “0” or “zero” fills the blanks with 0s:
 useful to format numbers. Option “right” right aligns, and “center”
 centers the strings.</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">12345</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"left:   {format, q, C ? x}"</span>, </span>
 <span>        <span class="st">"right:  {Format, q, C ? x}"</span>,</span>
@@ -883,7 +903,7 @@ centers the strings.</p>
 </h4>
 <p>Applies base::sprintf() formatting. The syntax is ‘arg’% with arg an
 sprintf formatting, or directly the sprint formatting.</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"pi = {%.3f ? pi}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; pi = 3.142</span></span></code></pre></div>
 </div>
@@ -894,7 +914,7 @@ sprintf formatting, or directly the sprint formatting.</p>
 stopwords are replaced with an empty space but the left and right WS are
 untouched. So WS normalization may be needed (see operation
 <code>ws</code>).</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"He is tall"</span>, <span class="st">"He isn't young"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Is he {stop, ws, C ? x}?"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Is he tall and young?</span></span></code></pre></div>
@@ -908,7 +928,7 @@ translations are transformed into question marks. Options: “silent”,
 Option “silent” disables the warning in case of failed conversion. The
 conversion is done with base::iconv(), option “utf8” indicates that the
 source endocing is UTF-8, can be useful in some cases.</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">author</span> <span class="op">=</span> <span class="st">"Laurent Bergé"</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"This package has been developped by {ascii ? author}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; This package has been developped by Laurent Berge.</span></span></code></pre></div>
@@ -922,7 +942,7 @@ letters (large numbers keep their numeric format). The option “upper” is
 like the option “letter” but uppercases the first letter. Options “0” or
 “zero” left pads numeric vectors with 0s. The upper case command
 (<code>N</code>) adds the option “letter”.</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">12</span>, <span class="fl">52123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"She owes {n, '$'paste, C ? x}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; She owes $5, $12 and $52,123.</span></span>
@@ -948,7 +968,7 @@ like the option “letter” but uppercases the first letter. Options “0” or
 </h4>
 <p>When applied to a number, this operator writes them as a rank.
 Options: “letter”, “upper”, “compact”.</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"They finished {nth, enum ? n}!"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; They finished 3rd and 7th!</span></span></code></pre></div>
@@ -956,12 +976,12 @@ Options: “letter”, “upper”, “compact”.</p>
 it stops at 20. Option “upper” is the same as “letter” but uppercases
 the first letter. Option “compact” aggregates consecutive sequences in
 the form “start_n_th to end_n_th”.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"They arrived {nth.compact ? 5:20}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; They arrived 5th to 20th.</span></span></code></pre></div>
 <p>The upper case command (<code>Nth</code>) adds the option
 “letter”.</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"They finished {Nth, enum ? n}!"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; They finished third and seventh!</span></span></code></pre></div>
@@ -973,12 +993,12 @@ the form “start_n_th to end_n_th”.</p>
 “upper”. Option “letter” writes the number in letters (up to 100).
 Option “upper” does the same as “letter” and uppercases the first
 letter.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"They lost {C ! {ntimes ? c(1, 12)} against {/Real, Barcelona}}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; They lost once against Real and 12 times against Barcelona.</span></span></code></pre></div>
 <p>The upper case command (<code>Ntimes</code>) adds the option
 “letter”.</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"This paper was rejected {Ntimes ? x}..."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; This paper was rejected five times...</span></span></code></pre></div>
@@ -988,7 +1008,7 @@ letter.</p>
 </h4>
 <p>To select the first/last characters of each element. Negative numbers
 remove the first/last characters.</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{19 cfirst, 9 clast ! This is a very long sentence}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; very long</span></span>
 <span></span>
@@ -1008,7 +1028,7 @@ string <code>s</code> can be appended at the end. The difference between
 <code>'n|s'</code> and <code>'n||s'</code> is that in the second case
 the strings will always be of maximum size <code>n</code>, while in the
 first case they can be of length <code>n + nchar(s)</code>.</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"long sentence"</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"v0: {x}"</span>, </span>
 <span>        <span class="st">"v1: {4k ? x}"</span>, </span>
@@ -1028,7 +1048,7 @@ and a free-form symbol. Default is left-alignment of the strings. Option
 free-form symbol as option, it will be used for the filling. By default
 if no argument is provided, the maximum size of the character string is
 used. See help for str_fill() for more information.</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">life</span> <span class="op">=</span> <span class="st">"full of sound and fury, Signifying nothing"</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'[ ,]+'s, upper.first, fill.center, q, '\n'c ? life}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; '   Full   '</span></span>
@@ -1053,7 +1073,7 @@ pastes on the right and “both” pastes on both sides. Option “front” only
 pastes on the first element while option “back” only pastes on the last
 element. Option “delete” first replaces all elements with the empty
 string.</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"6 = {'|'paste.both, ' + 'c ? -3:-1}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 6 = |-3| + |-2| + |-1|</span></span></code></pre></div>
 </div>
@@ -1072,7 +1092,7 @@ conversion of at least one element fails, leading to a character vector.
 Option “rm” converts and removes the elements that could not be
 converted. Option “clear” turns failed conversions into the empty
 string, and hence lead to a character vector.</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="st">"six"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"   origin: {C, q ? x}"</span>, </span>
 <span>        <span class="st">"      num: {num, C, q ? x}"</span>, </span>
@@ -1091,14 +1111,14 @@ string, and hence lead to a character vector.</p>
 <p>Enumerates the elements. It creates a single string containing the
 comma separated list of elements. If there are more than 7 elements,
 only the first 6 are shown and the number of items left is written.</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"enum ? 1:5"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; enum ? 1:5</span></span></code></pre></div>
 <p>You can add the following options: + q, Q, or bq: to quote the
 elements + or, nor: to finish with an ‘or’ (or ‘nor’) instead of an
 ‘and’ + i, I, a, A, 1: to enumerate with this prefix, like in: i) one,
 and ii) two + a number: to tell the number of items to display</p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Marv"</span>, <span class="st">"Nancy"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"The murderer must be {enum.or ? x}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; The murderer must be Marv or Nancy.</span></span>
@@ -1111,11 +1131,11 @@ and ii) two + a number: to tell the number of items to display</p>
 <span><span class="co"># default is at 7</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"x{sample(100, 30)}"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum ? x}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The problematic variables are x5, x10, x18, x29, x30, x32 and 24 others.</span></span>
+<span><span class="co">#&gt; The problematic variables are x3, x4, x12, x13, x14, x16 and 24 others.</span></span>
 <span></span>
 <span><span class="co"># you can augment or reduce the numbers to display with an option</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum.3 ? x}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The problematic variables are x5, x10 and 28 others.</span></span></code></pre></div>
+<span><span class="co">#&gt; The problematic variables are x3, x4 and 28 others.</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="len-len">len, Len<a class="anchor" aria-label="anchor" href="#len-len"></a>
@@ -1124,12 +1144,12 @@ and ii) two + a number: to tell the number of items to display</p>
 Option “letter” writes the length in words (up to 100). Option “upper”
 is the same as letter but uppercases the first letter. Option “format”
 add comma separation for thousands.</p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Size = {len.format ? 1:5000}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Size = 5,000</span></span></code></pre></div>
 <p>The upper case command (<code>Len</code>) adds the option
 “letter”.</p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Its size is {Len ? 1:8}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Its size is eight</span></span></code></pre></div>
 </div>
@@ -1148,7 +1168,7 @@ behavior, add an underscore at the end of it. The argument
 fraction of the current screen. Finally it can be an expression that
 uses the variable <code>.sw</code> which will capture the value of the
 current screen width.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"this is a long sentence"</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"------ version 0 ------\n{x}"</span>, </span>
 <span>        <span class="st">"------ version 1 ------\n{15 width ? x}"</span>, </span>
@@ -1173,11 +1193,11 @@ current screen width.</p>
 <p>Displays a formatted time difference. Option “silent” does not report
 a warning if the operation fails. It accepts either objects of class
 <code>POSIXt</code> or <code>difftime</code>.</p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.15</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Time: {dtime ? x}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Time: 159ms</span></span></code></pre></div>
+<span><span class="co">#&gt; Time: 153ms</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -1191,7 +1211,7 @@ element).</p>
 <p>Use the tilde operator, of the form <code>~(op1, op2)</code>, to
 apply operations group-wise, to each of the split strings. Better with
 an example.</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Oreste, Hermione"</span>, <span class="st">"Hermione, Pyrrhus"</span>, <span class="st">"Pyrrhus, Andromaque"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Troubles ahead: {S, ~(' loves 'c), C ? x}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Troubles ahead: Oreste loves Hermione, Hermione loves Pyrrhus and Pyrrhus loves Andromaque.</span></span></code></pre></div>
@@ -1214,7 +1234,7 @@ condition is <code>TRUE</code> and <code>ops_false</code> an
 <code>FALSE</code>.</p>
 <p>Ex.1: Let’s take a sentence, delete words of less than 4 characters,
 and trim words of 7+ characters.</p>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"Songe Céphise à cette nuit cruelle qui fut pour tout un peuple une nuit éternelle"</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{s, if(.nchar&lt;=4 ; nuke ; '7|..'k), c ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Songe Céphise cette cruelle peuple éternel..</span></span></code></pre></div>
@@ -1244,7 +1264,7 @@ operations modifying the length of the vectors are
 in full-string conditions.</p>
 <p>Ex.2: we write the sum of several elements, if the vector is longer
 than 4, we replace all remaining elements with an ellispsis.</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># same expression for two values of x give different results</span></span>
 <span><span class="va">x_short</span> <span class="op">=</span> <span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"x{1:4}"</span><span class="op">)</span></span>
 <span><span class="co"># the false statement is missing: it means that nothing is done is .N&lt;=4</span></span>
@@ -1263,7 +1283,7 @@ replaced if the condition is <code>TRUE</code>. This is similar for
 <code>verb_false</code>. The condition works as in <code>if</code>.</p>
 <p>Ex.3: we want to replace all values lower than 10 by the the string
 “&lt;10”, and then create an enumeration.</p>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">25</span>, <span class="fl">12</span>, <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Values: {vif(.&lt;10 ; &lt;10), C ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Values: &lt;10, 25, 12 and &lt;10</span></span></code></pre></div>
@@ -1271,7 +1291,7 @@ replaced if the condition is <code>TRUE</code>. This is similar for
 element-wise operation is triggered. Conditions of length 1 apply the
 replacement to the full vector. Knowing this, let’s redo Ex.3
 differently:</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"x{1:10}"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"y = {vif(.N&gt;4 ; {x[1]} + ... + {last?x} ; {' + 'c?x}) ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; y = x1 + ... + x10</span></span></code></pre></div>
@@ -1288,7 +1308,7 @@ illustrated by the last example.</p>
 <p>Ex.5: we take in numeric values, keep only the last 4 values, append
 <code>x</code> for odd numbers and <code>y</code> for even numbers, we
 further revert the order of the even numbers.</p>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{4 last, vif(. %% 2 ; x{.} ; y{rev?.}), C ? 1:11}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; y10, x9, y8 and x11</span></span></code></pre></div>
 <p>Let’s break it down. We take in <code>1:11</code>, and after the
@@ -1309,7 +1329,7 @@ result.</p>
 </h2>
 <p>Interpolations starting with a slash are different from regular
 interpolations.</p>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">4</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{/one, two, {x}}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; one</span></span>
@@ -1333,7 +1353,7 @@ into the vector, leading to the result.</p>
 apply the slash operator without the need of an interpolation box
 (provided the slash appears as the first character), see the example
 below.</p>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">4</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"/one, two, {x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; one</span></span>
@@ -1365,7 +1385,7 @@ section.</p>
 If its length is lower than 10 then we write the message “x is short”,
 otherwise we write “x is long”, and insert “very” depending on the
 number of digits.</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"x is {&amp;len(x)&lt;10 ; short ; {`log10(.N)-1`times, ''c ! very }long}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; x is short</span></span>
@@ -1392,7 +1412,7 @@ There can be interpolation on the values <code>verb_true</code> and
 a vector of either length 1 or a length equal to the condition. Then
 element-wise replacements are made, a la <code><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">base::ifelse</a></code>.</p>
 <p>Ex.2: illustration of element-wise replacements.</p>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span></span>
 <span><span class="va">y</span> <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{&amp;x %% 2 ; odd ; {y}}"</span><span class="op">)</span></span>
@@ -1409,7 +1429,7 @@ is the variable used in the condition itself. So the syntax is
 accept</em> <code>verb_false</code>.</p>
 <p>Ex.3: let’s write the integer <code>i</code> in letters when equal to
 3 only.</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">i</span> <span class="op">=</span> <span class="fl">3</span> </span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"i = {&amp;&amp;i == 3 ; three}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; i = three</span></span>
@@ -1437,7 +1457,7 @@ Ex.2)</li>
 Ex.1)</li>
 </ul>
 <p>Ex.1: we add an ending ‘s’ based on a number.</p>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"I bought {N?x} book{#s}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; I bought five books.</span></span>
@@ -1463,7 +1483,7 @@ used (see Ex.2). If no variable is interpolated at all, an error is
 thrown.</p>
 <p>Ex.2: we add an ending ‘s’ and conjugate the verb ‘be’ based on the
 length of a vector.</p>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"J."</span>, <span class="st">"M."</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"My BFF{$s, are} {C?x}!"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; My BFFs are J. and M.!</span></span>
@@ -1485,7 +1505,7 @@ different from regular operations.</p>
 <p>Adds an “s” (or “es”) if it is plural (&gt; 1), nothing otherwise.
 Accepts the option <code>0</code> or <code>zero</code> which treats a
 0-length or a 0-value as plural.</p>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"We've found {&amp;nfiles;{.};no} file{#s}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We've found 1 file.</span></span>
@@ -1508,7 +1528,7 @@ Accepts the option <code>0</code> or <code>zero</code> which treats a
 <p>Adds an ‘y’ if singular and ‘ies’ if plural (&gt;1). Accepts the
 option <code>0</code> or <code>zero</code> which treats a 0-length or a
 0-value as plural.</p>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ndir</span> <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"We've found {ndir} director{#y}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We've found 1 directory.</span></span>
@@ -1526,7 +1546,7 @@ option <code>0</code> or <code>zero</code> which treats a 0-length or a
 </h4>
 <p>Enumerates the elements (see help for the regular operation
 <code>enum</code>).</p>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fruits</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"apples"</span>, <span class="st">"oranges"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"The fruit{$s ? fruits} I love {$are, enum}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; The fruits I love are apples and oranges.</span></span>
@@ -1542,7 +1562,7 @@ option <code>0</code> or <code>zero</code> which treats a 0-length or a
 as a formatted number or in letters (upper case versions). Accepts the
 options <code>letter</code> (to write in letter) and <code>upper</code>
 (to uppercase the first letter).</p>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{#N.upper ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Five files are compromised.</span></span>
@@ -1557,7 +1577,7 @@ options <code>letter</code> (to write in letter) and <code>upper</code>
 <p>Writes the value of the variable as an order (nth) or a frequence
 (ntimes). Accepts the option <code>letter</code> to write the numbers in
 letters (uppercase version of the operator does the same).</p>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Writing the same sentence {#Ntimes ? n} is unnecessary."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Writing the same sentence twice is unnecessary.</span></span></code></pre></div>
@@ -1572,7 +1592,7 @@ is treated as a verb.</p>
 <p>Multiple verbs are illustrated in the example below. It also
 anticipaed the conditional statements described in the next section.</p>
 <p>Ex.3: multiple verbs and conditional statements.</p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pple</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Francis"</span>, <span class="st">"Henry"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{$enum, is, (a;) ? pple} tall guy{$s}."</span>,</span>
 <span>        <span class="st">"{$(He;They), like} to eat donuts."</span>,</span>
@@ -1615,7 +1635,7 @@ or plural (i.e. &gt;=1)</li>
 interpolated</strong> (if appropriate). In these interpolations you need
 not refer explicitly to the variable for pluralization
 interpolations.</p>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Sorry, nothing found.</span></span>
@@ -1641,7 +1661,7 @@ meaning, you need to escape them with a double backslash.</p>
 currently looking for. In the examples below, you don’t need to escape
 the closing bracket in Ex.1 since no box was open. On the other hand,
 you need to escape it in Ex.2.</p>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the closing bracket does not have a special meaning since no open bracket</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"open = \\{, close = }"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; open = {, close = }</span></span>
@@ -1653,7 +1673,7 @@ you need to escape it in Ex.2.</p>
 interpolate with <code>.[]</code> instead of <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code>.</p>
 <p>You can also use the following hack:</p>
 <p>Ex.3: using regular interpolation to pass verbatim text.</p>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"I {'can {write} {{what}} I want'}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; I can {write} {{what}} I want</span></span></code></pre></div>
 <p>Since <code>{expr}</code> evaluates <code>expr</code>, the stuff
@@ -1661,7 +1681,7 @@ inside the <em>box</em>, you can pass a character string and it will
 stay untouched.</p>
 <p>In the few operations expecting a semi-colon (if-else and
 pluralization), it can also be escaped with a double backslash.</p>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">is_c</span> <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{&amp;is_c ; int i =1\\; ; i = 1}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; int i =1;</span></span>
@@ -1676,7 +1696,7 @@ you need a hack: use a question mark (<code>?</code>) first to indicate
 to the algorithm that you want to evaluate the expression.</p>
 <p>Ex.4: using the <code>?</code> hack to use <code>!</code> as a
 logical operation.</p>
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{!TRUE} is {?!TRUE}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; TRUE is FALSE</span></span></code></pre></div>
 </div>
@@ -1696,7 +1716,7 @@ functions modifying the length or order of the vector.</p>
 <code>smagick_register</code> and provide it an alias. Optionnally, you
 can provide a list of valid options.</p>
 <p>Ex.1: a new operation adding markdown emphasis.</p>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># A) define the function</span></span>
 <span><span class="va">fun_emph</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"*"</span>, <span class="va">x</span>, <span class="st">"*"</span><span class="op">)</span></span>
 <span> </span>
@@ -1735,7 +1755,7 @@ if <code>fun</code> changes the length or the order of vectors.</p>
 <p>Let’s add an argument and an option to the “emph” operation that we
 defined in Ex.1.</p>
 <p>Ex.2: new operation with argument and option.</p>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fun_emph</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">argument</span>, <span class="va">options</span>, <span class="va">...</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">arg</span> <span class="op">=</span> <span class="va">argument</span></span>
 <span>  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">arg</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="va">arg</span> <span class="op">=</span> <span class="st">"*"</span></span>
@@ -1764,7 +1784,7 @@ defined in Ex.1.</p>
 <p>Finally let’s illustrate an example with group-wise axareness.</p>
 <p>Ex.3: we create a function that only keeps variable names (ex: x5,
 is_num, etc).</p>
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">keep_varnames</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">group</span>, <span class="va">group_flag</span>, <span class="va">...</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">is_ok</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^[[:alpha:].][[:alnum:]._]*$"</span>, <span class="va">x</span><span class="op">)</span></span>
