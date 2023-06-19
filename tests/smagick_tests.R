@@ -58,7 +58,7 @@ x = "Cogito...Ergo...Sum"
 txt = smagick("He said: {'f/...'s ? x}")
 test(txt, c("He said: Cogito", "He said: Ergo", "He said: Sum"))
 
-txt = smagick("He said: {'i / [cs]'s ? x}")
+txt = smagick("He said: {'i/[cs]'s ? x}")
 test(txt, c("He said: ", "He said: ogito...Ergo...", "He said: um"))
 
 
@@ -74,42 +74,42 @@ test(txt, "She said: Blanche dit 'Bla nc'.")
 txt = smagick("She said: {'bla'r.ignore, ws ? x}")
 test(txt, "She said: nche dit ' nc'.")
 
-txt = smagick("She said: {'i / bla'r, ws ? x}")
+txt = smagick("She said: {'i/bla'r, ws ? x}")
 test(txt, "She said: nche dit ' nc'.")
 
 txt = smagick("She said: {'bla'r.word, ws ? x}")
 test(txt, "She said: Blanche dit 'Bla blanc'.")
 
-txt = smagick("She said: {'w / bla'r, ws ? x}")
+txt = smagick("She said: {'w/bla'r, ws ? x}")
 test(txt, "She said: Blanche dit 'Bla blanc'.")
 
 txt = smagick("She said: {'bla'r.word.ignore, ws ? x}")
 test(txt, "She said: Blanche dit ' blanc'.")
 
-txt = smagick("She said: {'wi / bla'r, ws ? x}")
+txt = smagick("She said: {'wi/bla'r, ws ? x}")
 test(txt, "She said: Blanche dit ' blanc'.")
 
 txt = smagick("She said: {'.'r.fixed, ws ? x}")
 test(txt, "She said: Blanche dit 'Bla bla blanc'")
 
-txt = smagick("She said: {'fixed / .'r, ws ? x}")
+txt = smagick("She said: {'fixed/.'r, ws ? x}")
 test(txt, "She said: Blanche dit 'Bla bla blanc'")
 
 txt = smagick("She said: {'Bla, blanc => ??'r.word, ws ? x}")
 test(txt, "She said: Blanche dit '?? bla ??'.")
 
-txt = smagick("She said: {'word / Bla, blanc => ??'r, ws ? x}")
+txt = smagick("She said: {'word/Bla, blanc => ??'r, ws ? x}")
 test(txt, "She said: Blanche dit '?? bla ??'.")
 
 txt = smagick("She said: {'Bla, blanc => \\1\\1'r.w, ws ? x}")
 test(txt, "She said: Blanche dit 'BlaBla bla blancblanc'.")
 
-txt = smagick("She said: {'w / Bla, blanc => \\1\\1'r, ws ? x}")
+txt = smagick("She said: {'w/Bla, blanc => \\1\\1'r, ws ? x}")
 test(txt, "She said: Blanche dit 'BlaBla bla blancblanc'.")
 
 # total replacement
 x = smagick("/jingle bells, jingle bells, jingle, all the way")
-txt = smagick("{', 'c ! {'t / jing => [sound]'r ? x}}")
+txt = smagick("{', 'c ! {'t/jing => [sound]'r ? x}}")
 test(txt, "[sound], [sound], [sound], all the way")
 
 txt = smagick("{', 'c ! {'jing => [sound]'r.total ? x}}")
@@ -123,10 +123,10 @@ test(smagick("a = {R ? 1:5}"), "err")
 
 x = c("[]", "Moon", "Sun")
 
-txt = dsb("Stare at the .['f / []'r ? x]")
+txt = dsb("Stare at the .['f/[]'r ? x]")
 test(txt, c("Stare at the ", "Stare at the Moon", "Stare at the Sun"))
 
-txt = dsb("Stare at the .['f / [] => ...'r ? x]")
+txt = dsb("Stare at the .['f/[] => ...'r ? x]")
 test(txt, c("Stare at the ...", "Stare at the Moon", "Stare at the Sun"))
 
 txt = dsb("Stare at the .['[[:upper:]]'R ? x]")
@@ -176,13 +176,13 @@ test(txt, c("bla", "bla"))
 txt = smagick("{'bla'X.i ? x}")
 test(txt, c("Bla", "Bla", "bla", "bla"))
 
-txt = smagick("{'i / bla'X ? x}")
+txt = smagick("{'i/bla'X ? x}")
 test(txt, c("Bla", "Bla", "bla", "bla"))
 
 txt = smagick("{'bla'X.i.w ? x}")
 test(txt, c("Bla", "bla"))
 
-txt = smagick("{'ignore, word / bla'X ? x}")
+txt = smagick("{'ignore, word/bla'X ? x}")
 test(txt, c("Bla", "bla"))
 
 # conditional

@@ -348,7 +348,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
   //      -     is_not: c(FALSE, TRUE)
   //      - is_not_gnl: FALSE
   //
-  //  in: "!fiw / test | wordle"
+  //  in: "!fiw/test | wordle"
   // out: -      flags: "fiw"
   //      -   patterns: c("test", "wordle")
   //      -      is_or: c(FALSE, TRUE)
@@ -433,13 +433,12 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
           return res;
         }
         
-        while(i < n && is_blank(str[i])) ++i;
+        while(i < n && str[i] == ' ') ++i;
         while(i < n && str[i] >= 'a' && str[i] <= 'z'){
           flag_tmp += str[i++];
         }
         
-        if(i < n && str[i] != ',' && str[i] != '/' && 
-           !(str[i] == ' ' && i +  2 < n && str[i+1] == '/' && str[i+2] == ' ')){
+        if(i < n && str[i] != ',' && str[i] != '/'){
           res["error"] = "non valid character at position";
           res["error_extra"] = i + 1;
           return res;
@@ -454,11 +453,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
         flags.push_back(flag_tmp);
         flag_tmp = "";
 
-        if(str[i] == ' '){
-          // if a space: we checked it at "non valid character at position"
-          i += 3;
-          break;
-        } else if(str[i] == '/'){
+        if(str[i] == '/'){
           ++i;
           break;
         } else if(str[i] == ','){

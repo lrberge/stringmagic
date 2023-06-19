@@ -415,7 +415,7 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' str_get(x, "Volvo", "Mazda", seq = TRUE)
 #'
 #' # let's get the first word of each car name
-#' car_first = str_op(x, "extract.first")
+#' car_first = str_ops(x, "extract.first")
 #' # we select car brands ending with 'a', then ending with 'i'
 #' str_get(car_first, "a$", "i$", seq = TRUE)
 #' # seq.unik is similar to seq but applies unique()
@@ -887,9 +887,9 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' x = c("hello world  ", "it's 5 am....")
 #'
 #' # we clean the o's and the points (we use 'fixed' to trigger fixed-search)
-#' str_clean(x, c("o", "f/."))
+#' str_clean(x, "o", "f/.")
 #' # equivalently
-#' str_clean(x, "fixed / o, .")
+#' str_clean(x, "fixed/o, .")
 #' # equivalently
 #' str_clean(x, "o, .", fixed = TRUE)
 #' # equivalently
@@ -902,7 +902,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' cars = row.names(mtcars)
 #' new = str_clean(cars, 
 #'            # replace strings containing "Maz" with Mazda
-#'            "total / Maz => Mazda", 
+#'            "total/Maz => Mazda", 
 #'            # replace the word 'Merc' with Mercedes
 #'            "wi/merc => Mercedes",
 #'            # replace strings containing "Merc" and a digit followed with an 'S'
@@ -1007,7 +1007,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
         p = format_pattern(p, fixed = is_fixed, word = is_word, ignore = is_ignore)
         is_fixed = attr(p, "fixed")
 
-        if(is_total){          
+        if(is_total){
           who_tmp = tryCatch(grepl(p, res, perl = !is_fixed, fixed = is_fixed), 
                          error = function(e) structure(conditionMessage(e), class = "try-error"),
                          warning = function(w) structure(conditionMessage(w), class = "try-warning"))
@@ -1253,7 +1253,7 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE, pa
     info = setdiff(authorized_flags, flags)
     stop_hook("In the pattern {'20||...'k, bq?pattern} the flag {enum.bq?flag_pblm} is not authorized.",
               "\nFYI the authorized flags are: {enum.bq?authorized_flags}.",
-              "\nNOTA: The syntax is \"flag1, flag2 / regex\". To remove the parsing of flags, start with a '/'.")
+              "\nNOTA: The syntax is \"flag1, flag2/regex\". To remove the parsing of flags, start with a '/'.")
   }
 
   if("verbatim" %in% flags){
