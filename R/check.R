@@ -891,6 +891,14 @@ get_up_hook = function(){
     up = up + 1
     f = parent.frame(up + 1)
   }
+  
+  # we accept direct nestedness
+  f_up = parent.frame(up + 2)
+  while(!identical(f_up, .GlobalEnv) && exists("SMAGICK_HOOK", f_up)){
+    up = up + 1
+    f = f_up
+    f_up = parent.frame(up + 2)
+  }
 
   if(identical(f, .GlobalEnv)){
     up = 1
