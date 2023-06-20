@@ -109,18 +109,22 @@ generate_help_extensive = function(){
   
   if(!is_smagick_root()) return(NULL)
   
-  mtime_origin = floor(as.numeric(file.info("R/smagick_main.R")["mtime"]))
+  mtime_origin = floor(as.numeric(file.info("R/smagick_doc.R")["mtime"]))
   mtime_destination = readLines("R/AUTO_help.R", n = 1)
-  mtime_destination = str_ops(mtime_destination, "x, num")
+  mtime_destination = as.numeric(str_trim(mtime_destination, 2))
     
   if(mtime_origin <= mtime_destination){
     return(NULL)
   }  
   
-  smagick_txt = readLines("R/smagick_main.R")
+  smagick_txt = readLines("R/smagick_doc.R")
   
-  if(any(grepl("browser()", smagick_txt))){
-    return(NULL)
+  # we check if browser is used
+  for(f in list.files("R", full.names = TRUE)){
+    txt = readLines(f)
+    if(any(grepl("browser()", txt, fixed = TRUE))){
+      return(NULL)
+    }
   }
   
   message("Help rewritten.")

@@ -930,6 +930,34 @@ txt = smagick("First letters: {
 test(txt, "First letters: abcdef")
 
 #
+# variables as arguments ####
+#
+
+txt = smagick("Hi {you}!", you = "Omer")
+test(txt, "Hi Omer!")
+
+txt = smagick("m * n = {m * n}", m = 5, n = 4)
+test(txt, "m * n = 20")
+
+# with nesting
+txt = smagick("vars = {' + 'c ! {v1}_{suffix}}", v1 = c("x1", "z5"), suffix = "post")
+test(txt, "vars = x1_post + z5_post")
+
+# with ifelse
+txt = smagick("value = {&v1 > 0 ; {.} ; {v2}}", v1 = 55, v2 = "error")
+test(txt, "value = 55")
+
+txt = smagick("value = {&v1 > 0 ; {.} ; {v2}}", v1 = -55, v2 = "error")
+test(txt, "value = error")
+
+# with plural
+txt = smagick("The number{$s, is, ({v};{$enum}) ? x}", x = 1:3, v = "error")
+test(txt, "The numbers are 1, 2 and 3")
+
+txt = smagick("The number{$s, is, ({v};{$enum}) ? x}", x = 3, v = "error")
+test(txt, "The number is error")
+
+#
 # data.table ####
 #
 

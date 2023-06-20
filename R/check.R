@@ -541,9 +541,12 @@ check_set_smagick_eval = function(call, data, envir, check){
     if(inherits(x, "try-error")){
       context = get_smagick_context()
       call_dp = deparse_short(call)
+      if(grep("^expression\\(", call_dp)){
+        call_dp = gsub("^expression\\(|\\)", "", call_dp)
+      }
       x_clean = gsub("^Error in eva[^:]+: ?", "Error: ", x)
       
-      msg = .sma("PROBLEM: The expression {bq?call_dp} could not be evaluated, see error below:",
+      msg = .sma("PROBLEM: The expression {bq ? call_dp} could not be evaluated, see error below:",
                 "\n{x_clean}")
                 
       stop_hook("{context}\n{msg}")
