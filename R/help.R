@@ -109,7 +109,6 @@ generate_help_extensive = function(){
   
   if(!is_smagick_root()) return(NULL)
   
-  
   mtime_origin = floor(as.numeric(file.info("R/smagick_main.R")["mtime"]))
   mtime_destination = readLines("R/AUTO_help.R", n = 1)
   mtime_destination = str_ops(mtime_destination, "x, num")
@@ -118,9 +117,13 @@ generate_help_extensive = function(){
     return(NULL)
   }  
   
-  message("Help rewritten.")
-  
   smagick_txt = readLines("R/smagick_main.R")
+  
+  if(any(grepl("browser()", smagick_txt))){
+    return(NULL)
+  }
+  
+  message("Help rewritten.")
   
   i_smagick = str_which(smagick_txt, "^sma.*gick .*= function\\(")
   doc = smagick_txt[1:(i_smagick - 1)]
