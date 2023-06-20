@@ -178,7 +178,7 @@ smagick_register = function(fun, alias, valid_options = NULL){
 ####
 
 #' @describeIn smagick Like `smagick` but interpolation is with the dot-square-bracket ".[]"
-dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+dsb = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
                slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
 
 
@@ -186,7 +186,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
   if(!missing(slash)) check_logical(slash, scalar = TRUE)
   if(!missing(collapse)) check_character(collapse, null = TRUE, scalar = TRUE)
   if(!missing(sep)) check_character(sep, scalar = TRUE)
-  if(!missing(frame)) check_envir(frame)
+  if(!missing(envir)) check_envir(envir)
 
   if(...length() == 0){
     if(missnull(help)){
@@ -201,7 +201,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
   set_pblm_hook()
 
-  res = smagick_internal(..., is_dsb = TRUE, frame = frame, sep = sep,
+  res = smagick_internal(..., is_dsb = TRUE, envir = envir, sep = sep,
                             vectorize = vectorize, slash = slash,
                             collapse = collapse, help = help, is_root = use_DT,
                             check = TRUE, fun_name = "dsb")
@@ -216,11 +216,11 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 
 
 #' @describeIn smagick Like `dsb` but without error handling (leads to slightly faster run times).
-.dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+.dsb = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
                 check = FALSE, slash = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
-  smagick_internal(..., is_dsb = TRUE, frame = frame,
+  smagick_internal(..., is_dsb = TRUE, envir = envir,
                       slash = slash, sep = sep,
                       vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".dsb")
@@ -245,7 +245,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' there's over 50 operators, it's a bit complicated to sort you out in this small space. 
 #' But type `smagick("--help")` to prompt a compact help, or use the argument `help = "keyword"`
 #' (or `help = TRUE`) to obtain a selective help from the main documentation.
-#' @param frame An environment used to evaluate the variables in `"{}"`. By default the variables are
+#' @param envir An environment used to evaluate the variables in `"{}"`. By default the variables are
 #' evaluated using the environment from where the function is called.
 #' @param sep Character scalar, default is the empty string `""`. It is used to collapse all
 #'  the elements in `...` before applying any operation.
@@ -1220,10 +1220,10 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #'
 #' #
-#' # ARGUMENTS FROM THE FRAME ####
+#' # ARGUMENTS FROM THE ENVIRONMENT ####
 #' #
 #'
-#' # Arguments can be evaluated from the calling frame.
+#' # Arguments can be evaluated from the calling environment.
 #' # Simply use backticks instead of quotes.
 #'
 #' dollar = 6
@@ -1249,7 +1249,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #'
 #'    
 #'
-smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, check = TRUE,
+smagick = function(..., envir = parent.frame(), sep = "", vectorize = FALSE, check = TRUE,
                slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
 
 
@@ -1257,7 +1257,7 @@ smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, che
   if(!missing(slash)) check_logical(slash, scalar = TRUE)
   if(!missing(collapse)) check_character(collapse, null = TRUE, scalar = TRUE)
   if(!missing(sep)) check_character(sep, scalar = TRUE)
-  if(!missing(frame)) check_envir(frame)
+  if(!missing(envir)) check_envir(envir)
 
   if(...length() == 0){
     if(missnull(help)){
@@ -1274,7 +1274,7 @@ smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, che
 
   # is_root is only used to enable DT evaluation
 
-  res = smagick_internal(..., is_dsb = FALSE, frame = frame, sep = sep,
+  res = smagick_internal(..., is_dsb = FALSE, envir = envir, sep = sep,
                             vectorize = vectorize, slash = slash, help = help,
                             collapse = collapse, is_root = use_DT,
                             check = TRUE, fun_name = "smagick")
@@ -1291,12 +1291,12 @@ smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, che
 sma = smagick
 
 #' @describeIn smagick Like `smagick` but without any error handling to save a few ms
-.smagick = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
+.smagick = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
                 check = FALSE, slash = FALSE, use_DT = FALSE){
 
   set_pblm_hook()
 
-  smagick_internal(..., is_dsb = FALSE, frame = frame,
+  smagick_internal(..., is_dsb = FALSE, envir = envir,
                       slash = slash, sep = sep,
                       vectorize = vectorize, is_root = use_DT,
                       check = check, fun_name = ".smagick")
@@ -1309,7 +1309,7 @@ sma = smagick
 #### Internal ####
 ####
 
-smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = list(),
+smagick_internal = function(..., is_dsb = TRUE, envir = parent.frame(),  data = list(),
                                sep = "", vectorize = FALSE,
                                slash = TRUE, collapse = NULL,
                                help = NULL, is_root = FALSE,
@@ -1365,7 +1365,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
             }
           }
 
-          attr(frame, "dt_data") = dt_data
+          attr(envir, "dt_data") = dt_data
       }
     }
   }
@@ -1409,7 +1409,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
       res = vector("list", n)
       for(i in 1:n){
         res[[i]] = smagick_internal(dots[[i]], is_dsb = is_dsb, slash = slash, 
-                                       frame = frame, check = check, fun_name = fun_name)
+                                       envir = envir, check = check, fun_name = fun_name)
       }
 
       return(unlist(res))
@@ -1424,7 +1424,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 
   if(slash && substr(x, 1, 1) == "/"){
     # we apply the "slash" operation
-    x = sma_operators(substr(x, 2, nchar(x)), "/", NULL, "", check = check, frame = frame, 
+    x = sma_operators(substr(x, 2, nchar(x)), "/", NULL, "", check = check, envir = envir, 
                       group_flag = 0, is_dsb = is_dsb, fun_name = fun_name)
     return(x)
   } 
@@ -1503,7 +1503,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
         if(is.character(xi_call)){
           xi = xi_call
         } else {
-          xi = check_set_smagick_eval(xi_call, data, frame, check)
+          xi = check_set_smagick_eval(xi_call, data, envir, check)
         }
 
         if(ANY_PLURAL){
@@ -1633,13 +1633,13 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
           if(verbatim){
             # for the slash operation, we delay the interpolation
             if(operators[1] != "/" && grepl(BOX_OPEN, xi, fixed = TRUE)){
-              xi = smagick_internal(xi, is_dsb = is_dsb, frame = frame, slash = FALSE,
+              xi = smagick_internal(xi, is_dsb = is_dsb, envir = envir, slash = FALSE,
                                       vectorize = concat_nested, check = check, fun_name = fun_name)
             }
           } else if(!verbatim){
             # evaluation
             xi_call = check_set_smagick_parsing(xi, check)
-            xi = check_set_smagick_eval(xi_call, data, frame, check)
+            xi = check_set_smagick_eval(xi_call, data, envir, check)
           }
         }
 
@@ -1657,7 +1657,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
         #
 
         if(is_plural){
-          xi = sma_pluralize(operators, xi, fun_name, is_dsb, frame, check)
+          xi = sma_pluralize(operators, xi, fun_name, is_dsb, envir, check)
 
         } else if(is_ifelse){
 
@@ -1686,7 +1686,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
             
             if(do_eval){
               xi_call = str2lang(vars[1])
-              xi_val = check_set_smagick_eval(xi_call, data, frame, check)
+              xi_val = check_set_smagick_eval(xi_call, data, envir, check)
             }
             
             if(operators[1] == "&&" && length(xi) != length(xi_val)){
@@ -1710,7 +1710,7 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
             }
           }
 
-          xi = sma_ifelse(operators, xi, xi_val, fun_name, frame = frame,
+          xi = sma_ifelse(operators, xi, xi_val, fun_name, envir = envir,
                           check = check, is_dsb = is_dsb)
         } else {
           #
@@ -1725,20 +1725,20 @@ smagick_internal = function(..., is_dsb = TRUE, frame = parent.frame(),  data = 
 
             if(op_parsed$eval){
               argument_call = check_set_oparg_parse(op_parsed$argument, opi, check)
-              argument = check_set_oparg_eval(argument_call, data, frame, opi, check)
+              argument = check_set_oparg_eval(argument_call, data, envir, opi, check)
             } else {
               argument = op_parsed$argument
             }
 
             if(check){
               xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument,
-                                              check = check, frame = frame, group_flag = group_flag,
+                                              check = check, envir = envir, group_flag = group_flag,
                                               is_dsb = is_dsb, fun_name = fun_name),
                                 get_smagick_context(), " See error below:",
                                 verbatim = TRUE, up = 1)
             } else {
               xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, check = check,
-                                 frame = frame, group_flag = group_flag,
+                                 envir = envir, group_flag = group_flag,
                                  is_dsb = is_dsb, fun_name = fun_name)
             }
           }
@@ -1903,7 +1903,7 @@ sma_char2operator = function(x, fun_name){
 }
 
 
-sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL, 
+sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
                          group_flag = 0, is_dsb = FALSE, fun_name = "smagick"){
 
   # group_flag:  0 nothing
@@ -1932,7 +1932,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       
       for(i in 1:n_res){
         if(is_open[i]){
-          all_elements[[i]] = smagick_internal(res[i], is_dsb = is_dsb, frame = frame,
+          all_elements[[i]] = smagick_internal(res[i], is_dsb = is_dsb, envir = envir,
                                                   check = check, fun_name = fun_name)  
         } else {
           all_elements[[i]] = res[i]
@@ -3202,14 +3202,14 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       }
       
       if(check){
-        cond = check_expr(eval(cond_parsed, my_data, frame), 
+        cond = check_expr(eval(cond_parsed, my_data, envir), 
                   .sma("The string operation {bq?op} should be of the form ",
                        "{op}(condition ; true ; false). ",
                        "\nPROBLEM: the condition {bq?cond_raw} could not be ",
                        "evaluated, see error below:"), 
                    verbatim = TRUE)  
       } else {
-        cond = eval(cond_parsed, my_data, frame)
+        cond = eval(cond_parsed, my_data, envir)
       }
     }
     
@@ -3281,7 +3281,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
       if(op == "if"){
         n_old = length(xi)
         cond_flag = +grepl("~(", instruction, fixed = TRUE)
-        xi = apply_simple_operations(xi, op, instruction, check, frame, 
+        xi = apply_simple_operations(xi, op, instruction, check, envir, 
                                      group_flag = cond_flag, is_dsb, fun_name)
         
         if(is_elementwise && !length(xi) %in% c(0, n_old)){
@@ -3298,7 +3298,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
         } else {
           data = list()
         }
-        xi = smagick_internal(instruction, is_dsb = is_dsb, data = data, frame = frame, check = check, 
+        xi = smagick_internal(instruction, is_dsb = is_dsb, data = data, envir = envir, check = check, 
                                 fun_name = fun_name)
       }
       
@@ -3375,7 +3375,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
   } else if(op == "~"){
     # Conditional: ~ ####
-    res = apply_simple_operations(x, op, argument, check, frame, 
+    res = apply_simple_operations(x, op, argument, check, envir, 
                                   group_flag = 2, is_dsb, fun_name)
                                   
     group_index = attr(res, "group_index")
@@ -3428,7 +3428,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
 
 
 
-sma_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
+sma_pluralize = function(operators, xi, fun_name, is_dsb, envir, check){
 
   plural_len = operators[1] == "$"
 
@@ -3542,7 +3542,7 @@ sma_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
          (op == "singular" && !IS_PLURAL && !(any(grepl("zero$", operators)) && IS_ZERO)) || 
          (op == "plural" && IS_PLURAL)){
           
-          value = smagick_internal(argument, is_dsb = is_dsb, frame = frame,
+          value = smagick_internal(argument, is_dsb = is_dsb, envir = envir,
                                       slash = FALSE, check = check, fun_name = fun_name,
                                       plural_value = xi)
         if(value != ""){
@@ -3574,7 +3574,7 @@ sma_pluralize = function(operators, xi, fun_name, is_dsb, frame, check){
   paste(res, collapse = " ")
 }
 
-sma_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
+sma_ifelse = function(operators, xi, xi_val, fun_name, envir, is_dsb, check){
 
   if(is.numeric(xi)){
     xi = xi != 0
@@ -3636,7 +3636,7 @@ sma_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
           data = list("." = xi_val, ".N" = length(xi_val), ".len" = length(xi_val))
         }
         
-        log_op_eval = smagick_internal(log_op, is_dsb = is_dsb, frame = frame, data = data,
+        log_op_eval = smagick_internal(log_op, is_dsb = is_dsb, envir = envir, data = data,
                               slash = FALSE, check = check, fun_name = fun_name, 
                               plural_value = xi_val)
         
@@ -3703,7 +3703,7 @@ sma_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
     if(is.null(data)){
       data = list("." = xi_val, ".N" = length(xi_val), ".len" = length(xi_val))
     }
-    res = smagick_internal(res, is_dsb = is_dsb, frame = frame, data = data,
+    res = smagick_internal(res, is_dsb = is_dsb, envir = envir, data = data,
                            slash = FALSE, check = check, fun_name = fun_name, 
                            plural_value = xi_val)
   }
@@ -3712,7 +3712,7 @@ sma_ifelse = function(operators, xi, xi_val, fun_name, frame, is_dsb, check){
 }
 
 
-apply_simple_operations = function(x, op, operations_string, check = FALSE, frame = NULL, 
+apply_simple_operations = function(x, op, operations_string, check = FALSE, envir = NULL, 
                                  group_flag = 0, is_dsb = FALSE, fun_name = "smagick"){
                                   
   op_all = cpp_parse_simple_operations(operations_string, is_dsb)
@@ -3757,19 +3757,19 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, fram
                                         "{&length(op_all) == 1 ; operation ; chain of operations} ",
                                         " {bq?operations_string} led to a problem.", 
                                         "In operation {bq?opi}, the argument in backticks ", 
-                                        "(equal to {bq?op_parsed$argument}) is evaluated from the calling frame.",
+                                        "(equal to {bq?op_parsed$argument}) is evaluated from the calling environment.",
                                         "\nPROBLEM: the argument could not be parsed."),
                                     verbatim = TRUE)
 
-        argument = check_expr(eval(argument_call, frame),
+        argument = check_expr(eval(argument_call, envir),
                               "In the operation `{op}()`, the ",
                               "{&length(op_all) == 1 ; operation ; chain of operations} ",
                               " {bq?operations_string} led to a problem.", 
                               "In operation {bq?opi}, the argument in backticks ", 
-                              "(equal to {bq?op_parsed$argument}) is evaluated from the calling frame.",
+                              "(equal to {bq?op_parsed$argument}) is evaluated from the calling environment.",
                               "\nPROBLEM: the argument could not be evaluated.")
       } else {
-        argument = eval(str2lang(op_parsed$argument), frame)
+        argument = eval(str2lang(op_parsed$argument), envir)
       }
 
     } else {

@@ -945,15 +945,15 @@ duplicated_xy = function(x, y){
   which(x_dup & y_dup)
 }
 
-eval_dt = function(call, data = list(), frame){
+eval_dt = function(call, data = list(), envir){
   
   is_data = TRUE
-  if(missing(frame)){
-    frame = data
+  if(missing(envir)){
+    envir = data
     is_data = FALSE
   }
 
-  dt_data = attr(frame, "dt_data")
+  dt_data = attr(envir, "dt_data")
   
   if(is_data){
     for(v in names(data)){
@@ -972,7 +972,7 @@ eval_dt = function(call, data = list(), frame){
     }
   }
 
-  eval(call, dt_data, frame)
+  eval(call, dt_data, envir)
 }
 
 

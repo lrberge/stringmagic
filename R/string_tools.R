@@ -92,7 +92,7 @@ str_ops = function(x, op, pre_unik = NULL){
     res = res_small[x_int]
   } else {
     operation = paste0("{", op, " ? x}")
-    res = .smagick(operation, data = list(x = x), frame = parent.frame())
+    res = .smagick(operation, data = list(x = x), envir = parent.frame())
   }
 
   if("group_index" %in% names(attributes(res))){

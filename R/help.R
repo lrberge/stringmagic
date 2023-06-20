@@ -97,7 +97,7 @@ setup_help_compact = function(){
     '  Ex: smagick("/x1, x2")            -> c("x1", "x2")',
     '      smagick("Hi {/David, Dora}!") -> c("Hi David!", "Hi Dora!")',
     "",
-    "  In quoted arguments, use backticks to evaluate them from the frame.",
+    "  In quoted arguments, use backticks to evaluate them from the calling environment.",
     '  Ex: n = 3 ; smagick("{`n`times.c!$}") -> "$$$". The \'$\' is replicated n times, then collapsed.'
   )
 

@@ -517,25 +517,25 @@ check_set_smagick_parsing = function(x, check){
   x_call
 }
 
-check_set_smagick_eval = function(call, data, frame, check){
+check_set_smagick_eval = function(call, data, envir, check){
   # we need to eval the call
   
-  is_dt = "dt_data" %in% names(attributes(frame))
+  is_dt = "dt_data" %in% names(attributes(envir))
   
   if(!check){
     if(is_dt){
-      x = eval_dt(call, data, frame)
+      x = eval_dt(call, data, envir)
     } else {
-      x = eval(call, data, frame)
+      x = eval(call, data, envir)
     }
     
   } else {
     # now with check = TRUE
     
     if(is_dt){
-      x = try(eval_dt(call, data, frame), silent = TRUE)
+      x = try(eval_dt(call, data, envir), silent = TRUE)
     } else {
-      x = try(eval(call, data, frame), silent = TRUE)
+      x = try(eval(call, data, envir), silent = TRUE)
     }
     
     if(inherits(x, "try-error")){
@@ -576,7 +576,7 @@ check_set_oparg_parse = function(argument, operator, check){
   if(inherits(call, "try-error")){
     context = get_smagick_context()
     msg = .sma("EXPECTATION: In operation \"{bq?argument}{operator}\" the argument ",
-               "in backticks is evaluated from the frame.",
+               "in backticks is evaluated from the calling environment.",
                "\nPROBLEM: {bq?argument} is not a valid R-expression, see parsing error below:",
                "\n{call}")
     stop_hook("{context}\n{msg}")
@@ -585,19 +585,19 @@ check_set_oparg_parse = function(argument, operator, check){
   call
 }
 
-check_set_oparg_eval = function(call, data, frame, operator, check){
+check_set_oparg_eval = function(call, data, envir, operator, check){
   
   if(check){
-    x = try(eval(call, data, frame), silent = TRUE)
+    x = try(eval(call, data, envir), silent = TRUE)
   } else {
-    x = eval(call, data, frame)
+    x = eval(call, data, envir)
     return(x)
   }
   
   if(inherits(x, "try-error")){
     context = get_smagick_context()
     msg = .sma("EXPECTATION: In operation {bq?operator} the argument ",
-               "in backticks is evaluated from the frame.",
+               "in backticks is evaluated from the calling environment.",
                "\nPROBLEM: {bq?deparse_short(call)} could not be evaluated, see error below:",
                "\n{x}")
     stop_hook("{context}\n{msg}")
@@ -907,29 +907,29 @@ get_up_hook = function(){
   up
 }
 
-.stop_hook = function(..., msg = NULL, frame = parent.frame()){
+.stop_hook = function(..., msg = NULL, envir = parent.frame()){
   # verbatim version
   up = get_up_hook()
 
-  stop_up(..., up = up, msg = msg, frame = frame, verbatim = TRUE)
+  stop_up(..., up = up, msg = msg, envir = envir, verbatim = TRUE)
 }
 
-stopi = function(..., frame = parent.frame()){
-  stop_up(..., up = 1, frame = frame, verbatim = FALSE)
+stopi = function(..., envir = parent.frame()){
+  stop_up(..., up = 1, envir = envir, verbatim = FALSE)
 }
 
-stop_hook = function(..., msg = NULL, frame = parent.frame(), verbatim = FALSE){
+stop_hook = function(..., msg = NULL, envir = parent.frame(), verbatim = FALSE){
   up = get_up_hook()
 
-  stop_up(..., up = up, msg = msg, frame = frame, verbatim = verbatim)
+  stop_up(..., up = up, msg = msg, envir = envir, verbatim = verbatim)
 }
 
-stop_up = function(..., up = 1, msg = NULL, frame = parent.frame(), verbatim = FALSE){
+stop_up = function(..., up = 1, msg = NULL, envir = parent.frame(), verbatim = FALSE){
 
   if(verbatim){
     main_msg = paste0(...)
   } else {
-    main_msg = .smagick(..., frame = frame)
+    main_msg = .smagick(..., envir = envir)
   }
 
   # up with set_up
@@ -991,28 +991,28 @@ warn_no_named_dots = function(dots){
   }
 }
 
-.warn_hook = function(..., frame = parent.frame(), immediate. = FALSE){
+.warn_hook = function(..., envir = parent.frame(), immediate. = FALSE){
   up = get_up_hook()
 
-  warn_up(..., up = up, frame = frame, verbatim = TRUE, immediate. = immediate.)
+  warn_up(..., up = up, envir = envir, verbatim = TRUE, immediate. = immediate.)
 }
 
-warn_hook = function(..., frame = parent.frame(), immediate. = FALSE, verbatim = FALSE){
+warn_hook = function(..., envir = parent.frame(), immediate. = FALSE, verbatim = FALSE){
   up = get_up_hook()
 
-  warn_up(..., up = up, frame = frame, verbatim = verbatim, immediate. = immediate.)
+  warn_up(..., up = up, envir = envir, verbatim = verbatim, immediate. = immediate.)
 }
 
-warni = function(..., frame = parent.frame(), immediate. = FALSE){
-  warn_up(..., up = 1, frame = frame, verbatim = FALSE, immediate. = immediate.)
+warni = function(..., envir = parent.frame(), immediate. = FALSE){
+  warn_up(..., up = 1, envir = envir, verbatim = FALSE, immediate. = immediate.)
 }
 
-warn_up = function (..., up = 1, immediate. = FALSE, frame = parent.frame(), verbatim = FALSE){
+warn_up = function (..., up = 1, immediate. = FALSE, envir = parent.frame(), verbatim = FALSE){
 
   if(verbatim){
     message = paste0(...)
   } else {
-    message = smagick(..., frame = frame)
+    message = smagick(..., envir = envir)
   }
   
   mc = match.call()
@@ -1152,9 +1152,9 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE, dsb 
       msg = paste0(..., collapse = "")
     } else {
       if(dsb){
-        msg = .dsb(..., frame = parent.frame())
+        msg = .dsb(..., envir = parent.frame())
       } else {
-        msg = .smagick(..., frame = parent.frame())
+        msg = .smagick(..., envir = parent.frame())
       }
     }
     
@@ -1163,7 +1163,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE, dsb 
         arg_name = deparse(substitute(expr))
       }
       msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
-      stop_up(msg, res[[2]], verbatim = verbatim, frame = parent.frame(), up = up)
+      stop_up(msg, res[[2]], verbatim = verbatim, envir = parent.frame(), up = up)
       
     } else {
       call_non_informative = deparse(substitute(expr),100)[1]
