@@ -92,28 +92,6 @@ inline bool is_box_bracket_open(const int box_type, const char * str, int i){
   return box_type == DSB ? str[i] == '[' : str[i] == '{';
 }
 
-inline bool is_box_bound(const int box_type, const char * str, int i, int n){
-
-  if(box_type == DSB){
-    if(str[i] == ']'){
-      return true;
-    } else if(i + 2 < n){
-      return str[i] == '.' && str[i + 1] == '[';
-    } else {
-      return false;
-    }
-  } else {
-    // curly brackets
-    if(str[i] == '}'){
-      return true;
-    } else if(i + 1 < n){
-      return str[i] == '{';
-    } else {
-      return false;
-    }
-  }
-}
-
 inline char get_closing_box_char(const int box_type){
   return box_type == DSB ? ']' : '}';
 }
