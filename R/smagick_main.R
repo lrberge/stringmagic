@@ -179,7 +179,7 @@ smagick_register = function(fun, alias, valid_options = NULL){
 
 #' @describeIn smagick Like `smagick` but interpolation is with the dot-square-bracket ".[]"
 dsb = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
-               slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
+               slash = TRUE, collapse = NULL, help = NULL, data.table = TRUE){
 
 
   if(!missing(vectorize)) check_logical(vectorize, scalar = TRUE)
@@ -203,7 +203,7 @@ dsb = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
 
   res = smagick_internal(..., is_dsb = TRUE, envir = envir, sep = sep,
                             vectorize = vectorize, slash = slash,
-                            collapse = collapse, help = help, is_root = use_DT,
+                            collapse = collapse, help = help, is_root = data.table,
                             check = TRUE, fun_name = "dsb")
 
   if(inherits(res, "help")){
@@ -217,12 +217,12 @@ dsb = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
 
 #' @describeIn smagick Like `dsb` but without error handling (leads to slightly faster run times).
 .dsb = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
-                check = FALSE, slash = FALSE, use_DT = FALSE){
+                check = FALSE, slash = FALSE, data.table = FALSE){
 
   set_pblm_hook()
   smagick_internal(..., is_dsb = TRUE, envir = envir,
                       slash = slash, sep = sep,
-                      vectorize = vectorize, is_root = use_DT,
+                      vectorize = vectorize, is_root = data.table,
                       check = check, fun_name = ".dsb")
 }
 
@@ -261,7 +261,7 @@ dsb = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
 #' navigate the help pages. If a character scalar, then a regex search is perfomed on the main
 #' documentation and any section containining a match is displayed. The user can easily
 #' navigate across matches.
-#' @param use_DT Logical, default is `TRUE`. If you use `smagick` in a `data.table` call
+#' @param data.table Logical, default is `TRUE`. If you use `smagick` in a `data.table` call
 #' and interpolate variables within the `data.table`, you want this argument to be `TRUE`.
 #' It only incurs a small overhead.
 #' @param collapse Character scalar, default is `NULL`. If provided, the character vector
@@ -1250,7 +1250,7 @@ dsb = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
 #'    
 #'
 smagick = function(..., envir = parent.frame(), sep = "", vectorize = FALSE, check = TRUE,
-               slash = TRUE, collapse = NULL, help = NULL, use_DT = TRUE){
+               slash = TRUE, collapse = NULL, help = NULL, data.table = TRUE){
 
 
   if(!missing(vectorize)) check_logical(vectorize, scalar = TRUE)
@@ -1276,7 +1276,7 @@ smagick = function(..., envir = parent.frame(), sep = "", vectorize = FALSE, che
 
   res = smagick_internal(..., is_dsb = FALSE, envir = envir, sep = sep,
                             vectorize = vectorize, slash = slash, help = help,
-                            collapse = collapse, is_root = use_DT,
+                            collapse = collapse, is_root = data.table,
                             check = TRUE, fun_name = "smagick")
 
   if(inherits(res, "help")){
@@ -1292,13 +1292,13 @@ sma = smagick
 
 #' @describeIn smagick Like `smagick` but without any error handling to save a few ms
 .smagick = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
-                check = FALSE, slash = FALSE, use_DT = FALSE){
+                check = FALSE, slash = FALSE, data.table = FALSE){
 
   set_pblm_hook()
 
   smagick_internal(..., is_dsb = FALSE, envir = envir,
                       slash = slash, sep = sep,
-                      vectorize = vectorize, is_root = use_DT,
+                      vectorize = vectorize, is_root = data.table,
                       check = check, fun_name = ".smagick")
 }
 
