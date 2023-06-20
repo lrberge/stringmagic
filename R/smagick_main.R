@@ -538,7 +538,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' + %: applies [base::sprintf()] formatting. The syntax is 'arg'% with arg an sprintf formatting,
 #' or directly the sprint formatting, e.g. `% 5s`. Example: `smagick("pi = {%.3f ? pi}")` leads
 #' to "pi = 3.142".
-#' + stopword: removes basic English stopwords (the snowball list is used). 
+#' + stopwords: removes basic English stopwords (the snowball list is used). 
 #' The stopwords are replaced with an empty space but the left and right WS are 
 #' untouched. So WS normalization may be needed (see operation `ws`).
 #'   `x = c("He is tall", "He isn't young"); smagick("Is he {stop, ws, C ? x}?")` leads to "Is he tall and young?".
@@ -1087,7 +1087,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
 #' smagick("Main reasons to pursue an academic career:\n {enum.i ? acad}.")
 #'
 #' #
-#' # stopword: removes basic English stopwords
+#' # stopwords: removes basic English stopwords
 #' # the list is from the Snowball project:
 #' #  http://snowball.tartarus.org/algorithms/english/stop.txt
 #'
@@ -3089,7 +3089,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, frame = NULL,
     # ascii, stop ####
     res = str_to_ascii(x, options)
 
-  } else if(op == "stopword"){
+  } else if(op == "stopwords"){
 
     # current limitation: does not work for quoted words
     #                     but quoted words are not stopwords usually
@@ -3805,7 +3805,7 @@ setup_operations = function(){
                 "rev", "sort", "dsort", "ascii", "title",
                 "ws", "tws", "trim", "get", "is", "which",
                 "n", "N", "len", "Len", "width", "dtime",
-                "stopword", "nth", "Nth", "ntimes", "Ntimes")
+                "stopwords", "nth", "Nth", "ntimes", "Ntimes")
   options("smagick_operations" = sort(OPERATORS))
   options("smagick_operations_origin" = sort(OPERATORS))
 }

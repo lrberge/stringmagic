@@ -712,7 +712,7 @@ or directly the sprint formatting.
 smagick("pi = {%.3f ? pi}")
 ```
 
-### stopword
+### stopwords
 
 Removes basic English stopwords (the snowball list is used). 
 The stopwords are replaced with an empty space but the left and right WS are 
