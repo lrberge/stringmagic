@@ -332,9 +332,9 @@ smagick("{s, '.{5,}'get, c ! I don't like short words}")
 ### extract, x, X
 
 Extracts the first or multiple patterns from a string. Default argument is `'[[:alnum:]]+'`.
-Command "extract" accepts the option "first", and 
-"x" and "X" accept no option. `x` is an alias for `extract.first` and `X` for `extract`.
-Use the option "first" to extract only the first match for each string.
+Command `"extract"` accepts the option `"first"`, and 
+`"x"` and `"X"` accept no option. `x` is an alias for `extract.first` and `X` for `extract`.
+Use the option `"first"` to extract only the first match for each string.
 
 When patterns are extracted, the identity of each original character string is kept in memory 
 so that group-wise operations can be applied. See the [section on group-wise operations](#sec_group_wise).
@@ -362,7 +362,7 @@ Replaces a pattern with a string. The two operations are identical and have no d
 The syntax is `'flags/old'` or `'old => new'` with `'old'` the pattern to find and `new` the 
 replacement. `flags/` are optional regex flags. The default for `new` is 
 the empty string. On top of regular regex flags, this operation also accepts 
-the flag "total" which instruct to replace the fulll string in case the pattern is found.
+the flag `"total"` which instruct to replace the fulll string in case the pattern is found.
 ```{r}
 # regex without replacement (ie removing)
 smagick("{'e'r ! Where is the letter e?}")
@@ -379,7 +379,7 @@ smagick("{'t/e => here!'r ? x}")
 
 Replaces a pattern with a string. Similar to the operation `r`, except that here the comma is
 a pattern separator. The argument is of the form `"flags/pattern1, pattern2 => replacement"`. 
-See detailed explanations in str_clean(). 
+See detailed explanations in [`str_clean()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#sec_clean). 
 
 ```{r}
 # we use the fixed pattern to remove the regex meaning
@@ -389,11 +389,12 @@ smagick("{'f/[, ]'clean ! x[a]}")
 ### get
 
 Restricts the string vector to only the values respecting a pattern. This operation has no default.
-Accepts the options "equal" and "in".
-By default it uses the same syntax as str_get() so that you can use regex flags and 
+Accepts the options `"equal"` and `"in"`.
+By default it uses the same syntax as [`str_get()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#detect_funs) 
+so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
-If the option "equal" is used, a simple string equality with the argument is tested (hence
-no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+If the option `"equal"` is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option `"in"` is used, the argument is first split with respect to commas
 and then set inclusion is tested. 
 
 ```{r}
@@ -409,11 +410,12 @@ smagick("Mercedes models: {`models`get.in, C ? x}.")
 ### is
 
 Detects if a pattern is present in a string, returns a logical vector. This operation has no default.
-Mostly useful as the final operation in a str_op() call.
-By default it uses the same syntax as str_is() so that you can use regex flags and 
+Mostly useful as the final operation in a [`str_ops()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#sec_ops) call.
+By default it uses the same syntax as [`str_is()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#detect_funs) 
+so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
-If the option "equal" is used, a simple string equality with the argument is tested (hence
-no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+If the option `"equal"` is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option `"in"` is used, the argument is first split with respect to commas
 and then set inclusion is tested. 
 ```{r}
 x = c("Mark", "Lucas")
@@ -425,12 +427,13 @@ smagick("Mark? {'i/mark'is, C ? x}")
 
 Returns the index of string containing a specified pattern. With no default, can be applied
 to a logical vector directly. 
-By default it uses the same syntax as str_which() so that you can use regex flags and 
+By default it uses the same syntax as [`str_which()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#detect_funs) 
+so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
-If the option "equal" is used, a simple string equality with the argument is tested (hence
-no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
+If the option `"equal"` is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option `"in"` is used, the argument is first split with respect to commas
 and then set inclusion is tested. 
-Mostly useful as the final operation in a str_op() call.
+Mostly useful as the final operation in a [`str_ops()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#sec_ops) call.
 ```{r}
 x = c("Mark", "Lucas", "Markus")
 # note that we use the flag `i` to ignore the case and `w` to add word boundaries
@@ -470,7 +473,7 @@ smagick("Last letters: {-21 first, C ? letters}.")
 Keeps only the first `n` elements; has more options than `first`. The syntax is `'n'K`, 
 `'n|s'K`, `'n||s'K`. `n` provides the number of elements to keep. If `s` is provided and the number of 
 elements are greater than `n`, then in `'n|s'` the string `s` is added at the end, and
-if `'n||s'` the string s replaces the nth element.
+if `'n||s'` the string `s` replaces the nth element.
 The string `s` accepts specials values:
   + `:n:` or `:N:` which gives the total number of items in digits or letters (N)
   + `:rest:` or `:REST:` which gives the number of elements that have been truncated in digits or letters (REST)
@@ -495,14 +498,15 @@ smagick("Removing the 3 last elements leads to {-3 last, C ! x{1:5}}.")
 
 ### sort
 
-Sorts the vector in increasing order. Accepts an optional argument and the option "num". 
+Sorts the vector in increasing order. Accepts an optional argument and the option `"num"`. 
 ```{r}
 x = c("sort", "me")
 # basic use
 smagick("{sort, c ? x}")
 ```
 If an argument is provided, it must be a regex pattern that will be applied to
-the vector using str_clean(). The sorting will be applied to the modified version of the vector
+the vector using [`str_clean()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#sec_clean). 
+The sorting will be applied to the modified version of the vector
 and the original vector will be ordered according to this sorting. 
 ```{r}
 # first modifying the string before sorting
@@ -511,7 +515,7 @@ x = c("Jon Snow", "Khal Drogo")
 smagick("{'.+ 'sort, C?x}")
 ```
 
-The option "num" sorts over a numeric version 
+The option `"num"` sorts over a numeric version 
 (with silent conversion) of the vector and reorders the original vector accordingly. 
 Values which could not be converted are last.
 ```{r}
@@ -536,7 +540,7 @@ smagick("{n, sort, ' + 'c ? x}")
 ### dsort
 
 Sorts the vector in decreasing order. It accepts an optional argument and 
-the option "num". See the operation "sort" for a description of the argument and the option.
+the option `"num"`. See the operation `"sort"` for a description of the argument and the option.
 ```{r}
 smagick("5 = {dsort, ' + 'c ? 2:3}")
 ```
@@ -557,7 +561,7 @@ smagick("Iris species: {unik, upper.first, C ? iris$Species}.")
 
 ### each
 
-Repeats each element of the vector `n` times. Option "c" then collapses the full vector 
+Repeats each element of the vector `n` times. Option `"c"` then collapses the full vector 
 with the empty string as a separator. 
 ```{r}
 # note: the slash special operations splits wrt to commas (see dedicated section)
@@ -569,7 +573,7 @@ smagick("Large number: 1{5 each.c ! 0}")
 
 ### times
 
-Repeats the vector sequence `n` times. Option "c" then collapses the full vector 
+Repeats the vector sequence `n` times. Option `"c"` then collapses the full vector 
 with the empty string as a separator. 
 ```{r}
 smagick("What{6 times.c ! ?}")
@@ -577,7 +581,7 @@ smagick("What{6 times.c ! ?}")
 
 ### rm
 
-Removes elements from the vector. Options: "empty", "blank", "noalpha", "noalnum", "all".
+Removes elements from the vector. Options: `"empty"`, `"blank"`, `"noalpha"`, `"noalnum"`, `"all"`.
 The *optional* argument represents the pattern used to detect strings to be deleted. 
 ```{r}
 x = c("Luke", "Charles")
@@ -585,10 +589,10 @@ smagick("{'i/lu'rm ? x}")
 ```
 
 By default it removes empty strings. 
-Option "blank" removes strings containing only blank characters (spaces, tab, newline).
-Option "noalpha" removes strings not containing letters. Option "noalnum" removes strings not 
-containing alpha numeric characters. Option "all" removes all strings (useful in conditions, see 
-the dedicated section). If an argument is provided, only the options "empty" and "blank" are available.
+Option `"blank"` removes strings containing only blank characters (spaces, tab, newline).
+Option `"noalpha"` removes strings not containing letters. Option `"noalnum"` removes strings not 
+containing alpha numeric characters. Option `"all"` removes all strings (useful in conditions, see 
+the dedicated section). If an argument is provided, only the options `"empty"` and `"blank"` are available.
 
 ```{r}
 x = c("I want to enter.", "Age?", "21.")
@@ -607,8 +611,8 @@ smagick("Small numbers only: {if(.>20 ; nuke), C ? x}.")
 
 ### insert
 
-Inserts a new element to the vector. Options: "right" and "both". Option "right" adds
-the new element to the right. Option "both" inserts the new element on the two sides of the vector.
+Inserts a new element to the vector. Options: `"right"` and `"both"`. Option `"right"` adds
+the new element to the right. Option `"both"` inserts the new element on the two sides of the vector.
 
 ```{r}
 smagick("{'3'insert.right, ' + 'c ? 1:2}")
@@ -626,8 +630,8 @@ smagick("from a {x} to {lower?x}")
 
 ### upper
 
-Upper cases the full string. Options: "first" and "sentence".
-Option "first" upper cases only the first character. Option "sentence"
+Upper cases the full string. Options: `"first"` and `"sentence"`.
+Option `"first"` upper cases only the first character. Option `"sentence"`
 upper cases the first letter after punctuation. 
 
 ```{r}
@@ -637,9 +641,9 @@ smagick("{upper.sentence ? x}")
 
 ### title
 
-Applies a title case to the string. Options: "force" and "ignore".
-Option "force" first puts everything to lowercase before applying the title case. 
-Option "ignore" ignores a few small prepositions ("a", "the", "of", etc).
+Applies a title case to the string. Options: `"force"` and `"ignore"`.
+Option `"force"` first puts everything to lowercase before applying the title case. 
+Option `"ignore"` ignores a few small prepositions ("a", "the", "of", etc).
 
 ```{r}
 x = "bryan is in the KITCHEN"
@@ -658,10 +662,10 @@ smagick("{title.force.ignore ? x}")
 
 Normalizes whitespaces (WS). It trims the whitespaces on the edges and transforms any succession 
 of whitespaces into a single one. Can also be used to further clean the string with its options. 
-Options: "punct", "digit", "isolated". Option "punct" cleans the punctuation. Option "digit" cleans digits.
-Option "isolated" cleans isolated letters. WS normalization always come after any of these options.
+Options: `"punct"`, `"digit"`, `"isolated"`. Option `"punct"` cleans the punctuation. Option `"digit"` cleans digits.
+Option `"isolated"` cleans isolated letters. WS normalization always come after any of these options.
 **Important note:** punctuation (or digits) are replaced with WS and **not** 
-the empty string. This means that `smagick("ws.punct ! Meg's car")` will become "Meg s car".
+the empty string. This means that `smagick("ws.punct ! Meg's car")` will become `"Meg s car"`.
 
 ```{r}
 x = "   I    should? review 85 4 this text!!"
@@ -687,11 +691,11 @@ smagick("Hello {q, C ? x}!")
 
 ### format, Format
 
-Applies the base R's function [base::format()] to the string. 
-By default, the values are left aligned, *even numbers* (differently from [base::format()]'s behavior).
-The upper case command (`Format`) applies right alignment. Options: "0", "zero", "right", "center".
-Options "0" or "zero" fills the blanks with 0s: useful to format numbers. Option "right" right aligns,
-and "center" centers the strings.
+Applies the base R's function `base::format()` to the string. 
+By default, the values are left aligned, *even numbers* (differently from `base::format()`'s behavior).
+The upper case command (`Format`) applies right alignment. Options: `"0"`, `"zero"`, `"right"`, `"center"`.
+Options `"0"` or `"zero"` fills the blanks with 0s: useful to format numbers. Option `"right"` right aligns,
+and `"center"` centers the strings.
 ```{r}
 x = c(1, 12345) 
 smagick("left:   {format, q, C ? x}", 
@@ -702,7 +706,7 @@ smagick("left:   {format, q, C ? x}",
 
 ### %
 
-Applies base::sprintf() formatting. The syntax is 'arg'% with arg an sprintf formatting,
+Applies `base::sprintf()` formatting. The syntax is `'arg'%` with arg an sprintf formatting,
 or directly the sprint formatting.
 ```{r}
 smagick("pi = {%.3f ? pi}")
@@ -721,9 +725,9 @@ smagick("Is he {stop, ws, C ? x}?")
 ### ascii
 
 Turns all letters into ASCII with transliteration. Failed translations are transformed 
-into question marks. Options: "silent", "utf8". By default, if some conversion fails
-a warning is prompted. Option "silent" disables the warning in case of failed conversion. The conversion 
-is done with base::iconv(), option "utf8" indicates that the source endocing is UTF-8, can be useful 
+into question marks. Options: `"silent"`, `"utf8"`. By default, if some conversion fails
+a warning is prompted. Option `"silent"` disables the warning in case of failed conversion. The conversion 
+is done with `base::iconv()`, option `"utf8"` indicates that the source endocing is UTF-8, can be useful 
 in some cases.
 ```{r}
 author = "Laurent Bergé"
@@ -732,10 +736,10 @@ smagick("This package has been developped by {ascii ? author}.")
 
 ### n, N
 
-Formats integers by adding a comma to separate thousands. Options: "letter", "upper", "0", "zero".
-The option "letter" writes the number in letters (large numbers keep their numeric format). The option
-"upper" is like the option "letter" but uppercases the first letter. Options "0" or "zero" left pads
-numeric vectors with 0s. The upper case command (`N`) adds the option "letter".
+Formats integers by adding a comma to separate thousands. Options: `"letter"`, `"upper"`, `"0"`, `"zero"`.
+The option `"letter"` writes the number in letters (large numbers keep their numeric format). The option
+`"upper"` is like the option `"letter"` but uppercases the first letter. Options `"0"` or `"zero"` left pads
+numeric vectors with 0s. The upper case command (`N`) adds the option `"letter"`.
 ```{r}
 x = c(5, 12, 52123)
 smagick("She owes {n, '$'paste, C ? x}.")
@@ -753,19 +757,19 @@ smagick("He's {N ? x} years old.")
 
 ### nth, Nth
 
-When applied to a number, this operator writes them as a rank. Options: "letter", 
-"upper", "compact". 
+When applied to a number, this operator writes them as a rank. Options: `"letter"`, 
+`"upper"`, `"compact"`. 
 ```{r}
 n = c(3, 7)
 smagick("They finished {nth, enum ? n}!")
 ```
-Option "letter" tries to write the numbers in letters, but note that it stops at 20. Option "upper"
-is the same as "letter" but uppercases the first letter. Option "compact" aggregates
-consecutive sequences in the form "start_n_th to end_n_th". 
+Option `"letter"` tries to write the numbers in letters, but note that it stops at 20. Option `"upper"`
+is the same as `"letter"` but uppercases the first letter. Option `"compact"` aggregates
+consecutive sequences in the form `"start_n_th to end_n_th"`. 
 ```{r}
 smagick("They arrived {nth.compact ? 5:20}.")
 ```
-The upper case command (`Nth`) adds the option "letter".
+The upper case command (`Nth`) adds the option `"letter"`.
 ```{r}
 n = c(3, 7)
 smagick("They finished {Nth, enum ? n}!")
@@ -773,13 +777,13 @@ smagick("They finished {Nth, enum ? n}!")
 
 ### ntimes, Ntimes
 
-Write numbers in the form `n` times. Options: "letter", "upper". Option 
-"letter" writes the number in letters (up to 100). Option "upper" does the same as "letter" 
+Write numbers in the form `n` times. Options: `"letter"`, `"upper"`. Option 
+`"letter"` writes the number in letters (up to 100). Option `"upper"` does the same as `"letter"` 
 and uppercases the first letter. 
 ```{r}
 smagick("They lost {C ! {ntimes ? c(1, 12)} against {/Real, Barcelona}}.")
 ```
-The upper case command (`Ntimes`) adds the option "letter".
+The upper case command (`Ntimes`) adds the option `"letter"`.
 ```{r}
 x = 5
 smagick("This paper was rejected {Ntimes ? x}...")
@@ -813,11 +817,12 @@ smagick("v0: {x}",
 
 ### fill
 
-Fills the character strings up to a size. Options: "right", "center" and a free-form symbol.
+Fills the character strings up to a size. Options: `"right"`, `"center"` and a free-form symbol.
 Default is left-alignment of the strings. 
-Option "right" right aligns and "center" centers the strings. You can pass a free-form symbol
+Option `"right"` right aligns and `"center"` centers the strings. You can pass a free-form symbol
 as option, it will be used for the filling. By default if no argument is provided, the
-maximum size of the character string is used. See help for str_fill() for more information.
+maximum size of the character string is used. See help for [`str_fill()`](https://lrberge.github.io/stringmagick/reference/str_fill.html) 
+for more information.
 ```{r}
 life = "full of sound and fury, Signifying nothing"
 smagick("{'[ ,]+'s, upper.first, fill.center, q, '\n'c ? life}")
@@ -830,9 +835,9 @@ smagick("{'5|0'fill.right, C ? c(1, 55)}")
 
 Pastes a custom character string to all elements of the string. 
 This operation has no default.
-Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
-Option "right" pastes on the right and "both" pastes on both sides. Option "front" only 
-pastes on the first element while option "back" only pastes on the last element. Option "delete"
+Options: `"both"`, `"right"`, `"front"`, `"back"`, `"delete"`. By default, a string is pasted on the left.
+Option `"right"` pastes on the right and `"both"` pastes on both sides. Option `"front"` only 
+pastes on the first element while option `"back"` only pastes on the last element. Option `"delete"`
 first replaces all elements with the empty string.
 ```{r}
 smagick("6 = {'|'paste.both, ' + 'c ? -3:-1}")
@@ -843,13 +848,13 @@ smagick("6 = {'|'paste.both, ' + 'c ? -3:-1}")
 
 ### num
 
-Converts to numeric. Options: "warn", "soft", "rm", "clear". By default, the conversion
+Converts to numeric. Options: `"warn"`, `"soft"`, `"rm"`, `"clear"`. By default, the conversion
 is performed silently and elements that fail to convert are turned into NA. 
-Option "warns" displays a warning if the conversion to numeric fails. 
-Option "soft" does not convert if the conversion of at least one element fails, leading to 
+Option `"warn"` displays a warning if the conversion to numeric fails. 
+Option `"soft"` does not convert if the conversion of at least one element fails, leading to 
 a character vector. 
-Option "rm" converts and removes the elements that could not be converted. 
-Option "clear" turns failed conversions into the empty string, and hence lead to a character vector.
+Option `"rm"` converts and removes the elements that could not be converted. 
+Option `"clear"` turns failed conversions into the empty string, and hence lead to a character vector.
 ```{r}
 x = c(5, "six")
 smagick("   origin: {C, q ? x}", 
@@ -869,9 +874,10 @@ items left is written.
 smagick("enum ? 1:5")
 ```
 You can add the following options:
-  + q, Q, or bq: to quote the elements
-  + or, nor: to finish with an 'or' (or 'nor') instead of an 'and'
-  + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two
+
+  + `q`, `Q`, or `bq`: to quote the elements
+  + `or`, `nor`: to finish with an 'or' (or 'nor') instead of an 'and'
+  + `i`, `I`, `a`, `A`, `1`: to enumerate with this prefix, like in: i) one, and ii) two
   + a number: to tell the number of items to display
 ```{r}
 x = c("Marv", "Nancy")
@@ -892,13 +898,13 @@ smagick("The problematic variables are {'x'sort.num, enum.3 ? x}.")
 
 ### len, Len
 
-Gives the length of the vector. Options "letter", "upper", "format".
-Option "letter" writes the length in words (up to 100). Option "upper" is the same 
-as letter but uppercases the first letter. Option "format" add comma separation for thousands.
+Gives the length of the vector. Options `"letter"`, `"upper"`, `"format"`.
+Option `"letter"` writes the length in words (up to 100). Option `"upper"` is the same 
+as letter but uppercases the first letter. Option `"format"` add comma separation for thousands.
 ```{r}
 smagick("Size = {len.format ? 1:5000}")
 ```
-The upper case command (`Len`) adds the option "letter".
+The upper case command (`Len`) adds the option `"letter"`.
 ```{r}
 smagick("Its size is {Len ? 1:8}")
 ```
@@ -924,7 +930,7 @@ smagick("------ version 0 ------\n{x}",
 
 ### dtime
 
-Displays a formatted time difference. Option "silent" does not report a warning if the
+Displays a formatted time difference. Option `"silent"` does not report a warning if the
 operation fails. It accepts either objects of class `POSIXt` or `difftime`.
 ```{r}
 x = Sys.time()
@@ -1023,7 +1029,7 @@ smagick("y = {vif(.N>4 ; {x[1]} + ... + {last?x} ; {' + 'c?x}) ? x}")
 Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
 the full string is replaced with `"{x[1]} + ... + {last?x}"`. Since this string 
 contains curly brackets, interpolation applies. 
-Hence we obtain the string "x1 + ... + x10". Finally, this is collated to "y = " 
+Hence we obtain the string `"x1 + ... + x10"`. Finally, this is collated to `"y = "` 
 leading to the result. 
 
 If the vector were of length lower than 4, it would have been replaced with "{' + 'c?x}",
@@ -1065,7 +1071,7 @@ resulting into a vector
 - if the vector contains any *box*, extra interpolations are resolved and appended 
 in a vector fashion
 
-In Ex.1 the string "one, two, {x}" is taken as verbatim and split w.r.t. commas, 
+In Ex.1 the string `"one, two, {x}"` is taken as verbatim and split w.r.t. commas, 
 leading to `c("one", "two", "{x}")`. 
 Since the last element contained an opening box, it is interpolated and inserted into the vector, 
 leading to the result.
@@ -1098,8 +1104,8 @@ the double ampersand described (`&&`) at the end of this section.
 Note that in `cond`, you can use the function `len`, an alias to `length`.
 
 Ex.1: we take a vector and compose a message depending on its length. If its length is
-lower than 10 then we write the message "x is short", otherwise we write "x is long",
-and insert "very" depending on the number of digits.
+lower than 10 then we write the message `"x is short"`, otherwise we write `"x is long"`,
+and insert `"very"` depending on the number of digits.
 ```{r}
 x = 1:5
 smagick("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
@@ -1132,7 +1138,7 @@ y = letters[1:4]
 smagick("{&x %% 2 ; odd ; {y}}")
 ```
 
-In that example, when x is odd, it is replaced with "odd", and when even it is
+In that example, when x is odd, it is replaced with `"odd"`, and when even it is
 replaced with the elements of y.
 
 Using the two ampersands operator (`&&`) is like the simple ampersand version but the 
@@ -1202,7 +1208,7 @@ from regular operations.
 
 ### s, es
 
-Adds an "s" (or "es") if it is plural (> 1), nothing otherwise. Accepts the option `0` or `zero` which 
+Adds an `"s"` (or `"es"`) if it is plural (> 1), nothing otherwise. Accepts the option `0` or `zero` which 
 treats a 0-length or a 0-value as plural.
 
 ```{r}
@@ -1249,7 +1255,7 @@ smagick("The fruit{$s ? fruits} I love {$are, enum}.")
 
 ### n, N, len, Len
 
-Add the number of elements ("len") or the value ("n") of the variable as a formatted number or 
+Add the number of elements (`"len"`) or the value (`"n"`) of the variable as a formatted number or 
 in letters (upper case versions). Accepts the options `letter` (to write in letter) 
 and `upper` (to uppercase the first letter).
 
@@ -1417,7 +1423,7 @@ Here is the meaning of the arguments:
 The two last arguments, `group` and `group_flag`, are of use
 only in group-wise operations only if `fun` changes the length or the order of vectors. 
 
-Let's add an argument and an option to the "emph" operation that we defined in Ex.1.
+Let's add an argument and an option to the `"emph"` operation that we defined in Ex.1.
 
 Ex.2: new operation with argument and option.
 ```{r}
