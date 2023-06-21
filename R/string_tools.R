@@ -179,7 +179,7 @@ str_ops = function(x, op, pre_unik = NULL){
 #' # NOTA: using `str_get` instead of `str_is` may lead to a faster understanding 
 #' #       of the examples 
 #'
-#' x = dsb("/one, two, one... two, microphone, check")
+#' x = smagick("/one, two, one... two, microphone, check")
 #'
 #' # default is regular expression search
 #' # => 3 character items
@@ -426,7 +426,7 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' #
 #' 
 #' # you can combine the flags
-#' x = dsb("/One, two, one... Two!, Microphone, check")
+#' x = smagick("/One, two, one... Two!, Microphone, check")
 #' # regular
 #' str_get(x, "one")
 #' # ignore case
@@ -723,10 +723,9 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
       n_id = unique(lengths(id))
       if(length(n_id) != 1 || max(n_id) != n){
         extra = ""
-        if(max(n_id) != n) extra = dsb("\nPROBELM: len x: .[#n ? n] len id: .[#n ? max(n_id)].")
+        if(max(n_id) != n) extra = smagick("\nPROBELM: len x: {#n ? n} len id: {#n ? max(n_id)}.")
         stop("The argument `id` must be either a vector of identifiers or a data.frame ",
-             "of identifiers of the same length as `x`.",
-             extra)
+             "of identifiers of the same length as `x`.", extra)
       }
 
       id_names = names(id)
@@ -742,13 +741,14 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
     } else {
       n_id = length(id)
       if(n != n_id){
-        stop("The argument `id` must be either a vector of identifiers or a data.frame ",
+        stopi("The argument `id` must be either a vector of identifiers or a data.frame ",
              "of identifiers of the same length as `x`.",
-             dsb("\nPROBELM: len x: .[n ? n]; len id: .[n ? n_id]."))
+             "\nPROBELM: len x: {n ? n}; len id: {n ? n_id}.")
       }
       if(!is.atomic(id)){
         stop("The argument `id` must be either a vector of identifiers or a data.frame ",
-             "of identifiers of the same length as `x`.\nPROBLEM: `id` is not an atomic vector")
+             "of identifiers of the same length as `x`.",
+             "\nPROBLEM: `id` is not an atomic vector")
       }
 
       id_names = deparse_short(mc$id)

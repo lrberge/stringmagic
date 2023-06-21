@@ -42,7 +42,7 @@
 #' that should be returned is collapsed with the value of this argument. This leads
 #' to return a string of length 1.
 #' @param check Logical scalar, default is `TRUE`. Whether to enable error-handling. 
-#' Without errorhandling you can save something of the order of 40ms. Useful only
+#' Without errorhandling you can save something of the order of 40us. Useful only
 #' in long loops.
 #'
 #' @details 
@@ -622,8 +622,7 @@
 #' As you can see, you don't need to escape the closing bracket in Ex.1 since no box
 #' was open. On the other hand, you need to escape it in Ex.2.
 #' 
-#' Alternatively, you can use the function `dsb()` to interpolate with `.[]` instead of `{}`.
-#' You can also use the following hack:
+#' Alternatively, use the arguments `.open` and `.close` to set custom delimiters.
 #' 
 #' Ex.3: smagick("I {'can {write} {{what}} I want'}") leads to `"I can {write} {{what}} I want"`.
 #' 

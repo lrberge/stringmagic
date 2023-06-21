@@ -65,54 +65,6 @@ str_to_ascii = function(x, options){
 #### internal ####
 ####
 
-bespoke_msg = function(x, fun_name = NULL){
-  # function to write an error message curated for the current function
-  # cat(bespoke_msg('x = 1:5; dsb("test.[3K ? x[-1]]")', ".smagick", FALSE))
-  # the original error msg must always be written in the dsb way
-
-  if(length(x) > 1){
-    x = paste(x, collapse = "")
-  }
-
-  # We find the original functions, the one just before string_ops_internal
-  if(is.null(fun_name)){
-    all_funs = sapply(sys.calls(), function(x) deparse(x)[1])
-    qui = which(grepl("string_ops_internal", all_funs)) - 1
-    if(length(qui) > 0 && qui[1] > 0){
-      fun_name = gsub("\\(.+", "", all_funs[qui[1]])
-    } else {
-      fun_name = "dsb"
-    }
-  }
-
-  # we double the backslashes for printing
-  if(grepl("\\", x, fixed = TRUE)){
-    x = gsub("\\", "\\\\", x, fixed = TRUE)
-  }
-
-  if(fun_name == "dsb") return(x)
-
-  is_dsb = grepl("dsb", fun_name, fixed = TRUE)
-
-  res = gsub("dsb(", paste0(fun_name, "("), x, fixed = TRUE)
-  res = gsub("dsb`", paste0(fun_name, "`"), res, fixed = TRUE)
-
-  if(is_dsb) return(res)
-
-  res = gsub(".[", "{", res, fixed = TRUE)
-
-  if(grepl("[", res, fixed = TRUE)){
-    # means we have indexing, which is valid
-    res = gsub("\\[([^]]+)\\]", "[\\1]_", res)
-    res = gsub("](?!_)", "}", res, perl = TRUE)
-    res = gsub("]_", "]", res, fixed = TRUE)
-  } else {
-    res = gsub("]", "}", res, fixed = TRUE)
-  }
-
-  res
-}
-
 is_numeric_in_char = function(x){
   res = tryCatch(as.numeric(x), warning = function(x) "not numeric")
   !identical(res, "not numeric")
@@ -727,30 +679,6 @@ fml_extract_elements = function(fml){
   res
 }
 
-
-
-
-# x = "x = 1:5; dsb(Hi .[' 'c ! .[letters[x]].[x[]]])"
-dsb2curb = function(x){
-  # transforms help written for dsb into help for smagick
-
-  # function name
-  res = gsub("dsb", "smagick", x)
-
-  # opening
-  res = gsub(".[", "{", res, fixed = TRUE)
-
-  # closing (more difficult)
-  res = gsub("\\[([^]]*)\\]", "_OPEN_\\1_CLOSE_", res)
-
-  res = gsub("]", "}", res, fixed = TRUE)
-
-  res = gsub("_OPEN_", "[", res, fixed = TRUE)
-  res = gsub("_CLOSE_", "]", res, fixed = TRUE)
-
-  res
-}
-
 insert = function(x, y, i, replace = FALSE){
   # x = list(a = 1, b = 2, c = 3) ; y = list(u = 33, v = 55) ; i = 2 ; insert(x, y, i)
   # we insert y into x in location i
@@ -1043,21 +971,13 @@ fix_newline = function(x){
   gsub("\n", "\\\\n", x)
 }
 
-is_box_open = function(x, is_dsb){
-  if(is_dsb){
-    substr(x, 1, 2) == ".["
-  } else {
-    substr(x, 1, 2) == "{"
-  }
+is_box_open = function(x, delim){
+  substr(x, 1, nchar(delim[1])) == delim[1]
 }
 
-is_box_close = function(x, is_dsb){
+is_box_close = function(x, delim){
   n = nchar(x)
-  if(is_dsb){
-    substr(x, n, n) == "]"
-  } else {
-    substr(x, n, n) == "}"
-  }
+  substr(x, n - nchar(delim[2] + 1), n) == delim[2]
 }
 
 extract_pipe = function(x, op, double = FALSE, numeric = FALSE, data = NULL, mbt = FALSE){

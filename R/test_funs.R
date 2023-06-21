@@ -250,8 +250,17 @@ test_err_contains = function(x, pattern){
 }
 
 run_test = function(chunk, from){
-
-  all_files = list.files("tests", pattern = ".R$", full.names = TRUE)
+  
+  dir_tests = list.dirs("tests", recursive = FALSE)
+  if(length(dir_tests) > 0){
+    all_files = list.files(dir_tests, pattern = ".R$", full.names = TRUE)
+  } else {
+    all_files = list.files("tests", pattern = ".R$", full.names = TRUE)
+  }
+  
+  if(length(all_files) == 0){
+    stop("No test file was found in ./tests/")
+  }  
 
   test_code = c()
   offset = 2

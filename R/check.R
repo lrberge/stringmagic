@@ -191,8 +191,8 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
 
   if(!is.atomic(x)){
     x_dp = deparse_short(substitute(x))
-    stop_up(dsb("Argument `.[x_dp]` must be atomic. \n",
-                "PROBLEM: Currently it is of the non-atomic class .[bq?class(x)[1]]."))
+    stop_up("Argument {bq?x_dp} must be atomic. ",
+            "\nPROBLEM: Currently it is of the non-atomic class {bq?class(x)[1]}.")
   }
 
   if(!is.character(x)){
@@ -340,10 +340,10 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
 
       info_call = smagick("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
-      cls_pblm = sapply(dots[i_pblm], function(x) dsb(".[bq ! .[enum ? class(x)]]"))
-      stop_up(dsb("In the argument `...`, all elements must be atomic (i.e. convertible to a character string).\nPROBLEM: ",
-                  ".['\n'c ! The .[Nth ? i_pblm] element (.[info_call]) is not character",
-                  " (instead it is of class: .[cls_pblm]).]"))
+      cls_pblm = sapply(dots[i_pblm], function(x) smagick("{bq ! {enum ? class(x)}}"))
+      stop_up("In the argument `...`, all elements must be atomic (i.e. convertible to a character string).",
+              "\nPROBLEM: {'\n         'c ! The {Nth ? i_pblm} element ({info_call}) is not character",
+              " (instead it is of class: {cls_pblm}).}")
     }
 
     i_no_char = which(!sapply(dots, is.character))
@@ -372,9 +372,9 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
 
       info_call = smagick("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
-      stop_up(dsb("In the argument `...`, all elements must be without NA.\nPROBLEM: ",
-                  "The .[nth, enum ? i_pblm] element.[$s] (.[C ? info_call])",
-                  " .[$contain] NA values."))
+      stop_up("In the argument `...`, all elements must be without NA.\nPROBLEM: ",
+              "The {nth, enum ? i_pblm} element{$s} ({C ? info_call})",
+              " {$contain} NA values.")
     }
   }
 
@@ -428,13 +428,13 @@ get_smagick_context = function(){
   }
   
   x = get("x", parent.frame(up))
-  is_dsb = get("is_dsb", parent.frame(up))
+  delim = get("delim", parent.frame(up))
   
   i = get("i", parent.frame(up))
   n = get("n", parent.frame(up))
   
   # we reparse
-  x_parsed = cpp_smagick_parser(x, is_dsb, TRUE)
+  x_parsed = cpp_smagick_parser(x, delim, TRUE)
   context_specific = x_parsed[[i]]
   
   # normalizing newlines or very confusing
@@ -457,7 +457,7 @@ get_smagick_context = function(){
   res    
 }
 
-check_set_smagick_parsing = function(x, check){
+check_set_smagick_parsing = function(x, check, delim){
   # x is a character string to be turned into an R expression
   
   if(check){
@@ -469,45 +469,51 @@ check_set_smagick_parsing = function(x, check){
   
   if(inherits(x_call, "try-error")){
     
+    open = delim[1]
+    close = delim[2]
+    
     context = get_smagick_context()
     first_char = substr(x, 1, 1)
     
     if(first_char %in% c("#", "$")){
-      msg = .dsb("PROBLEM: there is a syntax error in the pluralization (the ", 
-                  "interpolation starting with .[bq?first_char]).",
+      msg = smagick("PROBLEM: there is a syntax error in the pluralization (the ", 
+                  "interpolation starting with {bq?first_char}).",
                   "\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
-                  ".[Q!Interpolation and string operations: Principle]")
+                  "{Q!Interpolation and string operations: Principle}")
       
     } else if(first_char == "&"){
-      msg = .dsb("PROBLEM: there is a syntax error in the if-else (the ", 
-                  "interpolation starting with .['^&+'x, bq?x]).",
+      msg = smagick("PROBLEM: there is a syntax error in the if-else (the ", 
+                  "interpolation starting with {'^&+'x, bq?x}).",
                   "\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
-                  ".[Q!Special interpolation: if-else]")
+                  "{Q!Special interpolation: if-else}")
     } else {
       if(grepl("[!?]", x)){
-        type = "2 (`{ops ? expr}`) or 3 (`{ops ! verbatim}`)"
+        type = paste0("2 (`", open, "ops ? expr", close, "`) or 3 (`", open, "ops ! verbatim", close"`)")
         if(!grepl("!", x)){
-          type = "2 (`{ops ? expr}`)"
+          type = paste0("2 (`", open, "ops ? expr", close, "`)")
         } else if(!grepl("[?]", x)){
-          type = "3 (`{ops ! verbatim}`)"
+          type = paste0("3 (`", open, "ops ! verbatim", close, "`)")
         }
         
-        extra = .dsb("\nCurrently the interpolation has been parsed as the first case (`{expr}`).",
-                     "\nMaybe there is a syntax mistake preventing it to be interpreted as case .[type]?")
+        extra = smagick("\nCurrently the interpolation has been parsed as the first case: ",
+                     "`{open}expr{close}`.",
+                     "\nMaybe there is a syntax mistake preventing it to be interpreted as case {type}?")
       } else {
         extra = "\nCurrently it seems that the expression to be interpolated is not a valid R expression."
       }
       
-      help_suggest = .dsb("\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
-                          ".[Q!Operations: General syntax]")
+      help_suggest = .sma("\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
+                          "{!Operations: General syntax}")
       
       x_call_clean = gsub("Error in str2[^:]+: ?", "Error when parsing: ", x_call)
       
-      msg = .dsb("PROBLEM: The expression .[bq?x] could not be parsed, see error below:",
-                 "\n.[x_call_clean]",
-                  "\nINFO: Interpolations can be of the form `{expr}`, `{op1, op2?expr}`, or", 
-                  " `{op1, op2!verbatim}`. ",
-                  extra, help_suggest)
+      msg = .sma("PROBLEM: The expression .[bq?x] could not be parsed, see error below:",
+                 "\n{x_call_clean}",
+                 "\nINFO: Interpolations can be of the form `{open}expr{close}`, ",
+                 "`{open}op1, op2?expr{close}`, or", 
+                 " `{open}op1, op2!verbatim{close}`. ",
+                 "{extra}", 
+                 "{help_suggest}")
     }
     
     .stop_hook(context, "\n", msg)
@@ -609,7 +615,7 @@ check_set_oparg_eval = function(call, data, envir, operator, check){
   x
 }
 
-report_smagick_parsing_error = function(x, x_parsed, is_dsb, error = TRUE){
+report_smagick_parsing_error = function(x, x_parsed, delim, error = TRUE){
   
   x_parsed = x_parsed[[1]]
   error_msg = x_parsed[1]
@@ -618,6 +624,9 @@ report_smagick_parsing_error = function(x, x_parsed, is_dsb, error = TRUE){
   #
   # getting the context
   #
+  
+  open = delim[1]
+  close = delim[2]
   
   x = fix_newline(x)
   xi = fix_newline(xi)
@@ -636,25 +645,25 @@ report_smagick_parsing_error = function(x, x_parsed, is_dsb, error = TRUE){
   
   suggest = ""
   if(error_msg == "slash operator not ending correctly"){
-    if(is_box_open(xi, is_dsb) && !is_box_close(xi, is_dsb)){
-      msg = .sma("PROBLEM: the opening bracket (`{&is_dsb ; .[ ; \\{}`) is not ", 
-                 "matched with a closing bracket (`{&is_dsb ; ] ; \\}}`).",
-                 "\nNOTE: to escape the meaning of the bracket, use a ",
-                 "double backslash: \\\\{&is_dsb ; .[ ; \\{}.")
+    if(is_box_open(xi, delim) && !is_box_close(xi, delim)){
+      msg = .sma("PROBLEM: the opening delimiter ({bq?delim[1]}) is not ", 
+                 "matched with a closing delimiter ({bq?delim[2]}).",
+                 "\nNOTE: to escape the meaning of the delimiter, use a ",
+                 "double backslash: \\\\{delim[1]}")
       
       suggest= "INFO: see smagick(help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
       # we diagnose the substring
-      if(is_box_open(xi, is_dsb)){
+      if(is_box_open(xi, delim)){
         xi_small = str_trim(xi, 1)
       } else {
-        xi_small = str_trim(xi, 1 + is_dsb, 1)
+        xi_small = str_trim(xi, nchar(open), nchar(close))
       }
       
-      xi_small_parsed = cpp_smagick_parser(xi_small, is_dsb)
+      xi_small_parsed = cpp_smagick_parser(xi_small, delim)
       
       if(length(xi_small_parsed) == 1 && isTRUE(attr(xi_small_parsed, "error"))){
-        msg = report_smagick_parsing_error(xi_small_parsed, xi_small, is_dsb, FALSE)
+        msg = report_smagick_parsing_error(xi_small_parsed, xi_small, delim, FALSE)
         msg = gsub("^CONTEXT:", "         ", msg)
       } else {
         # here I don't knwo what the error can be
@@ -666,11 +675,11 @@ report_smagick_parsing_error = function(x, x_parsed, is_dsb, error = TRUE){
     }
     
   } else if(error_msg == "no closing bracket"){
-    if(!is_box_close(xi, is_dsb)){
-      msg = .sma("PROBLEM: the opening bracket (`{&is_dsb ; .[ ; \\{}`) is not ", 
-                 "matched with a closing bracket (`{&is_dsb ; ] ; \\}}`).",
+    if(!is_box_close(xi, delim)){
+      msg = .sma("PROBLEM: the opening bracket ({bq?delim[1]}) is not ", 
+                 "matched with a closing bracket ({bq?delim[2]}).",
                  "\nNOTE: to escape the meaning of the bracket, use a ",
-                 "double backslash: \\\\{&is_dsb ; .[ ; \\{}.")
+                 "double backslash: \\\\{bq?delim[1]}.")
       suggest = "INFO: see smagick(help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
       pblm = cpp_find_closing_problem(xi)
@@ -687,7 +696,7 @@ report_smagick_parsing_error = function(x, x_parsed, is_dsb, error = TRUE){
     }    
     
   } else if(str_x(error_msg, 7) == "if-else"){
-    type = if(str_x(xi, 2, 2 + is_dsb) == "&&") "&&" else "&"
+    type = if(str_x(xi, 2, 1 + nchar(open)) == "&&") "&&" else "&"
     syntax = if(type == "&&") "{&&cond ; verb_true}" else "{&cond ; verb_true ; verb_false}"
     intro = .sma("The syntax of the if-else operation is {syntax}, with ", 
                  "`verb_.` a verbatim expression (possibly containing interpolations).")
@@ -710,8 +719,8 @@ report_smagick_parsing_error = function(x, x_parsed, is_dsb, error = TRUE){
     # pluralization
     
     suggest = "INFO: see smagick(help = TRUE) and go to the section 'Special interpolation: Pluralization'"
-    type = str_x(xi, 1, 2 + is_dsb)
-    syntax = .dsb("{.[type]op1, op2} or {.[type]op1, op2 ? variable}")
+    type = str_x(xi, 1, 1 + nchar(open))
+    syntax = .sma("{open}{type}op1, op2{close} or {open}{type}op1, op2 ? variable{close}")
     
     if(error_msg == "pluralization: operators cannot contain parentheses"){
       msg = .sma("In pluralization, the parenthesis is a forbidden character *except* ",
@@ -1126,7 +1135,7 @@ isError = function(x){
 ####
 
 
-check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE, dsb = FALSE){
+check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
 
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e),
                                                           conditionMessage(e)), class = "try-error"))
@@ -1154,11 +1163,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE, dsb 
     if(verbatim){
       msg = paste0(..., collapse = "")
     } else {
-      if(dsb){
-        msg = .dsb(..., envir = parent.frame())
-      } else {
-        msg = .smagick(..., envir = parent.frame())
-      }
+      msg = .smagick(..., envir = parent.frame())
     }
     
     if(nchar(msg) == 0){

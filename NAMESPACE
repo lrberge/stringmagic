@@ -4,11 +4,8 @@ useDynLib(stringmagick, .registration = TRUE)
 export(str_ops, str_is, str_which, str_get, str_clean, str_split2df,
        str_split2dt, str_fill)
 
-# dsb
-export(dsb, .dsb)
-
 # smagick
-export(smagick, sma, .smagick, .sma)
+export(smagick, .smagick)
 export(smagick_register)
 
 # Methods
