@@ -27,21 +27,60 @@ using namespace Rcpp;
 // - separator: either ? or !
 //   whether to evaluate from the environment or use verbatim
 
-// here DSB is equal to 2 => we will use it!!!
-enum {
-CUB = 1, DSB = 2
+//
+// delimiter class -------------------------------------------------------------
+//
+
+
+class delim{
+  const char *open;
+  const char *close;
+  
+  int size_open;
+  int size_close;
+ 
+  delim() = delete;
+ 
+public:
+  // SEXP: vector of length 2
+  delim(SEXP);
+  
+  bool is_open(const char *, int &, int, bool);
+  bool is_close(const char *, int &, int, bool);
+  
+  int get_size_open(){return size_open;};
+  int get_size_close(){return size_close;};
+ 
 };
 
-inline bool is_box_open(const int box_type, const char * str, int &i, int n, bool skip = false){
+delim::delim(SEXP Rstr){
+  if(Rf_length(Rstr) != 2){
+    stop("Internal error: Delimiter must be of length 2");
+  }
+  if(TYPEOF(Rstr) != STRSXP){
+    stop("Internal error: Delimiter must be of type character");
+  }
+  
+  open = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
+  close = Rf_translateCharUTF8(STRING_ELT(Rstr, 1));
+  
+  size_open = std::strlen(open);
+  size_close = std::strlen(close);
+}
 
+bool check_symbol(const char *symbol, int n_symbol, const char *str, int &i, int n, bool skip){
+  
   bool ok_escape = false;
   if(skip && str[i] == '\\'){
-    
-    // here we need to 'avoid' the backslash since it is only used to
-    // escape the opening box (note that in regex this is not checked)
-    if(box_type == DSB && i + 2 < n && str[i + 1] == '.' && str[i + 2] == '['){
-      ok_escape = true;
-    } else if(box_type == CUB && i + 1 < n && str[i + 1] == '{'){
+    // what do we do here? we increment i if we have an escaped symbol
+    // since i does not point at the symbol, it always returns FALSE
+    // only thing that matters is the i increment
+    if(i + n_symbol < n){
+      for(int k=0 ; k<n_symbol ; ++k){
+        if(str[i + 1 + k] != symbol[k]){
+          return false;
+        }
+      }
       ok_escape = true;
     }
     
@@ -60,67 +99,50 @@ inline bool is_box_open(const int box_type, const char * str, int &i, int n, boo
   }
   
   // we don't skip but we still check for escaping
+  for(int k=0 ; k<n_symbol ; ++k){
+    if(str[i + k] != symbol[k]){
+      return false;
+    }
+  }
+  
+  // we check escaping
   if(i >= 1 && str[i - 1] == '\\'){
     ok_escape = true;
     int j = i - 2;
-    while(j > 0 && str[j--] == '\\'){
+    while(j >= 0 && str[j--] == '\\'){
       ok_escape = !ok_escape;
     }
     
-    if(ok_escape){
-      return false;
-    }    
+    return !ok_escape;
   }
+  
+  return true;
+}
 
-  if(box_type == DSB){
-    if(i + 2 < n){
-      return str[i] == '.' && str[i + 1] == '[';
-    } else {
-      return false;
-    }
-  } else {
-    // curly brackets
-    if(i + 1 < n){
-      return str[i] == '{';
-    } else {
-      return false;
-    }
+bool delim::is_open(const char *str, int &i, int n, bool skip){
+  return check_symbol(open, size_open, str, i, n, skip);
+}
+
+bool delim::is_close(const char *str, int &i, int n, bool skip){
+  return check_symbol(close, size_close, str, i, n, skip);
+}
+
+//
+// END OF: delimiter class ----------------------------------------------------- 
+//
+
+
+inline bool is_escaped(const char *str, int i){
+  bool ok_escape = i >= 1 && str[i - 1] == '\\';
+  
+  if(ok_escape){
+    int j = i - 2;
+    while(j >= 0 && str[j--] == '\\'){
+      ok_escape = !ok_escape;
+    }  
   }
-}
-
-inline bool is_box_bracket_open(const int box_type, const char * str, int i){
-  return box_type == DSB ? str[i] == '[' : str[i] == '{';
-}
-
-inline char get_closing_box_char(const int box_type){
-  return box_type == DSB ? ']' : '}';
-}
-
-inline std::string get_closing_box_string(const int box_type){
-  return box_type == DSB ? "]" : "}";
-}
-
-inline bool is_box_close(const int box_type, const char * str, int &i, bool skip = false){
-  // sikp: we skip the backslash which can be used for escaping
-
-  if(skip && str[i] == '\\'){
-    int n = std::strlen(str);
-    if( i + 1 < n && ((box_type == DSB && str[i + 1] == ']') || (box_type == CUB && str[i + 1] == '}')) ){
-      ++i;
-    }
-    return false;
-  }
-
-  return box_type == DSB ? str[i] == ']' : str[i] == '}';
-}
-
-
-inline bool is_box_close_verbatim(const int box_type, const char * str, int &i){
-  // sikp: we skip the backslash which can be used for escaping
-
-  bool is_close = box_type == DSB ? str[i] == ']' : str[i] == '}';
-
-  return is_close && !(i > 0 && str[i - 1] == '\\');
+  
+  return ok_escape;
 }
 
 inline bool is_digit(const char * str, int i){
@@ -145,10 +167,15 @@ inline bool is_separator(const char * str, int i){
 }
 
 
-// checks inclusion of a character value in a string array (sort of)
-inline bool is_ending(const char * str, int i, std::string ending_str){
+// checks inclusion of a character value in a string array
+inline bool is_in_string(const char * str, int i, std::string std_str){
   // only supports endings of length <= 3
-  return (str[i] == ending_str[0] || (ending_str.length() > 1 && str[i] == ending_str[1]));
+  for(size_t k=0 ; k<std_str.size() ; ++k){
+    if(str[i] == std_str[k]){
+      return true;
+    }
+  }
+  return false;
 }
 
 // adds quotes only when operator_tmp is not quoted
@@ -175,7 +202,6 @@ inline void enquote(std::string &operator_tmp){
   }
 
 }
-
 
 void extract_quote(const char * str, int &i, int n,
                    std::string &operator_tmp, const bool inQuote_only = false){
@@ -214,10 +240,11 @@ void extract_quote(const char * str, int &i, int n,
 }
 
 
-void extract_r_expression(bool &is_pblm, const char * str, int &i, int n,
-                      std::string &operator_tmp, char ending_char);
+void extract_r_expression(delim &delims, bool &is_pblm, const char * str, int &i, int n,
+                          std::string &operator_tmp, std::string ending_str, 
+                          bool check_closing, bool include_closing);
 
-void extract_single_simple_operation(const int box_type, bool &is_pblm, const char * str, int &i, int n,
+void extract_single_simple_operation(delim &delims, bool &is_pblm, const char * str, int &i, int n,
                                  std::string &operator_tmp, std::string ending_str){
 
   // regular, simple operation
@@ -230,8 +257,8 @@ void extract_single_simple_operation(const int box_type, bool &is_pblm, const ch
     extract_quote(str, i, n, operator_tmp);
   } else {
     // we check for possible argument space separated
-    while(i < n && str[i] != ',' && str[i] != ' ' && !is_ending(str, i, ending_str) && 
-                !is_box_close(box_type, str, i, n) && !is_box_bracket_open(box_type, str, i)){
+    while(i < n && str[i] != ',' && str[i] != ' ' && !is_in_string(str, i, ending_str) && 
+                !delims.is_close(str, i, n, false) && !delims.is_open(str, i, n, false)){
       operator_tmp += str[i++]; 
     }
 
@@ -241,19 +268,23 @@ void extract_single_simple_operation(const int box_type, bool &is_pblm, const ch
     }
   }
   
-  if(is_box_bracket_open(box_type, str, i)){
+  Rcout << "op = " << operator_tmp << " i = " << i << "\n";
+  
+  if(delims.is_open(str, i, n, false)){
     is_pblm = true;
     return;
   }
 
   // step 2: operator extraction (if not done)
   if(is_arg){
-    while(i < n && str[i] != ',' && !is_ending(str, i, ending_str) && 
-                !is_box_close(box_type, str, i, false)){
+    while(i < n && str[i] != ',' && !is_in_string(str, i, ending_str) && 
+                !delims.is_close(str, i, n, false)){
       operator_tmp += str[i++];
     }
     
-    if(is_box_bracket_open(box_type, str, i)){
+    Rcout << "op + extra = " << operator_tmp << " i = " << i << "\n";
+    
+    if(delims.is_open(str, i, n, false)){
       is_pblm = true;
       return;
     }
@@ -283,14 +314,15 @@ inline bool is_paren_operator(const char * str, int i, int n){
 }
 
 
-void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &i, int n,
-                      std::string &operator_tmp, std::string ending_str, bool skip_box_open,
-                      bool skip_second_space = false);
+void extract_verbatim(delim &delims, bool &is_pblm, const char * str, int &i, int n,
+                      std::string &operator_tmp, std::string ending_str, 
+                      bool check_closing, bool include_closing,
+                      bool skip_box_open, bool skip_second_space = false);
 
-void extract_simple_ops_verbatim(const int box_type, bool &is_pblm, const char * str, int &i, int n,
+void extract_simple_ops_verbatim(delim &delims, bool &is_pblm, const char * str, int &i, int n,
                                  std::string &operator_tmp, std::string ending_str);
 
-void extract_paren_operator(const int box_type, bool &is_pblm, const char * str, int &i, int n,
+void extract_paren_operator(delim &delims, bool &is_pblm, const char * str, int &i, int n,
                                  std::string &operator_tmp){
   // ~(simple_ops)
   // if(cond ; ops ; ops)
@@ -303,14 +335,14 @@ void extract_paren_operator(const int box_type, bool &is_pblm, const char * str,
   operator_tmp += str[i++];
 
   if(op == '~'){
-    extract_simple_ops_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")");
+    extract_simple_ops_verbatim(delims, is_pblm, str, i, n, operator_tmp, ")");
     if(is_pblm) return;
 
     operator_tmp += str[i++];
   } else {
     // if or vif
 
-    extract_r_expression(is_pblm, str, i, n, operator_tmp, ';');
+    extract_r_expression(delims, is_pblm, str, i, n, operator_tmp, ";", false, false);
     if(is_pblm) return;
     
     bool is_decorative_space = str[i - 1] == ' ' && i + 1 < n && str[i + 1] == ' ';
@@ -326,9 +358,9 @@ void extract_paren_operator(const int box_type, bool &is_pblm, const char * str,
     // vif => verbatim
     
     if(op == 'i'){
-      extract_simple_ops_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ";)");
+      extract_simple_ops_verbatim(delims, is_pblm, str, i, n, operator_tmp, ";)");
     } else {
-      extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ";)", false);
+      extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ";)", false, false, false);
     }
     
     if(is_pblm) return;
@@ -347,9 +379,9 @@ void extract_paren_operator(const int box_type, bool &is_pblm, const char * str,
       operator_tmp += "_;;;_";
       // last round
       if(op == 'i'){
-        extract_simple_ops_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")");  
+        extract_simple_ops_verbatim(delims, is_pblm, str, i, n, operator_tmp, ")");  
       } else {
-        extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")", false);
+        extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ")", false, false, false);
       }
       
       if(is_pblm) return;
@@ -362,7 +394,7 @@ void extract_paren_operator(const int box_type, bool &is_pblm, const char * str,
 
 }
 
-void extract_simple_ops_verbatim(const int box_type, bool &is_pblm, const char * str, int &i, int n,
+void extract_simple_ops_verbatim(delim &delims, bool &is_pblm, const char * str, int &i, int n,
                                  std::string &operator_tmp, std::string ending_str){
   // extracts simple operations
   // the basic operations can be of the form:
@@ -371,7 +403,6 @@ void extract_simple_ops_verbatim(const int box_type, bool &is_pblm, const char *
   // There are special operations which can include parentheses:
   // - ~(simple_ops)
   // - if(condition ; simple_ops ; simple_ops)
-  // - vif(condition ; verbatim ; verbatim)
   //
   // THE INDEX i OUT IS AT THE ENDING!
 
@@ -385,16 +416,17 @@ void extract_simple_ops_verbatim(const int box_type, bool &is_pblm, const char *
 
     if(i == n) break;
 
-    if(is_ending(str, i, ending_str)){
+    if(is_in_string(str, i, ending_str)){
       // we're good
       break;
-    } else if(is_box_close(box_type, str, i, false)){
+    } else if(delims.is_close(str, i, n, false)){
       // we're a the bound of the box => can be a single variable and not an operation
-      break;
+      is_pblm = true;
+      return;
     } else if(is_paren_operator(str, i, n)){
       // NOTE: we have a guarantee n > i+3
 
-      extract_paren_operator(box_type, is_pblm, str, i, n, operator_tmp);
+      extract_paren_operator(delims, is_pblm, str, i, n, operator_tmp);
       if(is_pblm) return;
       
       if(i < n && str[i] == ','){
@@ -404,7 +436,7 @@ void extract_simple_ops_verbatim(const int box_type, bool &is_pblm, const char *
       // regular, simple operation
       // format: /'arg'op/ or /arg op/
 
-      extract_single_simple_operation(box_type, is_pblm, str, i, n, operator_tmp, ending_str);
+      extract_single_simple_operation(delims, is_pblm, str, i, n, operator_tmp, ending_str);
 
       if(str[i] == ','){
         operator_tmp += str[i++];
@@ -422,17 +454,20 @@ void extract_simple_ops_verbatim(const int box_type, bool &is_pblm, const char *
 
 }
 
-void extract_r_expression(bool &is_pblm, const char * str, int &i, int n,
-                      std::string &operator_tmp, char ending_char){
+void extract_r_expression(delim &delims, bool &is_pblm, const char * str, int &i, int n,
+                          std::string &operator_tmp, std::string ending_str, 
+                          bool check_closing, bool include_closing){
   // extracts a value after a '?' It must always be an R expression
   // the string must contain a closing box to be valid (hence cannot end at n)
   // the index i is located just after the variable
-  // this is a mini R parser (note that it does not check the syntax)
+  // this is a light and mini R parser (note that it does not check the syntax)
   //
   // "bonjour {enum ? persons}"
   //                 i (in)   i (out)
   // the index is at the bound
   //
+  
+  bool check_ending = ending_str.size() > 0;
 
   // square brackets and curly brackets
   int n_cb_open = 0;
@@ -463,10 +498,23 @@ void extract_r_expression(bool &is_pblm, const char * str, int &i, int n,
       extract_quote(str, i, n, operator_tmp);
       if(i == n) break;
 
-    } else if(n_cb_open == 0 && n_sb_open == 0 && n_par_open == 0 && str[i] == ending_char){
-      // we're good!
+    } else if(n_cb_open == 0 && n_sb_open == 0 && n_par_open == 0 && 
+                 ((check_ending && is_in_string(str, i, ending_str)) || 
+                  (check_closing && delims.is_close(str, i, n, false)))){
+      // if here: we're done
+      if(check_closing && delims.is_close(str, i, n, false)){
+        // we're good! => we need to point at the extremity of the delimiter
+        
+        for(int k=1 ; k<delims.get_size_close() ; ++k){
+          if(include_closing){
+            operator_tmp += str[i++];
+          } else {
+            ++i;
+          }
+        }
+      }
+      
       break;
-
     } else {
       if(str[i] == '{'){
         ++n_cb_open;
@@ -492,7 +540,7 @@ void extract_r_expression(bool &is_pblm, const char * str, int &i, int n,
 
 }
 
-void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, int &i, int n,
+void extract_box_verbatim(delim &delims, bool &is_pblm, const char * str, int &i, int n,
                                 std::string &operator_tmp){
   // we extract what is inside a box verbatim
   // the resulting index i is AFTER the closing of the box
@@ -502,15 +550,14 @@ void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, i
 
   if(str[i] == '/'){
     
-    while(i < n && !is_box_close_verbatim(box_type, str, i)){
-      operator_tmp += str[i++];
-    }
+    // we extract the verbatim until the closing box
+    extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, "", true, true, false);
 
   } else if(str[i] == '$' || str[i] == '#'){
     // pluralization
     operator_tmp += str[i++];
     
-    while(i < n && !is_separator(str, i) && !is_box_close(box_type, str, i, false)){
+    while(i < n && !is_separator(str, i) && !delims.is_close(str, i, n, false)){
       if(str[i] != '('){
         operator_tmp += str[i++];
       } else {
@@ -519,7 +566,7 @@ void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, i
         operator_tmp += str[i++];
 
         // we extract the first item
-        extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ";", false);
+        extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ";", false, false, false);
         
         // NOTA: if i == n this means there is a pblm, so we're out
         if(is_pblm) return;
@@ -527,13 +574,13 @@ void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, i
         operator_tmp += str[i++];
 
         // we extract the second or last item
-        extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ";)", false);
+        extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ";)", false, false, false);
         if(is_pblm) return;
 
         if(i < n && str[i] == ';'){
           // we go for another round
           operator_tmp += str[i++];
-          extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")", false);
+          extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ")", false, false, false);
           if(is_pblm) return;
         }
 
@@ -546,21 +593,19 @@ void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, i
     // NOTA: the code differs from above via the different ending that is looked after
     operator_tmp += str[i++];
 
-    extract_r_expression(is_pblm, str, i, n, operator_tmp, ';');
+    extract_r_expression(delims, is_pblm, str, i, n, operator_tmp, ";", false, false);
     if(is_pblm) return;
     
     operator_tmp += str[i++];
 
     // we extract the second or last item
-    std::string ending = ";" + get_closing_box_string(box_type);
-    extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ending, false);
+    extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ";", true, true, false);
     if(is_pblm) return;
 
     if(i < n && str[i] == ';'){
       // we go for another round
       operator_tmp += str[i++];
-      ending = get_closing_box_string(box_type);
-      extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ending, false);
+      extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, "", true, true, false);
       if(is_pblm) return;
     }
 
@@ -573,7 +618,7 @@ void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, i
     // - vif(condition ; verbatim ; verbatim)
 
     // the fun either exits at ?/!, either at a closing box
-    extract_simple_ops_verbatim(box_type, is_pblm, str, i, n, operator_tmp, "?!");
+    extract_simple_ops_verbatim(delims, is_pblm, str, i, n, operator_tmp, "?!");
     if(is_pblm) return;
 
     if(is_separator(str, i)){
@@ -591,24 +636,24 @@ void extract_box_verbatim(const int box_type, bool &is_pblm, const char * str, i
   }
 
   if(check_separator && is_separator(str, i)){
-    std::string ending = get_closing_box_string(box_type);
     if(str[i] == '?'){
-      extract_r_expression(is_pblm, str, i, n, operator_tmp, ending[0]);
+      extract_r_expression(delims, is_pblm, str, i, n, operator_tmp, "", true, true);
     } else if(str[i] == '!'){
-      extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ending, false, true);
+      extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, "", true, true, false, true);
     }
 
     if(is_pblm) return;
   }
 
-  // we add the closing box element
+  // we add the last character of the closing box element
   operator_tmp += str[i++];
 }
 
-void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &i, int n,
-                      std::string &operator_tmp, std::string ending_str, bool skip_box_open,
-                      bool skip_second_space){
-  // ending_str: we stop at the ending, can be at most 2 char length
+void extract_verbatim(delim &delims, bool &is_pblm, const char * str, int &i, int n,
+                      std::string &operator_tmp, std::string ending_str, 
+                      bool check_closing, bool include_closing,
+                      bool skip_box_open, bool skip_second_space){
+  //
   // the final index i stops at the ending value (and not after it)
   // the default for skip_second_space is given in its first declaration
   
@@ -625,8 +670,8 @@ void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &
 
   while(i < n){
     
-    if(is_ending(str, i, ending_str)){
-      if(str[i - 1] == '\\'){
+    if(is_in_string(str, i, ending_str)){
+      if(is_escaped(str, i)){
         // means the value has been escaped
         operator_tmp.pop_back();
         operator_tmp += str[i++];
@@ -634,12 +679,25 @@ void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &
         // we're done
         break;
       }
-    } else if(is_box_open(box_type, str, i, n, skip_box_open)){
+    } else if(check_closing && delims.is_close(str, i, n, true)){
+      // the skipping of the escape is included 
+      // (I've checked it works! you move i by one, then end up in the last 'else', and all is well)
+      // we need to point at the extremity of the delimiter
+      for(int k=1 ; k<delims.get_size_close() ; ++k){
+        if(include_closing){
+          operator_tmp += str[i++];
+        } else {
+          ++i;
+        }
+      }
+      
+      break;
+    } else if(delims.is_open(str, i, n, skip_box_open)){
       operator_tmp += str[i++];
-      if(box_type == DSB){
+      for(int k=1 ; k<delims.get_size_open() ; ++k){
         operator_tmp += str[i++];
       }
-      extract_box_verbatim(box_type, is_pblm, str, i, n, operator_tmp);
+      extract_box_verbatim(delims, is_pblm, str, i, n, operator_tmp);
     } else {
       operator_tmp += str[i++];
     }
@@ -652,7 +710,7 @@ void extract_verbatim(const int box_type, bool &is_pblm, const char * str, int &
 }
 
 
-void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int n,
+void parse_box(delim &delims, bool &is_pblm, const char * str, int &i, int n,
                       std::vector<std::string> &operator_vec, std::string &expr_value,
                       bool &any_plural, std::string &error_msg){
   // modifies the operator and gives the updated i
@@ -687,8 +745,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     ++i;
     
     // this is a simple verbatim extraction without any reparsing
-    std::string closing_box = get_closing_box_string(box_type);
-    extract_verbatim(box_type, is_pblm, str, i, n, expr_value, closing_box, true);
+    extract_verbatim(delims, is_pblm, str, i, n, expr_value, "", true, false, true);
     
     if(is_pblm || i == n){
       error_msg = "slash operator not ending correctly";
@@ -711,7 +768,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     operator_tmp = "";
     
     // step 1: extraction of the condition
-    extract_r_expression(is_pblm, str, i, n, operator_tmp, ';');
+    extract_r_expression(delims, is_pblm, str, i, n, operator_tmp, ";", false, false);
     if(is_pblm){
       error_msg = "if-else: error extracting condition";
       return;
@@ -723,14 +780,13 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     operator_tmp = "";
 
     // step 2: extraction of the first verbatim
-    std::string ending = ";" + get_closing_box_string(box_type);
     
     if(i < n && str[i] == ' ' && str[i - 2] == ' '){
       // we strip one WS for readability
       ++i;
     }
     
-    extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ending, false);
+    extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ";", true, false, false);
     if(is_pblm){
       error_msg = "if-else: error extracting the first part";
       return;
@@ -752,7 +808,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     operator_tmp = "";
 
     if(two_verbatims){
-      extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, get_closing_box_string(box_type), false);
+      extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, "", true, false, false);
       if(is_pblm){
         error_msg = "if-else: error extracting the second part";
         return;
@@ -777,7 +833,15 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     while(i < n && is_blank(str[i])) ++i;
 
     bool in_operator = false;
-    while(i < n && !is_separator(str, i) && !is_box_close(box_type, str, i)){
+    while(i < n && !is_separator(str, i)){
+      
+      if(delims.is_close(str, i, n, false)){
+        // we point at the end of the closing box
+        for(int k=1 ; k<delims.get_size_close() ; ++k){
+          ++i;
+        }
+        break;
+      }
 
       // pluralization: op1, op2, (sing;plural)
 
@@ -805,7 +869,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
         // step 1: extraction of the first verbatim element
         //
 
-        extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ";", false);
+        extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ";", false, false, false);
         if(is_pblm){
           error_msg = "pluralization: (v1;v2) error extracting the first verbatim";
           return;
@@ -836,7 +900,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
           ++i;
         }
 
-        extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ";)", false);
+        extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ";)", false, false, false);
         if(is_pblm){
           error_msg = "pluralization: (v1;v2) error extracting the second verbatim";
           return;
@@ -865,7 +929,7 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
             ++i;
           }
           
-          extract_verbatim(box_type, is_pblm, str, i, n, operator_tmp, ")", false);
+          extract_verbatim(delims, is_pblm, str, i, n, operator_tmp, ")", false, false, false);
           if(is_pblm){
             error_msg = "pluralization: (v1;v2;v3) error extracting the third verbatim";
             return;
@@ -955,9 +1019,11 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
       // stripping the WS
       while(i < n && is_blank(str[i])) ++i;
 
-      if(is_box_close(box_type, str, i)){
+      if(delims.is_close(str, i, n, false)){
         // normal operations cannot end with a closing box
         // UNLESS we're in a simple argument evaluation box: like '{x}'
+        
+        for(int k=1 ; k<delims.get_size_close() ; ++k) ++i;
         
         if(n_ops == 1){
           expr_value = operator_vec[0];
@@ -970,14 +1036,18 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
 
       } else {
         ++n_ops;
+        
+        Rcout << "START OPERATION: i = " << i << " str[i] = " << str[i] << "\n";
 
         if(is_paren_operator(str, i, n)){
           // paren-like operations: if(cond;op;op), ~(ops), vif(cond;veb;verb)
-          extract_paren_operator(box_type, is_pblm, str, i, n, operator_tmp);
+          extract_paren_operator(delims, is_pblm, str, i, n, operator_tmp);
         } else {
           // regular, simple operation
-          extract_single_simple_operation(box_type, is_pblm, str, i, n, operator_tmp, "?!");
+          extract_single_simple_operation(delims, is_pblm, str, i, n, operator_tmp, "?!");
         }
+        
+        Rcout << "  END OPERATION: i = " << i << " str[i] = " << str[i] << "\n";
 
         if(is_pblm) return;
         
@@ -1014,26 +1084,27 @@ void parse_box(const int box_type, bool &is_pblm, const char * str, int &i, int 
     // we add the separator (? or !) as an operator
     operator_vec.push_back(operator_tmp);
     ++i;
+    
+    Rcout << "preparing ? or ! -- i = " << i << "; str[i] = " << str[i];
 
-    std::string closing_box = get_closing_box_string(box_type);
     if(is_eval){
-      extract_r_expression(is_pblm, str, i, n, expr_value, closing_box[0]);
+      extract_r_expression(delims, is_pblm, str, i, n, expr_value, "", true, false);
     } else {
-      extract_verbatim(box_type, is_pblm, str, i, n, expr_value, closing_box, true);
+      extract_verbatim(delims, is_pblm, str, i, n, expr_value, "", true, false, true);
     }
   }
 
 }
 
 // [[Rcpp::export]]
-List cpp_smagick_parser(SEXP Rstr, bool is_dsb = false, bool only_section = false){
+List cpp_smagick_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_section = false){
   // Rstr: string from R of length 1
 
   List res;
   // const char *str = CHAR(STRING_ELT(Rstr, 0));
   const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
 
-  const int box_type = is_dsb ? DSB : CUB;
+  delim delims(Rdelimiters);
 
   // pluralization flag
   bool any_plural = false;
@@ -1048,9 +1119,12 @@ List cpp_smagick_parser(SEXP Rstr, bool is_dsb = false, bool only_section = fals
 
     // if not currently open => we check until open
     std::string string_value = "";
-    while(i < n && !is_box_open(box_type, str, i, n, true)){
+    while(i < n && !delims.is_open(str, i, n, true)){
       string_value += str[i++];
     }
+    
+    Rcout << "value = " << string_value << "\n";
+    Rcout << "i = " << i << "\n";    
 
     if(!string_value.empty()){
       res.push_back(std_string_to_r_string(string_value));
@@ -1058,18 +1132,17 @@ List cpp_smagick_parser(SEXP Rstr, bool is_dsb = false, bool only_section = fals
 
     if(i < n){
       // there was one open
-      // box type: 1 is curly and 2 is dsb
-      i += box_type;
+      i += delims.get_size_open();
       int i_start = i;
     
-      bool is_pblm = false;      
+      bool is_pblm = false;
 
       List sop_element;
       std::vector<std::string> operator_vec;
       std::string expr_value;
 
       // modifies i, expr_value and operator_vec "in place"
-      parse_box(box_type, is_pblm, str, i, n, operator_vec, expr_value, any_plural, error_msg);
+      parse_box(delims, is_pblm, str, i, n, operator_vec, expr_value, any_plural, error_msg);
       
       if(is_pblm){
         // the parsing could not be achieved.... 
@@ -1084,7 +1157,7 @@ List cpp_smagick_parser(SEXP Rstr, bool is_dsb = false, bool only_section = fals
           
           is_pblm = false;
           i = i_start;
-          extract_r_expression(is_pblm, str, i, n, expr_value, get_closing_box_char(box_type));
+          extract_r_expression(delims, is_pblm, str, i, n, expr_value, "", true, false);
           
           if(is_pblm){
             error_msg = "no closing bracket";
@@ -1102,7 +1175,7 @@ List cpp_smagick_parser(SEXP Rstr, bool is_dsb = false, bool only_section = fals
           info_error.push_back(error_msg);
           
           std::string parsed_section = "";
-          for(int k=(i_start-box_type) ; k<=i && k<n ; ++k){
+          for(int k=(i_start - delims.get_size_open()) ; k<=i && k<n ; ++k){
             parsed_section += str[k];
           }
           
@@ -1118,9 +1191,9 @@ List cpp_smagick_parser(SEXP Rstr, bool is_dsb = false, bool only_section = fals
         sop_element.push_back(std_string_to_r_string(expr_value));
       }
       
-      if(only_section){
+      if(only_last_parsed_section){
         std::string parsed_section = "";
-        for(int k=(i_start-box_type) ; k<=i && k<n ; ++k){
+        for(int k=(i_start - delims.get_size_open()) ; k<=i && k<n ; ++k){
           parsed_section += str[k];
         }
         res.push_back(std_string_to_r_string(parsed_section));
@@ -1369,13 +1442,13 @@ List cpp_extract_pipe(SEXP Rstr, bool check_double = false){
 }
 
 // [[Rcpp::export]]
-SEXP cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
+SEXP cpp_parse_simple_operations(SEXP Rstr, SEXP Rdelimiters){
   // "'-'S, title, C" => c("'-'S", "title", "C")
   
   const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
-
-  const int box_type = is_dsb ? DSB : CUB;
+  
+  delim delims(Rdelimiters);
   
   std::vector<std::string> operator_vec;
   std::string operator_tmp;
@@ -1387,7 +1460,7 @@ SEXP cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
     // stripping the WS
     while(i < n && is_blank(str[i])) ++i;
 
-    if(is_box_close(box_type, str, i)){
+    if(delims.is_close(str, i, n, false)){
       // normal operations cannot end with a closing box
       // we'll throw an error
       break;
@@ -1396,7 +1469,7 @@ SEXP cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
 
       if(is_paren_operator(str, i, n)){
         // paren-like operations: if(cond;op;op), ~(ops), vif(cond;veb;verb)
-        extract_paren_operator(box_type, is_pblm, str, i, n, operator_tmp);
+        extract_paren_operator(delims, is_pblm, str, i, n, operator_tmp);
         if(i == n && str[n - 1] != ')'){
           i = 0;
           operator_vec.push_back(operator_tmp);  
@@ -1404,7 +1477,7 @@ SEXP cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
         }
       } else {
         // regular, simple operation
-        extract_single_simple_operation(box_type, is_pblm, str, i, n, operator_tmp, "?!");
+        extract_single_simple_operation(delims, is_pblm, str, i, n, operator_tmp, "?!");
       }
 
       if(!operator_tmp.empty()){
@@ -1439,12 +1512,12 @@ SEXP cpp_parse_simple_operations(SEXP Rstr, bool is_dsb){
 }
 
 // [[Rcpp::export]]
-SEXP cpp_parse_slash(SEXP Rstr, bool is_dsb){
+SEXP cpp_parse_slash(SEXP Rstr, SEXP Rdelimiters){
 
   const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
 
-  const int box_type = is_dsb ? DSB : CUB;
+  delim delims(Rdelimiters);
   
   std::vector<std::string> res;
   std::string string_tmp;
@@ -1452,7 +1525,7 @@ SEXP cpp_parse_slash(SEXP Rstr, bool is_dsb){
   int i = 0;
   while(i < n){
     
-    while(i < n && str[i] != ',' && !is_box_open(box_type, str, i, n, true)){
+    while(i < n && str[i] != ',' && !delims.is_close(str, i, n, true)){
       string_tmp += str[i++];
     }
     
@@ -1471,12 +1544,12 @@ SEXP cpp_parse_slash(SEXP Rstr, bool is_dsb){
     // If here: we're in a box!
     bool is_pblm = false;
     string_tmp += str[i++];
-    if(box_type == DSB){
+    for(int k=1 ; k<delims.get_size_open() ; ++k){
       string_tmp += str[i++];
     }
     
-    // we extract the box, the index if after the closing box
-    extract_box_verbatim(box_type, is_pblm, str, i, n, string_tmp);
+    // we extract the box, the index is after the closing box
+    extract_box_verbatim(delims, is_pblm, str, i, n, string_tmp);
   }
   
   // we save the last one if needed
@@ -1488,13 +1561,13 @@ SEXP cpp_parse_slash(SEXP Rstr, bool is_dsb){
 }
   
 // [[Rcpp::export]]
-SEXP cpp_find_closing_problem(SEXP Rstr, bool is_dsb = false){
+SEXP cpp_find_closing_problem(SEXP Rstr, SEXP Rdelimiters){
   
   const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
   
   
-  const int box_type = is_dsb ? DSB : CUB;
+  delim delims(Rdelimiters);
   int i = 0;
   
   std::string res;
@@ -1519,7 +1592,7 @@ SEXP cpp_find_closing_problem(SEXP Rstr, bool is_dsb = false){
       if(i == n) break;
       res = "";
 
-    } else if(n_cb_open == 0 && n_sb_open == 0 && n_par_open == 0 && is_box_close(box_type, str, i)){
+    } else if(n_cb_open == 0 && n_sb_open == 0 && n_par_open == 0 && delims.is_close(str, i, n, false)){
       // we're good!
       res = "";
       break;
