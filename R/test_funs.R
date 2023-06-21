@@ -249,7 +249,7 @@ test_err_contains = function(x, pattern){
   
 }
 
-run_test = function(chunk, from){
+run_test = function(chunk, from = 1){
   
   dir_tests = list.dirs("tests", recursive = FALSE)
   if(length(dir_tests) > 0){
@@ -259,19 +259,20 @@ run_test = function(chunk, from){
   }
   
   if(length(all_files) == 0){
-    stop("No test file was found in ./tests/")
+    stop("No test file was found in the folder './tests/'.")
   }  
 
   test_code = c()
+  lines_per_file = c()
+  file_names = c()
   offset = 2
   for(f in all_files){
-    my_file = paste0("MY_FILE = '", f, "'")
-    my_offset = paste0("MY_OFFSET = ", offset)
+    file_names = c(file_names, f)
     f_open = file(f, encoding = "UTF-8")
     new_code = readLines(f_open)
     close(f_open)
-    test_code = c(test_code, my_file, my_offset, new_code)
-    offset = offset + length(new_code) + 2
+    test_code = c(test_code, new_code)
+    lines_per_file = c(lines_per_file, length(new_code))
   }
 
   pkg = gsub(".+/", "", normalizePath(".", "/"))
@@ -341,7 +342,7 @@ run_test = function(chunk, from){
   test_code = code_LINE_FOR
 
   # C) Chunk selection
-
+  
   if(!missing(chunk) || !missing(from)){
 
       qui = which(grepl("^chunk\\(", test_code))
@@ -366,7 +367,7 @@ run_test = function(chunk, from){
         }
 
       } else {
-        if(is.character(from)){
+        if(is.character(chunk)){
           chunk = check_set_options(chunk, chunk_names, "test_fun")
         } else {
           check_numeric(chunk, scalar = TRUE, integer = TRUE)
@@ -403,6 +404,9 @@ run_test = function(chunk, from){
 
   env = new.env()
   assign("INSIDE_LOOP", FALSE, env)
+  assign("chunk", get("chunk", mode = "function"), env)
+  assign("test", test, env)
+  assign("test_err_contains", test_err_contains, env)
 
   my_eval = try(eval(parsed_code, env))
 
@@ -412,17 +416,20 @@ run_test = function(chunk, from){
       line_fail = get("LINE_COUNTER", env)
       inside_loop = get("INSIDE_LOOP", env)
       
-      file_info = ""
-      if(length(all_files) > 0){
-        my_file = get("MY_FILE", env)
-        file_info = smagick("In file {'/.+/'r, Q ? my_file}\n==> ")
-      }
+      nfiles = length(all_files)
+      line_start = c(0, cumsum(lines_per_file)[-nfiles])
+      line_end = cumsum(lines_per_file)
       
-      offset = get("MY_OFFSET", env)
+      index = which(line_fail >= line_start & line_fail <= line_end)
+      my_file_full = file_names[index]
+      my_file_short = gsub(".+/", "", my_file_full)
+      file_info = smagick("In file {Q?my_file_short}\n==> ")
+      
+      line_in_file = line_fail - line_start[index]
       
       message("\n---------------------------\n")
 
-      message(file_info, "Test failed at line: ", line_fail - offset)
+      message(file_info, "Test failed at line: ", line_in_file)
       
       i = which(test_code == paste0("LINE_COUNTER = ", line_fail))
       my_line = test_code[i + 1]
@@ -440,7 +447,7 @@ run_test = function(chunk, from){
           assign(var, get(var, env), parent.frame())
       }
       
-      command = .sma("rstudioapi::navigateToFile({Q?my_file}, {line_fail - offset})")
+      command = .sma("rstudioapi::navigateToFile({Q?my_file_full}, {line_in_file})")
       command = str2lang(command)
       
       eval(command)
