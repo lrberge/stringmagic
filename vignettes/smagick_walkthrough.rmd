@@ -1280,7 +1280,7 @@ smagick("Writing the same sentence {#Ntimes ? n} is unnecessary.")
 ### is, or any verb
 
 Conjugates any English verb appropriately depending on context. Any command that
-is not recognized as one the commands previously described is treated as a verb.
+is not recognized as one of the commands previously described is treated as a verb.
 
 Simply add an upper case first to upper case the conjugated verb.
 
