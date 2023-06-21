@@ -4,17 +4,13 @@
 # ~: test for auxilliary tools
 #------------------------------------------------------------------------------#
 
-library(stringmagick)
-test = stringmagick:::test
-test_err_contains = stringmagick:::test_err_contains
-
 
 ####
 #### str_is ####
 ####
 
 
-x = dsb("/one, two, one... two, microphone, check")
+x = smagick("/one, two, one... two, microphone, check")
 
 val = str_is(x, "^...$")
 test(val, c(TRUE, TRUE, FALSE, FALSE, FALSE))
@@ -62,7 +58,7 @@ val = str_is(x, "one | c", fixed = TRUE)
 test(val, c(TRUE, FALSE, TRUE, TRUE, TRUE))
 
 # escaping
-x = dsb("/hey!, /twitter, !##!, a & b, c | d")
+x = smagick("/hey!, /twitter, !##!, a & b, c | d")
 
 val = str_which(x, "\\/t")
 test(val, 2)
