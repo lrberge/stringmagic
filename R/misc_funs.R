@@ -977,7 +977,7 @@ is_box_open = function(x, delim){
 
 is_box_close = function(x, delim){
   n = nchar(x)
-  substr(x, n - nchar(delim[2] + 1), n) == delim[2]
+  substr(x, n - nchar(delim[2]) + 1, n) == delim[2]
 }
 
 extract_pipe = function(x, op, double = FALSE, numeric = FALSE, data = NULL, mbt = FALSE){

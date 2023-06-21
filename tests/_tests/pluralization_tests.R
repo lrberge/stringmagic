@@ -4,6 +4,9 @@
 # ~: pluralization tests
 #------------------------------------------------------------------------------#
 
+
+chunk("plural")
+
 dsb = function(...) smagick(..., open = ".[", close = "]")
 
 #

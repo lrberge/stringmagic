@@ -268,8 +268,6 @@ void extract_single_simple_operation(delim &delims, bool &is_pblm, const char * 
     }
   }
   
-  Rcout << "op = " << operator_tmp << " i = " << i << "\n";
-  
   if(delims.is_open(str, i, n, false)){
     is_pblm = true;
     return;
@@ -281,8 +279,6 @@ void extract_single_simple_operation(delim &delims, bool &is_pblm, const char * 
                 !delims.is_close(str, i, n, false)){
       operator_tmp += str[i++];
     }
-    
-    Rcout << "op + extra = " << operator_tmp << " i = " << i << "\n";
     
     if(delims.is_open(str, i, n, false)){
       is_pblm = true;
@@ -1036,8 +1032,6 @@ void parse_box(delim &delims, bool &is_pblm, const char * str, int &i, int n,
 
       } else {
         ++n_ops;
-        
-        Rcout << "START OPERATION: i = " << i << " str[i] = " << str[i] << "\n";
 
         if(is_paren_operator(str, i, n)){
           // paren-like operations: if(cond;op;op), ~(ops), vif(cond;veb;verb)
@@ -1046,8 +1040,6 @@ void parse_box(delim &delims, bool &is_pblm, const char * str, int &i, int n,
           // regular, simple operation
           extract_single_simple_operation(delims, is_pblm, str, i, n, operator_tmp, "?!");
         }
-        
-        Rcout << "  END OPERATION: i = " << i << " str[i] = " << str[i] << "\n";
 
         if(is_pblm) return;
         
@@ -1084,8 +1076,6 @@ void parse_box(delim &delims, bool &is_pblm, const char * str, int &i, int n,
     // we add the separator (? or !) as an operator
     operator_vec.push_back(operator_tmp);
     ++i;
-    
-    Rcout << "preparing ? or ! -- i = " << i << "; str[i] = " << str[i];
 
     if(is_eval){
       extract_r_expression(delims, is_pblm, str, i, n, expr_value, "", true, false);
@@ -1123,9 +1113,6 @@ List cpp_smagick_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_secti
       string_value += str[i++];
     }
     
-    Rcout << "value = " << string_value << "\n";
-    Rcout << "i = " << i << "\n";    
-
     if(!string_value.empty()){
       res.push_back(std_string_to_r_string(string_value));
     }
@@ -1525,7 +1512,7 @@ SEXP cpp_parse_slash(SEXP Rstr, SEXP Rdelimiters){
   int i = 0;
   while(i < n){
     
-    while(i < n && str[i] != ',' && !delims.is_close(str, i, n, true)){
+    while(i < n && str[i] != ',' && !delims.is_open(str, i, n, true)){
       string_tmp += str[i++];
     }
     

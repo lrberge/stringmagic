@@ -8,6 +8,8 @@
 # - should go through all the branches
 # - I test the conditional operations inside the operators when relevant
 
+chunk("smagick")
+
 dsb = function(...) smagick(..., open = ".[", close = "]")
 
 #
@@ -722,7 +724,7 @@ test(txt, "57-26, 32-7, 29-8 and 55")
 # ascii ####
 #
 
-test(dsb("laurent .[ascii ! bergé]"), "laurent berge")
+test(dsb("laurent .[ascii.utf8 ! bergé]"), "laurent berge")
 
 #
 # stop ####
@@ -871,7 +873,6 @@ smagick_register(xplode, "xplode")
 
 txt = smagick("bon{xplode!jour}")
 test(txt, c("bonj", "bono", "bonu", "bonr"))
-
 
 #
 # errors ####

@@ -488,7 +488,7 @@ check_set_smagick_parsing = function(x, check, delim){
                   "{Q!Special interpolation: if-else}")
     } else {
       if(grepl("[!?]", x)){
-        type = paste0("2 (`", open, "ops ? expr", close, "`) or 3 (`", open, "ops ! verbatim", close"`)")
+        type = paste0("2 (`", open, "ops ? expr", close, "`) or 3 (`", open, "ops ! verbatim", close, "`)")
         if(!grepl("!", x)){
           type = paste0("2 (`", open, "ops ? expr", close, "`)")
         } else if(!grepl("[?]", x)){
@@ -682,7 +682,7 @@ report_smagick_parsing_error = function(x, x_parsed, delim, error = TRUE){
                  "double backslash: \\\\{bq?delim[1]}.")
       suggest = "INFO: see smagick(help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
-      pblm = cpp_find_closing_problem(xi)
+      pblm = cpp_find_closing_problem(xi, delim)
       pblm = switch(pblm, 
                     "'" = "a single quote (') open is not closed.",
                     "\"" = "a double quote (\") open is not closed.",

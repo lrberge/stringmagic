@@ -143,7 +143,7 @@ smagick_register = function(fun, alias, valid_options = NULL){
               "\nPROBLEM: it has no argument {enum.bq.or?arg_missing}.")
   }
 
-  valid_args = .sma("/x, argument, options, group, group_flag")
+  valid_args = smagick("/x, argument, options, group, group_flag")
   arg_pblm = setdiff(setdiff(fun_args, "..."), valid_args)
   if(length(arg_pblm) > 0){
     stop_hook("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
@@ -262,7 +262,7 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
                                open = "{", close = "}",
                                sep = "", vectorize = FALSE,
                                slash = TRUE, collapse = NULL,
-                               help = NULL, is_root = FALSE,
+                               help = NULL, is_root = FALSE, data.table = FALSE,
                                check = FALSE, fun_name = "smagick", plural_value = NULL){
   
   # flag useful to easily identify this environment (used in error messages)
@@ -282,7 +282,7 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
     }    
   }
 
-  if(is_root){
+  if(is_root && data.table){
     # we check for data table calls
     is_dt = FALSE
     sc = sys.calls()
@@ -794,7 +794,7 @@ sma_char2operator = function(x, fun_name){
               "with 'op' an operator. ",
               "\nPROBLEM: In `", x, "` the operator is missing.")
   }
-  ]
+  
   argument = op_parsed$argument
   do_eval = op_parsed$eval
   
@@ -833,9 +833,8 @@ sma_char2operator = function(x, fun_name){
             "paste" = 'x = "those, words"; smagick("Let\'s emphasize {S, \'**\'paste.both, c ? x}.")')
 
       ex = bespoke_msg(ex[op])
-      .stop_hook("The operator `", op,]
-              "` has no default value, you must provide values explicitly.\n Example: ", 
-              ex)
+      .stop_hook("The operator `", op, "` has no default value, you must provide values explicitly.", 
+                 " EXAMPLE: ", ex)
     }
   }
 
@@ -2268,7 +2267,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
         } else {
           data = list()
         }
-        xi = smagick_internal(instruction, delim = delim, data = data, envir = envir, 
+        xi = smagick_internal(instruction, delim = delim, envir = envir, 
                               data = data, check = check, fun_name = fun_name)
       }
       
