@@ -17,14 +17,14 @@ dsb = function(...) smagick(..., .delim = ".[ ]")
 #
 
 # regular
-x = smagick("/bon, jour, les gens, 
+x = str_vec("bon, jour, les gens, 
           je suis, la bas")
 test(x, c("bon", "jour", "les gens", "je suis", "la bas"))
 
 # with nesting
 y = c("Ana", "Charles")
 z = c("Romeo Montaigu", "Juliette Capulet")
-x = smagick("/Jules, {y}, Francis, {'\\s+'S, ~(cfirst, ''c) ? z}")
+x = str_vec("Jules, {y}, Francis, {'\\s+'S, ~(cfirst, ''c) ? z}")
 test(x, c("Jules", "Ana", "Charles", "Francis", "RM", "JC"))
 
 #
@@ -49,7 +49,7 @@ test(smagick("win = {c ? x}"), "win = 1 2 3")
 test(smagick("win = {''c ? x}"), "win = 123")
 
 # conditional collapse
-x = smagick("/bonjour les gens., comment ca va?, bien?, bien.")
+x = str_vec("bonjour les gens., comment ca va?, bien?, bien.")
 txt = smagick("{' 'S, ~(cfirst.3, '.'c) ? x}")
 test(txt, c("bon.les.gen", "com.ca.va?", "bie", "bie"))
 
@@ -111,7 +111,7 @@ txt = smagick("She said: {'w/Bla, blanc => \\1\\1'r, ws ? x}")
 test(txt, "She said: Blanche dit 'BlaBla bla blancblanc'.")
 
 # total replacement
-x = smagick("/jingle bells, jingle bells, jingle, all the way")
+x = str_vec("jingle bells, jingle bells, jingle, all the way")
 txt = smagick("{', 'c ! {'t/jing => [sound]'r ? x}}")
 test(txt, "[sound], [sound], [sound], all the way")
 
@@ -189,7 +189,7 @@ txt = smagick("{'ignore, word/bla'X ? x}")
 test(txt, c("Bla", "bla"))
 
 # conditional
-x = smagick("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 txt = smagick("info: {'\\d+'X, ~('-'c), C ? x}")
 test(txt, "info: 57-26, 32-7, 29-8 and 55")
 
@@ -212,7 +212,7 @@ index = str_ops(x, "'gain & .'is.fixed")
 test(index, c(TRUE, FALSE, FALSE, FALSE))
 
 # conditional
-x = smagick("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 txt = smagick("info: {' 'S, '!\\d'get, ~('-'c), C ? x}")
 test(txt, "info: laura-and, charles-and, charly-and and june")
 
@@ -398,7 +398,7 @@ txt = smagick("{'3||et :REST:/:N:'K ? x}")
 test(txt, c("1", "2", "et three/five"))
 
 # conditional
-x = smagick("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 test(smagick("info: {' 'S, ~(2Ko), C ? x}"), "err")
 
 #
@@ -690,7 +690,7 @@ txt = smagick("{5 cfirst, 'pour'rm.blank, ', 'c ? x}")
 test(txt, "556, :!, serpe")
 
 # conditional
-x = smagick("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 txt = smagick("{' 'S, rm.noalpha, ~('-'c), C ? x}")
 test(txt, "laura-and, charles-and, charly-and and june")
 
@@ -716,7 +716,7 @@ txt = smagick("{num.rm ? x}")
 test(txt, 55)
 
 # conditional
-x = smagick("/laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 txt = smagick("{' 'S, num.rm, ~('-'c), C ? x}")
 test(txt, "57-26, 32-7, 29-8 and 55")
 
@@ -906,7 +906,7 @@ test_err_contains(smagick("error operation: {if(fakfak%m; upper ; lower) ! ohoho
 
 test_err_contains(smagick("error operation: {S, ~(sekg) ! ohohoh, hihihi}"), "not a valid op")
 
-test_err_contains(smagick("/hi, {there"), "bracket & matched & escape")
+test_err_contains(str_vec("hi, {there"), "bracket & matched & escape")
 
 #
 # multi line expressions ####

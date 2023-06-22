@@ -11,7 +11,7 @@ chunk("tools")
 ####
 
 
-x = smagick("/one, two, one... two, microphone, check")
+x = str_vec("one, two, one... two, microphone, check")
 
 val = str_is(x, "^...$")
 test(val, c(TRUE, TRUE, FALSE, FALSE, FALSE))
@@ -59,7 +59,7 @@ val = str_is(x, "one | c", fixed = TRUE)
 test(val, c(TRUE, FALSE, TRUE, TRUE, TRUE))
 
 # escaping
-x = smagick("/hey!, /twitter, !##!, a & b, c | d")
+x = str_vec("hey!, /twitter, !##!, a & b, c | d")
 
 val = str_which(x, "\\/t")
 test(val, 2)

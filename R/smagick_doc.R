@@ -25,10 +25,6 @@
 #'  the elements in `...` before applying any operation.
 #' @param .vectorize Logical scalar, default is `FALSE`. If `TRUE`, Further, elements in `...` are 
 #' NOT collapsed together, but instead vectorised.
-#' @param .slash Logical, default is `TRUE`. If `TRUE`, then starting the string with a slash,
-#' like in `smagick("/one, two, three")` will split the character string after the slash breaking at
-#' each comma followed by spaces or newlines. The previous example leads to the string vector
-#' `c("one", "two", "three")`. 
 #' @param .help Character scalar or `TRUE`, default is `NULL`. This argument
 #' is used to generate a dynamic help on the console. If `TRUE`, the user can select which
 #' topic to read from the main documentation, with the possibility to search for keywords and
@@ -348,7 +344,7 @@
 #' `n = c(3, 7); smagick("They finished {Nth, enum ? n}!")` leads to "They finished third and seventh!".
 #' + ntimes: write numbers in the form `n` times. Options: "letter", "upper". Option 
 #' "letter" writes the number in letters (up to 100). Option "upper" does the same as "letter" 
-#' and uppercases the first letter. Example: `smagick("They lost {C ! {ntimes ? c(1, 12)} against {/Real, Barcelona}}.")`
+#' and uppercases the first letter. Example: `smagick("They lost {C ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}.")`
 #' leads to "They lost once against Real and 12 times against Barcelona.".
 #' + Ntimes: same as `ntimes` but automatically adds the option "letter".
 #' Example: `x = 5; smagick("This paper was rejected {Ntimes ? x}...")` leads to
@@ -482,13 +478,13 @@
 #' "Values: <10, 25, 12 and <10". As we can see values lower than 10 are replaced
 #' with "<10" while other values are not modified.
 #' 
-#' Ex.4: `x = smagick("x{1:10}")`; `smagick("y = {vif(.N>4 ; {/{x[1]}, ..., {last?x}}), ' + 'c ? x}")`
+#' Ex.4: `x = smagick("x{1:10}")`; `smagick("y = {vif(.N>4 ; {S!{x[1]}, ..., {last?x}}), ' + 'c ? x}")`
 #' leads to "y = x1 + ... + x10".
 #' Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
-#' the full string is replaced with `"{/{x[1]}, ..., {last?x}}"`. Interpolation applies to
-#' such string. Hence the slash operation (see the dedicated section) breaks the string w.r.t.
-#' the commas, leading to the vector `c("{x[1]}", "...", "{last?x}")`. Since the 
-#' string contain curly brackets, interpolation is applied again. This leads to 
+#' the full string is replaced with `"{S!{x[1]}, ..., {last?x}}"`. Interpolation applies to
+#' such string. Hence the split operation `S` breaks the string w.r.t.
+#' the commas (default behavior), leading to the vector `c("{x[1]}", "...", "{last?x}")`. Since the 
+#' string contains curly brackets, interpolation is applied again. This leads to 
 #' the vector `c("x1", "...", "x10")`. Finally, this vector is collapsed with ' + ' leading
 #' to the final string.
 #' Note that there are many ways to get to the same result. Here is another example:
@@ -499,27 +495,6 @@
 #' 
 #' Ex.5: `smagick("{4 last, vif(. %% 2 ; x{.} ; y{rev?.}), C ? 1:11}")`
 #' leads to "y10, x9, y8 and x11".
-#' 
-#' 
-#' @section Special interpolation: The slash:
-#' 
-#' Interpolations starting with a slash are different from regular interpolations. 
-#' Ex.1: `x = 3:4; smagick("{/one, two, {x}}")` leads to the vector `c("one", "two", "3", "4")`.
-#' 
-#' When a "/" is the first character of an interpolation:
-#' - all characters until the closing bracket are taken as verbatim
-#' - the verbatim string is split according to comma separation (formally they are split with `,[ \t\n]+`),
-#' resulting into a vector
-#' - if the vector contains any *box*, extra interpolations are resolved and appended to the vector
-#' 
-#' In Ex.1 the string "one, two, {x}" is taken as verbatim and split w.r.t. commas, leading to c("one", "two", "{x}"). 
-#' Since the last element contained an opening box, it is interpolated and inserted into the vector, leading
-#' to the result.
-#' 
-#' By default, thanks to the argument `slash = TRUE`, you can apply the slash operator without
-#' the need of an interpolation box (provided the slash appears as the first character), see the example below. 
-#' 
-#' Ex.2: `x = 3:4; smagick("/one, two, {x}")` also leads to the vector `c("one", "two", "3", "4")`.
 #' 
 #' @section Special interpolation: if-else:
 #' 
@@ -681,7 +656,7 @@
 #'
 #' # Splitting a comma separated string
 #' # The mechanism is explained later
-#' smagick("/J. Mills, David, Agnes, Dr Strong")
+#' str_vec("J. Mills, David, Agnes, Dr Strong")
 #'
 #' # Nota: this is equivalent to (explained later)
 #' smagick("{', *'S ! J. Mills, David, Agnes, Dr Strong}")
@@ -868,7 +843,7 @@
 #' 
 #'
 #' # Enumerations
-#' acad = smagick("/you like admin, you enjoy working on weekends, you really love emails")
+#' acad = str_vec("you like admin, you enjoy working on weekends, you really love emails")
 #' smagick("Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}.")
 #' 
 #' # You can also use the enum command
@@ -887,7 +862,7 @@
 #' #         'n|s'k: same + adds 's' at the end of shortened strings
 #' #         'n||s'k: same but 's' counts in the n characters kept
 #'
-#' words = smagick("/short, constitutional")
+#' words = str_vec("short, constitutional")
 #' smagick("{5k ? words}")
 #'
 #' smagick("{'5|..'k ? words}")
@@ -902,7 +877,7 @@
 #' #
 #' # Special values :rest: and :REST:, give the number of items dropped
 #'
-#' bx = smagick("/Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
+#' bx = str_vec("Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
 #' smagick("Bordeaux wines I like: {3K, ', 'C ? bx}.")
 #'
 #' smagick("Bordeaux wines I like: {'3|etc..'K, ', 'C ? bx}.")
@@ -964,7 +939,7 @@
 #' 
 #' smagick("{rm.all ? x}")
 #'
-#' x = smagick("/1, 12, 123, 1234, 123456, 1234567")
+#' x = str_vec("1, 12, 123, 1234, 123456, 1234567")
 #' # we delete elements whose number of characters is lower or equal to 3
 #' # => see later section CONDITIONS
 #' smagick("{if(.nchar > 3 ; nuke) ? x}")

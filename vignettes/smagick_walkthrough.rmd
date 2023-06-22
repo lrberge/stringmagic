@@ -85,7 +85,6 @@ Once you're a bit comfortable, here are extra sections of interest:
 
 - [group-wise operations](#sec_group_wise)
 - [conditional operations](#sec_conditional)
-- [the slash operator](#sec_slash): to quickly create character vectors
 - [the if-else operator](#sec_ifelse)
 - [pluralization](#sec_pluralization): must read if interested in the topic
 - [escaping and special cases](#sec_special_cases)
@@ -159,11 +158,11 @@ expression only begins after the space. This is illustrated below
 ```{r}
 # The decorative space in verbatim mode
 smagick("{upper, Q! hi}", 
-        #       ^                      => adds a space before 'hi'
+        #          ^                      => adds a space before 'hi'
         "{upper, Q ! hi}", 
-        #      ^ ^                     => no space added (ie decorative space)
-        "{upper, Q !  hi}", sep = "\n")
-        #      ^ ^^                    => adds a space before 'hi'
+        #         ^ ^                     => no space added (ie decorative space)
+        "{upper, Q !  hi}", .sep = "\n")
+        #         ^ ^^                    => adds a space before 'hi'
 ```
 
 ### Nesting
@@ -571,8 +570,8 @@ smagick("Iris species: {unik, upper.first, C ? iris$Species}.")
 Repeats each element of the vector `n` times. Option `"c"` then collapses the full vector 
 with the empty string as a separator. 
 ```{r}
-# note: the slash special operations splits wrt to commas (see dedicated section)
-smagick("{/x, y}{2 each ? 1:2}")
+# note: operation `S` splits splits wrt to commas (default behavior)
+smagick("{S!x, y}{2 each ? 1:2}")
 
 # illustrating collapsing
 smagick("Large number: 1{5 each.c ! 0}")
@@ -680,7 +679,7 @@ smagick("v0: {x}",
         "v1: {ws ? x}",
         "v2: {ws.punct ? x}",
         "v3: {ws.punct.digit ? x}",
-        "v4: {ws.punct.digit.isolated ? x}", sep = "\n")
+        "v4: {ws.punct.digit.isolated ? x}", .sep = "\n")
 ```
 
 ### trimws
@@ -708,7 +707,7 @@ x = c(1, 12345)
 smagick("left:   {format, q, C ? x}", 
         "right:  {Format, q, C ? x}",
         "center: {format.center, q, C ? x}",
-        "zero:   {format.0, q, C ? x}", sep = "\n")
+        "zero:   {format.0, q, C ? x}", .sep = "\n")
 ```
 
 ### %
@@ -795,7 +794,7 @@ Write numbers in the form `n` times. Options: `"letter"`, `"upper"`. Option
 `"letter"` writes the number in letters (up to 100). Option `"upper"` does the same as `"letter"` 
 and uppercases the first letter. 
 ```{r}
-smagick("They lost {C ! {ntimes ? c(1, 12)} against {/Real, Barcelona}}.")
+smagick("They lost {C ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}.")
 ```
 The upper case command (`Ntimes`) adds the option `"letter"`.
 ```{r}
@@ -826,7 +825,7 @@ x = "long sentence"
 smagick("v0: {x}", 
         "v1: {4k ? x}", 
         "v2: {'4|..'k ? x}", 
-        "v3: {'4||..'k ? x}", sep = "\n")
+        "v3: {'4||..'k ? x}", .sep = "\n")
 ```
 
 ### fill
@@ -875,7 +874,7 @@ smagick("   origin: {C, q ? x}",
         "      num: {num, C, q ? x}", 
         "   num.rm: {num.rm, C, q ? x}", 
         " num.soft: {num.soft, C, q ? x}", 
-        "num.clear: {num.clear, C, q ? x}", sep = "\n")
+        "num.clear: {num.clear, C, q ? x}", .sep = "\n")
 ```
 
 ### enum
@@ -939,7 +938,7 @@ x = "this is a long sentence"
 smagick("------ version 0 ------\n{x}", 
         "------ version 1 ------\n{15 width ? x}", 
         "------ version 2 ------\n{'15|#>'width ? x}",
-        "------ version 3 ------\n{'15|#>_'width ? x}", sep = "\n")
+        "------ version 3 ------\n{'15|#>_'width ? x}", .sep = "\n")
 ```
 
 ### dtime
@@ -1067,39 +1066,6 @@ are transformed into `c("y10", "y8")` due to `"y{rev?.}"`. Each element of the v
 is then replaced with these values, here's a sketch of what happens: 
 `vec[cond==TRUE] = c("x9", "x11")` and `vec[cond==FALSE] = c("y10", "y8")`. 
 This leads to the result.
-
-
-# Special interpolation: The slash {#sec_slash}
-
-Interpolations starting with a slash are different from regular interpolations.
-```{r}
-x = 3:4
-smagick("{/one, two, {x}}")
-```
-
-When a "/" is the first character of an interpolation:
-
-- all characters until the closing bracket are taken as verbatim
-- the verbatim string is split according to comma separation (formally they are split with `,[ \t\n]+`),
-resulting into a vector
-- if the vector contains any *box*, extra interpolations are resolved and appended 
-in a vector fashion
-
-In Ex.1 the string `"one, two, {x}"` is taken as verbatim and split w.r.t. commas, 
-leading to `c("one", "two", "{x}")`. 
-Since the last element contained an opening box, it is interpolated and inserted into the vector, 
-leading to the result.
-
-By default, thanks to the argument `slash = TRUE`, you can apply the slash operator without
-the need of an interpolation box (provided the slash appears as the first character), 
-see the example below. 
-
-```{r}
-x = 3:4
-smagick("/one, two, {x}")
-```
-
-This is useful to quickly create string vectors.
 
 # Special interpolation: if-else {#sec_ifelse}
 
@@ -1307,13 +1273,13 @@ pple = c("Francis", "Henry")
 smagick("{$enum, is, (a;) ? pple} tall guy{$s}.",
         "{$(He;They), like} to eat donuts.",
         "When happy, at the pub {$(he;they), goes}!",
-        "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", sep = "\n")
+        "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", .sep = "\n")
 
 pple = "Francis"
 smagick("{$enum, is, (a;) ? pple} tall guy{$s}.",
         "{$(He;They), like} to eat donuts.",
         "When happy, at the pub {$(he;they), goes}!",
-        "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", sep = "\n")
+        "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", .sep = "\n")
 
 ```
 
@@ -1359,11 +1325,15 @@ smagick("open = \\{, close = }")
 smagick("many {5 times.c ! \\}}")
 ```
 
-Alternatively, you can use the function `dsb()` to interpolate with `.[]` instead of `{}`.
+Alternatively, use the argument `.delim` to change the delimiters. 
+
+Ex.3: changing the delimiter.
+```{r}
+smagick("Here I {interpolate} with .[this] ", .delim = ".[ ]", this = ".[]")
+```
 
 You can also use the following hack:
-
-Ex.3: using regular interpolation to pass verbatim text.
+Ex.4: using regular interpolation to pass verbatim text.
 ```{r}
 smagick("I {'can {write} {{what}} I want'}")
 ```
@@ -1417,7 +1387,7 @@ fun_emph = function(x, ...) paste0("*", x, "*")
 smagick_register(fun_emph, "emph")
 
 # C) use it
-x = smagick("/right, now")
+x = str_vec("right, now")
 smagick("Take heed, {emph, c? x}.")
 ```
 
@@ -1454,7 +1424,7 @@ fun_emph = function(x, argument, options, ...){
 
 smagick_register(fun_emph, "emph", "strong")
 
-x = smagick("/right, now")
+x = str_vec("right, now")
 smagick("Take heed, {'_'emph.s, c? x}.")
 
 # In smagick_register, the valid_option argument is used to validate them.

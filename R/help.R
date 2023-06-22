@@ -97,10 +97,6 @@ setup_help_compact = function(){
     "  ex: x = \"Mara\"; smagick(\"I like {C ? x}, {$(she;they), is} my best friend{$s}.\")",
     "",
     "# SPECIALS ----------------------------|",
-    "  Use '/' first to split the character with commas:",
-    '  Ex: smagick("/x1, x2")            -> c("x1", "x2")',
-    '      smagick("Hi {/David, Dora}!") -> c("Hi David!", "Hi Dora!")',
-    "",
     "  In quoted arguments, use backticks to evaluate them from the calling environment.",
     '  Ex: n = 3 ; smagick("{`n`times.c!$}") -> "$$$". The \'$\' is replicated n times, then collapsed.'
   )
@@ -125,6 +121,9 @@ generate_help_extensive = function(){
   
   # we check if browser is used
   for(f in list.files("R", full.names = TRUE)){
+    if(grepl("help.R", f, fixed = TRUE)){
+      next
+    }
     txt = readLines(f)
     if(any(grepl("browser()", txt, fixed = TRUE))){
       return(NULL)
@@ -133,7 +132,7 @@ generate_help_extensive = function(){
   
   message("Help rewritten.")
   
-  i_smagick = str_which(smagick_txt, "^sma.*gick .*= function\\(")
+  i_smagick = str_which(smagick_txt, "^\"smagick\"")
   doc = smagick_txt[1:(i_smagick - 1)]
   i_start_doc = max(str_which(doc, "!^#'")) + 1
   
@@ -163,7 +162,7 @@ generate_help_extensive = function(){
     text = c(text, "", title, "", content)
   }
   
-  # modifying the text to that it can be written and be interpreted as code
+  # modifying the text so that it can be written and be interpreted as code
   text_dp = capture.output(dput(as.character(text)))
   text_dp[1] = paste0("txt = ", text_dp[1])
   

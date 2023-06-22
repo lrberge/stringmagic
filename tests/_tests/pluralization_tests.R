@@ -104,7 +104,7 @@ test(txt, "Is Charles crazy? Hmm... no he isn't.")
 # enum, full force ####
 # 
 
-txt = dsb("I like the letter.[$s, enum.1.q ! .[/u, v, w]].")
+txt = dsb("I like the letter.[$s, enum.1.q ! .[S!u, v, w]].")
 test(txt, "I like the letters 1) 'u', 2) 'v', and 3) 'w'.")
 
 txt = dsb("I like the letter.[$s, enum.1.Q ! u].")

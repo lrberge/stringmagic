@@ -421,7 +421,7 @@ check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
   res
 }
 
-check_set_delimiter = function(.delim){
+check_set_delimiters = function(.delim){
   check_character(.delim, no_na = TRUE, up = 1)
   
   if(length(.delim) == 1){

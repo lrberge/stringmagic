@@ -29,7 +29,7 @@
 #' 
 #' print(cars)
 #' 
-#' smagick("/The first cars are:, {6 first ? cars}")
+#' str_vec("The first cars are:, {6 first ? cars}")
 #' 
 #' 
 print.smagick = function(x, ...){
@@ -78,7 +78,7 @@ print.smagick = function(x, ...){
 #' smagick_register(fun_emph, "emph")
 #' 
 #' # C) use it
-#' x = smagick("/right, now")
+#' x = str_vec("right, now")
 #' smagick("Take heed, {emph, c? x}.")
 #' 
 #' #
@@ -93,7 +93,7 @@ print.smagick = function(x, ...){
 #' 
 #' smagick_register(fun_emph, "emph", "strong")
 #' 
-#' x = smagick("/right, now")
+#' x = str_vec("right, now")
 #' smagick("Take heed, {emph.strong, c? x}.")
 #' 
 #' #
@@ -111,7 +111,7 @@ print.smagick = function(x, ...){
 #' 
 #' smagick_register(fun_emph, "emph", "strong")
 #' 
-#' x = smagick("/right, now")
+#' x = str_vec("right, now")
 #' smagick("Take heed, {'_'emph.s, c? x}.")
 #' 
 #' 
@@ -143,7 +143,7 @@ smagick_register = function(fun, alias, valid_options = NULL){
               "\nPROBLEM: it has no argument {enum.bq.or?arg_missing}.")
   }
 
-  valid_args = smagick("/x, argument, options, group, group_flag")
+  valid_args = str_vec("x, argument, options, group, group_flag")
   arg_pblm = setdiff(setdiff(fun_args, "..."), valid_args)
   if(length(arg_pblm) > 0){
     stop_hook("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
@@ -205,7 +205,7 @@ setSmagick = function(.smagick.class = FALSE, .delim = c("{", "}"),
     
   check_character(.sep, scalar = TRUE)
   
-  .delim = check_set_character(.delim)
+  .delim = check_set_delimiters(.delim)
 
   # Getting the existing defaults
   opts = getOption("smagick_options")
@@ -257,11 +257,10 @@ set_defaults = function(opts_name){
 smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
                    .delim = c("{", "}"), .check = TRUE, .smagick.class = FALSE, 
                    .default = TRUE,
-                   .slash = TRUE, .collapse = NULL, .help = NULL, .data.table = TRUE){
+                   .collapse = NULL, .help = NULL, .data.table = TRUE){
 
 
   if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
-  if(!missing(.slash)) check_logical(.slash, scalar = TRUE)
   if(!missing(.default)) check_logical(.default, scalar = TRUE)
   if(!missing(.data.table)) check_logical(.data.table, scalar = TRUE)
   if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
@@ -295,7 +294,7 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   }
 
   res = smagick_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
-                            .vectorize = .vectorize, .slash = .slash, .help = .help,
+                            .vectorize = .vectorize, .help = .help,
                             .collapse = .collapse, is_root = TRUE, 
                             .data.table = .data.table,
                             .check = .check)
@@ -314,7 +313,7 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 #' @describeIn smagick Like `smagick` but without any error handling to save a few micro seconds
 .smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                     .delim = c("{", "}"), .collapse = NULL,
-                    .check = FALSE, .slash = FALSE, .data.table = FALSE){
+                    .check = FALSE, .data.table = FALSE){
 
   set_pblm_hook()
   
@@ -323,7 +322,7 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   }
 
   smagick_internal(..., .delim = .delim, .envir = .envir,
-                      .slash = .slash, .sep = .sep,
+                      .sep = .sep,
                       .vectorize = .vectorize, .is_root = TRUE, 
                       .data.table = .data.table, .collapse = .collapse,
                       .check = .check)
@@ -337,7 +336,7 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 
 smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  .data = list(),
                                .sep = "", .vectorize = FALSE,
-                               .slash = TRUE, .collapse = NULL,
+                               .collapse = NULL,
                                .help = NULL, .is_root = FALSE, .data.table = FALSE,
                                .check = FALSE, .plural_value = NULL){
   
@@ -457,7 +456,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
       n = length(dots)
       res = vector("list", n)
       for(i in 1:n){
-        res[[i]] = smagick_internal(dots[[i]], .delim = .delim, .slash = .slash, .envir = .envir, 
+        res[[i]] = smagick_internal(dots[[i]], .delim = .delim, .envir = .envir, 
                                     .data = .data, .check = .check)
       }
 
@@ -470,13 +469,6 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
   }
 
   BOX_OPEN = .delim[1]
-
-  if(.slash && substr(x, 1, 1) == "/"){
-    # we apply the "slash" operation
-    x = sma_operators(substr(x, 2, nchar(x)), "/", NULL, "", .check = .check, .envir = .envir, 
-                      group_flag = 0, .delim = .delim)
-    return(x)
-  } 
   
   if(!grepl(BOX_OPEN, x, fixed = TRUE)){
     return(x)
@@ -490,7 +482,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
 
   # NOTE on the parsing:
   # - parsing returns a list.
-  #   If, eg: x = "str1.[stuff1]str2.[stuff2]"
+  #   If, eg: x = "str1{stuff1}str2{stuff2}"
   #   we will obtain a list of 4 elements
   #   note that the empty string between two boxes is an element
   # - an element can be either of length 1 or of length 2
@@ -499,11 +491,11 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
   #     + the first element is a vector of operators, with ? or ! always at the end (when available)
   #     + the second element is the string to be interpolated (when available, some operators don't
   #       require interpolation, like pluralization)
-  #   ex: "hello: .[u, C ! .[/luc, domi]]"
+  #   ex: "hello: {u, C ! {S!luc, domi}}"
   #     [[1]]: "hello: "
   #     [[2]]:
   #           [[1]]: vector c("u", "C")
-  #           [[2]]: scalar ".[/luc, domi]"
+  #           [[2]]: scalar "{S!luc, domi}"
   # - note that nestedness is dealt with in here and NOT in the parser.
   #
 
@@ -563,7 +555,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
       } else {
 
         n_op = length(operators)
-        verbatim = operators[n_op] %in% c("!", "/")
+        verbatim = operators[n_op] == "!"
         
         if(operators[1] %in% c("&", "&&")){
           .data[["len"]] = function(x) length(x)
@@ -659,8 +651,6 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
             is_ifelse = TRUE
             xi_raw = xi = operators[2]
             verbatim = FALSE
-          } else if(operators[n_op] == "/"){
-            operators = "/"
           } else {
             operators = operators[-n_op]
             # The two separators ? and ! have no default operation
@@ -678,9 +668,8 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
 
         if(!is_xi_done){
           if(verbatim){
-            # for the slash operation, we delay the interpolation
-            if((length(operators) == 0 || operators[1] != "/") && grepl(BOX_OPEN, xi, fixed = TRUE)){
-              xi = smagick_internal(xi, .delim = .delim, .envir = .envir, .data = .data, .slash = FALSE,
+            if(grepl(BOX_OPEN, xi, fixed = TRUE)){
+              xi = smagick_internal(xi, .delim = .delim, .envir = .envir, .data = .data, 
                                       .vectorize = concat_nested, .check = .check)
             }
           } else if(!verbatim){
@@ -959,37 +948,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
   extra = attr(x, "extra")
   group_index = attr(x, "group_index")
 
-  if(op == "/"){
-    # slash ####
-    
-    # What happens:
-    # - string is split wrt commas
-    # - any interpolation is vectorized
-    
-    res = cpp_parse_slash(x, .delim)
-    
-    BOX_OPEN = .delim[1]
-    
-    is_open = grepl(BOX_OPEN, res, fixed = TRUE)
-    n_open = sum(is_open)
-    if(n_open > 0){
-      n_res = length(res)
-      all_elements = vector("list", n_res)
-      
-      for(i in 1:n_res){
-        if(is_open[i]){
-          all_elements[[i]] = smagick_internal(res[i], .delim = .delim, .envir = .envir,
-                                               .data = .data, .check = .check)  
-        } else {
-          all_elements[[i]] = res[i]
-        }        
-      }
-      
-      res = do.call(base::c, all_elements)      
-    }    
-    
-    
-  } else if(op %in% c("c", "C", "collapse")){
+  if(op %in% c("c", "C", "collapse")){
     # C, collapse ####
     # collapse
 
@@ -2579,7 +2538,7 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check){
          (op == "plural" && IS_PLURAL)){
           
           value = smagick_internal(argument, .delim = .delim, .envir = .envir, .data = .data,
-                                      .slash = FALSE, .check = .check,
+                                      .check = .check,
                                       .plural_value = xi)
         if(value != ""){
           res[i] = value
@@ -2676,7 +2635,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
         }
         
         log_op_eval = smagick_internal(log_op, .delim = .delim, .envir = .envir, .data = .data,
-                              .slash = FALSE, .check = .check,  
+                              .check = .check,  
                               .plural_value = xi_val)
         
         if(!length(log_op) %in% c(1, n_x)){
@@ -2746,7 +2705,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
         .data[[".len"]] = length(xi_val)
       }
     res = smagick_internal(res, .delim = .delim, .envir = .envir, .data = .data,
-                           .slash = FALSE, .check = .check,  
+                           .check = .check,  
                            .plural_value = xi_val)
   }
 
@@ -2836,7 +2795,7 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
 }
 
 setup_operations = function(){
-  OPERATORS = c("/", "s", "S", "split", "x", "X", "extract", 
+  OPERATORS = c("s", "S", "split", "x", "X", "extract", 
                 "c", "C", "collapse", "r", "R", "replace", "clean",
                 "times", "each", "fill",
                 "~", "if", "vif",
