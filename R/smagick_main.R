@@ -197,29 +197,15 @@ smagick_register = function(fun, alias, valid_options = NULL){
 #' setSmagick(reset = TRUE)
 #' smagick("{S!x, y}{2 each?1:2}")
 #' 
-setSmagick = function(.smagick.class = FALSE, .open = "{", .close = "}", 
+setSmagick = function(.smagick.class = FALSE, .delim = c("{", ."}"), 
                       .sep = "", .data.table = TRUE, reset = FALSE){
 
   check_logical(.smagick.class, scalar = TRUE)
   check_logical(.data.table, scalar = TRUE)
     
   check_character(.sep, scalar = TRUE)
-  check_character(.open, scalar = TRUE)
-  check_character(.close, scalar = TRUE)
   
-  .delim = c(.open, .close)
-  if(any(nchar(.delim) == 0)){
-    stopi("Argument `{&.delim[1]=='';.open;.close}` must contain a non-empty delimiter.",
-          "\nPROBLEM: it is currently equal to the empty string.")
-  }
-  
-  if(any(grepl("[());?!]", .delim))){
-    i = which(grepl("[());?!]", .delim))[1]
-    pblm = str_ops(.delim[i], "'[());?!]'X")
-    stopi("Argument `{&i==1;.open;.close}` cannot contain the following, reserved, ",
-          "characters: `(`, `)`, `;`, `?`, `!`.",
-          "\nPROBLEM: it contains the forbidden character{$s ? pblm}: {$enum.bq}.")
-  }
+  .delim = check_set_character(.delim)
 
   # Getting the existing defaults
   opts = getOption("smagick_options")
@@ -269,36 +255,32 @@ set_defaults = function(opts_name){
 
 
 smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
-                   .open = "{", .close = "}", .check = TRUE, .smagick.class = FALSE, 
+                   .delim = c("{", "}"), .check = TRUE, .smagick.class = FALSE, 
+                   .default = TRUE,
                    .slash = TRUE, .collapse = NULL, .help = NULL, .data.table = TRUE){
 
 
   if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
   if(!missing(.slash)) check_logical(.slash, scalar = TRUE)
+  if(!missing(.default)) check_logical(.default, scalar = TRUE)
   if(!missing(.data.table)) check_logical(.data.table, scalar = TRUE)
   if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
   if(!missing(.sep)) check_character(.sep, scalar = TRUE)
   if(!missing(.envir)) check_envir(.envir)
   
-  if(!missing(.open)) check_character(.open, scalar = TRUE)
-  if(!missing(.close)) check_character(.close, scalar = TRUE)
+  set_pblm_hook()
   
-  set_defaults("smagick_options")
+  if(.default){
+    set_defaults("smagick_options")
+  }  
   
-  .delim = c(.open, .close)
-  if(.check){
-    if(any(nchar(.delim) == 0)){
-      stopi("Argument `{&.delim[1]=='';.open;.close}` must contain a non-empty delimiter.",
-            "\nPROBLEM: it is currently equal to the empty string.")
-    }
+  check_character(.delim, no_na = TRUE)
+  if(length(.delim) == 1){
+    .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
+  }
     
-    if(any(grepl("[());?!]", .delim))){
-      i = which(grepl("[());?!]", .delim))[1]
-      pblm = str_ops(.delim[i], "'[());?!]'X")
-      stopi("Argument `{&i==1;.open;.close}` cannot contain the following, reserved, ",
-            "characters: `(`, `)`, `;`, `?`, `!`.",
-            "\nPROBLEM: it contains the forbidden character{$s ? pblm}: {$enum.bq}.")
-    }
+  if(.check){ 
+    check_delimiters(.delim)
   }
 
   if(...length() == 0){
@@ -311,8 +293,6 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
       .help = "_COMPACT_" # means full help
     }
   }
-
-  set_pblm_hook()
 
   res = smagick_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
                             .vectorize = .vectorize, .slash = .slash, .help = .help,
@@ -331,14 +311,16 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   res
 }
 
-#' @describeIn smagick Like `smagick` but without any error handling to save a few us
+#' @describeIn smagick Like `smagick` but without any error handling to save a few micro seconds
 .smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
-                    .open = "{", .close = "}", .collapse = NULL,
+                    .delim = c("{", "}"), .collapse = NULL,
                     .check = FALSE, .slash = FALSE, .data.table = FALSE){
 
   set_pblm_hook()
   
-  .delim = c(.open, .close)
+  if(length(.delim) == 1){
+    .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
+  }
 
   smagick_internal(..., .delim = .delim, .envir = .envir,
                       .slash = .slash, .sep = .sep,
@@ -1917,7 +1899,6 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       if(is.numeric(x)){
         if(any(options %in% c("roman", "Roman"))){
           res = as.roman(x)
-          browser()
           if("roman" %in% options){
             res = tolower(res)
           }

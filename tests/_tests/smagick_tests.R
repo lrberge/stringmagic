@@ -10,7 +10,7 @@
 
 chunk("smagick")
 
-dsb = function(...) smagick(..., .open = ".[", .close = "]")
+dsb = function(...) smagick(..., .delim = ".[ ]")
 
 #
 # slash ####

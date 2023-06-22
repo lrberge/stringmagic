@@ -44,6 +44,15 @@
 #' @param .check Logical scalar, default is `TRUE`. Whether to enable error-handling. 
 #' Without errorhandling you can save something of the order of 40us. Useful only
 #' in long loops.
+#' @param .delim Character vector of length 1 or 2. Default is `c("{", "}")`. Defines 
+#' the opening and the closing delimiters for interpolation. 
+#' 
+#' If of length 1, it must be of the form: 1) the opening delimiter, 
+#' 2) a single space, 3) the closing delimiter. Ex: `".[ ]"` is equivalent to `c(".[", "]")`.
+#' The default value is equivalent to `"{ }"`.
+#' @param .default Logical scalar, default is `TRUE`. Whether to use the global defaults 
+#' set with the function [setSmagick()]. If `FALSE`, then the default value of the arguments
+#' is guaranteed to be ones of the function definition.
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
@@ -622,7 +631,7 @@
 #' As you can see, you don't need to escape the closing bracket in Ex.1 since no box
 #' was open. On the other hand, you need to escape it in Ex.2.
 #' 
-#' Alternatively, use the arguments `.open` and `.close` to set custom delimiters.
+#' Alternatively, use the argument `.delim` to set custom delimiters.
 #' 
 #' Ex.3: smagick("I {'can {write} {{what}} I want'}") leads to `"I can {write} {{what}} I want"`.
 #' 

@@ -1106,6 +1106,165 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
   res
 }
 
+#' Efficient creation of string vectors with optional interpolation
+#' 
+#' Create string vectors in multiple ways: 1) add successive string elements (like in `c()`),
+#' or 2) write a character string that will be broken with respect to commas 
+#' (`"hi, there"` becomes `c("hi", "there")`), or 3) interpolate variables in 
+#' character strings (`"x{1:2}"` becomes `c("x1", "x2")`) with full access to 
+#' [smagick()] operations, or any combination of the three.
+#' 
+#' @inheritParams smagick
+#' 
+#' @param ... Character vectors that will be vectorized. If commas are present in the 
+#' character vector, it will be split with respect to commas and following blanks. 
+#' The vectors can contain any interpolation in the form `"{var}"` and 
+#' any [smagick()] operation can be applied. To change the delimiters for interpolation,
+#' see `.delim`. Named arguments are used in priority for variable substitution,
+#' otherwise the value of the variables to be interpolated are fetched in the calling environment 
+#' (see argument `.envir`).
+#' 
+#' Note, importantly, that interpolation and comma splitting are performed on "natural" vectors only.
+#' That is: `str_vec("x{1:5}")` will lead to a vector of length 5 ("x1" to "x5"), while `z = "x{1:5}"`
+#' followed by `str_vec(z)` leads to a vector of length 1: `"x{1:5}"`. To change this behavior and 
+#' obtain equivalent results, use `.protect.vars = FALSE`.
+#' @param .protect.vars Logical scalar, default is `TRUE`. If `TRUE`, then only
+#' arguments equal to a "natural" character scalar are comma-split and interpolated, 
+#' other arguments are not touched. Ex: `str_vec("x{1:5}")` will lead to a vector of 
+#' length 5 ("x1" to "x5"), while `z = "x{1:5}"` followed by `str_vec(z)` leads 
+#' to a vector of length 1: `"x{1:5}"`. If `FALSE`, comma-splitting and interpolation
+#' is performed on all variables. 
+#' @param .split Logical, default is `TRUE`. Whether to split the vector with 
+#' respect to commas. Ex: by default `str_vec("hi, there")` leads to the 
+#' vector `c("hi", "there")`.
+#' 
+#' @details 
+#' The default of the argument `.protect.vars` is `FALSE` so as to avoid unwanted 
+#' comma-splitting and interpolations. The main use case of this function is
+#' the creation of small string vectors, which can be written directly at
+#' function call. 
+#' 
+#' @author 
+#' Laurent Berge
+#' 
+#' @inheritSection str_clean seealso
+#' 
+#' @examples 
+#' 
+#' # illustrating comma-splitting and interpolation
+#' str_vec("x1, y2, z{4:5}")
+#' 
+#' # variable protection
+#' x = "x{1:5}"
+#' str_vec(x, "y{1:2}")
+#' 
+#' # without protection => interpolation takes place
+#' str_vec(x, "y{1:2}", .protect.vars = FALSE)
+#' 
+#' # removing comma splitting
+#' str_vec("Hi, said Charles.", "Hi, said {girl}.", girl = "Julia", .split = FALSE)
+#' 
+#' # changing the delimiters for interpolation
+#' pkg = "\\usepackage[usenames,dvipsnames]{xcolor}"
+#' str_vec("\\usepackage{.[S!graphicx, fourier, standalone]}", 
+#'         pkg, .delim = ".[ ]")
+#' 
+#' 
+#' 
+str_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
+                   .split = TRUE, .protect.vars = TRUE){
+  
+  # checks
+  set_pblm_hook()  
+  .delim = check_set_delimiters(.delim)
+  
+  check_envir(.envir)
+  
+  # checking the dots + setting up the data
+  dots = check_set_dots(..., mbt = TRUE, nofun = TRUE)
+  
+  # we check if some variables were passed in the arguments
+  .data = list()
+  dot_names = names(dots)
+  if(!is.null(dot_names)){
+    is_var = dot_names != ""
+    for(i in which(is_var)){
+      .data[[dot_names[i]]] = dots[[i]]
+    }
+    dots[is_var] = NULL      
+  }
+  
+  n = length(dots)
+  if(n == 0){
+    stop_hook("`str_vec` requires at least one character scalar to work.",
+              "\nNamed arguments are only used as variables on which to apply interpolation.",
+              "\nPROBLEM: all arguments are named.",
+              "\nFIX: please provide at least one non-named argument.")
+  }
+  
+  is_to_split = rep(TRUE, n)
+  if(.protect.vars){
+    mc_dots = match.call(expand.dots = FALSE)[["..."]]
+    mc_dots_nm = names(mc_dots)
+    if(!is.null(mc_dots_nm)){
+      # we keep only the non named arguments
+      mc_dots = mc_dots[nchar(mc_dots_nm) == 0]
+    }
+    
+    is_to_split = sapply(mc_dots, is.character)
+  }
+  
+  #
+  # now the algorithm
+  #
+  
+  BOX_OPEN = .delim[1]
+  
+  res_list = vector("list", n)
+  for(i in 1:n){
+    di = dots[[i]]
+    if(!is.character(di)){
+      di = as.character(di)
+    }
+    if(length(di) == 1 && is_to_split[i]){
+      
+      if(.split){
+        di_expanded = cpp_parse_slash(di, .delim)
+      } else {
+        di_expanded = di
+      }      
+      
+      is_open = grepl(BOX_OPEN, di_expanded, fixed = TRUE)
+      n_open = sum(is_open)
+      if(n_open > 0){
+        n_di_xpd = length(di_expanded)
+        all_elements = vector("list", n_di_xpd)
+        
+        for(j in 1:n_di_xpd){
+          if(is_open[j]){
+            all_elements[[j]] = smagick_internal(di_expanded[j], .delim = .delim, .envir = .envir,
+                                                  .data = .data, .check = TRUE)  
+          } else {
+            all_elements[[j]] = di_expanded[j]
+          }        
+        }
+        
+        di_expanded = do.call(base::c, all_elements)  
+      }
+      
+      res_list[[i]] = di_expanded
+    } else {
+      res_list[[i]] = di
+    }
+  }
+  
+  res = do.call(base::c, res_list)
+  
+  res  
+}
+
+
+
 #' Fills a character string up to a size
 #' 
 #' Fills a character string up to a size and handles multibyte encodings 

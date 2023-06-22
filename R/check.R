@@ -125,7 +125,10 @@ check_numeric = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
 
 }
 
-check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FALSE, mbt = TRUE){
+check_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, 
+                          no_na = FALSE, mbt = TRUE, up = 0){
+                            
+  set_up(up + 1)
 
   if(missing(x)){
     if(mbt){
@@ -240,7 +243,7 @@ check_envir = function(x){
 
 
 check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
-                          no_na = FALSE, scalar = FALSE){
+                          no_na = FALSE, scalar = FALSE, nofun = FALSE){
   # check the dots arguments
 
   n = ...length()
@@ -267,7 +270,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
   for(i in 1:n){
     elem = try(...elt(i), silent = TRUE)
 
-    if(isError(elem)){
+    if(isError(elem) || (nofun && is.function(elem))){
       nm = if(is.null(dots_nm)) "" else dots_nm[i]
       if(is.na(nm)) nm = ""
 
@@ -275,13 +278,18 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       value = deparse_short(mc_dots[[i]])
 
       nm = smagick(" ({if(.C<4 ; erase) ! {nm} = }{value})")
+      
+      if(isError(elem)){
+        if(grepl("try(...", elem, fixed = TRUE)){
+          elem = gsub("^[^:]+:", "", elem)
+        }
 
-      if(grepl("try(...", elem, fixed = TRUE)){
-        elem = gsub("^[^:]+:", "", elem)
+        stop_up("In the argument `...`, the {#nth ? i} element{nm} raises an error:\n",
+                elem)
+      } else {
+        stop_up("In the argument `...`, the elements must not be functions.",
+                "\nPROBLEM: the {#nth ? i} element{nm} is a function.")
       }
-
-      stop_up("In the argument `...`, the {#nth ? i} element{#s} raises an error:\n",
-              elem)
     }
 
     dots[[i]] = elem
@@ -413,7 +421,43 @@ check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
   res
 }
 
+check_set_delimiter = function(.delim){
+  check_character(.delim, no_na = TRUE, up = 1)
+  
+  if(length(.delim) == 1){
+    .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
+  }
+  
+  check_delimiters(.delim)
+  
+  .delim
+}
 
+check_delimiters = function(.delim){
+  
+  if(!length(.delim) == 2){
+    stop_hook("The argument .`delim` must lead to a character vector of length 2",
+              " (after splitting the space if relevant).",
+              "\nPROBLEM: it is of length {len.f?.delim}.")
+  }
+  
+  if(any(nchar(.delim) == 0)){
+    info = c("opening", "closing")[nchar(.delim) == 0]
+    stop_hook("Argument `.delim` must be composed of non-empty delimiters.",
+          "\nPROBLEM: the {C?info} delimiter{$s, are} equal to the empty string.")
+  }
+  
+  forbid = "();?! "
+  forbid_regex = paste0("[", forbid, "]")
+  if(any(grepl(forbid_regex, .delim))){
+    i = which(grepl(forbid_regex, .delim))[1]
+    pblm = str_ops(.delim[i], paste0("'", forbid_regex, "'X"))
+    info = smagick("{&i == 1;opening;closing} delimiter (equal to {bq?.delim[i]})")
+    stop_hook("Argument `.delim` cannot contain the following, reserved, ",
+              "characters: {''s, bq, C?forbid}.",
+              "\nPROBLEM: the {info} contains the forbidden character{$s ? pblm}: {$enum.bq}.")
+  }
+}
 
 get_smagick_context = function(){
   # this is specific to functions running within smagick_internal
