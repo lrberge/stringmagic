@@ -478,13 +478,13 @@ check_set_smagick_parsing = function(x, check, delim){
     if(first_char %in% c("#", "$")){
       msg = smagick("PROBLEM: there is a syntax error in the pluralization (the ", 
                   "interpolation starting with {bq?first_char}).",
-                  "\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
+                  "\nFor more information on the syntax, type `smagick(.help = TRUE)` and go to the section ",
                   "{Q!Interpolation and string operations: Principle}")
       
     } else if(first_char == "&"){
       msg = smagick("PROBLEM: there is a syntax error in the if-else (the ", 
                   "interpolation starting with {'^&+'x, bq?x}).",
-                  "\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
+                  "\nFor more information on the syntax, type `smagick(.help = TRUE)` and go to the section ",
                   "{Q!Special interpolation: if-else}")
     } else {
       if(grepl("[!?]", x)){
@@ -502,7 +502,7 @@ check_set_smagick_parsing = function(x, check, delim){
         extra = "\nCurrently it seems that the expression to be interpolated is not a valid R expression."
       }
       
-      help_suggest = .sma("\nFor more information on the syntax, type `smagick(help = TRUE)` and go to the section ",
+      help_suggest = .sma("\nFor more information on the syntax, type `smagick(.help = TRUE)` and go to the section ",
                           "{!Operations: General syntax}")
       
       x_call_clean = gsub("Error in str2[^:]+: ?", "Error when parsing: ", x_call)
@@ -651,7 +651,7 @@ report_smagick_parsing_error = function(x, x_parsed, delim, error = TRUE){
                  "\nNOTE: to escape the meaning of the delimiter, use a ",
                  "double backslash: \\\\{delim[1]}")
       
-      suggest= "INFO: see smagick(help = TRUE) and go to the section 'Escaping and special cases'"
+      suggest= "INFO: see smagick(.help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
       # we diagnose the substring
       if(is_box_open(xi, delim)){
@@ -680,7 +680,7 @@ report_smagick_parsing_error = function(x, x_parsed, delim, error = TRUE){
                  "matched with a closing bracket ({bq?delim[2]}).",
                  "\nNOTE: to escape the meaning of the bracket, use a ",
                  "double backslash: \\\\{bq?delim[1]}.")
-      suggest = "INFO: see smagick(help = TRUE) and go to the section 'Escaping and special cases'"
+      suggest = "INFO: see smagick(.help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
       pblm = cpp_find_closing_problem(xi, delim)
       pblm = switch(pblm, 
@@ -713,12 +713,12 @@ report_smagick_parsing_error = function(x, x_parsed, delim, error = TRUE){
       msg = .sma("{intro}\nPROBLEM: no closing bracket was found to delimit `verb_false`.")
     }
     
-    suggest = "INFO: see smagick(help = TRUE) and go to the section 'Special interpolation: if-else'"
+    suggest = "INFO: see smagick(.help = TRUE) and go to the section 'Special interpolation: if-else'"
     
   } else {
     # pluralization
     
-    suggest = "INFO: see smagick(help = TRUE) and go to the section 'Special interpolation: Pluralization'"
+    suggest = "INFO: see smagick(.help = TRUE) and go to the section 'Special interpolation: Pluralization'"
     type = str_x(xi, 1, 1 + nchar(open))
     syntax = .sma("{open}{type}op1, op2{close} or {open}{type}op1, op2 ? variable{close}")
     

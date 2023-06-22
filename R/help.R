@@ -3,7 +3,7 @@
 # Created: 2023-06-02
 # ~: smagic help setup
 #------------------------------------------------------------------------------#
-
+  
 
 
 
@@ -11,7 +11,7 @@
 setup_help_compact = function(){
 
   msg = c(
-    "# Welcome to smagick compact help (also try smagick(help = TRUE) for more extensive help)",
+    "# Welcome to smagick compact help (also try smagick(.help = TRUE) for more extensive help)",
     "Usage: smagick(s) with 's' a character string",
     " ",
     "# BASIC usage -------------------------|",
@@ -191,7 +191,7 @@ format_help = function(pattern = NULL, x = NULL){
     qui = str_is(x, p, ignore.case = TRUE)
 
     if(!any(qui)){
-      stop_up("In argument `help`, the pattern `", p, "` did not match any element of the documentation.")
+      stop_up("In argument `.help`, the pattern `", p, "` did not match any element of the documentation.")
     }
 
     select = select | qui

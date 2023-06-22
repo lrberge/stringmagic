@@ -16,32 +16,32 @@
 #'  (resp. the verbatim of `x`). Otherwise, what to say? Ah, nesting is enabled, and since 
 #' there's over 50 operators, it's a bit complicated to sort you out in this small space. 
 #' 
-#' But type `smagick("--help")` to prompt a compact help, or use the argument `help = "keyword"`
-#' (or `help = TRUE`) to obtain a selective help from the main documentation.
-#' @param envir An environment used to evaluate the variables in `"{}"`. By default the variables are
+#' But type `smagick("--help")` to prompt a compact help, or use the argument `.help = "keyword"`
+#' (or `.help = TRUE`) to obtain a selective help from the main documentation.
+#' @param .envir An environment used to evaluate the variables in `"{}"`. By default the variables are
 #' evaluated using the environment from where the function is called or using the named 
 #' arguments passed to the function.
-#' @param sep Character scalar, default is the empty string `""`. It is used to collapse all
+#' @param .sep Character scalar, default is the empty string `""`. It is used to collapse all
 #'  the elements in `...` before applying any operation.
-#' @param vectorize Logical scalar, default is `FALSE`. If `TRUE`, Further, elements in `...` are 
+#' @param .vectorize Logical scalar, default is `FALSE`. If `TRUE`, Further, elements in `...` are 
 #' NOT collapsed together, but instead vectorised.
-#' @param slash Logical, default is `TRUE`. If `TRUE`, then starting the string with a slash,
+#' @param .slash Logical, default is `TRUE`. If `TRUE`, then starting the string with a slash,
 #' like in `smagick("/one, two, three")` will split the character string after the slash breaking at
 #' each comma followed by spaces or newlines. The previous example leads to the string vector
 #' `c("one", "two", "three")`. 
-#' @param help Character scalar or `TRUE`, default is `NULL`. This argument
+#' @param .help Character scalar or `TRUE`, default is `NULL`. This argument
 #' is used to generate a dynamic help on the console. If `TRUE`, the user can select which
 #' topic to read from the main documentation, with the possibility to search for keywords and
 #' navigate the help pages. If a character scalar, then a regex search is perfomed on the main
 #' documentation and any section containining a match is displayed. The user can easily
 #' navigate across matches.
-#' @param data.table Logical, default is `TRUE`. If you use `smagick` in a `data.table` call
+#' @param .data.table Logical, default is `TRUE`. If you use `smagick` in a `data.table` call
 #' and interpolate variables within the `data.table`, you want this argument to be `TRUE`.
 #' It only incurs a small overhead.
-#' @param collapse Character scalar, default is `NULL`. If provided, the character vector
+#' @param .collapse Character scalar, default is `NULL`. If provided, the character vector
 #' that should be returned is collapsed with the value of this argument. This leads
 #' to return a string of length 1.
-#' @param check Logical scalar, default is `TRUE`. Whether to enable error-handling. 
+#' @param .check Logical scalar, default is `TRUE`. Whether to enable error-handling. 
 #' Without errorhandling you can save something of the order of 40us. Useful only
 #' in long loops.
 #'
@@ -53,7 +53,7 @@
 #' You can also declare your own operations with [smagick_register()]. They will be 
 #' seamlessly integrated to `smagick`.
 #'
-#' Access a compact help on the console with `smagick("--help")` or use the argument `help` to which
+#' Access a compact help on the console with `smagick("--help")` or use the argument `.help` to which
 #' you can pass keywords or regular expressions and fecth select pieces from the main documentation.
 #' 
 #' This function is compatible with calls within a `data.table` without named arguments. 

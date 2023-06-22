@@ -178,54 +178,55 @@ smagick_register = function(fun, alias, valid_options = NULL){
 ####
 
 
-smagick = function(..., envir = parent.frame(), sep = "", vectorize = FALSE, 
-                   open = "{", close = "}", check = TRUE,
-                   slash = TRUE, collapse = NULL, help = NULL, data.table = TRUE){
+smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
+                   .open = "{", .close = "}", .check = TRUE, 
+                   .slash = TRUE, .collapse = NULL, .help = NULL, .data.table = TRUE){
 
 
-  if(!missing(vectorize)) check_logical(vectorize, scalar = TRUE)
-  if(!missing(slash)) check_logical(slash, scalar = TRUE)
-  if(!missing(collapse)) check_character(collapse, null = TRUE, scalar = TRUE)
-  if(!missing(sep)) check_character(sep, scalar = TRUE)
-  if(!missing(envir)) check_envir(envir)
+  if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
+  if(!missing(.slash)) check_logical(.slash, scalar = TRUE)
+  if(!missing(.data.table)) check_logical(.data.table, scalar = TRUE)
+  if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
+  if(!missing(.sep)) check_character(.sep, scalar = TRUE)
+  if(!missing(.envir)) check_envir(.envir)
   
-  if(!missing(open)) check_character(open, scalar = TRUE)
-  if(!missing(close)) check_character(close, scalar = TRUE)  
+  if(!missing(.open)) check_character(.open, scalar = TRUE)
+  if(!missing(.close)) check_character(.close, scalar = TRUE)  
   
-  delim = c(open, close)
-  if(check){
+  delim = c(.open, .close)
+  if(.check){
     if(any(nchar(delim) == 0)){
-      stopi("Argument `{&delim[1]=='';open;close}` must contain a non-empty delimiter.",
+      stopi("Argument `{&delim[1]=='';.open;.close}` must contain a non-empty delimiter.",
             "\nPROBLEM: it is currently equal to the empty string.")
     }
     
     if(any(grepl("[());?!]", delim))){
       i = which(grepl("[());?!]", delim))[1]
       pblm = str_ops(delim[i], "'[());?!]'X")
-      stopi("Argument `{&i==1;open;close}` cannot contain the following, reserved, ",
+      stopi("Argument `{&i==1;.open;.close}` cannot contain the following, reserved, ",
             "characters: `(`, `)`, `;`, `?`, `!`.",
-            "\nPROBLEM: it contains the forbidden character{$(:;s:), enum.bq ? pblm}.")
+            "\nPROBLEM: it contains the forbidden character{$s ? pblm}: {$enum.bq}.")
     }
   }
 
   if(...length() == 0){
-    if(missnull(help)){
+    if(missnull(.help)){
       return("")
     }
   } else if(identical(..1, "--help")){
     sc = sys.call()
     if(identical(sc[[2]], "--help")){
-      help = "_COMPACT_" # means full help
+      .help = "_COMPACT_" # means full help
     }
   }
 
   set_pblm_hook()
 
-  res = smagick_internal(..., delim = delim, envir = envir, sep = sep,
-                            vectorize = vectorize, slash = slash, help = help,
-                            collapse = collapse, is_root = TRUE, 
-                            data.table = data.table,
-                            check = TRUE, fun_name = "smagick")
+  res = smagick_internal(..., delim = delim, envir = .envir, sep = .sep,
+                            vectorize = .vectorize, slash = .slash, help = .help,
+                            collapse = .collapse, is_root = TRUE, 
+                            data.table = .data.table,
+                            check = .check, fun_name = "smagick")
 
   if(inherits(res, "help")){
       return(invisible(NULL))
@@ -236,20 +237,19 @@ smagick = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
 }
 
 #' @describeIn smagick Like `smagick` but without any error handling to save a few us
-.smagick = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
-                    open = "{", close = "}",
-                    check = FALSE, slash = FALSE, data.table = FALSE){
+.smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
+                    .open = "{", .close = "}",
+                    .check = FALSE, .slash = FALSE, .data.table = FALSE){
 
   set_pblm_hook()
   
-  delim = c(open, close)
+  delim = c(.open, .close)
 
-  smagick_internal(..., delim = delim, envir = envir,
-                      slash = slash, sep = sep,
-                      vectorize = vectorize, is_root = TRUE, 
-                      open = open, close = close,
-                      data.table = data.table,
-                      check = check, fun_name = ".smagick")
+  smagick_internal(..., delim = delim, envir = .envir,
+                      slash = .slash, sep = .sep,
+                      vectorize = .vectorize, is_root = TRUE, 
+                      data.table = .data.table,
+                      check = .check, fun_name = ".smagick")
 }
 
 .sma = .smagick
@@ -259,7 +259,6 @@ smagick = function(..., envir = parent.frame(), sep = "", vectorize = FALSE,
 ####
 
 smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  data = list(),
-                               open = "{", close = "}",
                                sep = "", vectorize = FALSE,
                                slash = TRUE, collapse = NULL,
                                help = NULL, is_root = FALSE, data.table = FALSE,
