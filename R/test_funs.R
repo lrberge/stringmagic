@@ -249,7 +249,7 @@ test_err_contains = function(x, pattern){
   
 }
 
-run_test = function(chunk, from = 1){
+run_tests = function(chunk, from = 1, source = FALSE){
   
   dir_tests = list.dirs("tests", recursive = FALSE)
   if(length(dir_tests) > 0){
@@ -260,6 +260,16 @@ run_test = function(chunk, from = 1){
   
   if(length(all_files) == 0){
     stop("No test file was found in the folder './tests/'.")
+  }
+  
+  if(isTRUE(source)){
+    assign("chunk", get("chunk", mode = "function"), parent.frame())
+    assign("test", get("test", mode = "function"), parent.frame())
+    assign("test_err_contains", test_err_contains, parent.frame())
+    
+    for(f in all_files){
+      source(f)
+    }
   }  
 
   test_code = c()
