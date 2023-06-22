@@ -697,7 +697,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
         if(!is_xi_done){
           if(verbatim){
             # for the slash operation, we delay the interpolation
-            if(operators[1] != "/" && grepl(BOX_OPEN, xi, fixed = TRUE)){
+            if((length(operators) == 0 || operators[1] != "/") && grepl(BOX_OPEN, xi, fixed = TRUE)){
               xi = smagick_internal(xi, .delim = .delim, .envir = .envir, .data = .data, .slash = FALSE,
                                       .vectorize = concat_nested, .check = .check)
             }
@@ -1890,7 +1890,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     if(op == "nth"){
       opt_default = c("letter", "upper", "compact")
     } else if(op == "n"){
-      opt_default = c("letter", "upper", "0", "zero")
+      opt_default = c("letter", "upper", "0", "zero", "roman", "Roman")
     } else if(op == "len"){
       opt_default = c("letter", "upper", "format")
     } else {
@@ -1915,7 +1915,13 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       # we force the conversion to numeric
       mark = if(is_zero) "" else ","
       if(is.numeric(x)){
-        if(is_letter){
+        if(any(options %in% c("roman", "Roman"))){
+          res = as.roman(x)
+          browser()
+          if("roman" %in% options){
+            res = tolower(res)
+          }
+        } else if(is_letter){
           res = n_letter(x)
         } else {
           res = format(x, big.mark = mark)
@@ -1931,7 +1937,12 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         is_x_num = which(!is.na(x_num))
         num_val = x_num[is_x_num]
 
-        if(is_letter){
+        if(any(options %in% c("roman", "Roman"))){
+          res_num = as.roman(num_val)
+          if("roman" %in% options){
+            res_num = tolower(res_num)
+          }
+        } else if(is_letter){
           res_num = n_letter(num_val)
         } else {
           res_num = format(num_val, big.mark = mark)

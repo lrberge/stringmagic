@@ -741,12 +741,15 @@ author = "Laurent Bergé"
 smagick("This package has been developped by {ascii ? author}.")
 ```
 
-### n, N
+### n, N: Formatting integers
 
-Formats integers by adding a comma to separate thousands. Options: `"letter"`, `"upper"`, `"0"`, `"zero"`.
+Formats integers by adding a comma to separate thousands. Options: `"letter"`, `"upper"`, 
+`"0"`, `"zero"`, `"roman"`, `"Roman"`.
 The option `"letter"` writes the number in letters (large numbers keep their numeric format). The option
 `"upper"` is like the option `"letter"` but uppercases the first letter. Options `"0"` or `"zero"` left pads
-numeric vectors with 0s. The upper case command (`N`) adds the option `"letter"`.
+numeric vectors with 0s. The options `"roman"` and `"Roman"` write the integer in Roman 
+with `utils::as.roman`. The lower case version writes them in lower case. 
+The upper case command (`N`) adds the option `"letter"`.
 ```{r}
 x = c(5, 12, 52123)
 smagick("She owes {n, '$'paste, C ? x}.")
@@ -754,15 +757,19 @@ smagick("She owes {n, '$'paste, C ? x}.")
 # option 0: all same width, no ',' for thousands
 smagick("|---|\n{n.0, '\n'c ? x}")
 
-# option upper
+# option "upper"
 n = 5
 smagick("{n.upper ? n} is my favourite number.")
 
+# N: like "n.letter"
 x = 5
 smagick("He's {N ? x} years old.")
+
+# roman
+smagick("What's nicer? {c?11:13}, {n.roman, c?11:13} or {n.Roman, c?11:13}?")
 ```
 
-### nth, Nth
+### nth, Nth: Numbered position
 
 When applied to a number, this operator writes them as a rank. Options: `"letter"`, 
 `"upper"`, `"compact"`. 
@@ -782,7 +789,7 @@ n = c(3, 7)
 smagick("They finished {Nth, enum ? n}!")
 ```
 
-### ntimes, Ntimes
+### ntimes, Ntimes: Number of times
 
 Write numbers in the form `n` times. Options: `"letter"`, `"upper"`. Option 
 `"letter"` writes the number in letters (up to 100). Option `"upper"` does the same as `"letter"` 
@@ -796,7 +803,7 @@ x = 5
 smagick("This paper was rejected {Ntimes ? x}...")
 ```
 
-### cfirst, clast
+### cfirst, clast: First/last characters
 
 To select the first/last characters of each element. 
 Negative numbers remove the first/last characters.

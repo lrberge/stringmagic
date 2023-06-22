@@ -394,9 +394,8 @@ check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
   for(i in 1:n){
     v = x[i]
 
-    if(case){
-      pm = pmatch(v, options)
-    } else {
+    pm = pmatch(v, options)
+    if(is.na(pm) && !case){
       pm = pmatch(tolower(v), tolower(options))
     }
     
