@@ -1057,7 +1057,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     if(op == "extract"){
       valid_options = c(valid_options, "first")
     } else if(op %in% c("r", "R", "clean", "replace")){
-      valid_options = c(valid_options, "total")
+      valid_options = c(valid_options, c("total", "first"))
     } else if(op %in% c("get", "is", "which")){
       valid_options = c(valid_options, "equal", "in")
     }
@@ -1121,6 +1121,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       
     } else if(op %in% c("r", "R", "replace", "clean")){
       is_total = "total" %in% options
+      is_first = "first" %in% options
 
       pipe = "=>"
       if(grepl(" => ", argument, fixed = TRUE)){
@@ -1131,7 +1132,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
       res = str_clean(x, argument, pipe = pipe, sep = sep, 
                       ignore.case = is_ignore, fixed = is_fixed, word = is_word, 
-                      total = is_total)
+                      total = is_total, first = is_first)
 
     } else if(op == 'x'){
       x_pat = regexpr(argument, x, fixed = is_fixed, perl = !is_fixed)

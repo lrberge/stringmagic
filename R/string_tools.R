@@ -871,6 +871,9 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' @param total Logical scalar, default is `FALSE`. If `TRUE`, then when a pattern is found 
 #' in a string, the full string is replaced (instead of just the pattern). Note, *importantly*, 
 #' that when `total = TRUE` you can use logical operators in the patterns.
+#' @param first Logical scalar, default is `FALSE`. Whether, in substitutions, to stop at 
+#' the first match found. Ex: `str_clean("abc", "[[:alpha:]] => _", first = TRUE)` leads 
+#' to `"_bc"`, while `str_clean("abc", "[[:alpha:]] => _")` leads to `"___"`.
 #' 
 #' Example: `str_clean(x, "wi/ & two, three & !four => ", total = TRUE)`
 #'
@@ -918,7 +921,8 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #'
 #'
 str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+", 
-                     ignore.case = FALSE, fixed = FALSE, word = FALSE, total = FALSE){
+                     ignore.case = FALSE, fixed = FALSE, word = FALSE, 
+                     total = FALSE, first = FALSE){
 
   x = check_set_character(x, l0 = TRUE)
   if(length(x) == 0){
@@ -936,6 +940,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
   check_logical(fixed, scalar = TRUE)
   check_logical(word, scalar = TRUE)
   check_logical(total, scalar = TRUE)
+  check_logical(first, scalar = TRUE)
 
   rep_main = replacement
 
@@ -943,6 +948,8 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
   warn_no_named_dots(dots)
 
   dots = unlist(dots)
+  
+  my_sub = if(first) base::sub else base::gsub
 
   res = x
   for(i in seq_along(dots)){
@@ -1058,7 +1065,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
           # I'm not sure it's useful: I think P(error|warning) = 100%, but well
           # you never know... 
           res_save = res
-          res = tryCatch(gsub(p, replacement, res, perl = !is_fixed, fixed = is_fixed), 
+          res = tryCatch(my_sub(p, replacement, res, perl = !is_fixed, fixed = is_fixed), 
                          error = function(e) structure(conditionMessage(e), class = "try-error"),
                          warning = function(w) structure(conditionMessage(w), class = "try-warning"))
             
@@ -1067,7 +1074,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
           if(is_warn){
             # is there an error?
             warn_msg = res
-            res = tryCatch(suppressWarnings(gsub(p, replacement, res_save, perl = !is_fixed, fixed = is_fixed)), 
+            res = tryCatch(suppressWarnings(my_sub(p, replacement, res_save, perl = !is_fixed, fixed = is_fixed)), 
                            error = function(e) structure(conditionMessage(e), class = "try-error"))
           }
           
@@ -1076,7 +1083,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
                   "\n         pattern     = {Q?p} ",
                   "\n         replacement = {Q?replacement}",
                   "\nEXPECTATION: the pattern must be a valid regular expression",
-                  "\nPROBLEM: `gsub` led to an error, see below:",
+                  "\nPROBLEM: `{&first;sub;gsub}` led to an error, see below:",
                   "\n{res}",
                   "{&nchar(warn_msg) > 0;\n{.}}")
           } else if(is_warn){

@@ -364,12 +364,18 @@ The syntax is `'flags/old'` or `'old => new'` with `'old'` the pattern to find a
 replacement. `flags/` are optional regex flags. The default for `new` is 
 the empty string. On top of regular regex flags, this operation also accepts 
 the flag `"total"` which instruct to replace the fulll string in case the pattern is found.
+
+If the option `"first"` is provided, the only the first pattern is replaced. That is, 
+the function `base::sub` is used instead of `base::gsub`.
 ```{r}
 # regex without replacement (ie removing)
-smagick("{'e'r ! Where is the letter e?}")
+smagick("{'e'replace ! Where is the letter e?}")
 
 # regex with replacement
-smagick("{'(?<!\\b)e => a'R ! Where is the letter e?}")
+smagick("{'(?<!\\b)e => a'replace ! Where is the letter e?}")
+
+# with option "first"
+smagick("{'(?<!\\b)e => a'replace.first ! Where is the letter e?}")
 
 # we replace the full string with the flag total (`t/`)
 x = c("Where is the letter e?", "Not this way!")
