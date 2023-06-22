@@ -197,7 +197,7 @@ smagick_register = function(fun, alias, valid_options = NULL){
 #' setSmagick(reset = TRUE)
 #' smagick("{S!x, y}{2 each?1:2}")
 #' 
-setSmagick = function(.smagick.class = FALSE, .delim = c("{", ."}"), 
+setSmagick = function(.smagick.class = FALSE, .delim = c("{", "}"), 
                       .sep = "", .data.table = TRUE, reset = FALSE){
 
   check_logical(.smagick.class, scalar = TRUE)
