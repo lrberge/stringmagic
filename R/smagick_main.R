@@ -904,9 +904,9 @@ sma_char2operator = function(x){
     
     # default values
     argument = switch(op,
-                      s = " ", S = ",[ \t\n]*",
+                      s = " ", S = ",[ \t\n]*", split = " ",
                       x = "[[:alnum:]]+", X = "[[:alnum:]]+", extract = "[[:alnum:]]+",
-                      c = " ", C = ", | and ",
+                      c = " ", C = ", | and ", collapse = " ",
                       times = 1, each = 1,
                       first = 1, last = 1,
                       cfirst = 1, clast = 1,
@@ -918,6 +918,7 @@ sma_char2operator = function(x){
     if(op %in% c("R", "r", "%", "k", "K", "paste", "get", "is")){
       ex = c("R" = 'x = "She loves me."; smagick("{\'s\\b => d\'R ? x}")',
             "r" = 'x = "Amour"; smagick("{\'ou => e\'r ? x}...")',
+            "replace" = 'x = "Amour"; smagick("{\'ou => e\'r ? x}...")',
             "%" = 'smagick("pi is: {%.03f ? pi}")',
             "k" = 'smagick("The first 8 letters of the longuest word are: {8k, q ! the longuest word}.")',
             "K" = 'x = 5:9; smagick("The first 2 elements of `x` are: {2K, C ? x}.")',
@@ -1006,7 +1007,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     }    
     
     
-  } else if(op %in% c("c", "C")){
+  } else if(op %in% c("c", "C", "collapse")){
     # C, collapse ####
     # collapse
 
@@ -1014,28 +1015,10 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     sep_last = ""
     is_last = FALSE
     if(length(x) > 1 && grepl("|", argument, fixed = TRUE)){
-      is_last = TRUE
-      arg_split = strsplit(argument, "(?<!\\\\)\\|", perl = TRUE)[[1]]
-      if(grepl("\\", argument, fixed = TRUE)){
-        arg_split = gsub("\\|", "|", arg_split, fixed = TRUE)
-      }
-
-      argument = arg_split[[1]]
-      if(length(arg_split) == 1){
-        # case with escape \\|
-        is_last = grepl("(?<!\\\\)\\|$", argument, perl = TRUE)
-        if(is_last){
-          sep_last = ""
-        }
-      } else if(length(arg_split) == 2){
-        # regular case
-        sep_last = arg_split[[2]]
-      } else {
-        arg_split = as.list(arg_split)
-        args_paste = arg_split[-1]
-        args_paste[["sep"]] = "|"
-        sep_last = do.call(paste, args_paste)
-      }
+      info = extract_pipe(argument, op)
+      is_last = info$is_pipe
+      argument = info$value
+      sep_last = info$extra
     }
     sep = argument
 
@@ -1066,13 +1049,14 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     }
     
-  } else if(op %in% c("s", "S", "r", "R", "clean", "get", "is", "which", "x", "X", "extract")){
+  } else if(op %in% c("s", "S", "split", "r", "R", "replace", "clean", "get", 
+                      "is", "which", "x", "X", "extract")){
     # split, replace, clean, extract, get, is, which ####
     
     valid_options = c("word", "ignore", "fixed")
     if(op == "extract"){
       valid_options = c(valid_options, "first")
-    } else if(op %in% c("r", "R", "clean")){
+    } else if(op %in% c("r", "R", "clean", "replace")){
       valid_options = c(valid_options, "total")
     } else if(op %in% c("get", "is", "which")){
       valid_options = c(valid_options, "equal", "in")
@@ -1091,7 +1075,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       }
     }
 
-    if(op %in% c("s", "S", "X", "x", "extract")){
+    if(op %in% c("s", "S", "split", "X", "x", "extract")){
       # otherwise => dealt with in str_is or str_clean
       # we don't repeat the processing (otherwise => bugs)
       
@@ -1109,7 +1093,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       x = as.character(x)
     }
     
-    if(op %in% c("s", "S")){
+    if(op %in% c("s", "S", "split")){
       # strsplit applied to "" returns character(0)
       # if occurring: need to fix
       
@@ -1135,7 +1119,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
       res = unlist(x_split)
       
-    } else if(op %in% c("r", "R", "clean")){
+    } else if(op %in% c("r", "R", "replace", "clean")){
       is_total = "total" %in% options
 
       pipe = "=>"
@@ -2859,7 +2843,8 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
 }
 
 setup_operations = function(){
-  OPERATORS = c("/", "s", "S", "x", "X", "extract", "c", "C", "r", "R", "clean",
+  OPERATORS = c("/", "s", "S", "split", "x", "X", "extract", 
+                "c", "C", "collapse", "r", "R", "replace", "clean",
                 "times", "each", "fill",
                 "~", "if", "vif",
                 "upper", "lower", "q", "Q", "bq", 

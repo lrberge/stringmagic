@@ -276,10 +276,10 @@ operations have a name composed of just one letter.
 These functions accept generic flags ("ignore", "fixed", "word") in their patterns (syntax: "flags/pattern"). 
 For more information on regex flags, see the [dedicated section](https://lrberge.github.io/stringmagick/articles/string_tools.html).
 
-### s, S
+### s, S, split
 
-Splits the string according to a pattern. The two operations have different defaults: `' '` 
-for `s` and `',[ \t\n}*'` for `S` (i.e. comma separation). 
+Splits the string according to a pattern. The three operations have different defaults: `' '` 
+for `s` and `split`, and `',[ \t\n]*'` for `S` (i.e. comma separation). 
 
 When character strings are split, their identity is kept in memory 
 so that group-wise operations can be applied. See the [section on group-wise operations](#sec_group_wise).
@@ -303,11 +303,12 @@ smagick("Order matters:\n{s, ~(sort, c), fill.c, lower, upper.sentence,
                           Q, '\n'c ? prince_talk}")
 ```
 
-### c, C
+### c, C, collapse
 
-To concatenate multiple strings into a single one. The two operations are 
-identical, only their default change. c: default is `' '`, C: default is `', | and '`.
-The syntax of the argument is 's1' or 's1|s2'. s1 is the string used to concatenate 
+To collapse (or concatenate) multiple strings into a single one. The three operations are 
+identical, only their defaults change. The default is `' '` for `c` and `collapse`, 
+and `', | and '` for `C`.
+The syntax of the argument is `'s1'` or `'s1|s2'`. s1 is the string used to concatenate 
 (think `paste(x, collapse = s1)`). In arguments of the form `'s1|s2'`, `s2` will be 
 used to concatenate the last two elements. 
 When the elements of the vector are split, each original item is kept in memory 
@@ -356,9 +357,9 @@ smagick("{'\\w{3}'x ? x}")
 smagick("{'\\w{3}'X ? x}")
 ```
 
-### r, R
+### r, R, replace
 
-Replaces a pattern with a string. The two operations are identical and have no default.
+Replaces a pattern with a string. The three operators are identical and have no default.
 The syntax is `'flags/old'` or `'old => new'` with `'old'` the pattern to find and `new` the 
 replacement. `flags/` are optional regex flags. The default for `new` is 
 the empty string. On top of regular regex flags, this operation also accepts 

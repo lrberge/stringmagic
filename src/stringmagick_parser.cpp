@@ -1401,11 +1401,13 @@ List cpp_extract_pipe(SEXP Rstr, bool check_double = false){
   
   std::string value;
   std::string extra;
+  bool is_pipe = false;
   bool is_double = false;
   
   int i = 0;
   while(i < n){
     if(is_non_escaped_symbol('|', str, i, n, true)){
+      is_pipe = true;
       ++i;
       if(check_double && i < n && str[i] == '|'){
         ++i;
@@ -1423,6 +1425,7 @@ List cpp_extract_pipe(SEXP Rstr, bool check_double = false){
   
   res["value"] = std_string_to_r_string(value);
   res["extra"] = std_string_to_r_string(extra);
+  res["is_pipe"] = is_pipe; 
   res["is_double"] = is_double; 
   
   return res;
