@@ -428,13 +428,13 @@ get_smagick_context = function(){
   }
   
   x = get("x", parent.frame(up))
-  delim = get("delim", parent.frame(up))
+  .delim = get(".delim", parent.frame(up))
   
   i = get("i", parent.frame(up))
   n = get("n", parent.frame(up))
   
   # we reparse
-  x_parsed = cpp_smagick_parser(x, delim, TRUE)
+  x_parsed = cpp_smagick_parser(x, .delim, TRUE)
   context_specific = x_parsed[[i]]
   
   # normalizing newlines or very confusing
@@ -457,7 +457,7 @@ get_smagick_context = function(){
   res    
 }
 
-check_set_smagick_parsing = function(x, check, delim){
+check_set_smagick_parsing = function(x, check, .delim){
   # x is a character string to be turned into an R expression
   
   if(check){
@@ -469,8 +469,8 @@ check_set_smagick_parsing = function(x, check, delim){
   
   if(inherits(x_call, "try-error")){
     
-    open = delim[1]
-    close = delim[2]
+    open = .delim[1]
+    close = .delim[2]
     
     context = get_smagick_context()
     first_char = substr(x, 1, 1)
@@ -554,7 +554,7 @@ check_set_smagick_eval = function(call, data, envir, check){
       
       msg = .sma("PROBLEM: The expression {bq ? call_dp} could not be evaluated, see error below:",
                 "\n{x_clean}")
-                
+      
       stop_hook("{context}\n{msg}")
     }
   }  
@@ -615,7 +615,7 @@ check_set_oparg_eval = function(call, data, envir, operator, check){
   x
 }
 
-report_smagick_parsing_error = function(x, x_parsed, delim, error = TRUE){
+report_smagick_parsing_error = function(x, x_parsed, .delim, error = TRUE){
   
   x_parsed = x_parsed[[1]]
   error_msg = x_parsed[1]
@@ -625,8 +625,8 @@ report_smagick_parsing_error = function(x, x_parsed, delim, error = TRUE){
   # getting the context
   #
   
-  open = delim[1]
-  close = delim[2]
+  open = .delim[1]
+  close = .delim[2]
   
   x = fix_newline(x)
   xi = fix_newline(xi)
@@ -645,25 +645,25 @@ report_smagick_parsing_error = function(x, x_parsed, delim, error = TRUE){
   
   suggest = ""
   if(error_msg == "slash operator not ending correctly"){
-    if(is_box_open(xi, delim) && !is_box_close(xi, delim)){
-      msg = .sma("PROBLEM: the opening delimiter ({bq?delim[1]}) is not ", 
-                 "matched with a closing delimiter ({bq?delim[2]}).",
+    if(is_box_open(xi, .delim) && !is_box_close(xi, .delim)){
+      msg = .sma("PROBLEM: the opening delimiter ({bq?.delim[1]}) is not ", 
+                 "matched with a closing delimiter ({bq?.delim[2]}).",
                  "\nNOTE: to escape the meaning of the delimiter, use a ",
-                 "double backslash: \\\\{delim[1]}")
+                 "double backslash: \\\\{.delim[1]}")
       
       suggest= "INFO: see smagick(.help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
       # we diagnose the substring
-      if(is_box_open(xi, delim)){
+      if(is_box_open(xi, .delim)){
         xi_small = str_trim(xi, 1)
       } else {
         xi_small = str_trim(xi, nchar(open), nchar(close))
       }
       
-      xi_small_parsed = cpp_smagick_parser(xi_small, delim)
+      xi_small_parsed = cpp_smagick_parser(xi_small, .delim)
       
       if(length(xi_small_parsed) == 1 && isTRUE(attr(xi_small_parsed, "error"))){
-        msg = report_smagick_parsing_error(xi_small_parsed, xi_small, delim, FALSE)
+        msg = report_smagick_parsing_error(xi_small_parsed, xi_small, .delim, FALSE)
         msg = gsub("^CONTEXT:", "         ", msg)
       } else {
         # here I don't knwo what the error can be
@@ -675,14 +675,14 @@ report_smagick_parsing_error = function(x, x_parsed, delim, error = TRUE){
     }
     
   } else if(error_msg == "no closing bracket"){
-    if(!is_box_close(xi, delim)){
-      msg = .sma("PROBLEM: the opening bracket ({bq?delim[1]}) is not ", 
-                 "matched with a closing bracket ({bq?delim[2]}).",
+    if(!is_box_close(xi, .delim)){
+      msg = .sma("PROBLEM: the opening bracket ({bq?.delim[1]}) is not ", 
+                 "matched with a closing bracket ({bq?.delim[2]}).",
                  "\nNOTE: to escape the meaning of the bracket, use a ",
-                 "double backslash: \\\\{bq?delim[1]}.")
+                 "double backslash: \\\\{bq?.delim[1]}.")
       suggest = "INFO: see smagick(.help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
-      pblm = cpp_find_closing_problem(xi, delim)
+      pblm = cpp_find_closing_problem(xi, .delim)
       pblm = switch(pblm, 
                     "'" = "a single quote (') open is not closed.",
                     "\"" = "a double quote (\") open is not closed.",
@@ -941,7 +941,7 @@ stop_up = function(..., up = 1, msg = NULL, envir = parent.frame(), verbatim = F
   if(verbatim){
     main_msg = paste0(...)
   } else {
-    main_msg = .smagick(..., envir = envir)
+    main_msg = .smagick(..., .envir = envir)
   }
 
   # up with set_up
@@ -1024,7 +1024,7 @@ warn_up = function (..., up = 1, immediate. = FALSE, envir = parent.frame(), ver
   if(verbatim){
     message = paste0(...)
   } else {
-    message = smagick(..., envir = envir)
+    message = .smagick(..., .envir = envir)
   }
   
   mc = match.call()
@@ -1163,7 +1163,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
     if(verbatim){
       msg = paste0(..., collapse = "")
     } else {
-      msg = .smagick(..., envir = parent.frame())
+      msg = .smagick(..., .envir = parent.frame())
     }
     
     if(nchar(msg) == 0){

@@ -7,7 +7,7 @@
 
 chunk("plural")
 
-dsb = function(...) smagick(..., open = ".[", close = "]")
+dsb = function(...) smagick(..., .open = ".[", .close = "]")
 
 #
 # numbers ####

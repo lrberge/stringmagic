@@ -207,15 +207,15 @@ setSmagick = function(.smagick.class = FALSE, .open = "{", .close = "}",
   check_character(.open, scalar = TRUE)
   check_character(.close, scalar = TRUE)
   
-  delim = c(.open, .close)
-  if(any(nchar(delim) == 0)){
-    stopi("Argument `{&delim[1]=='';.open;.close}` must contain a non-empty delimiter.",
+  .delim = c(.open, .close)
+  if(any(nchar(.delim) == 0)){
+    stopi("Argument `{&.delim[1]=='';.open;.close}` must contain a non-empty delimiter.",
           "\nPROBLEM: it is currently equal to the empty string.")
   }
   
-  if(any(grepl("[());?!]", delim))){
-    i = which(grepl("[());?!]", delim))[1]
-    pblm = str_ops(delim[i], "'[());?!]'X")
+  if(any(grepl("[());?!]", .delim))){
+    i = which(grepl("[());?!]", .delim))[1]
+    pblm = str_ops(.delim[i], "'[());?!]'X")
     stopi("Argument `{&i==1;.open;.close}` cannot contain the following, reserved, ",
           "characters: `(`, `)`, `;`, `?`, `!`.",
           "\nPROBLEM: it contains the forbidden character{$s ? pblm}: {$enum.bq}.")
@@ -285,16 +285,16 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   
   set_defaults("smagick_options")
   
-  delim = c(.open, .close)
+  .delim = c(.open, .close)
   if(.check){
-    if(any(nchar(delim) == 0)){
-      stopi("Argument `{&delim[1]=='';.open;.close}` must contain a non-empty delimiter.",
+    if(any(nchar(.delim) == 0)){
+      stopi("Argument `{&.delim[1]=='';.open;.close}` must contain a non-empty delimiter.",
             "\nPROBLEM: it is currently equal to the empty string.")
     }
     
-    if(any(grepl("[());?!]", delim))){
-      i = which(grepl("[());?!]", delim))[1]
-      pblm = str_ops(delim[i], "'[());?!]'X")
+    if(any(grepl("[());?!]", .delim))){
+      i = which(grepl("[());?!]", .delim))[1]
+      pblm = str_ops(.delim[i], "'[());?!]'X")
       stopi("Argument `{&i==1;.open;.close}` cannot contain the following, reserved, ",
             "characters: `(`, `)`, `;`, `?`, `!`.",
             "\nPROBLEM: it contains the forbidden character{$s ? pblm}: {$enum.bq}.")
@@ -314,11 +314,11 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 
   set_pblm_hook()
 
-  res = smagick_internal(..., delim = delim, envir = .envir, sep = .sep,
-                            vectorize = .vectorize, slash = .slash, help = .help,
-                            collapse = .collapse, is_root = TRUE, 
-                            data.table = .data.table,
-                            check = .check, fun_name = "smagick")
+  res = smagick_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
+                            .vectorize = .vectorize, .slash = .slash, .help = .help,
+                            .collapse = .collapse, is_root = TRUE, 
+                            .data.table = .data.table,
+                            .check = .check)
 
   if(inherits(res, "help")){
       return(invisible(NULL))
@@ -333,18 +333,18 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 
 #' @describeIn smagick Like `smagick` but without any error handling to save a few us
 .smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
-                    .open = "{", .close = "}",
+                    .open = "{", .close = "}", .collapse = NULL,
                     .check = FALSE, .slash = FALSE, .data.table = FALSE){
 
   set_pblm_hook()
   
-  delim = c(.open, .close)
+  .delim = c(.open, .close)
 
-  smagick_internal(..., delim = delim, envir = .envir,
-                      slash = .slash, sep = .sep,
-                      vectorize = .vectorize, is_root = TRUE, 
-                      data.table = .data.table,
-                      check = .check, fun_name = ".smagick")
+  smagick_internal(..., .delim = .delim, .envir = .envir,
+                      .slash = .slash, .sep = .sep,
+                      .vectorize = .vectorize, .is_root = TRUE, 
+                      .data.table = .data.table, .collapse = .collapse,
+                      .check = .check)
 }
 
 .sma = .smagick
@@ -353,30 +353,30 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 #### Internal ####
 ####
 
-smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  data = list(),
-                               sep = "", vectorize = FALSE,
-                               slash = TRUE, collapse = NULL,
-                               help = NULL, is_root = FALSE, data.table = FALSE,
-                               check = FALSE, fun_name = "smagick", plural_value = NULL){
+smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  .data = list(),
+                               .sep = "", .vectorize = FALSE,
+                               .slash = TRUE, .collapse = NULL,
+                               .help = NULL, .is_root = FALSE, .data.table = FALSE,
+                               .check = FALSE, .plural_value = NULL){
   
   # flag useful to easily identify this environment (used in error messages)
   is_smagick_internal = TRUE
 
-  if(!is.null(help)){
-    if(identical(help, "_COMPACT_")){
+  if(!is.null(.help)){
+    if(identical(.help, "_COMPACT_")){
       msg = getOption("smagick_help_compact")
       
       msg = paste(msg, collapse = "\n")
       stop_up("Help requested.", msg = msg)
     } else {
       
-      on.exit(smagick_dynamic_help(help))
+      on.exit(smagick_dynamic_help(.help))
       
       stop_up("smagick: Help requested.")
     }    
   }
 
-  if(is_root && data.table){
+  if(.is_root && .data.table){
     # we check for data table calls
     is_dt = FALSE
     sc = sys.calls()
@@ -420,22 +420,22 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
   } else if(...length() == 1){
     
     if(!is.null(...names())){
-      stop_hook("{bq ? fun_name} requires at least one character scalar to work.",
+      stop_hook("`smagick` requires at least one character scalar to work.",
                 "\nNamed arguments are only used as variables on which to apply interpolation.",
                 "\nFIX: please provide at least one non-named argument.")
     }
     
     x = as.character(..1)
-
+    
     if(length(x) > 1){
-      stop_hook("{bq ? fun_name} can only be applied to character scalars. ",
+      stop_hook("`smagick` can only be applied to character scalars. ",
                 "\nPROBLEM: the argument is not of length 1, it is of length {len.f ? x}.")
     }
 
   } else {
 
-    if(check){
-      dots = check_expr(list(...), "In `", fun_name, "`, one element of ... could not be evaluated.")
+    if(.check){
+      dots = check_expr(list(...), "In `smagick`, one element of ... could not be evaluated.")
     } else {
       dots = list(...)
     }
@@ -445,13 +445,13 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
     if(!is.null(dot_names)){
       is_var = dot_names != ""
       for(i in which(is_var)){
-        data[[dot_names[i]]] = dots[[i]]
+        .data[[dot_names[i]]] = dots[[i]]
       }
       dots[is_var] = NULL      
     }
     
     if(length(dots) == 0){
-      stop_hook("{bq ? fun_name} requires at least one character scalar to work.",
+      stop_hook("`smagick` requires at least one character scalar to work.",
                 "\nNamed arguments are only used as variables on which to apply interpolation.",
                 "\nPROBLEM: all arguments are named.",
                 "\nFIX: please provide at least one non-named argument.")
@@ -459,24 +459,24 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
     
     if(any(lengths(dots) > 1)){
       qui = which(lengths(dots) > 1)[1]
-      stop_hook("`", fun_name, "` can only be applied to character scalars.",
+      stop_hook("`smagick` can only be applied to character scalars.",
                 "\nPROBLEM: The ", n_th(qui),
                 " elment in ... is of length ", length(dots[[qui]]), ".")
     }
 
-    if(!vectorize){
-      # Note: using paste(..1, ..2, sep = sep) explicitly only saves 2us vav do.call
+    if(!.vectorize){
+      # Note: using paste(..1, ..2, sep = .sep) explicitly only saves 2us vav do.call
       # not worth it.
 
-      dots$sep = sep
+      dots$sep = .sep
       x = do.call(paste, dots)
     } else {
       # vectorize
       n = length(dots)
       res = vector("list", n)
       for(i in 1:n){
-        res[[i]] = smagick_internal(dots[[i]], delim = delim, slash = slash, envir = envir, 
-                                    data = data, check = check, fun_name = fun_name)
+        res[[i]] = smagick_internal(dots[[i]], .delim = .delim, .slash = .slash, .envir = .envir, 
+                                    .data = .data, .check = .check)
       }
 
       return(unlist(res))
@@ -487,12 +487,12 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
     return(x)
   }
 
-  BOX_OPEN = delim[1]
+  BOX_OPEN = .delim[1]
 
-  if(slash && substr(x, 1, 1) == "/"){
+  if(.slash && substr(x, 1, 1) == "/"){
     # we apply the "slash" operation
-    x = sma_operators(substr(x, 2, nchar(x)), "/", NULL, "", check = check, envir = envir, 
-                      group_flag = 0, delim = delim, fun_name = fun_name)
+    x = sma_operators(substr(x, 2, nchar(x)), "/", NULL, "", .check = .check, .envir = .envir, 
+                      group_flag = 0, .delim = .delim)
     return(x)
   } 
   
@@ -500,9 +500,9 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
     return(x)
 
   } else {
-    x_parsed = cpp_smagick_parser(x, delim)
+    x_parsed = cpp_smagick_parser(x, .delim)
     if(length(x_parsed) == 1 && isTRUE(attr(x_parsed, "error"))){
-      report_smagick_parsing_error(x, x_parsed, delim)
+      report_smagick_parsing_error(x, x_parsed, .delim)
     }
   }
 
@@ -532,7 +532,7 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
   }
 
   n_x_all = lengths(x_parsed)
-
+  
   n = length(x_parsed)
   res = character(0)
   i_done = FALSE
@@ -565,12 +565,12 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
       if(length(operators) == 0){
 
         # we need to evaluate xi
-        xi_call = check_set_smagick_parsing(xi, check, delim)
+        xi_call = check_set_smagick_parsing(xi, .check, .delim)
 
         if(is.character(xi_call)){
           xi = xi_call
         } else {
-          xi = check_set_smagick_eval(xi_call, data, envir, check)
+          xi = check_set_smagick_eval(xi_call, .data, .envir, .check)
         }
 
         if(ANY_PLURAL){
@@ -584,7 +584,7 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
         verbatim = operators[n_op] %in% c("!", "/")
         
         if(operators[1] %in% c("&", "&&")){
-          data[["len"]] = function(x) length(x)
+          .data[["len"]] = function(x) length(x)
         }
 
         is_ifelse = FALSE
@@ -609,7 +609,7 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
 
             if(identical(xi, "")){
 
-              if(!is.null(plural_value)){
+              if(!is.null(.plural_value)){
                 # we are in a nested pluralization call:
                 # ex: "{$(;; Maybe you meant: {enum.bq.4}?) ? sugg)}"
                 # here 'sugg' would be in `plural_value`
@@ -617,13 +617,13 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
                 # " Maybe you meant: {enum.bq.4}?"
                 # if we did not pass it along, there would have been an error
 
-                xi = plural_value
+                xi = .plural_value
                 is_xi_done = TRUE
 
               } else {
                 if(length(operators) == 1){
                   example = 'Example: x = c("Mark", "Sarah"); smagick("{$enum, is ? x} away.")'
-                  .stop_hook("In `", fun_name, "`, the pluralization operator (`", operators[1], 
+                  .stop_hook("In `smagick`, the pluralization operator (`", operators[1], 
                              "`) must contain operations. ", '\n', example)
                 }
 
@@ -644,9 +644,8 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
                   if(!ok){
                     pblm = paste0(operators[1], paste0(operators[-1], collapse = ", "))
                     example = 'Example: x = c("Mark", "Sarah"); smagick("{$enum, is ? x} away.")'
-                    example = bespoke_msg(example, fun_name)
 
-                    .stop_hook("In `", fun_name, "`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
+                    .stop_hook("In `smagick`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
                             "Please provide one by adding it after a question mark.\n", example)
                   }
 
@@ -699,13 +698,13 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
           if(verbatim){
             # for the slash operation, we delay the interpolation
             if(operators[1] != "/" && grepl(BOX_OPEN, xi, fixed = TRUE)){
-              xi = smagick_internal(xi, delim = delim, envir = envir, data = data, slash = FALSE,
-                                      vectorize = concat_nested, check = check, fun_name = fun_name)
+              xi = smagick_internal(xi, .delim = .delim, .envir = .envir, .data = .data, .slash = FALSE,
+                                      .vectorize = concat_nested, .check = .check)
             }
           } else if(!verbatim){
             # evaluation
-            xi_call = check_set_smagick_parsing(xi, check, delim)
-            xi = check_set_smagick_eval(xi_call, data, envir, check)
+            xi_call = check_set_smagick_parsing(xi, .check, .delim)
+            xi = check_set_smagick_eval(xi_call, .data, .envir, .check)
           }
         }
 
@@ -723,7 +722,7 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
         #
 
         if(is_plural){
-          xi = sma_pluralize(operators, xi, fun_name, delim, envir, data, check)
+          xi = sma_pluralize(operators, xi, .delim, .envir, .data, .check)
 
         } else if(is_ifelse){
 
@@ -752,7 +751,7 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
             
             if(do_eval){
               xi_call = str2lang(vars[1])
-              xi_val = check_set_smagick_eval(xi_call, data, envir, check)
+              xi_val = check_set_smagick_eval(xi_call, .data, .envir, .check)
             }
             
             if(operators[1] == "&&" && length(xi) != length(xi_val)){
@@ -776,8 +775,8 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
             }
           }
 
-          xi = sma_ifelse(operators, xi, xi_val, fun_name, envir = envir, data = data,
-                          check = check, delim = delim)
+          xi = sma_ifelse(operators, xi, xi_val, .envir = .envir, .data = .data,
+                          .check = .check, .delim = .delim)
         } else {
           #
           # REGULAR OPERATORS
@@ -787,25 +786,25 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
           
           for(j in seq_along(operators)){
             opi = operators[[j]]
-            op_parsed = sma_char2operator(opi, fun_name)
+            op_parsed = sma_char2operator(opi)
 
             if(op_parsed$eval){
-              argument_call = check_set_oparg_parse(op_parsed$argument, opi, check)
-              argument = check_set_oparg_eval(argument_call, data, envir, opi, check)
+              argument_call = check_set_oparg_parse(op_parsed$argument, opi, .check)
+              argument = check_set_oparg_eval(argument_call, .data, .envir, opi, .check)
             } else {
               argument = op_parsed$argument
             }
 
-            if(check){
+            if(.check){
               xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument,
-                                              check = check, envir = envir, group_flag = group_flag,
-                                              delim = delim, fun_name = fun_name),
+                                              .check = .check, .envir = .envir, group_flag = group_flag,
+                                              .delim = .delim),
                                 get_smagick_context(), " See error below:",
                                 verbatim = TRUE, up = 1)
             } else {
-              xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, check = check,
-                                 envir = envir, group_flag = group_flag,
-                                 delim = delim, fun_name = fun_name)
+              xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, .check = .check,
+                                 .envir = .envir, group_flag = group_flag,
+                                 .delim = .delim)
             }
           }
         }
@@ -847,7 +846,7 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
         res = xi
       } else{
         if(i < n && n_x_all[i + 1] == 1){
-          if(vectorize){
+          if(.vectorize){
             res = c(res, xi, x_parsed[[i + 1]])
           } else {
             res = paste0(res, xi, x_parsed[[i + 1]])
@@ -855,7 +854,7 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
 
           i_done = TRUE
         } else {
-          if(vectorize){
+          if(.vectorize){
             res = c(res, xi)
           } else {
             res = paste0(res, xi)
@@ -865,15 +864,15 @@ smagick_internal = function(..., delim = c("{", "}"), envir = parent.frame(),  d
     }
   }
 
-  if(!is.null(collapse) && length(res) > 1){
-    res = paste0(res, collapse = collapse)
+  if(!is.null(.collapse) && length(res) > 1){
+    res = paste0(res, collapse = .collapse)
   }
 
   return(res)
 }
 
 
-sma_char2operator = function(x, fun_name){
+sma_char2operator = function(x){
 
   op_parsed = cpp_parse_operator(x)
 
@@ -883,7 +882,7 @@ sma_char2operator = function(x, fun_name){
   op = op_parsed$operator
 
   if(nchar(op) == 0){
-    .stop_hook("In ", fun_name, ", if a quoted value is present, the operators must ",
+    .stop_hook("In `smagick`, if a quoted value is present, the operators must ",
               "be of the form 'value'op, ",
               "with 'op' an operator. ",
               "\nPROBLEM: In `", x, "` the operator is missing.")
@@ -926,7 +925,6 @@ sma_char2operator = function(x, fun_name){
             "is" = 'x = c("Bob", "Pam") ; smagick("{\'am\'is ? x}")',
             "paste" = 'x = "those, words"; smagick("Let\'s emphasize {S, \'**\'paste.both, c ? x}.")')
 
-      ex = bespoke_msg(ex[op])
       .stop_hook("The operator `", op, "` has no default value, you must provide values explicitly.", 
                  " EXAMPLE: ", ex)
     }
@@ -956,7 +954,7 @@ sma_char2operator = function(x, fun_name){
 
       msg = .sma("{context}",
               "\nPROBLEM: {bq?op} is not a valid operator. ", sugg_txt,
-              "\n\nINFO: Type smagick('--help') for more help or smagick(help = regex) or smagick(help = TRUE).",
+              "\n\nINFO: Type smagick('--help') for more help or smagick(.help = regex) or smagick(.help = TRUE).",
               "\nEx. of valid stuff: smagick(\"{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
 
       .stop_hook(msg)
@@ -968,8 +966,8 @@ sma_char2operator = function(x, fun_name){
 }
 
 
-sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, data = list(),
-                         group_flag = 0, delim = c("{", "}"), fun_name = "smagick"){
+sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL, .data = list(),
+                         group_flag = 0, .delim = c("{", "}")){
 
   # group_flag:  0 nothing
   #                    1 keep track of conditional things
@@ -985,9 +983,9 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
     # - string is split wrt commas
     # - any interpolation is vectorized
     
-    res = cpp_parse_slash(x, delim)
+    res = cpp_parse_slash(x, .delim)
     
-    BOX_OPEN = delim[1]
+    BOX_OPEN = .delim[1]
     
     is_open = grepl(BOX_OPEN, res, fixed = TRUE)
     n_open = sum(is_open)
@@ -997,8 +995,8 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
       
       for(i in 1:n_res){
         if(is_open[i]){
-          all_elements[[i]] = smagick_internal(res[i], delim = delim, envir = envir,
-                                               data = data, check = check, fun_name = fun_name)  
+          all_elements[[i]] = smagick_internal(res[i], .delim = .delim, .envir = .envir,
+                                               .data = .data, .check = .check)  
         } else {
           all_elements[[i]] = res[i]
         }        
@@ -2222,7 +2220,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
 
     # computing the condition
     # a) parsing
-    if(check){
+    if(.check){
       cond_parsed = check_expr(str2lang(cond_raw), 
             .sma("The string operation {bq?op} should be of the form ",
                  "{op}(condition ; true ; false). ",
@@ -2236,7 +2234,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
     if(is.character(cond_parsed)){
       # REGEX
       
-      if(check){
+      if(.check){
         cond = check_expr(str_is(x, cond_parsed), 
                   .sma("The operation is of the form {bq?op}(cond ; true ; false). ",
                   "When `cond` is a pure character string, the function `str_is()` ",
@@ -2264,15 +2262,15 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
         }
       }
       
-      if(check){
-        cond = check_expr(eval(cond_parsed, my_data, envir), 
+      if(.check){
+        cond = check_expr(eval(cond_parsed, my_data, .envir), 
                   .sma("The string operation {bq?op} should be of the form ",
                        "{op}(condition ; true ; false). ",
                        "\nPROBLEM: the condition {bq?cond_raw} could not be ",
                        "evaluated, see error below:"), 
                    verbatim = TRUE)  
       } else {
-        cond = eval(cond_parsed, my_data, envir)
+        cond = eval(cond_parsed, my_data, .envir)
       }
     }
     
@@ -2344,8 +2342,8 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
       if(op == "if"){
         n_old = length(xi)
         cond_flag = +grepl("~(", instruction, fixed = TRUE)
-        xi = apply_simple_operations(xi, op, instruction, check, envir, 
-                                     group_flag = cond_flag, delim, fun_name)
+        xi = apply_simple_operations(xi, op, instruction, .check, .envir, 
+                                     group_flag = cond_flag, .delim)
         
         if(is_elementwise && !length(xi) %in% c(0, n_old)){
           stop_hook("In {bq?op} operations, when conditions are of length > 1, the ",
@@ -2357,12 +2355,11 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
       } else {
         # verbatim if
         if(grepl(".", instruction, fixed = TRUE)){
-          data = list("." = xi)
-        } else {
-          data = list()
+          .data[["."]] = xi
         }
-        xi = smagick_internal(instruction, delim = delim, envir = envir, 
-                              data = data, check = check, fun_name = fun_name)
+        
+        xi = smagick_internal(instruction, .delim = .delim, .envir = .envir, 
+                              .data = .data, .check = .check)
       }
       
       if(state == "true"){
@@ -2438,8 +2435,8 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
 
   } else if(op == "~"){
     # Conditional: ~ ####
-    res = apply_simple_operations(x, op, argument, check, envir, 
-                                  group_flag = 2, delim, fun_name)
+    res = apply_simple_operations(x, op, argument, .check, .envir, 
+                                  group_flag = 2, .delim)
                                   
     group_index = attr(res, "group_index")
 
@@ -2491,7 +2488,7 @@ sma_operators = function(x, op, options, argument, check = FALSE, envir = NULL, 
 
 
 
-sma_pluralize = function(operators, xi, fun_name, delim, envir, data, check){
+sma_pluralize = function(operators, xi, .delim, .envir, .data, .check){
 
   plural_len = operators[1] == "$"
 
@@ -2510,7 +2507,6 @@ sma_pluralize = function(operators, xi, fun_name, delim, envir, data, check){
 
     if(is_pblm){
       example = 'Example: x = 5; smagick("There {#is, N ? x} cat{#s} in the room.")'
-      example = bespoke_msg(example, fun_name)
 
       extra = ""
       reason = NULL
@@ -2605,9 +2601,9 @@ sma_pluralize = function(operators, xi, fun_name, delim, envir, data, check){
          (op == "singular" && !IS_PLURAL && !(any(grepl("zero$", operators)) && IS_ZERO)) || 
          (op == "plural" && IS_PLURAL)){
           
-          value = smagick_internal(argument, delim = delim, envir = envir, data = data,
-                                      slash = FALSE, check = check, fun_name = fun_name,
-                                      plural_value = xi)
+          value = smagick_internal(argument, .delim = .delim, .envir = .envir, .data = .data,
+                                      .slash = FALSE, .check = .check,
+                                      .plural_value = xi)
         if(value != ""){
           res[i] = value
         }        
@@ -2637,7 +2633,7 @@ sma_pluralize = function(operators, xi, fun_name, delim, envir, data, check){
   paste(res, collapse = " ")
 }
 
-sma_ifelse = function(operators, xi, xi_val, fun_name, envir, data, delim, check){
+sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
 
   if(is.numeric(xi)){
     xi = xi != 0
@@ -2666,7 +2662,7 @@ sma_ifelse = function(operators, xi, xi_val, fun_name, envir, data, delim, check
               "PROBLEM: the condition contains NA values.", example)
   }
 
-  BOX_OPEN = delim[1]
+  BOX_OPEN = .delim[1]
   true = operators[3]
   false = operators[4]
   
@@ -2697,14 +2693,14 @@ sma_ifelse = function(operators, xi, xi_val, fun_name, envir, data, delim, check
       if(grepl(BOX_OPEN, log_op, fixed = TRUE)){
         if(!new_values_done){
           new_values_done = TRUE
-          data[["."]] = xi_val
-          data[[".N"]] = length(xi_val)
-          data[[".len"]] = length(xi_val)
+          .data[["."]] = xi_val
+          .data[[".N"]] = length(xi_val)
+          .data[[".len"]] = length(xi_val)
         }
         
-        log_op_eval = smagick_internal(log_op, delim = delim, envir = envir, data = data,
-                              slash = FALSE, check = check, fun_name = fun_name, 
-                              plural_value = xi_val)
+        log_op_eval = smagick_internal(log_op, .delim = .delim, .envir = .envir, .data = .data,
+                              .slash = FALSE, .check = .check,  
+                              .plural_value = xi_val)
         
         if(!length(log_op) %in% c(1, n_x)){
           form = "{&cond ; true ; false}"
@@ -2768,23 +2764,23 @@ sma_ifelse = function(operators, xi, xi_val, fun_name, envir, data, delim, check
   if(length(res) == 1 && grepl(BOX_OPEN, res, fixed = TRUE)){
     if(!new_values_done){
         new_values_done = TRUE
-        data[["."]] = xi_val
-        data[[".N"]] = length(xi_val)
-        data[[".len"]] = length(xi_val)
+        .data[["."]] = xi_val
+        .data[[".N"]] = length(xi_val)
+        .data[[".len"]] = length(xi_val)
       }
-    res = smagick_internal(res, delim = delim, envir = envir, data = data,
-                           slash = FALSE, check = check, fun_name = fun_name, 
-                           plural_value = xi_val)
+    res = smagick_internal(res, .delim = .delim, .envir = .envir, .data = .data,
+                           .slash = FALSE, .check = .check,  
+                           .plural_value = xi_val)
   }
 
   res
 }
 
 
-apply_simple_operations = function(x, op, operations_string, check = FALSE, envir = NULL, 
-                                 group_flag = 0, delim = c("{", "}"), fun_name = "smagick"){
+apply_simple_operations = function(x, op, operations_string, .check = FALSE, .envir = NULL, 
+                                 group_flag = 0, .delim = c("{", "}")){
                                   
-  op_all = cpp_parse_simple_operations(operations_string, delim)
+  op_all = cpp_parse_simple_operations(operations_string, .delim)
     
   if(length(op_all) == 0){
     return(x)
@@ -2817,10 +2813,10 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, envi
   for(i in seq_along(op_all)){
     opi = op_all[i]
 
-    op_parsed = sma_char2operator(opi, fun_name)
+    op_parsed = sma_char2operator(opi)
 
     if(op_parsed$eval){
-      if(check){
+      if(.check){
         argument_call = check_expr(str2lang(op_parsed$argument), 
                                    .sma("In the operation `{op}()`, the ",
                                         "{&length(op_all) == 1 ; operation ; chain of operations} ",
@@ -2830,7 +2826,7 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, envi
                                         "\nPROBLEM: the argument could not be parsed."),
                                     verbatim = TRUE)
 
-        argument = check_expr(eval(argument_call, envir),
+        argument = check_expr(eval(argument_call, .envir),
                               "In the operation `{op}()`, the ",
                               "{&length(op_all) == 1 ; operation ; chain of operations} ",
                               " {bq?operations_string} led to a problem.", 
@@ -2838,23 +2834,23 @@ apply_simple_operations = function(x, op, operations_string, check = FALSE, envi
                               "(equal to {bq?op_parsed$argument}) is evaluated from the calling environment.",
                               "\nPROBLEM: the argument could not be evaluated.")
       } else {
-        argument = eval(str2lang(op_parsed$argument), envir)
+        argument = eval(str2lang(op_parsed$argument), .envir)
       }
 
     } else {
       argument = op_parsed$argument
     }
 
-    if(check){
+    if(.check){
       xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
-                                      group_flag = group_flag, delim = delim, fun_name = fun_name),
+                                      group_flag = group_flag, .delim = .delim),
                                      "In the operation `{op}()`, the ",
                                      "{&length(op_all) == 1 ; operation ; chain of operations} ",
                                      " {bq?operations_string} led to a problem.", 
                                      "\nPROBLEM: the operation {opi} failed. Look up the doc?")
     } else {
       xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
-                         group_flag = group_flag, delim = delim, fun_name = fun_name)
+                         group_flag = group_flag, .delim = .delim)
     }
   }
 

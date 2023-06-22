@@ -1008,7 +1008,7 @@
 #' dollar = 6
 #' reason = "glory"
 #' smagick("Why do you develop packages? For {`dollar`times.c ! $}?",
-#'     "For money? No... for {upper,''s, c ? reason}!", sep = "\n")
+#'     "For money? No... for {upper,''s, c ? reason}!", .sep = "\n")
 #' 
 #' 
 #' #
