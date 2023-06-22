@@ -646,8 +646,14 @@
 #' It returns a character vector whose length depends on the elements and operations in the interpolations.
 #' 
 #' @seealso 
+#' 
+#' To set new operators, see the function [smagick_register()].
+#' 
+#' To modify the default values of smagick, use the function [setSmagick()].
+#' 
 #' If you want to apply a chain of operations on a single vector, see [str_ops()] which 
 #' may be more appropriate.
+#' 
 #'
 #' @examples
 #'

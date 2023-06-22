@@ -7,6 +7,7 @@ export(str_ops, str_is, str_which, str_get, str_clean, str_split2df,
 # smagick
 export(smagick, .smagick)
 export(smagick_register)
+export(setSmagick)
 
 # Methods
 S3method(print, smagick)

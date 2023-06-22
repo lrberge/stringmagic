@@ -173,13 +173,103 @@ smagick_register = function(fun, alias, valid_options = NULL){
 
 }
 
+#' Set defaults for smagick
+#' 
+#' Se the default values for a few arguments of the function [smagick()].
+#' 
+#' @inheritParams smagick
+#' @param reset Logical scalar, default is `FALSE`. Whether to reset all values.
+#' 
+#' @details 
+#' By default, each call to `setSmagick` adds modifications to the default values. 
+#' To set a few default values and resetting the others, you need to use `reset = TRUE`.
+#' 
+#' @author 
+#' Laurent Berge
+#' 
+#' @examples 
+#' 
+#' # we change the default display of the results of smagick
+#' setSmagick(.smagick.class = TRUE)
+#' smagick("{S!x, y}{2 each?1:2}")
+#' 
+#' # back to a regular character vector
+#' setSmagick(reset = TRUE)
+#' smagick("{S!x, y}{2 each?1:2}")
+#' 
+setSmagick = function(.smagick.class = FALSE, .open = "{", .close = "}", 
+                      .sep = "", .data.table = TRUE, reset = FALSE){
+
+  check_logical(.smagick.class, scalar = TRUE)
+  check_logical(.data.table, scalar = TRUE)
+    
+  check_character(.sep, scalar = TRUE)
+  check_character(.open, scalar = TRUE)
+  check_character(.close, scalar = TRUE)
+  
+  delim = c(.open, .close)
+  if(any(nchar(delim) == 0)){
+    stopi("Argument `{&delim[1]=='';.open;.close}` must contain a non-empty delimiter.",
+          "\nPROBLEM: it is currently equal to the empty string.")
+  }
+  
+  if(any(grepl("[());?!]", delim))){
+    i = which(grepl("[());?!]", delim))[1]
+    pblm = str_ops(delim[i], "'[());?!]'X")
+    stopi("Argument `{&i==1;.open;.close}` cannot contain the following, reserved, ",
+          "characters: `(`, `)`, `;`, `?`, `!`.",
+          "\nPROBLEM: it contains the forbidden character{$s ? pblm}: {$enum.bq}.")
+  }
+
+  # Getting the existing defaults
+  opts = getOption("smagick_options")
+
+  if(reset || is.null(opts)){
+    opts = list()
+  } else if(!is.list(opts)){
+    warning("Wrong formatting of option 'smagick_options', all options are reset.")
+    opts = list()
+  }
+
+  # Saving the default values
+  mc = match.call()
+  args_default = setdiff(names(mc)[-1], "reset")
+
+  # NOTA: only elements in opts will be later set to their default
+  for(v in args_default){
+    opts[[v]] = eval(as.name(v))
+  }
+
+  options(smagick_options = opts)
+
+}
+
+set_defaults = function(opts_name){
+
+  opts = getOption(opts_name)
+  if(is.null(opts) || length(opts) == 0){
+    return(NULL)
+  }
+
+  sysOrigin = sys.parent()
+  mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
+  args_in = names(mc)
+
+  args2set = setdiff(names(opts), args_in)
+
+  for(v in args2set){
+    assign(v, opts[[v]], parent.frame())
+  }
+
+}
+
 ####
 #### ... smagick ####
 ####
 
 
 smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
-                   .open = "{", .close = "}", .check = TRUE, 
+                   .open = "{", .close = "}", .check = TRUE, .smagick.class = FALSE, 
                    .slash = TRUE, .collapse = NULL, .help = NULL, .data.table = TRUE){
 
 
@@ -191,7 +281,9 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   if(!missing(.envir)) check_envir(.envir)
   
   if(!missing(.open)) check_character(.open, scalar = TRUE)
-  if(!missing(.close)) check_character(.close, scalar = TRUE)  
+  if(!missing(.close)) check_character(.close, scalar = TRUE)
+  
+  set_defaults("smagick_options")
   
   delim = c(.open, .close)
   if(.check){
@@ -232,7 +324,10 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
       return(invisible(NULL))
   }
 
-  class(res) = c("smagick", "character")
+  if(isTRUE(.smagick.class)){
+    class(res) = c("smagick", "character")
+  }
+  
   res
 }
 
