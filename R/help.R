@@ -52,17 +52,19 @@ setup_help_compact = function(){
     "  Below is a compact list of operators; their default arg. is in quotes, ",
     "  their options are in brackets",
     "",
-    "  %, ascii[silent, utf8], bq, ' 'c, ', | and 'C, ' 'collapse, ", 
-    "  cfirst, clast, clean, dsort[num], dtime[silent], each[c], ",
+    "  %, ascii[silent, utf8], bq, ' 'c, ' 'collapse, ', | and 'C, ', | and 'Collapse, ", 
+    "  firstchar, lastchar, clean, dsort[num], dtime[silent], each[c], ",
     "  enum[bq, q, Q, or, nor, 1, i, I, a, A, oxford], ", 
     "  erase, '[[:alnum:]]+'extract[first], fill[right, center], first, ",
     "  format[letter, upper, right, center], get[equal, in], insert[right], is[equal, in], ",
-    "  k, K, last, len[letter, upper, format], lower, ",
+    "  k[include, dots], K, last, len[letter, upper, format], lower, ",
     "  n[letter, upper, 0, roman, Roman], ",
     "  nth[letter, upper, compact], ntimes[letter, upper], nuke, ",
     "  num[warn, soft, rm, clear], paste[right, front, back], q, Q, ", 
     "  r[first], R[first], replace[first], rev,", 
-    "  rm[empty, blank, noalpha, noalnum, all], ' 's, ' 'split, ',[ \\t\\n]+'S, ",
+    "  rm[empty, blank, noalpha, noalnum, all], ", 
+    "  shorten[include, dots], Shorten",
+    "  ' 's, ' 'split, ',[ \\t\\n]+'S, ',[ \\t\\n]+'Split",
     "  sort[num], stopword, times[c], ", 
     "  title[force, ignore], trim[right, both], tws, unik, upper[first, sentence],",
     "  which[equal, in], width, ws[punct, digit, isolated], x, X",
@@ -117,8 +119,6 @@ generate_help_extensive = function(){
     return(NULL)
   }  
   
-  smagick_txt = readLines("R/smagick_doc.R")
-  
   # we check if browser is used
   for(f in list.files("R", full.names = TRUE)){
     if(grepl("help.R", f, fixed = TRUE)){
@@ -131,6 +131,8 @@ generate_help_extensive = function(){
   }
   
   message("Help rewritten.")
+  
+  smagick_txt = readLines("R/smagick_doc.R")
   
   i_smagick = str_which(smagick_txt, "^\"smagick\"")
   doc = smagick_txt[1:(i_smagick - 1)]

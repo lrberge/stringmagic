@@ -24,7 +24,7 @@ test(x, c("bon", "jour", "les gens", "je suis", "la bas"))
 # with nesting
 y = c("Ana", "Charles")
 z = c("Romeo Montaigu", "Juliette Capulet")
-x = str_vec("Jules, {y}, Francis, {'\\s+'S, ~(cfirst, ''c) ? z}")
+x = str_vec("Jules, {y}, Francis, {'\\s+'S, ~(firstchar, ''c) ? z}")
 test(x, c("Jules", "Ana", "Charles", "Francis", "RM", "JC"))
 
 #
@@ -50,7 +50,7 @@ test(smagick("win = {''c ? x}"), "win = 123")
 
 # conditional collapse
 x = str_vec("bonjour les gens., comment ca va?, bien?, bien.")
-txt = smagick("{' 'S, ~(cfirst.3, '.'c) ? x}")
+txt = smagick("{' 'S, ~(firstchar.3, '.'c) ? x}")
 test(txt, c("bon.les.gen", "com.ca.va?", "bie", "bie"))
 
 #
@@ -117,6 +117,9 @@ test(txt, "[sound], [sound], [sound], all the way")
 
 txt = smagick("{', 'c ! {'jing => [sound]'r.total ? x}}")
 test(txt, "[sound], [sound], [sound], all the way")
+
+txt = smagick("{'(?<!\\b)e => a'replace.first ! Where is the letter e?}")
+test(txt, "Whare is the letter e?")
 
 # default
 test(smagick("a = {r ? 1:5}"), "err")
@@ -367,8 +370,20 @@ test(txt, "this is a l and a short one")
 txt = smagick("{'11|..'k, ' and 'c ? x}")
 test(txt, "this is a l.. and a short one")
 
+txt = smagick("{11|.. shorten, ' and 'c ? x}")
+test(txt, "this is a l.. and a short one")
+
 txt = smagick("{'11||..'k, ' and 'c ? x}")
 test(txt, "this is a.. and a short one")
+
+txt = smagick("{11|.. shorten.inclu, ' and 'c ? x}")
+test(txt, "this is a.. and a short one")
+
+txt = smagick("{11k.d, ' and 'c ? x}")
+test(txt, "this is a .. and a short one")
+
+txt = smagick("{11 Shorten, ' and 'c ? x}")
+test(txt, "this is a .. and a short one")
 
 #
 # K, keep elements ####
@@ -456,12 +471,12 @@ txt = smagick("{''S, ~(last), ' ; 'c ? x}")
 test(txt, "3 ; c ; 2")
 
 #
-# cfirst, clast ####
+# firstchar, lastchar ####
 #
 
 x = c("bonjour", "les", "gens")
 a = 2
-txt = smagick("{3 cfirst, `a`clast ? x}")
+txt = smagick("{3 firstchar, `a`lastchar ? x}")
 test(txt, c("on", "es", "en"))
 
 #
@@ -610,6 +625,13 @@ test(txt, c("A = 45,546 ; B = fifty-five", "A = bonjour ; B = fifty-five"))
 txt = smagick("{N.up ? 8} times he won!")
 test(txt, "Eight times he won!")
 
+year = 2023
+txt = smagick("This test was written in {n.R?year}.")
+test(txt, "This test was written in MMXXIII.")
+
+txt = smagick("This test was written in {n.r?year}.")
+test(txt, "This test was written in mmxxiii.")
+
 #
 # len ####
 #
@@ -671,22 +693,22 @@ test(txt, "nothing = ")
 #
 
 x = c("", "    ", "556", ":!", "pour qui sont ces", "serpents qui sifflent sur nos tetes?")
-txt = smagick("{5 cfirst, rm, ', 'c ? x}")
+txt = smagick("{5 firstchar, rm, ', 'c ? x}")
 test(txt, "    , 556, :!, pour , serpe")
 
-txt = smagick("{5 cfirst, rm.blank, ', 'c ? x}")
+txt = smagick("{5 firstchar, rm.blank, ', 'c ? x}")
 test(txt, "556, :!, pour , serpe")
 
-txt = smagick("{5 cfirst, rm.noalpha, ', 'c ? x}")
+txt = smagick("{5 firstchar, rm.noalpha, ', 'c ? x}")
 test(txt, "pour , serpe")
 
-txt = smagick("{5 cfirst, rm.noalnum, ', 'c ? x}")
+txt = smagick("{5 firstchar, rm.noalnum, ', 'c ? x}")
 test(txt, "556, pour , serpe")
 
-txt = smagick("{5 cfirst, rm.all, ', 'c ? x}")
+txt = smagick("{5 firstchar, rm.all, ', 'c ? x}")
 test(txt, "")
 
-txt = smagick("{5 cfirst, 'pour'rm.blank, ', 'c ? x}")
+txt = smagick("{5 firstchar, 'pour'rm.blank, ', 'c ? x}")
 test(txt, "556, :!, serpe")
 
 # conditional

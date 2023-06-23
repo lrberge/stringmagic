@@ -275,10 +275,10 @@ operations have a name composed of just one letter.
 These functions accept generic flags ("ignore", "fixed", "word") in their patterns (syntax: "flags/pattern"). 
 For more information on regex flags, see the [dedicated section](https://lrberge.github.io/stringmagick/articles/string_tools.html).
 
-### s, S, split
+### s, S, split, Split
 
 Splits the string according to a pattern. The three operations have different defaults: `' '` 
-for `s` and `split`, and `',[ \t\n]*'` for `S` (i.e. comma separation). 
+for `s` and `split`, and `',[ \t\n]*'` for `S` and `Split` (i.e. comma separation). 
 
 When character strings are split, their identity is kept in memory 
 so that group-wise operations can be applied. See the [section on group-wise operations](#sec_group_wise).
@@ -302,11 +302,11 @@ smagick("Order matters:\n{s, ~(sort, c), fill.c, lower, upper.sentence,
                           Q, '\n'c ? prince_talk}")
 ```
 
-### c, C, collapse
+### c, C, collapse, Collapse
 
 To collapse (or concatenate) multiple strings into a single one. The three operations are 
 identical, only their defaults change. The default is `' '` for `c` and `collapse`, 
-and `', | and '` for `C`.
+and `', | and '` for `C` and `Collapse`.
 The syntax of the argument is `'s1'` or `'s1|s2'`. s1 is the string used to concatenate 
 (think `paste(x, collapse = s1)`). In arguments of the form `'s1|s2'`, `s2` will be 
 used to concatenate the last two elements. 
@@ -359,13 +359,14 @@ smagick("{'\\w{3}'X ? x}")
 ### r, R, replace
 
 Replaces a pattern with a string. The three operators are identical and have no default.
+Accepts the option `"first"`.
 The syntax is `'flags/old'` or `'old => new'` with `'old'` the pattern to find and `new` the 
 replacement. `flags/` are optional regex flags. The default for `new` is 
 the empty string. On top of regular regex flags, this operation also accepts 
-the flag `"total"` which instruct to replace the fulll string in case the pattern is found.
+the flag `"total"` which instructs to replace the fulll string in case the pattern is found.
 
-If the option `"first"` is provided, the only the first pattern is replaced. That is, 
-the function `base::sub` is used instead of `base::gsub`.
+If the option `"single"` is provided, only a single substitution is performed (the first pattern is replaced). 
+That is, the function `base::sub` is used instead of `base::gsub`.
 ```{r}
 # regex without replacement (ie removing)
 smagick("{'e'replace ! Where is the letter e?}")
@@ -373,8 +374,8 @@ smagick("{'e'replace ! Where is the letter e?}")
 # regex with replacement
 smagick("{'(?<!\\b)e => a'replace ! Where is the letter e?}")
 
-# with option "first"
-smagick("{'(?<!\\b)e => a'replace.first ! Where is the letter e?}")
+# with option "single"
+smagick("{'(?<!\\b)e => a'replace.single ! Where is the letter e?}")
 
 # we replace the full string with the flag total (`t/`)
 x = c("Where is the letter e?", "Not this way!")
@@ -812,29 +813,48 @@ smagick("{19 cfirst, 9 clast ! This is a very long sentence}")
 smagick("delete 3 = {-3 cfirst ! delete 3}")
 ```
 
-### k
+### k, shorten, Shorten: Shortens character strings
 
-To keep only the first `n` characters (like `cfirst` but with more options). The
-argument can be of the form `'n'k`, `'n|s'k` or `'n||s'k` with `n` a number and `s` a string.
-`n` provides the number of characters to keep. Optionnaly, only for strings whose
-length is greater than `n`, after truncation, the string `s` can be appended at the end.
-The difference between `'n|s'` and `'n||s'` is that in the second case the strings
-will always be of maximum size `n`, while in the first case they can be of length `n + nchar(s)`.
+To keep only the first `n` characters (like `cfirst` but with more options). 
+(Note that `k` stands for "keep" and exists for historical reasons.)
+Available options: `"include"`, `"dots"`. The argument can be of the form `'n'` or `'n|s'` 
+with `n` a number and `s` a string. `n` provides the number of characters to keep. 
+Optionnaly, only for strings *whose length is greater than `n`*, 
+after truncation, the string `s` is appended at the end.
+
+By default, if argument `s` is provided, strings longer than `n` end up at size `n + nchar(s)`.
+If option `"include"` is provided, the strings are guaranteed to be of maximum size `n`,
+even after the string `s` has been appended. Example: if `n=4` and `s=".."`, then "hello"
+becomes "hell.." without `"include"`, and "he.." with it.
+
+Option `"dots"`: if strings are longer than `n+1`, they are truncated at `n-1` and two dots are 
+appended. For example if `n = 3`, then "hello" becomes "he..". Disregards the argument `s`.
+The operation `"Shorten"` (upper case), is with the option `"dots"`.
+
+Note that another way to add the option `"include"` is to use a double pipe
+for the argument `s`, like in `'n||s'`.
+
 ```{r}
 x = "long sentence"
 smagick("v0: {x}", 
-        "v1: {4k ? x}", 
-        "v2: {'4|..'k ? x}", 
-        "v3: {'4||..'k ? x}", .sep = "\n")
+        "v1: {4 shorten ? x}", 
+        "v2: {'4|..'shorten ? x}", 
+        "v3: {'4|..'shorten.include ? x}", 
+        "v4: {4 shorten.dots ? x}", .sep = "\n")
 ```
 
 ### fill
 
-Fills the character strings up to a size. Options: `"right"`, `"center"` and a free-form symbol.
+Fills the character strings up to a size. Options: `"right"` or `"center"`. 
 Default is left-alignment of the strings. 
-Option `"right"` right aligns and `"center"` centers the strings. You can pass a free-form symbol
-as option, it will be used for the filling. By default if no argument is provided, the
-maximum size of the character string is used. See help for [`str_fill()`](https://lrberge.github.io/stringmagick/reference/str_fill.html) 
+
+The argument is optional and can be of the form `'n'` or `'n|s'`. By default if no argument
+is provided, of if `n=0`,`n` is equal to the maximum character length of the vector. The optional
+argument `s` is a symbol used to fill the blanks. By default `s` is equal to a white space.
+
+Option `"right"` right aligns and `"center"` centers the strings.
+
+See help for [`str_fill()`](https://lrberge.github.io/stringmagick/reference/str_fill.html) 
 for more information.
 ```{r}
 life = "full of sound and fury, Signifying nothing"

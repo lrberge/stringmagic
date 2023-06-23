@@ -349,10 +349,10 @@
 #' + Ntimes: same as `ntimes` but automatically adds the option "letter".
 #' Example: `x = 5; smagick("This paper was rejected {Ntimes ? x}...")` leads to
 #' "This paper was rejected five times...".
-#' + cfirst, clast: to select the first/last characters of each element. 
-#'   Ex: `smagick("{19 cfirst, 9 clast ! This is a very long sentence}")` leads to "very long".
+#' + firstchar, lastchar: to select the first/last characters of each element. 
+#'   Ex: `smagick("{19 firstchar, 9 lastchar ! This is a very long sentence}")` leads to "very long".
 #' Negative numbers remove the first/last characters.
-#' + k: to keep only the first n characters (like `cfirst` but with more options). The
+#' + k: to keep only the first n characters (like `firstchar` but with more options). The
 #'  argument can be of the form `'n'k`, `'n|s'k` or `'n||s'k` with `n` a number and `s` a string.
 #'   `n` provides the number of characters to keep. Optionnaly, only for strings whose
 #'  length is greater than `n`, after truncation, the string `s` can be appended at the end.

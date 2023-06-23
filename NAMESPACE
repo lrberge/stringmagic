@@ -2,7 +2,7 @@ useDynLib(stringmagick, .registration = TRUE)
 
 # str_*
 export(str_ops, str_is, str_which, str_get, str_clean, str_split2df,
-       str_split2dt, str_fill)
+       str_split2dt, str_fill, str_vec)
 
 # smagick
 export(smagick, .smagick)

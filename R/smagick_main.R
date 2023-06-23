@@ -856,7 +856,7 @@ sma_char2operator = function(x){
     .stop_hook("In `smagick`, if a quoted value is present, the operators must ",
               "be of the form 'value'op, ",
               "with 'op' an operator. ",
-              "\nPROBLEM: In `", x, "` the operator is missing.")
+              "\nPROBLEM: In `", escape_newline(x), "` the operator is missing.")
   }
   
   argument = op_parsed$argument
@@ -875,12 +875,12 @@ sma_char2operator = function(x){
     
     # default values
     argument = switch(op,
-                      s = " ", S = ",[ \t\n]*", split = " ",
+                      s = " ", S = ",[ \t\n]*", split = " ", Split = ",[ \t\n]*",
                       x = "[[:alnum:]]+", X = "[[:alnum:]]+", extract = "[[:alnum:]]+",
-                      c = " ", C = ", | and ", collapse = " ",
+                      c = " ", C = ", | and ", collapse = " ", Collapse = ", | and ",
                       times = 1, each = 1,
                       first = 1, last = 1,
-                      cfirst = 1, clast = 1,
+                      firstchar = 1, lastchar = 1,
                       trim = 1, 
                       "")
     
@@ -892,6 +892,8 @@ sma_char2operator = function(x){
             "replace" = 'x = "Amour"; smagick("{\'ou => e\'r ? x}...")',
             "%" = 'smagick("pi is: {%.03f ? pi}")',
             "k" = 'smagick("The first 8 letters of the longuest word are: {8k, q ! the longuest word}.")',
+            "shorten" = 'smagick("The first 8 letters of the longuest word are: {8 shorten, q ! the longuest word}.")',
+            "Shorten" = 'smagick("The first 8 letters of the longuest word are: {8 Shorten, q ! the longuest word}.")',
             "K" = 'x = 5:9; smagick("The first 2 elements of `x` are: {2K, C ? x}.")',
             "get" = 'x = row.names(mtcars) ; smagick("My fav. cars are {\'toy\'get.ignore, \'the \'app, enum ? x}.")',
             "is" = 'x = c("Bob", "Pam") ; smagick("{\'am\'is ? x}")',
@@ -921,8 +923,8 @@ sma_char2operator = function(x){
 
       sugg_txt = suggest_item(op, OPERATORS, newline = FALSE, info = "operator")
       
-      op = gsub("\n", "\\n", op)
-      op = gsub("\t", "\\t", op)
+      op = escape_newline(op)
+      op = gsub("\t", "\\\\t", op)
 
       msg = .sma("{context}",
               "\nPROBLEM: {bq?op} is not a valid operator. ", sugg_txt,
@@ -948,14 +950,14 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
   extra = attr(x, "extra")
   group_index = attr(x, "group_index")
 
-  if(op %in% c("c", "C", "collapse")){
+  if(op %in% c("c", "C", "collapse", "Collapse")){
     # C, collapse ####
     # collapse
 
     # argument of the form: 'main_sep|last_sep'
     sep_last = ""
     is_last = FALSE
-    if(length(x) > 1 && grepl("|", argument, fixed = TRUE)){
+    if(length(x) > 1 && grepl("|", argument, fixed = TRUE) && nchar(argument) > 1){
       info = extract_pipe(argument, op)
       is_last = info$is_pipe
       argument = info$value
@@ -964,9 +966,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     sep = argument
 
     if(!is.null(group_index) && group_flag == 2){
-      if(!is.character(x)){
-        x = as.character(x)
-      }
+      x = as.character(x)
       res = cpp_paste_conditional(x, group_index, sep, sep_last)
       group_index = seq_along(res)
       
@@ -990,7 +990,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     }
     
-  } else if(op %in% c("s", "S", "split", "r", "R", "replace", "clean", "get", 
+  } else if(op %in% c("s", "S", "split", "Split", "r", "R", "replace", "clean", "get", 
                       "is", "which", "x", "X", "extract")){
     # split, replace, clean, extract, get, is, which ####
     
@@ -998,7 +998,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     if(op == "extract"){
       valid_options = c(valid_options, "first")
     } else if(op %in% c("r", "R", "clean", "replace")){
-      valid_options = c(valid_options, c("total", "first"))
+      valid_options = c(valid_options, c("total", "single"))
     } else if(op %in% c("get", "is", "which")){
       valid_options = c(valid_options, "equal", "in")
     }
@@ -1030,11 +1030,11 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     # now the operations
     #
     
-    if(!is.character(x) && op != "which"){
+    if(!true_character(x) && op != "which"){
       x = as.character(x)
     }
     
-    if(op %in% c("s", "S", "split")){
+    if(op %in% c("s", "S", "split", "Split")){
       # strsplit applied to "" returns character(0)
       # if occurring: need to fix
       
@@ -1062,7 +1062,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       
     } else if(op %in% c("r", "R", "replace", "clean")){
       is_total = "total" %in% options
-      is_first = "first" %in% options
+      is_single = "single" %in% options
 
       pipe = "=>"
       if(grepl(" => ", argument, fixed = TRUE)){
@@ -1070,10 +1070,10 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       }
       
       sep = if(op == "clean") ",[ \t\n]+" else ""
-
+      
       res = str_clean(x, argument, pipe = pipe, sep = sep, 
                       ignore.case = is_ignore, fixed = is_fixed, word = is_word, 
-                      total = is_total, first = is_first)
+                      total = is_total, single = is_single, envir = .envir)
 
     } else if(op == 'x'){
       x_pat = regexpr(argument, x, fixed = is_fixed, perl = !is_fixed)
@@ -1123,7 +1123,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         }
         
       } else {
-        res = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+        res = str_is(x, pattern = argument, fixed = is_fixed, 
+                     ignore.case = is_ignore, word = is_word, envir = .envir)
       }
 
       if(op %in% c("get", "which")){
@@ -1300,7 +1301,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     is_both = opt_equal(options, "both")
     is_right = any(c("r", "right") %in% options) || nb < 0
     
-    if(!is.character(x)){
+    if(!true_character(x)){
       x = as.character(x)
     }
 
@@ -1320,12 +1321,18 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       res = substr(x, 1 + nb, nx)
     }
 
-  } else if(op %in% c("k", "K")){
+  } else if(op %in% c("k", "shorten", "Shorten", "K")){
     # keep: either the nber of characters (k) or the number of elements (K)
 
     #
-    # Keep, enum ####
+    # Keep, shorten ####
     #
+    
+    if(op %in% c("k", "shorten", "Shorten")){
+      options = check_set_options(options, c("include", "dots"))
+      is_dots = "dots" %in% options || substr(op, 1, 1) == "S"
+      op = "k"
+    }
     
     info = extract_pipe(argument, op, double = TRUE, numeric = TRUE, mbt = TRUE)
     nb = info$value
@@ -1333,15 +1340,23 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     is_included = info$is_double
 
     if(op == "k"){
-      if(!is.character(x)){
+      if(!true_character(x)){
         x = as.character(x)
       }
-      qui = nchar(x) > nb
-      res = substr(x, 1, nb)
-
-      if(is_included){
-        res[qui] = substr(res[qui], 1, nb - nchar(add))
+      
+      n_longer = n_rm = 0
+      if(is_dots){
+        n_longer = 1
+        n_rm = 1
+        add = ".."
+      } else if(is_included || "include" %in% options){
+        n_rm = nchar(add)
       }
+      
+      qui = nchar(x) > (nb + n_longer)
+      res = x
+      
+      res[qui] = substr(res[qui], 1, nb - n_rm)
 
       if(nchar(add) > 0){
         res[qui] = paste0(res[qui], add)
@@ -1388,6 +1403,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       }
     }
   } else if(op == "enum"){
+    # enum ####
     # NOTE:
     # for conditional operations, the code is slow.
     # but I don't see a use case for large vectors....
@@ -1407,8 +1423,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     }
 
-  } else if(op %in% c("first", "last", "cfirst", "clast")){
-    # first, last, cfirst, clast ####
+  } else if(op %in% c("first", "last", "firstchar", "lastchar")){
+    # first, last, firstchar, lastchar ####
 
     nb = argument
     
@@ -1445,20 +1461,20 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     if(str_x(op, 1) == "c"){
       # we select the first/last characters
       
-      if(!is.character(x)){
+      if(!true_character(x)){
         x = as.character(x)
       }
       
       if(nb < 0){
         nb = abs(nb)
         nx = nchar(x)
-        if(op == "cfirst"){
+        if(op == "firstchar"){
           res = substr(x, nb + 1, nx)
         } else {
           res = substr(x, 1, nx - nb)
         }
       } else {
-        if(op == "cfirst"){
+        if(op == "firstchar"){
           res = substr(x, 1, nb)
         } else {
           nx = nchar(x)
@@ -1556,7 +1572,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     is_modified = FALSE
     if(nchar(argument) > 0){
       is_modified = TRUE
-      x2sort = str_clean(x, argument)
+      x2sort = str_clean(x, argument, envir = .envir)
     }
     
     options = check_set_options(options, "num")
@@ -1966,7 +1982,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       is_word = "word" %in% options
       is_ignore = "ignore" %in% options
 
-      qui = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      qui = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, 
+                   word = is_word, envir = .envir)
 
       res[qui] = ""
     }
@@ -1986,7 +2003,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       is_word = "word" %in% options
       is_ignore = "ignore" %in% options
 
-      qui = !str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, word = is_word)
+      qui = !str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, 
+                    word = is_word, envir = .envir)
       
       options = setdiff(options, c("fixed", "ignore", "word"))
       if("blank" %in% options){
@@ -2171,7 +2189,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       # REGEX
       
       if(.check){
-        cond = check_expr(str_is(x, cond_parsed), 
+        cond = check_expr(str_is(x, cond_parsed, envir = .envir), 
                   .sma("The operation is of the form {bq?op}(cond ; true ; false). ",
                   "When `cond` is a pure character string, the function `str_is()` ",
                   "is applied with `cond` being the searched pattern.",
@@ -2179,7 +2197,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
                   "{bq?cond_raw} led to an error, see below:"),
                   verbatim = TRUE)
       } else {
-        cond = str_is(x, cond_parsed)
+        cond = str_is(x, cond_parsed, envir = .envir)
       }      
       
     } else {
@@ -2189,7 +2207,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         if(v %in% c(".N", ".len")){
           my_data[[v]] = length(x)
         } else if(v %in% c(".nchar", ".C")){
-          if(!is.character(x)){
+          if(!true_character(x)){
             x = as.character(x)
           }
           my_data[[v]] = nchar(x)
@@ -2795,15 +2813,16 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
 }
 
 setup_operations = function(){
-  OPERATORS = c("s", "S", "split", "x", "X", "extract", 
-                "c", "C", "collapse", "r", "R", "replace", "clean",
+  OPERATORS = c("s", "S", "split", "Split", "x", "X", "extract", 
+                "c", "C", "collapse", "Collapse", "r", "R", "replace", "clean",
                 "times", "each", "fill",
                 "~", "if", "vif",
                 "upper", "lower", "q", "Q", "bq", 
                 "format", "Format", "%",
                 "erase", "rm", "nuke", "paste", "insert", 
-                "k", "K", "last", "first",
-                "cfirst", "clast", "unik", "num", "enum",
+                "k", "shorten", "Shorten", 
+                "K", "last", "first",
+                "firstchar", "lastchar", "unik", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
                 "ws", "tws", "trim", "get", "is", "which",
                 "n", "N", "len", "Len", "width", "dtime",

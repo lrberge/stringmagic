@@ -198,7 +198,7 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
             "\nPROBLEM: Currently it is of the non-atomic class {bq?class(x)[1]}.")
   }
 
-  if(!is.character(x)){
+  if(!is.character(x) || !identical(class(x), "character")){
     x = as.character(x)
   }
 
@@ -354,7 +354,8 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
               " (instead it is of class: {cls_pblm}).}")
     }
 
-    i_no_char = which(!sapply(dots, is.character))
+    true_character = function(x) is.character(x) && identical(class(x), "character")
+    i_no_char = which(!sapply(dots, true_character))
     for(i in i_no_char){
       dots[[i]] = as.character(dots[[i]])
     }
@@ -481,8 +482,8 @@ get_smagick_context = function(){
   context_specific = x_parsed[[i]]
   
   # normalizing newlines or very confusing
-  x = gsub("\n", "\\\\n", x)
-  context_specific = gsub("\n", "\\\\n", context_specific)
+  x = escape_newline(x)
+  context_specific = escape_newline(context_specific)
   
   # normalizing the if-else semi-colon
   x = gsub("_;;;_", ";", x)
@@ -671,8 +672,8 @@ report_smagick_parsing_error = function(x, x_parsed, .delim, error = TRUE){
   open = .delim[1]
   close = .delim[2]
   
-  x = fix_newline(x)
-  xi = fix_newline(xi)
+  x = escape_newline(x)
+  xi = escape_newline(xi)
   
   same_context = gsub(" ", "", x) == gsub(" ", "", xi)
   if(same_context){

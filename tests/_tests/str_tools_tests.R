@@ -58,6 +58,11 @@ test(val, c(FALSE, FALSE, FALSE, TRUE, FALSE))
 val = str_is(x, "one | c", fixed = TRUE)
 test(val, c(TRUE, FALSE, TRUE, TRUE, TRUE))
 
+# magic
+my_words = "one, two"
+val = str_is(x, "wm/{my_words}", fixed = TRUE)
+test(val, c(TRUE, TRUE, TRUE, FALSE, FALSE))
+
 # escaping
 x = str_vec("hey!, /twitter, !##!, a & b, c | d")
 
@@ -144,6 +149,21 @@ test(val, c("_ world  ", "_'s 5 am...."))
 val = str_clean(x, "it/Hell => Heaven", "@'f/...'rm")
 test(val, "Heaven")
 
+# single
+val = str_clean(x, "single/[aeiou] => _")
+test(val, c("h_llo world  ", "_t's 5 am...."))
+
+# magic
+vowels = "aeiou"
+val = str_clean(x, "m/[{vowels}] => _")
+test(val, "h_ll_ w_rld  " "_t's 5 _m....")
+
+val = str_clean("bonjour les gens", "m/[{vowels}]{2,} => _")
+test(val, "bonj_r les gens")
+
+vowels_split = strsplit(vowels, "")[[1]]
+val = str_clean("bonjour les gens", "m/{'|'c?vowels_split} => _")
+test(val, "bonj_r les gens")
 
 ####
 #### str_split2df ####

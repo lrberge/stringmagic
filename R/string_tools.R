@@ -73,7 +73,7 @@ str_ops = function(x, op, pre_unik = NULL){
     stop("Argument `x` must be atomic. Currently it is of class `", class(x)[1], "`")
   }
 
-  if(!is.character(x)){
+  if(!true_character(x)){
     x = as.character(x)
   }
 
@@ -92,7 +92,7 @@ str_ops = function(x, op, pre_unik = NULL){
     res = res_small[x_int]
   } else {
     operation = paste0("{", op, " ? x}")
-    res = .smagick(operation, data = list(x = x), envir = parent.frame())
+    res = .smagick(operation, .data = list(x = x), .envir = parent.frame())
   }
 
   if("group_index" %in% names(attributes(res))){
@@ -233,7 +233,7 @@ str_ops = function(x, op, pre_unik = NULL){
 #'
 #'
 str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
-                  or = FALSE, pattern = NULL){
+                  or = FALSE, pattern = NULL, envir = parent.frame()){
 
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
   if(length(x) == 0){
@@ -261,7 +261,8 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     pat = pattern[i]
     first_char = substr(pat, 1, 1)
         
-    pat_parsed = parse_regex_pattern(pat, c("fixed", "word", "ignore"))
+    pat_parsed = parse_regex_pattern(pat, c("fixed", "word", "ignore", "magic"), 
+                                     envir = envir)
     is_or = pat_parsed$is_or
     flags = pat_parsed$flags
     all_patterns = pat_parsed$patterns
@@ -337,7 +338,7 @@ str_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 
 #' @describeIn str_is Returns the indexes of the values in which a pattern is detected
 str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
-                     or = FALSE, pattern = NULL){
+                     or = FALSE, pattern = NULL, envir = parent.frame()){
 
   check_character(pattern, null = TRUE, no_na = TRUE)
 
@@ -347,7 +348,8 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     pattern = unlist(dots)
   }
 
-  which(str_is(x, fixed = fixed, ignore.case = ignore.case, word = word, or = or, pattern = pattern))
+  which(str_is(x, fixed = fixed, ignore.case = ignore.case, word = word, 
+               or = or, pattern = pattern, envir = envir))
 }
 
 #' Gets elements of a character vector
@@ -458,7 +460,8 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #'
 #'
 str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
-                   or = FALSE, seq = FALSE, seq.unik = FALSE, pattern = NULL){
+                   or = FALSE, seq = FALSE, seq.unik = FALSE, 
+                   pattern = NULL, envir = parent.frame()){
 
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
   if(length(x) == 0){
@@ -503,7 +506,8 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   if(seq){
     for(i in seq_along(pattern)){
       value = str_get(x, pattern = pattern[i], or = or, seq = FALSE, 
-                      fixed = fixed, ignore.case = ignore.case, word = word)
+                      fixed = fixed, ignore.case = ignore.case, 
+                      word = word, envir = envir)
       if(i == 1){
         res = value
       } else {
@@ -518,7 +522,8 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     return(res)
   }
 
-  index = str_is(x, fixed = fixed, ignore.case = ignore.case, word = word, pattern = pattern, or = or)
+  index = str_is(x, fixed = fixed, ignore.case = ignore.case, word = word, 
+                 pattern = pattern, or = or, envir = envir)
   x[index]
 }
 
@@ -887,6 +892,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' 
 #' @seealso 
 #' A few basic operation: [str_is()], [str_get()], [str_clean()]. Chain basic operations with [str_ops()]. 
+#' Use [str_vec()] to create simple string vectors.
 #' String interpolation combined with operation chaining: [smagick()].
 #'
 #' @examples
@@ -922,7 +928,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #'
 str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+", 
                      ignore.case = FALSE, fixed = FALSE, word = FALSE, 
-                     total = FALSE, first = FALSE){
+                     total = FALSE, single = FALSE, envir = parent.frame()){
 
   x = check_set_character(x, l0 = TRUE)
   if(length(x) == 0){
@@ -940,7 +946,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
   check_logical(fixed, scalar = TRUE)
   check_logical(word, scalar = TRUE)
   check_logical(total, scalar = TRUE)
-  check_logical(first, scalar = TRUE)
+  check_logical(single, scalar = TRUE)
 
   rep_main = replacement
 
@@ -948,8 +954,6 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
   warn_no_named_dots(dots)
 
   dots = unlist(dots)
-  
-  my_sub = if(first) base::sub else base::gsub
 
   res = x
   for(i in seq_along(dots)){
@@ -980,8 +984,8 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
     
     # we parse the special flags
     is_total = total
-    di_parsed = parse_regex_pattern(di, c("ignore", "fixed", "word", "total"), 
-                                     parse_logical = FALSE)
+    di_parsed = parse_regex_pattern(di, c("ignore", "fixed", "word", "total", "single", "magic"), 
+                                     parse_logical = FALSE, envir = envir)
     flags = di_parsed$flags
     patterns = di_parsed$patterns
 
@@ -989,6 +993,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
     is_fixed = fixed || "fixed" %in% flags
     is_ignore = ignore.case || "ignore" %in% flags
     is_word = word || "word" %in% flags
+    is_single = single || "single" %in% flags
 
     if(is_sep){
       all_patterns = strsplit(patterns, split = sep)[[1]]
@@ -1033,6 +1038,9 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
           }
           
           if(inherits(who_tmp, "try-error")){
+            di_raw = escape_newline(di_raw)
+            p = escape_newline(p)
+            replacement = escape_newline(replacement)
             stopi("CONTEXT: evaluation of {Q?di_raw}",
                   "\n         pattern     = {Q?p} ",
                   "\n         replacement = {Q?replacement}",
@@ -1041,6 +1049,9 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
                   "\n{who_tmp}",
                   "{&nchar(warn_msg) > 0;\n{.}}")
           } else if(is_warn){
+            di_raw = escape_newline(di_raw)
+            p = escape_newline(p)
+            replacement = escape_newline(replacement)
             warni("CONTEXT: evaluation of {Q?di_raw}",
                   "\n         pattern     = {Q?p} ",
                   "\n         replacement = {Q?replacement}",
@@ -1065,6 +1076,8 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
           # I'm not sure it's useful: I think P(error|warning) = 100%, but well
           # you never know... 
           res_save = res
+          my_sub = if(is_single) base::sub else base::gsub          
+          
           res = tryCatch(my_sub(p, replacement, res, perl = !is_fixed, fixed = is_fixed), 
                          error = function(e) structure(conditionMessage(e), class = "try-error"),
                          warning = function(w) structure(conditionMessage(w), class = "try-warning"))
@@ -1079,14 +1092,20 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
           }
           
           if(inherits(res, "try-error")){
+            di_raw = escape_newline(di_raw)
+            p = escape_newline(p)
+            replacement = escape_newline(replacement)
             stopi("CONTEXT: evaluation of {Q?di_raw}",
                   "\n         pattern     = {Q?p} ",
                   "\n         replacement = {Q?replacement}",
                   "\nEXPECTATION: the pattern must be a valid regular expression",
-                  "\nPROBLEM: `{&first;sub;gsub}` led to an error, see below:",
+                  "\nPROBLEM: `{&is_single;sub;gsub}` led to an error, see below:",
                   "\n{res}",
                   "{&nchar(warn_msg) > 0;\n{.}}")
           } else if(is_warn){
+            di_raw = escape_newline(di_raw)
+            p = escape_newline(p)
+            replacement = escape_newline(replacement)
             warni("CONTEXT: evaluation of {Q?di_raw}",
                   "\n         pattern     = {Q?p} ",
                   "\n         replacement = {Q?replacement}",
@@ -1223,7 +1242,7 @@ str_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(),
   res_list = vector("list", n)
   for(i in 1:n){
     di = dots[[i]]
-    if(!is.character(di)){
+    if(!true_character(di)){
       di = as.character(di)
     }
     if(length(di) == 1 && is_to_split[i]){
@@ -1361,7 +1380,8 @@ str_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = FALS
 #### dedicated utilities ####
 ####
 
-parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE, parse_logical = TRUE){
+parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE, 
+                               parse_logical = TRUE, envir = parent.frame(2)){
   # in: "fw/hey!, bonjour, a[i]"
   # common authorized_flags: c("fixed", "word", "ignore")
 
@@ -1380,7 +1400,7 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE, pa
                  "non valid character at position" = 
                     .sma("the flag list contains a non ",
                         "valid character in position {info_pattern$error_extra} ",
-                        "({`info_pattern$error_extra`cfirst, clast, bq ? pattern}). ",
+                        "({`info_pattern$error_extra`firstchar, lastchar, bq ? pattern}). ",
                         "Flags must only consist of lower case letters followed by a comma or a slash."),
                 "flag starts with ! and no logical parsing" = 
                     .sma("You cannot use the '!' before the flags. Only the functions `str_is`, `str_which` and ", 
@@ -1428,6 +1448,31 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE, pa
 
   if("verbatim" %in% flags){
     info_pattern = cpp_parse_regex_pattern(pattern, FALSE)
+  }
+  
+  if("magic" %in% flags){
+    for(i in seq_along(info_pattern$patterns)){
+      p = info_pattern$patterns[i]
+      p_escaped = gsub("(\\{( *\\d| *,))", "\\\\\\1", p)
+      # we try the magic evaluation
+      p_new = try(smagick(p_escaped, .envir = envir), silent = TRUE)
+      if(isError(p_new)){
+        stop_hook("CONTEXT: concerns the pattern {bq?pattern}",
+                  "{&len(info_pattern)>1;\n         when evaluating {bq?p}}",
+                  "\nThe `magic` flag expands the pattern with `smagick`.",
+                  "\nPROBLEM: the evaluation with `smagick` failed, see error below:",
+                  "\n{'^[^\n]+\n'r?p_new}")
+      }
+      
+      if(length(p_new) != 1){
+        stop_hook("CONTEXT: concerns the pattern {bq?pattern}",
+                  "{&len(info_pattern)>1;\n         when evaluating {bq?p}}",
+                  "The `magic` flag expands the pattern with `smagick`. It must return a vector of length 1.",
+                  "\nPROBLEM: the vector returned is of length {len.f?p_new}.")
+      }
+      
+      info_pattern$patterns = p_new
+    }
   }
 
   res = list(flags = flags, patterns = info_pattern$patterns, is_or = info_pattern$is_or,
