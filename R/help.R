@@ -111,6 +111,11 @@ generate_help_extensive = function(){
   
   if(!is_smagick_root()) return(NULL)
   
+  if(!identical(parent.frame(), .GlobalEnv) && 
+         !identical(deparse(sys.calls()[[1]]), "devtools::load_all()")){
+    return(NULL)
+  }
+  
   mtime_origin = floor(as.numeric(file.info("R/smagick_doc.R")["mtime"]))
   mtime_destination = readLines("R/AUTO_help.R", n = 1)
   mtime_destination = as.numeric(str_trim(mtime_destination, 2))
