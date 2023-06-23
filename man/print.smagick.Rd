@@ -20,12 +20,13 @@ cars = row.names(mtcars)
 
 print(cars)
 
-smagick("/The first cars are:, {6 first ? cars}")
+str_vec("The first cars are:, {6 first ? cars}")
 
 
 }
 \seealso{
 A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
+Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
 String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
 }
 \author{

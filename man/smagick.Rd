@@ -3,11 +3,7 @@
 \docType{data}
 \name{smagick}
 \alias{smagick}
-\alias{dsb}
-\alias{.dsb}
-\alias{sma}
 \alias{.smagick}
-\alias{.sma}
 \title{String interpolation with operation chaining}
 \format{
 An object of class \code{function} of length 1.
@@ -15,57 +11,15 @@ An object of class \code{function} of length 1.
 \usage{
 smagick
 
-dsb(
-  ...,
-  envir = parent.frame(),
-  sep = "",
-  vectorize = FALSE,
-  slash = TRUE,
-  collapse = NULL,
-  help = NULL,
-  data.table = TRUE
-)
-
-.dsb(
-  ...,
-  envir = parent.frame(),
-  sep = "",
-  vectorize = FALSE,
-  check = FALSE,
-  slash = FALSE,
-  data.table = FALSE
-)
-
-sma(
-  ...,
-  envir = parent.frame(),
-  sep = "",
-  vectorize = FALSE,
-  check = TRUE,
-  slash = TRUE,
-  collapse = NULL,
-  help = NULL,
-  data.table = TRUE
-)
-
 .smagick(
   ...,
-  envir = parent.frame(),
-  sep = "",
-  vectorize = FALSE,
-  check = FALSE,
-  slash = FALSE,
-  data.table = FALSE
-)
-
-.sma(
-  ...,
-  envir = parent.frame(),
-  sep = "",
-  vectorize = FALSE,
-  check = FALSE,
-  slash = FALSE,
-  data.table = FALSE
+  .envir = parent.frame(),
+  .sep = "",
+  .vectorize = FALSE,
+  .delim = c("{", "}"),
+  .collapse = NULL,
+  .check = FALSE,
+  .data.table = FALSE
 )
 }
 \arguments{
@@ -79,42 +33,51 @@ You can add string operations in each \code{"{}"} instance with the syntax \code
 (resp. the verbatim of \code{x}). Otherwise, what to say? Ah, nesting is enabled, and since
 there's over 50 operators, it's a bit complicated to sort you out in this small space.
 
-But type \code{smagick("--help")} to prompt a compact help, or use the argument \code{help = "keyword"}
-(or \code{help = TRUE}) to obtain a selective help from the main documentation.}
+But type \code{smagick("--help")} to prompt a compact help, or use the argument \code{.help = "keyword"}
+(or \code{.help = TRUE}) to obtain a selective help from the main documentation.}
 
-\item{envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
+\item{.envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
 evaluated using the environment from where the function is called or using the named
 arguments passed to the function.}
 
-\item{sep}{Character scalar, default is the empty string \code{""}. It is used to collapse all
+\item{.sep}{Character scalar, default is the empty string \code{""}. It is used to collapse all
 the elements in \code{...} before applying any operation.}
 
-\item{vectorize}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, Further, elements in \code{...} are
+\item{.vectorize}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, Further, elements in \code{...} are
 NOT collapsed together, but instead vectorised.}
 
-\item{slash}{Logical, default is \code{TRUE}. If \code{TRUE}, then starting the string with a slash,
-like in \code{smagick("/one, two, three")} will split the character string after the slash breaking at
-each comma followed by spaces or newlines. The previous example leads to the string vector
-\code{c("one", "two", "three")}.}
+\item{.delim}{Character vector of length 1 or 2. Default is \code{c("{", "}")}. Defines
+the opening and the closing delimiters for interpolation.
 
-\item{collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
+If of length 1, it must be of the form: 1) the opening delimiter,
+2) a single space, 3) the closing delimiter. Ex: \code{".[ ]"} is equivalent to \code{c(".[", "]")}.
+The default value is equivalent to \code{"{ }"}.
+
+[ ]: R:\%20
+[", "]: R:\%22,\%20\%22}
+
+\item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
 that should be returned is collapsed with the value of this argument. This leads
 to return a string of length 1.}
 
-\item{help}{Character scalar or \code{TRUE}, default is \code{NULL}. This argument
+\item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling.
+Without errorhandling you can save something of the order of 40us. Useful only
+in long loops.}
+
+\item{.data.table}{Logical, default is \code{TRUE}. If you use \code{smagick} in a \code{data.table} call
+and interpolate variables within the \code{data.table}, you want this argument to be \code{TRUE}.
+It only incurs a small overhead.}
+
+\item{.help}{Character scalar or \code{TRUE}, default is \code{NULL}. This argument
 is used to generate a dynamic help on the console. If \code{TRUE}, the user can select which
 topic to read from the main documentation, with the possibility to search for keywords and
 navigate the help pages. If a character scalar, then a regex search is perfomed on the main
 documentation and any section containining a match is displayed. The user can easily
 navigate across matches.}
 
-\item{data.table}{Logical, default is \code{TRUE}. If you use \code{smagick} in a \code{data.table} call
-and interpolate variables within the \code{data.table}, you want this argument to be \code{TRUE}.
-It only incurs a small overhead.}
-
-\item{check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling.
-Without errorhandling you can save something of the order of 40ms. Useful only
-in long loops.}
+\item{.default}{Logical scalar, default is \code{TRUE}. Whether to use the global defaults
+set with the function \code{\link[=setSmagick]{setSmagick()}}. If \code{FALSE}, then the default value of the arguments
+is guaranteed to be ones of the function definition.}
 }
 \value{
 It returns a character vector whose length depends on the elements and operations in the interpolations.
@@ -131,26 +94,18 @@ operators have sensible defaults.
 You can also declare your own operations with \code{\link[=smagick_register]{smagick_register()}}. They will be
 seamlessly integrated to \code{smagick}.
 
-Access a compact help on the console with \code{smagick("--help")} or use the argument \code{help} to which
+Access a compact help on the console with \code{smagick("--help")} or use the argument \code{.help} to which
 you can pass keywords or regular expressions and fecth select pieces from the main documentation.
 
-This function is compatible with calls within a \code{data.table}. Note that it
-shouldn't work (try \href{https://glue.tidyverse.org/index.html}{glue} for instance)!
+This function is compatible with calls within a \code{data.table} without named arguments.
+Note that it shouldn't work (try \href{https://glue.tidyverse.org/index.html}{glue} for instance)!
 To make it work, we made use of how \code{data.table} works internally and, since we used stuff
 not exposed in its API, it is by construction unstable. \code{smagick} has been tested, and works, on
 \code{data.table} version 1.14.2 (2021-09-27) and version 1.14.8 (2023-02-17).
 }
 \section{Functions}{
 \itemize{
-\item \code{dsb()}: Like \code{smagick} but interpolation is with the dot-square-bracket ".[]"
-
-\item \code{.dsb()}: Like \code{dsb} but without error handling (leads to slightly faster run times).
-
-\item \code{sma()}: Alias to \code{smagick}.
-
-\item \code{.smagick()}: Like \code{smagick} but without any error handling to save a few ms
-
-\item \code{.sma()}: Alias to \code{.smagick}.
+\item \code{.smagick()}: Like \code{smagick} but without any error handling to save a few micro seconds
 
 }}
 \section{Interpolation and string operations}{
@@ -443,15 +398,15 @@ Nth: same as \code{nth}, but automatically adds the option "letter". Example:
 \verb{n = c(3, 7); smagick("They finished \{Nth, enum ? n\}!")} leads to "They finished third and seventh!".
 \item ntimes: write numbers in the form \code{n} times. Options: "letter", "upper". Option
 "letter" writes the number in letters (up to 100). Option "upper" does the same as "letter"
-and uppercases the first letter. Example: \code{smagick("They lost {C ! {ntimes ? c(1, 12)} against {/Real, Barcelona}}.")}
+and uppercases the first letter. Example: \code{smagick("They lost {C ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}.")}
 leads to "They lost once against Real and 12 times against Barcelona.".
 \item Ntimes: same as \code{ntimes} but automatically adds the option "letter".
 Example: \verb{x = 5; smagick("This paper was rejected \{Ntimes ? x\}...")} leads to
 "This paper was rejected five times...".
-\item cfirst, clast: to select the first/last characters of each element.
-Ex: \code{smagick("{19 cfirst, 9 clast ! This is a very long sentence}")} leads to "very long".
+\item firstchar, lastchar: to select the first/last characters of each element.
+Ex: \code{smagick("{19 firstchar, 9 lastchar ! This is a very long sentence}")} leads to "very long".
 Negative numbers remove the first/last characters.
-\item k: to keep only the first n characters (like \code{cfirst} but with more options). The
+\item k: to keep only the first n characters (like \code{firstchar} but with more options). The
 argument can be of the form \verb{'n'k}, \verb{'n|s'k} or \verb{'n||s'k} with \code{n} a number and \code{s} a string.
 \code{n} provides the number of characters to keep. Optionnaly, only for strings whose
 length is greater than \code{n}, after truncation, the string \code{s} can be appended at the end.
@@ -585,13 +540,13 @@ Ex.3: \verb{x = c(1, 25, 12, 6) ; smagick("Values: \{vif(.<10 ; <10), C ? x\}")}
 "Values: <10, 25, 12 and <10". As we can see values lower than 10 are replaced
 with "<10" while other values are not modified.
 
-Ex.4: \code{x = smagick("x{1:10}")}; \code{smagick("y = {vif(.N>4 ; {/{x[1]}, ..., {last?x}}), ' + 'c ? x}")}
+Ex.4: \code{x = smagick("x{1:10}")}; \code{smagick("y = {vif(.N>4 ; {S!{x[1]}, ..., {last?x}}), ' + 'c ? x}")}
 leads to "y = x1 + ... + x10".
 Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
-the full string is replaced with \code{"{/{x[1]}, ..., {last?x}}"}. Interpolation applies to
-such string. Hence the slash operation (see the dedicated section) breaks the string w.r.t.
-the commas, leading to the vector \code{c("{x[1]}", "...", "{last?x}")}. Since the
-string contain curly brackets, interpolation is applied again. This leads to
+the full string is replaced with \code{"{S!{x[1]}, ..., {last?x}}"}. Interpolation applies to
+such string. Hence the split operation \code{S} breaks the string w.r.t.
+the commas (default behavior), leading to the vector \code{c("{x[1]}", "...", "{last?x}")}. Since the
+string contains curly brackets, interpolation is applied again. This leads to
 the vector \code{c("x1", "...", "x10")}. Finally, this vector is collapsed with ' + ' leading
 to the final string.
 Note that there are many ways to get to the same result. Here is another example:
@@ -605,28 +560,6 @@ leads to "y10, x9, y8 and x11".
 }
 
 \section{Special interpolation}{
- The slash:
-
-Interpolations starting with a slash are different from regular interpolations.
-Ex.1: \verb{x = 3:4; smagick("\{/one, two, \{x\}\}")} leads to the vector \code{c("one", "two", "3", "4")}.
-
-When a "/" is the first character of an interpolation:
-\itemize{
-\item all characters until the closing bracket are taken as verbatim
-\item the verbatim string is split according to comma separation (formally they are split with \verb{,[ \\t\\n]+}),
-resulting into a vector
-\item if the vector contains any \emph{box}, extra interpolations are resolved and appended to the vector
-}
-
-In Ex.1 the string "one, two, {x}" is taken as verbatim and split w.r.t. commas, leading to c("one", "two", "{x}").
-Since the last element contained an opening box, it is interpolated and inserted into the vector, leading
-to the result.
-
-By default, thanks to the argument \code{slash = TRUE}, you can apply the slash operator without
-the need of an interpolation box (provided the slash appears as the first character), see the example below.
-
-Ex.2: \verb{x = 3:4; smagick("/one, two, \{x\}")} also leads to the vector \code{c("one", "two", "3", "4")}.
-
  if-else:
 
 Using an ampersand ("&") as the first character of an interpolation leads to an \emph{if-else} operation.
@@ -744,8 +677,7 @@ You only need to escape the special delimiters which the algorithm is currently 
 As you can see, you don't need to escape the closing bracket in Ex.1 since no box
 was open. On the other hand, you need to escape it in Ex.2.
 
-Alternatively, you can use the function \code{dsb()} to interpolate with \code{.[]} instead of \code{{}}.
-You can also use the following hack:
+Alternatively, use the argument \code{.delim} to set custom delimiters.
 
 Ex.3: smagick("I {'can {write} {{what}} I want'}") leads to \code{"I can {write} {{what}} I want"}.
 
@@ -764,7 +696,7 @@ Ex.4: \code{smagick("{!TRUE} is {?!TRUE}")} leads to "TRUE is FALSE". The first 
 taken verbatim while the second is evaluated.
 }
 
-\section{Generic pattern flags}{
+\section{Generic regular expression flags}{
 
 
 All \code{stringmagick} functions support generic flags in regular-expression patterns.
@@ -779,14 +711,18 @@ The no-flag verion \code{str_which(c("hello...", "world"), ".")} returns \code{1
 Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
 comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".
 
-The three flags always available are: "ignore", "fixed" and "word".
+The four flags always available are: "ignore", "fixed", "word" and "magic".
 \itemize{
-\item "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" at the beginning of the pattern.
+\item "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)"
+at the beginning of the pattern.
 \item "fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "["
 (among others) lose their special meaning and are treated for what they are: simple characters.
 \item "word" adds word boundaries (\code{"\\\\b"} in regex language) to the pattern. Further, the comma (\code{","})
 becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example:
 \code{str_clean("Am I ambushed?", "wi/am")} leads to " I ambushed?" thanks to the flags "ignore" and "word".
+\item "magic" allows to interpolate variables inside the pattern before regex interpretation.
+For example if \code{letters = "aiou"} then \code{str_clean("My great goose!", "magic/[{letters}] => e")}
+leads to \code{"My greet geese!"}
 }
 }
 
@@ -807,7 +743,7 @@ smagick("Hello {x[1]}, ",
 
 # Splitting a comma separated string
 # The mechanism is explained later
-smagick("/J. Mills, David, Agnes, Dr Strong")
+str_vec("J. Mills, David, Agnes, Dr Strong")
 
 # Nota: this is equivalent to (explained later)
 smagick("{', *'S ! J. Mills, David, Agnes, Dr Strong}")
@@ -994,7 +930,7 @@ smagick("{'|'paste.both, ' + 'c ! x{1:4}}")
 
 
 # Enumerations
-acad = smagick("/you like admin, you enjoy working on weekends, you really love emails")
+acad = str_vec("you like admin, you enjoy working on weekends, you really love emails")
 smagick("Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}.")
 
 # You can also use the enum command
@@ -1013,7 +949,7 @@ smagick("{stop, ws ! It is a tale told by an idiot, full of sound and fury, sign
 #         'n|s'k: same + adds 's' at the end of shortened strings
 #         'n||s'k: same but 's' counts in the n characters kept
 
-words = smagick("/short, constitutional")
+words = str_vec("short, constitutional")
 smagick("{5k ? words}")
 
 smagick("{'5|..'k ? words}")
@@ -1028,7 +964,7 @@ smagick("{'5||..'k ? words}")
 #
 # Special values :rest: and :REST:, give the number of items dropped
 
-bx = smagick("/Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
+bx = str_vec("Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
 smagick("Bordeaux wines I like: {3K, ', 'C ? bx}.")
 
 smagick("Bordeaux wines I like: {'3|etc..'K, ', 'C ? bx}.")
@@ -1090,7 +1026,7 @@ smagick("{'A'rm ? x}")
 
 smagick("{rm.all ? x}")
 
-x = smagick("/1, 12, 123, 1234, 123456, 1234567")
+x = str_vec("1, 12, 123, 1234, 123456, 1234567")
 # we delete elements whose number of characters is lower or equal to 3
 # => see later section CONDITIONS
 smagick("{if(.nchar > 3 ; nuke) ? x}")
@@ -1143,7 +1079,7 @@ smagick("The {Len ? x} classic author{$s, are, enum}.")
 dollar = 6
 reason = "glory"
 smagick("Why do you develop packages? For {`dollar`times.c ! $}?",
-    "For money? No... for {upper,''s, c ? reason}!", sep = "\n")
+    "For money? No... for {upper,''s, c ? reason}!", .sep = "\n")
 
 
 #
@@ -1165,6 +1101,10 @@ if(requireNamespace("data.table")){
 
 }
 \seealso{
+To set new operators, see the function \code{\link[=smagick_register]{smagick_register()}}.
+
+To modify the default values of smagick, use the function \code{\link[=setSmagick]{setSmagick()}}.
+
 If you want to apply a chain of operations on a single vector, see \code{\link[=str_ops]{str_ops()}} which
 may be more appropriate.
 }

@@ -12,7 +12,8 @@ str_is(
   ignore.case = FALSE,
   word = FALSE,
   or = FALSE,
-  pattern = NULL
+  pattern = NULL,
+  envir = parent.frame()
 )
 
 str_which(
@@ -22,7 +23,8 @@ str_which(
   ignore.case = FALSE,
   word = FALSE,
   or = FALSE,
-  pattern = NULL
+  pattern = NULL,
+  envir = parent.frame()
 )
 }
 \arguments{
@@ -80,7 +82,7 @@ The internal function used to find the patterns is \code{\link[base:grep]{base::
 \item \code{str_which()}: Returns the indexes of the values in which a pattern is detected
 
 }}
-\section{Generic pattern flags}{
+\section{Generic regular expression flags}{
 
 
 All \code{stringmagick} functions support generic flags in regular-expression patterns.
@@ -95,14 +97,18 @@ The no-flag verion \code{str_which(c("hello...", "world"), ".")} returns \code{1
 Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
 comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".
 
-The three flags always available are: "ignore", "fixed" and "word".
+The four flags always available are: "ignore", "fixed", "word" and "magic".
 \itemize{
-\item "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" at the beginning of the pattern.
+\item "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)"
+at the beginning of the pattern.
 \item "fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "["
 (among others) lose their special meaning and are treated for what they are: simple characters.
 \item "word" adds word boundaries (\code{"\\\\b"} in regex language) to the pattern. Further, the comma (\code{","})
 becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example:
 \code{str_clean("Am I ambushed?", "wi/am")} leads to " I ambushed?" thanks to the flags "ignore" and "word".
+\item "magic" allows to interpolate variables inside the pattern before regex interpretation.
+For example if \code{letters = "aiou"} then \code{str_clean("My great goose!", "magic/[{letters}] => e")}
+leads to \code{"My greet geese!"}
 }
 }
 
@@ -111,7 +117,7 @@ becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|tw
 # NOTA: using `str_get` instead of `str_is` may lead to a faster understanding 
 #       of the examples 
 
-x = dsb("/one, two, one... two, microphone, check")
+x = smagick("/one, two, one... two, microphone, check")
 
 # default is regular expression search
 # => 3 character items
@@ -167,6 +173,7 @@ str_which(x, "e & o")
 }
 \seealso{
 A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
+Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
 String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
 }
 \author{

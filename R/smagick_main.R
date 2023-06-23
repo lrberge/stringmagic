@@ -310,8 +310,6 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
     attr(res, "group_index") = NULL
   }
   
-  
-  
   res
 }
 

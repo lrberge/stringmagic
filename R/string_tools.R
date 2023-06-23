@@ -378,7 +378,7 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' @details 
 #' This function is a wrapper to [str_is()].
 #' 
-#' @inheritSection str_is Generic pattern flags
+#' @inheritSection str_is Generic regular expression flags
 #' 
 #' @section Caching:
 #' 
@@ -899,7 +899,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' 
 #' @inheritSection str_is Generic regular expression flags
 #' 
-#' @section Regular expression flags specific to replacement
+#' @section Regular expression flags specific to replacement:
 #' 
 #' This function benefits from two specific regex flags: "total" and "single".
 #' 
@@ -1189,7 +1189,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' @author 
 #' Laurent Berge
 #' 
-#' @inheritSection str_clean seealso
+#' @inherit str_clean seealso
 #' 
 #' @examples 
 #' 

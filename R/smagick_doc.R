@@ -624,7 +624,7 @@
 #' Ex.4: `smagick("{!TRUE} is {?!TRUE}")` leads to "TRUE is FALSE". The first expression is
 #' taken verbatim while the second is evaluated.
 #' 
-#' @inheritSection str_is Generic pattern flags
+#' @inheritSection str_is Generic regular expression flags
 #'
 #' @return
 #' It returns a character vector whose length depends on the elements and operations in the interpolations.

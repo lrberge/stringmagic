@@ -39,7 +39,7 @@ fun_emph = function(x, ...) paste0("*", x, "*")
 smagick_register(fun_emph, "emph")
 
 # C) use it
-x = smagick("/right, now")
+x = str_vec("right, now")
 smagick("Take heed, {emph, c? x}.")
 
 #
@@ -54,7 +54,7 @@ fun_emph = function(x, options, ...) {
 
 smagick_register(fun_emph, "emph", "strong")
 
-x = smagick("/right, now")
+x = str_vec("right, now")
 smagick("Take heed, {emph.strong, c? x}.")
 
 #
@@ -72,7 +72,7 @@ fun_emph = function(x, argument, options, ...){
 
 smagick_register(fun_emph, "emph", "strong")
 
-x = smagick("/right, now")
+x = str_vec("right, now")
 smagick("Take heed, {'_'emph.s, c? x}.")
 
 

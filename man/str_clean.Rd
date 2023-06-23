@@ -13,7 +13,9 @@ str_clean(
   ignore.case = FALSE,
   fixed = FALSE,
   word = FALSE,
-  total = FALSE
+  total = FALSE,
+  single = FALSE,
+  envir = parent.frame()
 )
 }
 \arguments{
@@ -25,8 +27,10 @@ with the string 'replacement'. By default patterns are comma separated and the r
 after a ' => ' (see args \code{sep} and \code{pipe} to change this). By default the replacement is the empty string
 (so "pat1, pat2" \emph{removes} the patterns).
 
-Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), and 'total'.
-The flag \code{total} leads to a \emph{total replacement} of the string if the pattern is found. Use flags
+Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex),
+'total', 'single' and 'magic'.
+The flag \code{total} leads to a \emph{total replacement} of the string if the pattern is found.
+The flag 'magic' allows to interpolate variables within the pattern.  Use flags
 with comma separation ("word, total/pat") or use only their initials ("wt/pat").
 
 Starting with an '@' leads to operations in \code{\link[=str_ops]{str_ops()}}. Ex: "@ascii, lower, ws" turns
@@ -67,7 +71,11 @@ Example: if \code{word = TRUE}, then pattern = "The, mountain" will select strin
 
 \item{total}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, then when a pattern is found
 in a string, the full string is replaced (instead of just the pattern). Note, \emph{importantly},
-that when \code{total = TRUE} you can use logical operators in the patterns.
+that when \code{total = TRUE} you can use logical operators in the patterns.}
+
+\item{single}{Logical scalar, default is \code{FALSE}. Whether, in substitutions, to stop at
+the first match found. Ex: \code{str_clean("abc", "[[:alpha:]] => _", single = TRUE)} leads
+to \code{"_bc"}, while \code{str_clean("abc", "[[:alpha:]] => _")} leads to \code{"___"}.
 
 Example: \code{str_clean(x, "wi/ & two, three & !four => ", total = TRUE)}}
 }
@@ -81,6 +89,49 @@ Recursively cleans a character vector from several patterns. Quickly handle the
 tedious task of data cleaning by taking advantage of the syntax.
 You can also apply all sorts of cleaning operations by summoning \code{\link[=str_ops]{str_ops()}} operations.
 }
+\section{Regular expression flags specific to replacement}{
+
+
+This function benefits from two specific regex flags: "total" and "single".
+\itemize{
+\item "total" replaces the \emph{complete string} if the pattern is found (remember that the
+default behavior is to replace just the pattern).
+\item "single" performs a single substitution for each string element and stops there.
+Only the first match of each string is replaced. Technically we use \code{\link[base:grep]{base::sub()}}
+internally instead of \code{\link[base:grep]{base::gsub()}}.
+}
+}
+
+\section{Generic regular expression flags}{
+
+
+All \code{stringmagick} functions support generic flags in regular-expression patterns.
+The flags are useful to quickly give extra instructions, similarly to \emph{usual}
+\href{https://javascript.info/regexp-introduction}{regular expression flags}.
+
+Here the syntax is "flag1, flag2/pattern". That is: flags are a comma separated list of flag-names
+separated from the pattern with a slash (\code{/}). Example: \code{str_which(c("hello...", "world"), "fixed/.")} returns \code{1}.
+Here the flag "fixed" removes the regular expression meaning of "." which would have otherwise meant \emph{"any character"}.
+The no-flag verion \code{str_which(c("hello...", "world"), ".")} returns \code{1:2}.
+
+Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
+comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".
+
+The four flags always available are: "ignore", "fixed", "word" and "magic".
+\itemize{
+\item "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)"
+at the beginning of the pattern.
+\item "fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "["
+(among others) lose their special meaning and are treated for what they are: simple characters.
+\item "word" adds word boundaries (\code{"\\\\b"} in regex language) to the pattern. Further, the comma (\code{","})
+becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example:
+\code{str_clean("Am I ambushed?", "wi/am")} leads to " I ambushed?" thanks to the flags "ignore" and "word".
+\item "magic" allows to interpolate variables inside the pattern before regex interpretation.
+For example if \code{letters = "aiou"} then \code{str_clean("My great goose!", "magic/[{letters}] => e")}
+leads to \code{"My greet geese!"}
+}
+}
+
 \examples{
 
 x = c("hello world  ", "it's 5 am....")
@@ -115,6 +166,7 @@ cbind(cars, new)
 }
 \seealso{
 A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
+Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
 String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
 }
 \author{
