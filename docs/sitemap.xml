@@ -4,16 +4,19 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/LICENSE-text.html</loc>
+  </url>
+  <url>
     <loc>/articles/index.html</loc>
   </url>
   <url>
     <loc>/articles/smagick_walkthrough.html</loc>
   </url>
   <url>
-    <loc>/articles/stringmagick_tour.html</loc>
+    <loc>/articles/string_tools.html</loc>
   </url>
   <url>
-    <loc>/articles/string_tools.html</loc>
+    <loc>/articles/stringmagick_tour.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
@@ -28,13 +31,16 @@
     <loc>/reference/index.html</loc>
   </url>
   <url>
+    <loc>/reference/print.smagick.html</loc>
+  </url>
+  <url>
+    <loc>/reference/setSmagick.html</loc>
+  </url>
+  <url>
     <loc>/reference/smagick.html</loc>
   </url>
   <url>
     <loc>/reference/smagick_register.html</loc>
-  </url>
-  <url>
-    <loc>/reference/stringmagick.html</loc>
   </url>
   <url>
     <loc>/reference/str_clean.html</loc>
@@ -53,5 +59,11 @@
   </url>
   <url>
     <loc>/reference/str_split2df.html</loc>
+  </url>
+  <url>
+    <loc>/reference/str_vec.html</loc>
+  </url>
+  <url>
+    <loc>/reference/stringmagick.html</loc>
   </url>
 </urlset>

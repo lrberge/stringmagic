@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>`stringmagick`: A quick tour • fixest</title>
+<title>`stringmagick`: A quick tour • stringmagick</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -32,7 +32,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">fixest</a>
+        <a class="navbar-link" href="../index.html">stringmagick</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-06-19</h4>
+            <h4 data-toc-skip class="date">2023-06-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagick/blob/HEAD/vignettes/stringmagick_tour.rmd" class="external-link"><code>vignettes/stringmagick_tour.rmd</code></a></small>
       <div class="hidden name"><code>stringmagick_tour.rmd</code></div>
@@ -116,13 +116,54 @@ this package. It offers <em>magical</em> string interpolation.</p>
 <p>For the record, string interpolation is a feature common to many
 programming languages, it is about inserting values from a variable
 directly in a character string. For example if <code>x = "Sam"</code>,
-then <code>"Hi {x}!"</code> becomes “Hi Sam!”.</p>
+then <code>"Hi {x}!"</code> becomes “Hi Sam!”. In this way, it’s very
+similar to the <code>glue</code> package by allowing you to put any R
+expression into <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code> within a string.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/stringmagick/" class="external-link">stringmagick</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidyverse/glue" class="external-link">glue</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/setSmagick.html">setSmagick</a></span><span class="op">(</span>.smagick.class <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Works the same way as glue for simple interpolation</span></span>
+<span><span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">"Welcome! Your have bought item number {1:3}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Welcome! Your have bought item number 1</span></span>
+<span><span class="co">#&gt; Welcome! Your have bought item number 2</span></span>
+<span><span class="co">#&gt; Welcome! Your have bought item number 3</span></span>
+<span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Welcome! You have bought item number {1:3}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Welcome! You have bought item number 1</span></span>
+<span><span class="co">#&gt; Welcome! You have bought item number 2</span></span>
+<span><span class="co">#&gt; Welcome! You have bought item number 3</span></span></code></pre></div>
 <p><code>smagick</code> enables to perform <em>any arbitrary
 operation</em> to the variables we interpolate. This opens the door to
 many possibilities, and makes the composition of complex character
 strings a piece of cake. By default over 50 basic operations are
 available, but the user can seamlessly add any she wants. It supports
 nesting, has advanced support for pluralization, and much more.</p>
+<p>Operations have the syntax:</p>
+<p><img src="Operations.png" alt='Figure with the string `smagick("{operation ? expression}")`. It is color coded to emphasize that the curly braces start and end the string interpolation. The word operation and expression are colored to show that they are special objects.' width="742"></p>
+<p>For example, consider someone who bought multiple items and you want
+to collapse them. You can use the <code>C</code> operator which
+automatically adds an “and” at the end.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># What if you want to collapse the vector?</span></span>
+<span><span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">"Welcome! Your have bought item number {paste0(1:3, collapse = ', ')}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Welcome! Your have bought item number 1, 2, 3</span></span>
+<span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Welcome! You have bought item number {C ? 1:3}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Welcome! You have bought item number 1, 2 and 3</span></span></code></pre></div>
+<p>There are over 50 operators available and you can chain them:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># What if you want to have numbers with decimals?</span></span>
+<span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Welcome! You have bought item number {%0.1f, C ? 1:3}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Welcome! You have bought item number 1.0, 2.0 and 3.0</span></span>
+<span></span>
+<span><span class="co"># What if you want to add a date to the receipt?</span></span>
+<span><span class="va">today</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span></span>
+<span>  <span class="st">"---- {'%Y-%m-%d'format ? today} ----\n"</span>,</span>
+<span>  <span class="st">"Welcome! You have bought item number {%0.1f, C ? 1:3}"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; ---- 2023-06-23 ----</span></span>
+<span><span class="co">#&gt; Welcome! You have bought item number 1.0, 2.0 and 3.0</span></span></code></pre></div>
 <p>Like any powerful tool (looking at you <em>regular expressions</em>),
 it has its own syntax, its own commands, and will require practice
 before mastering it. To minimize learning costs, great effort has been
@@ -136,7 +177,7 @@ and next comes an example.</p>
 </h3>
 <p>Here’s a set of stuff I do with my kids and my associated
 self-assessed sikll level:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">skills</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"managing to lose at chance-based board games: 8/10"</span>, </span>
 <span>           <span class="st">"making them clean their mess: 3/10"</span>, </span>
 <span>           <span class="st">"being OK with cooking stuff they don't eat: 9/10"</span>, </span>
@@ -145,7 +186,7 @@ self-assessed sikll level:</p>
 <p>Now say I want to write a small message and then display the first
 <code>n</code> of those skills by decreasing skill order, with
 <code>n</code> an arbitrary number. Here’s how it could be done:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/stringmagick/" class="external-link">stringmagick</a></span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"My {&amp;n&gt;1;{N?.} }best skill{#s} with kids:\n"</span>,</span>
@@ -204,7 +245,7 @@ operations.</li>
 </ul>
 <p>To illustrate this function, since real data science problems are a
 tiny bit dull, allow me to use a French classic:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tragedy</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P: Grâces au ciel, mes mains ne sont point criminelles."</span>,</span>
 <span>            <span class="st">"Plût aux dieux que mon coeur fût innocent comme elles !"</span>, </span>
 <span>            <span class="st">"..."</span>,</span>
@@ -229,13 +270,19 @@ tiny bit dull, allow me to use a French classic:</p>
 <span>          <span class="st">"romps =&gt; rompre"</span>, <span class="st">"sauras =&gt; savoir"</span>, <span class="st">"\\b(accable|cede|espere)s? =&gt; \\1r"</span>,</span>
 <span>          <span class="co"># renormalizing the whitespaces</span></span>
 <span>          <span class="st">"@ws"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "graces ciel mains ne etre point criminelles"</span></span>
-<span><span class="co">#&gt; [2] "plaire dieux coeur etre innocent"           </span></span>
-<span><span class="co">#&gt; [3] "fruit esperer tant violence"                </span></span>
-<span><span class="co">#&gt; [4] "fremir horreur rompre silence"              </span></span>
-<span><span class="co">#&gt; [5] "direz vous ne ceder grands dieux"           </span></span>
-<span><span class="co">#&gt; [6] "horreur vous voir expirer yeux"             </span></span>
-<span><span class="co">#&gt; [7] "quand savoir crime sort accabler"           </span></span>
+<span><span class="co">#&gt; Warning: In str_to_ascii(x, options):</span></span>
+<span><span class="co">#&gt;  When transforming to ASCII, there were 6 failed encodings. Attribute</span></span>
+<span><span class="co">#&gt; `isFailed` is created (note that you can only access it if the variable</span></span>
+<span><span class="co">#&gt; is not transformed).</span></span>
+<span><span class="co">#&gt; (Ignore this message with the `silent` option [ex: `ascii.silent`]. Pass</span></span>
+<span><span class="co">#&gt; the native encoding as an option?)</span></span>
+<span><span class="co">#&gt; [1] "gr aces ciel mains ne etre point criminelles"</span></span>
+<span><span class="co">#&gt; [2] "pl ut dieux coeur ut innocent"               </span></span>
+<span><span class="co">#&gt; [3] "fruit esp eres tant violence"                </span></span>
+<span><span class="co">#&gt; [4] "fr emiras horreur rompre silence"            </span></span>
+<span><span class="co">#&gt; [5] "direz vous ne ede grands dieux"              </span></span>
+<span><span class="co">#&gt; [6] "horreur vous voir expirer yeux"              </span></span>
+<span><span class="co">#&gt; [7] "quand savoir crime sort accabler"            </span></span>
 <span><span class="co">#&gt; [8] "mourir pas moins mourir plus coupable"</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -254,7 +301,7 @@ functions: <code>str_is</code>, <code>str_which</code> and
 expression. This example means: find the elements that: contain
 <code>pat1</code> and do not contain <code>pat2</code>, or contain
 <code>pat3</code>. See the examples below:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
 <span><span class="co"># Looking at the cars</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Cars from the `mtcars` data set:\n{sort, C, 80 width ? cars}."</span><span class="op">)</span></span>
@@ -285,7 +332,7 @@ expression. This example means: find the elements that: contain
 <p>If you want to apply a sequence of operations to a single character
 vector, you can use <code>str_ops</code>. It has access to all
 operations available to <code>smagick</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
 <span><span class="co"># Looking at the cars</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"Cars from the `mtcars` data set:\n{sort, C, 80 width ? cars}."</span><span class="op">)</span></span>

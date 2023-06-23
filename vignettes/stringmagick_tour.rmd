@@ -68,10 +68,10 @@ of complex character strings a piece of cake.
 By default over 50 basic operations are available, but the user can seamlessly add any she wants.
 It supports nesting, has advanced support for pluralization, and much more. 
 
-Operators have the syntax:
+Operations have the syntax:
 
 ```{r, echo = FALSE, fig.alt = 'Figure with the string `smagick("{operation ? expression}\")`. It is color coded to emphasize that the curly braces start and end the string interpolation. The word operation and expression are colored to show that they are special objects.'}
-knitr::include_graphics("../inst/Operations.png")
+knitr::include_graphics("Operations.png")
 ```
 
 For example, consider someone who bought multiple items and you want to collapse them. You can use the `C` operator which automatically adds an "and" at the end.

@@ -115,7 +115,7 @@ Now let's come to what `smagick` really brings to the table.
 To any interpolation you can add operations. Operators have the syntax:
 
 ```{r, echo = FALSE, fig.alt = 'Figure with the string `smagick("{operation ? expression}\")`. It is color coded to emphasize that the curly braces start and end the string interpolation. The word operation and expression are colored to show that they are special objects.'}
-knitr::include_graphics("../inst/Operations.png")
+knitr::include_graphics("Operations.png")
 ```
 
 Let's take the example of the previous section and 
@@ -138,18 +138,17 @@ The question mark means that the expression coming after it is to be evaluated
 The syntax is always the same: `{operations ? expression}`, where the operations section is a *comma separated* list of operations.
 These operations are of the form `'arg'op`, with `arg` the argument to the operator  `op`. These operations are performed sequentially from left to right. 
 
-The general syntax for operations that take argument and have option flags is: 
-```{r, echo = FALSE, fig.alt = "Figure with the string `'arg'operation.option1.option2`. This image is meant to show the general syntax available for operations"}
-knitr::include_graphics("../inst/Operation_details.png")
-```
-
-
 Some operations, like `upper`, accept options. You attach options to an operation 
 with a dot followed by the option name. Formally: `op.option1.option2`, etc. Example:
 
 ```{r ex-ops}
 x = "hi there. what's up? fine."
 smagick("He said: {upper.sentence, Q ? x}")
+```
+
+The general syntax for operations that take an argument and have option flags is: 
+```{r, echo = FALSE, fig.alt = "Figure with the string `'arg'operation.option1.option2`. This image is meant to show the general syntax available for operations"}
+knitr::include_graphics("Operation_details.png")
 ```
 
 Both operators and options are partially matched. So `smagick("He said: {up.s, Q ? x}")` would 
