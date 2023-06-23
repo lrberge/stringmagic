@@ -305,7 +305,12 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 
   if(isTRUE(.smagick.class)){
     class(res) = c("smagick", "character")
+  } else if(!is.null(attr(res, "group_index"))){
+    # cleaning artifacts
+    attr(res, "group_index") = NULL
   }
+  
+  
   
   res
 }
@@ -878,6 +883,7 @@ sma_char2operator = function(x){
                       s = " ", S = ",[ \t\n]*", split = " ", Split = ",[ \t\n]*",
                       x = "[[:alnum:]]+", X = "[[:alnum:]]+", extract = "[[:alnum:]]+",
                       c = " ", C = ", | and ", collapse = " ", Collapse = ", | and ",
+                      head = "6",
                       times = 1, each = 1,
                       first = 1, last = 1,
                       firstchar = 1, lastchar = 1,
@@ -1321,17 +1327,19 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       res = substr(x, 1 + nb, nx)
     }
 
-  } else if(op %in% c("k", "shorten", "Shorten", "K")){
+  } else if(op %in% c("k", "shorten", "Shorten", "K", "head")){
     # keep: either the nber of characters (k) or the number of elements (K)
 
     #
-    # Keep, shorten ####
+    # Keep, shorten, head ####
     #
     
     if(op %in% c("k", "shorten", "Shorten")){
       options = check_set_options(options, c("include", "dots"))
       is_dots = "dots" %in% options || substr(op, 1, 1) == "S"
       op = "k"
+    } else {
+      options = check_set_options(options, "include")
     }
     
     info = extract_pipe(argument, op, double = TRUE, numeric = TRUE, mbt = TRUE)
@@ -1362,7 +1370,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         res[qui] = paste0(res[qui], add)
       }
 
-    } else if(op == "K"){
+    } else {
+      # K or head
 
       if(nb == 0){
         res = character(0)
@@ -1458,7 +1467,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     nb = as.numeric(nb)
 
-    if(str_x(op, 1) == "c"){
+    if(str_x(op, -4) == "char"){
       # we select the first/last characters
       
       if(!true_character(x)){
@@ -2388,7 +2397,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     }
 
   } else if(op == "~"){
-    # Conditional: ~ ####
+    # Group wise: ~ ####
     res = apply_simple_operations(x, op, argument, .check, .envir, 
                                   group_flag = 2, .delim)
                                   
@@ -2821,7 +2830,7 @@ setup_operations = function(){
                 "format", "Format", "%",
                 "erase", "rm", "nuke", "paste", "insert", 
                 "k", "shorten", "Shorten", 
-                "K", "last", "first",
+                "K", "head", "last", "first",
                 "firstchar", "lastchar", "unik", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
                 "ws", "tws", "trim", "get", "is", "which",

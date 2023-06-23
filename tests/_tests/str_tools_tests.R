@@ -156,14 +156,14 @@ test(val, c("h_llo world  ", "_t's 5 am...."))
 # magic
 vowels = "aeiou"
 val = str_clean(x, "m/[{vowels}] => _")
-test(val, "h_ll_ w_rld  " "_t's 5 _m....")
+test(val, c("h_ll_ w_rld  ", "_t's 5 _m...."))
 
 val = str_clean("bonjour les gens", "m/[{vowels}]{2,} => _")
 test(val, "bonj_r les gens")
 
 vowels_split = strsplit(vowels, "")[[1]]
 val = str_clean("bonjour les gens", "m/{'|'c?vowels_split} => _")
-test(val, "bonj_r les gens")
+test(val, "b_nj__r l_s g_ns")
 
 ####
 #### str_split2df ####
@@ -222,3 +222,29 @@ test(txt, c("005", "015"))
 
 x = c("  hey  ", "de bas en haut")
 txt = str_fill(x)
+
+#
+# str_vec ####
+#
+
+# regular
+txt = str_vec("bon, jour, les gens, 
+          je suis, la bas")
+test(txt, c("bon", "jour", "les gens", "je suis", "la bas"))
+
+# with nesting
+y = c("Ana", "Charles")
+z = c("Romeo Montaigu", "Juliette Capulet")
+txt = str_vec("Jules, {y}, Francis, {'\\s+'S, ~(firstchar, ''c) ? z}")
+test(txt, c("Jules", "Ana", "Charles", "Francis", "RM", "JC"))
+
+# with/without variable protection
+x = "x{{1:2}}, xx"
+txt = str_vec(x, "y{{1:3}}", .delim = "{{ }}")
+test(txt, c("x{{1:2}}, xx", "y1", "y2", "y3"))
+
+txt = str_vec(x, "y{{1:3}}", .delim = "{{ }}", .protect.vars = FALSE)
+test(txt, c("x1", "x2", "xx", "y1", "y2", "y3"))
+
+txt = str_vec(x, "y{{1:3}}", .delim = "{{ }}", .protect.vars = FALSE, .split = FALSE)
+test(txt, c("x1, xx", "x2, xx", "y1", "y2", "y3"))

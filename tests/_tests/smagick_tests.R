@@ -13,21 +13,6 @@ chunk("smagick")
 dsb = function(...) smagick(..., .delim = ".[ ]")
 
 #
-# slash ####
-#
-
-# regular
-x = str_vec("bon, jour, les gens, 
-          je suis, la bas")
-test(x, c("bon", "jour", "les gens", "je suis", "la bas"))
-
-# with nesting
-y = c("Ana", "Charles")
-z = c("Romeo Montaigu", "Juliette Capulet")
-x = str_vec("Jules, {y}, Francis, {'\\s+'S, ~(firstchar, ''c) ? z}")
-test(x, c("Jules", "Ana", "Charles", "Francis", "RM", "JC"))
-
-#
 # collapse ####
 #
 
@@ -118,7 +103,7 @@ test(txt, "[sound], [sound], [sound], all the way")
 txt = smagick("{', 'c ! {'jing => [sound]'r.total ? x}}")
 test(txt, "[sound], [sound], [sound], all the way")
 
-txt = smagick("{'(?<!\\b)e => a'replace.first ! Where is the letter e?}")
+txt = smagick("{'(?<!\\b)e => a'replace.single ! Where is the letter e?}")
 test(txt, "Whare is the letter e?")
 
 # default
