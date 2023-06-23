@@ -911,7 +911,7 @@ separated list of elements.
 If there are more than 7 elements, only the first 6 are shown and the number of
 items left is written.
 ```{r}
-smagick("enum ? 1:5")
+smagick("{enum ? 1:5}")
 ```
 You can add the following options:
 
