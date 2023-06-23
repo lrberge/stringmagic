@@ -976,7 +976,7 @@ if(FALSE && requireNamespace("data.table", quietly = TRUE)){
   dt = as.data.table(iris)
   
   # variable creation
-  dt[, sepal_info := sma("{%.0f ? Sepal.Length}-{%.0f ? Sepal.Width}")]
+  dt[, sepal_info := smagick("{%.0f ? Sepal.Length}-{%.0f ? Sepal.Width}")]
   test(dt[1, "sepal_info"], "5-4")
   
   # variable creation with grouping
@@ -992,11 +992,11 @@ if(FALSE && requireNamespace("data.table", quietly = TRUE)){
   test(dt[1, "species_N"], "setos: 50")
   
   # variable selection
-  dt_small = dt[, .(petal_info = sma("{%.0f ? Petal.Length}-{%.0f ? Petal.Width}"))]
+  dt_small = dt[, .(petal_info = smagick("{%.0f ? Petal.Length}-{%.0f ? Petal.Width}"))]
   test(dt_small[1, "petal_info"], "1-0")
   
   # variable selection with grouping
-  dt_small = dt[, .(species_PL = sma("{first, 10 fill.c ? Species}: {%.1f ? mean(Petal.Length)}")), 
+  dt_small = dt[, .(species_PL = smagick("{first, 10 fill.c ? Species}: {%.1f ? mean(Petal.Length)}")), 
                  by = Species]
   test(dt_small[1, "species_PL"], "  setosa  : 1.5")
   

@@ -1091,7 +1091,7 @@ smagick("Why do you develop packages? For {`dollar`times.c ! $}?",
 if(requireNamespace("data.table")){
   library(data.table)
   dt_iris = as.data.table(iris)
-  dt_small = dt_iris[, .(species_PL = sma("{first, 10 fill.c ? Species}: {\%.1f ? mean(Petal.Length)}")), 
+  dt_small = dt_iris[, .(species_PL = smagick("{first, 10 fill.c ? Species}: {\%.1f ? mean(Petal.Length)}")), 
                      by = Species]
   print(dt_small)
 }

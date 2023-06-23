@@ -295,7 +295,7 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 
   res = smagick_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
                             .vectorize = .vectorize, .help = .help,
-                            .collapse = .collapse, is_root = TRUE, 
+                            .collapse = .collapse, .is_root = TRUE, 
                             .data.table = .data.table,
                             .check = .check)
 
@@ -359,7 +359,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
       stop_up("smagick: Help requested.")
     }    
   }
-
+  
   if(.is_root && .data.table){
     # we check for data table calls
     is_dt = FALSE
@@ -393,7 +393,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
             }
           }
 
-          attr(envir, "dt_data") = dt_data
+          attr(.envir, "dt_data") = dt_data
       }
     }
   }

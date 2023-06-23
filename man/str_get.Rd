@@ -170,7 +170,7 @@ str_get(x, "\\\\!")
 # so you don't need to repeat the argument 'x'
 # Mostly useful at an exploratory stage
 
-if(interactive() && identical(sys.frame(), .GlobalEnv)){
+if(interactive() && is.null(sys.calls())){
    
    # first run, the data is cached
    str_get(row.names(mtcars), "i/vol")
