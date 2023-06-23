@@ -47,13 +47,54 @@ string interpolation.
 
 For the record, string interpolation is a feature common to many programming languages, 
 it is about inserting values from a variable directly in a character string.
-For example if `x = "Sam"`, then `"Hi {x}!"` becomes "Hi Sam!".
+For example if `x = "Sam"`, then `"Hi {x}!"` becomes "Hi Sam!". In this way, it's very similar to the `glue` package by allowing you to put any R expression into `{}` within a string.
+
+```{r}
+library(stringmagick)
+library(glue)
+setSmagick(.smagick.class = TRUE)
+
+# Works the same way as glue for simple interpolation
+glue::glue("Welcome! Your have bought item number {1:3}")
+smagick("Welcome! You have bought item number {1:3}")
+```
+
+
+
 
 `smagick` enables to perform *any arbitrary operation* to the variables we interpolate. 
 This opens the door to many possibilities, and makes the composition
 of complex character strings a piece of cake. 
 By default over 50 basic operations are available, but the user can seamlessly add any she wants.
 It supports nesting, has advanced support for pluralization, and much more. 
+
+Operators have the syntax:
+
+```{r, echo = FALSE, fig.alt = 'Figure with the string `smagick("{operation ? expression}\")`. It is color coded to emphasize that the curly braces start and end the string interpolation. The word operation and expression are colored to show that they are special objects.'}
+knitr::include_graphics("../inst/Operations.png")
+```
+
+For example, consider someone who bought multiple items and you want to collapse them. You can use the `C` operator which automatically adds an "and" at the end.
+
+```{r}
+# What if you want to collapse the vector?
+glue::glue("Welcome! Your have bought item number {paste0(1:3, collapse = ', ')}")
+smagick("Welcome! You have bought item number {C ? 1:3}")
+```
+
+There are over 50 operators available and you can chain them:
+
+```{r}
+# What if you want to have numbers with decimals?
+smagick("Welcome! You have bought item number {%0.1f, C ? 1:3}")
+
+# What if you want to add a date to the receipt?
+today <- Sys.Date()
+smagick(
+  "---- {'%Y-%m-%d'format ? today} ----\n",
+  "Welcome! You have bought item number {%0.1f, C ? 1:3}"
+)
+```
 
 Like any powerful tool (looking at you *regular expressions*), it has its own syntax,
 its own commands, and will require practice before mastering it. To minimize learning costs, 
