@@ -75,57 +75,15 @@ basic string operations to the interpolated variables. Advanced support for plur
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="va">smagick</span></span>
 <span></span>
-<span><span class="fu">dsb</span><span class="op">(</span></span>
-<span>  <span class="va">...</span>,</span>
-<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  sep <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  slash <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  collapse <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  help <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  data.table <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.dsb</span><span class="op">(</span></span>
-<span>  <span class="va">...</span>,</span>
-<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  sep <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  check <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  slash <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  data.table <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">sma</span><span class="op">(</span></span>
-<span>  <span class="va">...</span>,</span>
-<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  sep <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  check <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  slash <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  collapse <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  help <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  data.table <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
 <span><span class="fu">.smagick</span><span class="op">(</span></span>
 <span>  <span class="va">...</span>,</span>
-<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  sep <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  check <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  slash <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  data.table <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.sma</span><span class="op">(</span></span>
-<span>  <span class="va">...</span>,</span>
-<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  sep <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  check <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  slash <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  data.table <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  .envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  .sep <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  .vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .delim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"{"</span>, <span class="st">"}"</span><span class="op">)</span>,</span>
+<span>  .collapse <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .check <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .data.table <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -144,40 +102,55 @@ You can add string operations in each <code>"{}"</code> instance with the syntax
 (resp. <code>"'arg'op ! x"</code>) to apply the operation <code>'op'</code> with the argument <code>'arg'</code> to <code>x</code>
 (resp. the verbatim of <code>x</code>). Otherwise, what to say? Ah, nesting is enabled, and since
 there's over 50 operators, it's a bit complicated to sort you out in this small space.</p>
-<p>But type <code>smagick("--help")</code> to prompt a compact help, or use the argument <code>help = "keyword"</code>
-(or <code>help = TRUE</code>) to obtain a selective help from the main documentation.</p></dd>
+<p>But type <code>smagick("--help")</code> to prompt a compact help, or use the argument <code>.help = "keyword"</code>
+(or <code>.help = TRUE</code>) to obtain a selective help from the main documentation.</p></dd>
 
 
-<dt>envir</dt>
+<dt>.envir</dt>
 <dd><p>An environment used to evaluate the variables in <code>"{}"</code>. By default the variables are
 evaluated using the environment from where the function is called or using the named
 arguments passed to the function.</p></dd>
 
 
-<dt>sep</dt>
+<dt>.sep</dt>
 <dd><p>Character scalar, default is the empty string <code>""</code>. It is used to collapse all
 the elements in <code>...</code> before applying any operation.</p></dd>
 
 
-<dt>vectorize</dt>
+<dt>.vectorize</dt>
 <dd><p>Logical scalar, default is <code>FALSE</code>. If <code>TRUE</code>, Further, elements in <code>...</code> are
 NOT collapsed together, but instead vectorised.</p></dd>
 
 
-<dt>slash</dt>
-<dd><p>Logical, default is <code>TRUE</code>. If <code>TRUE</code>, then starting the string with a slash,
-like in <code>smagick("/one, two, three")</code> will split the character string after the slash breaking at
-each comma followed by spaces or newlines. The previous example leads to the string vector
-<code>c("one", "two", "three")</code>.</p></dd>
+<dt>.delim</dt>
+<dd><p>Character vector of length 1 or 2. Default is <code>c("{", "}")</code>. Defines
+the opening and the closing delimiters for interpolation.</p>
+<p>If of length 1, it must be of the form: 1) the opening delimiter,
+2) a single space, 3) the closing delimiter. Ex: <code>".[ ]"</code> is equivalent to <code>c(".[", "]")</code>.
+The default value is equivalent to <code>"{ }"</code>.</p>
+<p>[ ]: R:%20
+[", "]: R:%22,%20%22</p></dd>
 
 
-<dt>collapse</dt>
+<dt>.collapse</dt>
 <dd><p>Character scalar, default is <code>NULL</code>. If provided, the character vector
 that should be returned is collapsed with the value of this argument. This leads
 to return a string of length 1.</p></dd>
 
 
-<dt>help</dt>
+<dt>.check</dt>
+<dd><p>Logical scalar, default is <code>TRUE</code>. Whether to enable error-handling.
+Without errorhandling you can save something of the order of 40us. Useful only
+in long loops.</p></dd>
+
+
+<dt>.data.table</dt>
+<dd><p>Logical, default is <code>TRUE</code>. If you use <code>smagick</code> in a <code>data.table</code> call
+and interpolate variables within the <code>data.table</code>, you want this argument to be <code>TRUE</code>.
+It only incurs a small overhead.</p></dd>
+
+
+<dt>.help</dt>
 <dd><p>Character scalar or <code>TRUE</code>, default is <code>NULL</code>. This argument
 is used to generate a dynamic help on the console. If <code>TRUE</code>, the user can select which
 topic to read from the main documentation, with the possibility to search for keywords and
@@ -186,16 +159,10 @@ documentation and any section containining a match is displayed. The user can ea
 navigate across matches.</p></dd>
 
 
-<dt>data.table</dt>
-<dd><p>Logical, default is <code>TRUE</code>. If you use <code>smagick</code> in a <code>data.table</code> call
-and interpolate variables within the <code>data.table</code>, you want this argument to be <code>TRUE</code>.
-It only incurs a small overhead.</p></dd>
-
-
-<dt>check</dt>
-<dd><p>Logical scalar, default is <code>TRUE</code>. Whether to enable error-handling.
-Without errorhandling you can save something of the order of 40ms. Useful only
-in long loops.</p></dd>
+<dt>.default</dt>
+<dd><p>Logical scalar, default is <code>TRUE</code>. Whether to use the global defaults
+set with the function <code><a href="setSmagick.html">setSmagick()</a></code>. If <code>FALSE</code>, then the default value of the arguments
+is guaranteed to be ones of the function definition.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -212,10 +179,10 @@ operators have sensible defaults.
 (it may be the most powerful feature)
 You can also declare your own operations with <code><a href="smagick_register.html">smagick_register()</a></code>. They will be
 seamlessly integrated to <code>smagick</code>.</p>
-<p>Access a compact help on the console with <code>smagick("--help")</code> or use the argument <code>help</code> to which
+<p>Access a compact help on the console with <code>smagick("--help")</code> or use the argument <code>.help</code> to which
 you can pass keywords or regular expressions and fecth select pieces from the main documentation.</p>
-<p>This function is compatible with calls within a <code>data.table</code>. Note that it
-shouldn't work (try <a href="https://glue.tidyverse.org/index.html" class="external-link">glue</a> for instance)!
+<p>This function is compatible with calls within a <code>data.table</code> without named arguments.
+Note that it shouldn't work (try <a href="https://glue.tidyverse.org/index.html" class="external-link">glue</a> for instance)!
 To make it work, we made use of how <code>data.table</code> works internally and, since we used stuff
 not exposed in its API, it is by construction unstable. <code>smagick</code> has been tested, and works, on
 <code>data.table</code> version 1.14.2 (2021-09-27) and version 1.14.8 (2023-02-17).</p>
@@ -223,11 +190,7 @@ not exposed in its API, it is by construction unstable. <code>smagick</code> has
     <div id="functions">
     <h2>Functions</h2>
     
-<ul><li><p><code>dsb()</code>: Like <code>smagick</code> but interpolation is with the dot-square-bracket ".[]"</p></li>
-<li><p><code>.dsb()</code>: Like <code>dsb</code> but without error handling (leads to slightly faster run times).</p></li>
-<li><p><code>sma()</code>: Alias to <code>smagick</code>.</p></li>
-<li><p><code>.smagick()</code>: Like <code>smagick</code> but without any error handling to save a few ms</p></li>
-<li><p><code>.sma()</code>: Alias to <code>.smagick</code>.</p></li>
+<ul><li><p><code>.smagick()</code>: Like <code>smagick</code> but without any error handling to save a few micro seconds</p></li>
 </ul></div>
     <div id="interpolation-and-string-operations">
     <h2>Interpolation and string operations</h2>
@@ -494,15 +457,15 @@ Nth: same as <code>nth</code>, but automatically adds the option "letter". Examp
 <code>n = c(3, 7); smagick("They finished {Nth, enum ? n}!")</code> leads to "They finished third and seventh!".</p></li>
 <li><p>ntimes: write numbers in the form <code>n</code> times. Options: "letter", "upper". Option
 "letter" writes the number in letters (up to 100). Option "upper" does the same as "letter"
-and uppercases the first letter. Example: <code>smagick("They lost {C ! {ntimes ? c(1, 12)} against {/Real, Barcelona}}.")</code>
+and uppercases the first letter. Example: <code>smagick("They lost {C ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}.")</code>
 leads to "They lost once against Real and 12 times against Barcelona.".</p></li>
 <li><p>Ntimes: same as <code>ntimes</code> but automatically adds the option "letter".
 Example: <code>x = 5; smagick("This paper was rejected {Ntimes ? x}...")</code> leads to
 "This paper was rejected five times...".</p></li>
-<li><p>cfirst, clast: to select the first/last characters of each element.
-Ex: <code>smagick("{19 cfirst, 9 clast ! This is a very long sentence}")</code> leads to "very long".
+<li><p>firstchar, lastchar: to select the first/last characters of each element.
+Ex: <code>smagick("{19 firstchar, 9 lastchar ! This is a very long sentence}")</code> leads to "very long".
 Negative numbers remove the first/last characters.</p></li>
-<li><p>k: to keep only the first n characters (like <code>cfirst</code> but with more options). The
+<li><p>k: to keep only the first n characters (like <code>firstchar</code> but with more options). The
 argument can be of the form <code>'n'k</code>, <code>'n|s'k</code> or <code>'n||s'k</code> with <code>n</code> a number and <code>s</code> a string.
 <code>n</code> provides the number of characters to keep. Optionnaly, only for strings whose
 length is greater than <code>n</code>, after truncation, the string <code>s</code> can be appended at the end.
@@ -624,13 +587,13 @@ This is similar for <code>verb_false</code>. The condition works as in <code>if<
 <p>Ex.3: <code>x = c(1, 25, 12, 6) ; smagick("Values: {vif(.&lt;10 ; &lt;10), C ? x}")</code> leads to
 "Values: &lt;10, 25, 12 and &lt;10". As we can see values lower than 10 are replaced
 with "&lt;10" while other values are not modified.</p>
-<p>Ex.4: <code>x = smagick("x{1:10}")</code>; <code>smagick("y = {vif(.N&gt;4 ; {/{x[1]}, ..., {last?x}}), ' + 'c ? x}")</code>
+<p>Ex.4: <code>x = smagick("x{1:10}")</code>; <code>smagick("y = {vif(.N&gt;4 ; {S!{x[1]}, ..., {last?x}}), ' + 'c ? x}")</code>
 leads to "y = x1 + ... + x10".
 Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
-the full string is replaced with <code>"{/{x[1]}, ..., {last?x}}"</code>. Interpolation applies to
-such string. Hence the slash operation (see the dedicated section) breaks the string w.r.t.
-the commas, leading to the vector <code>c("{x[1]}", "...", "{last?x}")</code>. Since the
-string contain curly brackets, interpolation is applied again. This leads to
+the full string is replaced with <code>"{S!{x[1]}, ..., {last?x}}"</code>. Interpolation applies to
+such string. Hence the split operation <code>S</code> breaks the string w.r.t.
+the commas (default behavior), leading to the vector <code>c("{x[1]}", "...", "{last?x}")</code>. Since the
+string contains curly brackets, interpolation is applied again. This leads to
 the vector <code>c("x1", "...", "x10")</code>. Finally, this vector is collapsed with ' + ' leading
 to the final string.
 Note that there are many ways to get to the same result. Here is another example:
@@ -642,20 +605,7 @@ leads to "y10, x9, y8 and x11".</p>
     </div>
     <div id="special-interpolation">
     <h2>Special interpolation</h2>
-    <p>The slash:</p>
-<p>Interpolations starting with a slash are different from regular interpolations.
-Ex.1: <code>x = 3:4; smagick("{/one, two, {x}}")</code> leads to the vector <code>c("one", "two", "3", "4")</code>.</p>
-<p>When a "/" is the first character of an interpolation:</p><ul><li><p>all characters until the closing bracket are taken as verbatim</p></li>
-<li><p>the verbatim string is split according to comma separation (formally they are split with <code>,[ \t\n]+</code>),
-resulting into a vector</p></li>
-<li><p>if the vector contains any <em>box</em>, extra interpolations are resolved and appended to the vector</p></li>
-</ul><p>In Ex.1 the string "one, two, x" is taken as verbatim and split w.r.t. commas, leading to c("one", "two", "x").
-Since the last element contained an opening box, it is interpolated and inserted into the vector, leading
-to the result.</p>
-<p>By default, thanks to the argument <code>slash = TRUE</code>, you can apply the slash operator without
-the need of an interpolation box (provided the slash appears as the first character), see the example below.</p>
-<p>Ex.2: <code>x = 3:4; smagick("/one, two, {x}")</code> also leads to the vector <code>c("one", "two", "3", "4")</code>.</p>
-<p>if-else:</p>
+    <p>if-else:</p>
 <p>Using an ampersand ("&amp;") as the first character of an interpolation leads to an <em>if-else</em> operation.
 Using two ampersands ("&amp;&amp;") leads to a slightly different operation described at the end of this section.</p>
 <p>The syntax is as follows: <code>{&amp;cond ; verb_true ; verb_false}</code> with <code>cond</code> a
@@ -739,8 +689,7 @@ Ex.2: <code>smagick("many {5 times.c ! \\\\}}")</code> leads to <code>many }}}}}
 <p>You only need to escape the special delimiters which the algorithm is currently looking for.
 As you can see, you don't need to escape the closing bracket in Ex.1 since no box
 was open. On the other hand, you need to escape it in Ex.2.</p>
-<p>Alternatively, you can use the function <code>dsb()</code> to interpolate with <code>.[]</code> instead of <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code>.
-You can also use the following hack:</p>
+<p>Alternatively, use the argument <code>.delim</code> to set custom delimiters.</p>
 <p>Ex.3: smagick("I 'can write what I want'") leads to <code>"I can {write} {{what}} I want"</code>.</p>
 <p>Since <code>{expr}</code> evaluates <code>expr</code>, the stuff inside the <em>box</em>, you can pass a
 character string and it will stay untouched.</p>
@@ -753,8 +702,8 @@ algorithm that you want to evaluate the expression.</p>
 <p>Ex.4: <code>smagick("{!TRUE} is {?!TRUE}")</code> leads to "TRUE is FALSE". The first expression is
 taken verbatim while the second is evaluated.</p>
     </div>
-    <div id="generic-pattern-flags">
-    <h2>Generic pattern flags</h2>
+    <div id="generic-regular-expression-flags">
+    <h2>Generic regular expression flags</h2>
     
 
 
@@ -767,16 +716,22 @@ Here the flag "fixed" removes the regular expression meaning of "." which would 
 The no-flag verion <code>str_which(c("hello...", "world"), ".")</code> returns <code>1:2</code>.</p>
 <p>Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
 comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".</p>
-<p>The three flags always available are: "ignore", "fixed" and "word".</p><ul><li><p>"ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" at the beginning of the pattern.</p></li>
+<p>The four flags always available are: "ignore", "fixed", "word" and "magic".</p><ul><li><p>"ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)"
+at the beginning of the pattern.</p></li>
 <li><p>"fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "["
 (among others) lose their special meaning and are treated for what they are: simple characters.</p></li>
 <li><p>"word" adds word boundaries (<code>"\\b"</code> in regex language) to the pattern. Further, the comma (<code>","</code>)
 becomes a word separator. Technically, "word/one, two" is treated as "\b(one|two)\b". Example:
 <code>str_clean("Am I ambushed?", "wi/am")</code> leads to " I ambushed?" thanks to the flags "ignore" and "word".</p></li>
+<li><p>"magic" allows to interpolate variables inside the pattern before regex interpretation.
+For example if <code>letters = "aiou"</code> then <code>str_clean("My great goose!", "magic/[{letters}] =&gt; e")</code>
+leads to <code>"My greet geese!"</code></p></li>
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>If you want to apply a chain of operations on a single vector, see <code><a href="str_ops.html">str_ops()</a></code> which
+    <div class="dont-index"><p>To set new operators, see the function <code><a href="smagick_register.html">smagick_register()</a></code>.</p>
+<p>To modify the default values of smagick, use the function <code><a href="setSmagick.html">setSmagick()</a></code>.</p>
+<p>If you want to apply a chain of operations on a single vector, see <code><a href="str_ops.html">str_ops()</a></code> which
 may be more appropriate.</p></div>
     </div>
 
@@ -791,28 +746,21 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># {x} inserts x</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Hello {x}!"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Hello Romeo!</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Hello Juliet!</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Hello Romeo!"  "Hello Juliet!"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># elements in ... are collapsed with "" (default)</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Hello {x[1]}, "</span>,</span></span>
 <span class="r-in"><span>    <span class="st">"how is {x[2]} doing?"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Hello Romeo, how is Juliet doing?</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Hello Romeo, how is Juliet doing?"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Splitting a comma separated string</span></span></span>
 <span class="r-in"><span><span class="co"># The mechanism is explained later</span></span></span>
-<span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"/J. Mills, David, Agnes, Dr Strong"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> J. Mills</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> David</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Agnes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Dr Strong</span>
+<span class="r-in"><span><span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"J. Mills, David, Agnes, Dr Strong"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "J. Mills"  "David"     "Agnes"     "Dr Strong"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Nota: this is equivalent to (explained later)</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{', *'S ! J. Mills, David, Agnes, Dr Strong}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> J. Mills</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> David</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Agnes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Dr Strong</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "J. Mills"  "David"     "Agnes"     "Dr Strong"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Applying low level operations to strings</span></span></span>
@@ -837,13 +785,11 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co"># Example: splitting</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"hello dear"</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{' 's ? x}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hello</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dear</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hello" "dear" </span>
 <span class="r-in"><span><span class="co"># x is split by ' '</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{' 's ! hello dear}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hello</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dear</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hello" "dear" </span>
 <span class="r-in"><span><span class="co"># 'hello dear' is split by ' '</span></span></span>
 <span class="r-in"><span><span class="co"># had we used ?, there would have been an error</span></span></span>
 <span class="r-in"><span></span></span>
@@ -855,7 +801,7 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example: default of 's' is ' ' + chaining with collapse</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{s, ' my 'c ! hello dear}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hello my dear</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hello my dear"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Nesting</span></span></span>
@@ -867,11 +813,11 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#              \-&gt; nesting requires verbatim evaluation: '!'</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"The variables are: {C ! x{1:4}}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> The variables are: x1, x2, x3 and x4.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The variables are: x1, x2, x3 and x4."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># This one is ugly but it shows triple nesting</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"The variables are: {ws, C ! {2 times ! x{1:4}}{','s, 4 each !  ,_sq}}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> The variables are: x1, x2, x3, x4, x1_sq, x2_sq, x3_sq and x4_sq.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The variables are: x1, x2, x3, x4, x1_sq, x2_sq, x3_sq and x4_sq."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Splitting</span></span></span>
@@ -879,27 +825,19 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># s: split with fixed pattern, default is ' '</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{s ! a b c}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> b</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> c</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "b" "c"</span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{' b 's !a b c}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> c</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "c"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># S: same as 's' but default is ',[ \t\n]*'</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{S !a, b, c}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> b</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> c</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "b" "c"</span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'[[:punct:] ]+'S ! a! b; c}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> b</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> c</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "b" "c"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># add regex flags: e.g. fixed search</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'f/.'s ! hi.there}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> there</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hi"    "there"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
@@ -913,14 +851,14 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># c: default is ' '</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{c ? 1:3}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 2 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1 2 3"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># C: default is ', | and '</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{C ? 1:3}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1, 2 and 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1, 2 and 3"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{', | or 'c ? 1:4}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1, 2, 3 or 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1, 2, 3 or 4"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Extraction</span></span></span>
@@ -934,15 +872,12 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"This years is... 2020"</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{x ? x}"</span><span class="op">)</span> <span class="co"># similar to smagick("{extract.first ? x}")</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> This</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This"</span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{X ? x}"</span><span class="op">)</span> <span class="co"># similar to smagick("{extract ? x}")</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> This</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> years</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> is</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2020</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This"  "years" "is"    "2020" </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'\\d+'x ? x}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2020</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2020"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># STRING FORMATTING ####</span></span></span>
@@ -953,29 +888,29 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># upper case the first letter</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{upper.first ! julia mills}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Julia mills</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Julia mills"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># title case</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{title ! julia mills}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Julia Mills</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Julia Mills"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># upper all letters</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{upper ! julia mills}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> JULIA MILLS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "JULIA MILLS"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># lower case</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{lower ! JULIA MILLS}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> julia mills</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "julia mills"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># q, Q, bq: single, double, back quote</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{S, q, C ! Julia, David, Wilkins}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 'Julia', 'David' and 'Wilkins'</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "'Julia', 'David' and 'Wilkins'"</span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{S, Q, C ! Julia, David, Wilkins}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "Julia", "David" and "Wilkins"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "\"Julia\", \"David\" and \"Wilkins\""</span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{S, bq, C ! Julia, David, Wilkins}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> `Julia`, `David` and `Wilkins`</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "`Julia`, `David` and `Wilkins`"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># format, Format: formats the string to fit the same length</span></span></span>
@@ -986,19 +921,15 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="va">score</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">2050</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">nm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wilkins"</span>, <span class="st">"David"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Monopoly scores:\n{'\n'c ! - {format ? nm}: {Format ? score} US$}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Monopoly scores:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> - Wilkins:   -10 US$</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> - David  : 2,050 US$</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Monopoly scores:\n- Wilkins:   -10 US$\n- David  : 2,050 US$"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># OK that example may have been a bit too complex,</span></span></span>
 <span class="r-in"><span><span class="co"># let's make it simple:</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Scores: {format ? score}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Scores: -10  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Scores: 2,050</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Scores: -10  " "Scores: 2,050"</span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Names: {Format ? nm}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Names: Wilkins</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Names:   David</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Names: Wilkins" "Names:   David"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># ws: white space normalization</span></span></span>
@@ -1010,32 +941,32 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co"># - isolated: remove isolated characters</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{ws ! The   white  spaces are now clean.  }"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> The white spaces are now clean.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The white spaces are now clean."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{ws.punct ! I, really -- truly; love punctuation!!!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> I really truly love punctuation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "I really truly love punctuation"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{ws.digit ! 1, 2, 12, a microphone check!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> , , , a microphone check!</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] ", , , a microphone check!"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{ws.i ! 1, 2, 12, a microphone check!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1, 2, 12, microphone check!</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1, 2, 12, microphone check!"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{ws.d.i ! 1, 2, 12, a microphone check!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> microphone check!</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "microphone check!"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{ws.p.d.i ! 1, 2, 12, a microphone check!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> microphone check</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "microphone check"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># %: applies sprintf formatting</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span> <span class="co"># add the formatting as a regular argument</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"pi = {'.2f'% ? pi}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> pi = 3.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pi = 3.14"</span>
 <span class="r-in"><span><span class="co"># or right after the %</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"pi = {%.2f ? pi}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> pi = 3.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pi = 3.14"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># paste: appends text on each element</span></span></span>
@@ -1044,19 +975,17 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># adding '|' on both sides</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'|'paste.both, ' + 'c ! x{1:4}}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> |x1| + |x2| + |x3| + |x4|</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "|x1| + |x2| + |x3| + |x4|"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Enumerations</span></span></span>
-<span class="r-in"><span><span class="va">acad</span> <span class="op">=</span> <span class="fu">smagick</span><span class="op">(</span><span class="st">"/you like admin, you enjoy working on weekends, you really love emails"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">acad</span> <span class="op">=</span> <span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"you like admin, you enjoy working on weekends, you really love emails"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Main reasons to pursue an academic career:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  i) you like admin, ii) you enjoy working on weekends and iii) you really love emails.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Main reasons to pursue an academic career:\n i) you like admin, ii) you enjoy working on weekends and iii) you really love emails."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># You can also use the enum command</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Main reasons to pursue an academic career:\n {enum.i ? acad}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Main reasons to pursue an academic career:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  i) you like admin, ii) you enjoy working on weekends, and iii) you really love emails.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Main reasons to pursue an academic career:\n i) you like admin, ii) you enjoy working on weekends, and iii) you really love emails."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># stopwords: removes basic English stopwords</span></span></span>
@@ -1064,7 +993,7 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#  http://snowball.tartarus.org/algorithms/english/stop.txt</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{stop, ws ! It is a tale told by an idiot, full of sound and fury, signifying nothing.}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> tale told idiot, full sound fury, signifying nothing.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "tale told idiot, full sound fury, signifying nothing."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># k: keeps the first n characters</span></span></span>
@@ -1072,18 +1001,15 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#         'n|s'k: same + adds 's' at the end of shortened strings</span></span></span>
 <span class="r-in"><span><span class="co">#         'n||s'k: same but 's' counts in the n characters kept</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">words</span> <span class="op">=</span> <span class="fu">smagick</span><span class="op">(</span><span class="st">"/short, constitutional"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">words</span> <span class="op">=</span> <span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"short, constitutional"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{5k ? words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> short</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> const</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "short" "const"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'5|..'k ? words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> short</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> const..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "short"   "const.."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'5||..'k ? words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> short</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> con..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "short" "con.."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># K: keeps the first n elements</span></span></span>
@@ -1093,18 +1019,18 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Special values :rest: and :REST:, give the number of items dropped</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">bx</span> <span class="op">=</span> <span class="fu">smagick</span><span class="op">(</span><span class="st">"/Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">bx</span> <span class="op">=</span> <span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {3K, ', 'C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {'3|etc..'K, ', 'C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux, etc...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux, etc..."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {'3||etc..'K, ', 'C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bordeaux wines I like: Pessac Leognan, Saint Emilion, etc...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, etc..."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {'3|and at least :REST: others'K, ', 'C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux, and at least two others.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux, and at least two others."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Ko, KO: special operator which keeps the first n elements and adds "others"</span></span></span>
@@ -1112,7 +1038,7 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co"># KO gives the rest in letters</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {4KO, C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux and two others.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux and two others."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># r, R: string replacement </span></span></span>
@@ -1120,40 +1046,40 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#         's1 =&gt; s2'R replaces s1 into s2</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'e'r, ws ! The letter e is deleted}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Th lttr is dltd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Th lttr is dltd"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># adding a perl look-behind</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'(?&lt;! )e'r !The letter e is deleted}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Th lttr e is dltd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Th lttr e is dltd"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'e =&gt; a'r !The letter e becomes a}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tha lattar a bacomas a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Tha lattar a bacomas a"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'([[:alpha:]]{3})[[:alpha:]]+ =&gt; \\1.'r ! Trimming the words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tri. the wor.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Tri. the wor."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternative way with simple operations: split, shorten, collapse</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{s, '3|.'k, c ! Trimming the words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tri. the wor.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Tri. the wor."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># times, each</span></span></span>
 <span class="r-in"><span><span class="co"># They accept the option c to collapse with the empty string</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"N{10 times.c ! o}!"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Noooooooooo!</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Noooooooooo!"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{3 times.c ? 1:3}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 123123123</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "123123123"</span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{3 each.c ? 1:3}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 111222333</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "111222333"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># erase: replaces the items by the empty string</span></span></span>
 <span class="r-in"><span><span class="co"># -&gt; useful in conditions</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{erase ! I am going to be annihilated}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] ""</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># ELEMENT MANIPULATION ####</span></span></span>
@@ -1166,18 +1092,16 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Destroy"</span>, <span class="st">"All"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{'A'rm ? x}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Destroy</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Destroy"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{rm.all ? x}"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu">smagick</span><span class="op">(</span><span class="st">"/1, 12, 123, 1234, 123456, 1234567"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"1, 12, 123, 1234, 123456, 1234567"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># we delete elements whose number of characters is lower or equal to 3</span></span></span>
 <span class="r-in"><span><span class="co"># =&gt; see later section CONDITIONS</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"{if(.nchar &gt; 3 ; nuke) ? x}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 123</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1"   "12"  "123"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># PLURALIZATION ####</span></span></span>
@@ -1191,12 +1115,12 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Eschyle"</span>, <span class="st">"Sophocle"</span>, <span class="st">"Euripide"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">37</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"The author{$s, enum, have ? x} written {#N ? n} play{#s}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> The authors Eschyle, Sophocle and Euripide have written thirty-seven plays.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The authors Eschyle, Sophocle and Euripide have written thirty-seven plays."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"Laurent Berge"</span></span></span>
 <span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">0</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"The author{$s, enum, have ? x} written {#N ? n} play{#s}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> The author Laurent Berge has written zero play.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The author Laurent Berge has written zero play."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># How does it work?</span></span></span>
 <span class="r-in"><span><span class="co"># First is {$s, enum, have ? x}.</span></span></span>
@@ -1216,7 +1140,7 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co"># Another similar example illustrating that we need not express the object several times:</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Eschyle"</span>, <span class="st">"Sophocle"</span>, <span class="st">"Euripide"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"The {Len ? x} classic author{$s, are, enum}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> The three classic authors are Eschyle, Sophocle and Euripide.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The three classic authors are Eschyle, Sophocle and Euripide."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
@@ -1230,9 +1154,8 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="va">dollar</span> <span class="op">=</span> <span class="fl">6</span></span></span>
 <span class="r-in"><span><span class="va">reason</span> <span class="op">=</span> <span class="st">"glory"</span></span></span>
 <span class="r-in"><span><span class="fu">smagick</span><span class="op">(</span><span class="st">"Why do you develop packages? For {`dollar`times.c ! $}?"</span>,</span></span>
-<span class="r-in"><span>    <span class="st">"For money? No... for {upper,''s, c ? reason}!"</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Why do you develop packages? For $$$$$$?</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> For money? No... for G L O R Y!</span>
+<span class="r-in"><span>    <span class="st">"For money? No... for {upper,''s, c ? reason}!"</span>, .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Why do you develop packages? For $$$$$$?\nFor money? No... for G L O R Y!"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
@@ -1250,8 +1173,7 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required namespace: data.table</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>package 'data.table' was built under R version 4.2.3</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> data.table 1.14.8 using 8 threads (see ?getDTthreads).  Latest news: r-datatable.com</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(dt_name, parent.frame(i + 1)):</span> object 'dt_iris' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in sma("{first, 10 fill.c ? Species}: {%.1f ? mean(Petal.Length)}"):</span> could not find function "sma"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>   </span></span>

@@ -91,7 +91,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-06-19</h4>
+            <h4 data-toc-skip class="date">2023-06-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagick/blob/HEAD/vignettes/string_tools.rmd" class="external-link"><code>vignettes/string_tools.rmd</code></a></small>
       <div class="hidden name"><code>string_tools.rmd</code></div>
@@ -155,13 +155,19 @@ added. If your regex should contain a slash, see the <a href="#flag_escaping">se
 <li>
 <a href="#flag_word">word</a>: always available</li>
 <li>
+<a href="#flag_magic">magic</a>: always available</li>
+<li>
 <a href="#flag_total">total</a>: only available in functions
+performing a replacement</li>
+<li>
+<a href="#flag_single">single</a>: only available in functions
 performing a replacement</li>
 </ul>
 <div class="section level4">
 <h4 id="flag_ignore">ignore<a class="anchor" aria-label="anchor" href="#flag_ignore"></a>
 </h4>
-<p>The flag “ignore” leads to a case-insensitive search.</p>
+<p>The flag <code>"ignore"</code> leads to a case-insensitive
+search.</p>
 <p>Ex: let’s extract words starting with the last letters of the
 alphabet.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -177,9 +183,7 @@ alphabet.</p>
 <span><span class="co"># upper cased letters</span></span>
 <span><span class="co"># ex: getting words starting with the letter 'r' to 'z'</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'i/\\b[r-z]\\w+'extract, c, 60 width ? unhappy}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rumble thy Spit spout rain rain wind thunder tax you you</span></span>
-<span><span class="co">#&gt; with unkindness you you You subscription Then Your stand</span></span>
-<span><span class="co">#&gt; your slave weak</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Rumble thy Spit spout rain rain wind thunder tax you you\nwith unkindness you you You subscription Then Your stand\nyour slave weak"</span></span></code></pre></div>
 <p><em>Technically</em>, the <a href="https://www.pcre.org/" class="external-link">perl</a>
 expression <code>"(?i)"</code> is added at the beginning of the
 pattern.</p>
@@ -187,8 +191,8 @@ pattern.</p>
 <div class="section level4">
 <h4 id="flag_fixed">fixed<a class="anchor" aria-label="anchor" href="#flag_fixed"></a>
 </h4>
-<p>The flag “fixed” removes any special regular expression meaning from
-the pattern, and treats it as verbatim.</p>
+<p>The flag <code>"fixed"</code> removes any special regular expression
+meaning from the pattern, and treats it as verbatim.</p>
 <p>Ex: let’s fix the equation by changing the operators.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"50 + 5 * 5 = 40"</span></span>
@@ -210,24 +214,24 @@ the pattern, and treats it as verbatim.</p>
 <span><span class="co">#&gt; PCRE pattern compilation error</span></span>
 <span><span class="co">#&gt;  'quantifier does not follow a repeatable item'</span></span>
 <span><span class="co">#&gt;  at '+'</span></span></code></pre></div>
-<p><em>Technically</em>, if “fixed” is the only flag, then the functions
-<code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::grepl</a></code> or <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::gsub</a></code> are run with the
-argument <code>fixed = TRUE</code>. If there are also the flags “ignore”
-or “word”, the pattern is nested into the perl boundaries
-<code>\\Q</code> and <code>\\E</code> which strip any special meaning
-from the pattern.</p>
+<p><em>Technically</em>, if <code>"fixed"</code> is the only flag, then
+the functions <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::grepl</a></code> or <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::gsub</a></code> are
+run with the argument <code>fixed = TRUE</code>. If there are also the
+flags <code>"ignore"</code> or <code>"word"</code>, the pattern is
+nested into the perl boundaries <code>\\Q</code> and <code>\\E</code>
+which strip any special meaning from the pattern.</p>
 </div>
 <div class="section level4">
 <h4 id="flag_word">word<a class="anchor" aria-label="anchor" href="#flag_word"></a>
 </h4>
-<p>The flag “word” :</p>
+<p>The flag <code>"word"</code>:</p>
 <ul>
 <li>adds word boundaries to the pattern</li>
 <li>accepts comma-separated enumerations of words which are concatenated
 with a logical ‘or’</li>
 </ul>
 <p>The logic of accepting comma-separated enumerations is to increase
-readability. For example, with the flag “word”,
+readability. For example, with the flag <code>"word"</code>,
 <code>"is, are, were"</code> is equivalent to
 <code>"\\b(is|are|were)\\b"</code>.</p>
 <p>Ex: we hide a few words from Alfred de Vigny’s poem.</p>
@@ -242,28 +246,70 @@ readability. For example, with the flag “word”,
 <span></span>
 <span><span class="co"># we hide a few words from this poem</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'wi/et, le, il, au, des?, ce =&gt; _'r ? le_mont_des_oliviers}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; S'_ est vrai qu'_ Jardin sacré _ Écritures,</span></span>
-<span><span class="co">#&gt; _ Fils _ l'homme ai dit _ qu'on voit rapporté ;</span></span>
-<span><span class="co">#&gt; Muet, aveugle _ sourd _ cri _ créatures,</span></span>
-<span><span class="co">#&gt; Si _ Ciel nous laissa comme un monde avorté,</span></span>
-<span><span class="co">#&gt; Alors _ Juste opposera _ dédain à l'absence</span></span>
-<span><span class="co">#&gt; _ ne répondra plus que par un froid silence</span></span>
-<span><span class="co">#&gt; _ silence éternel _ la Divinité.</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "S'_ est vrai qu'_ Jardin sacré _ Écritures,\n_ Fils _ l'homme ai dit _ qu'on voit rapporté ;\nMuet, aveugle _ sourd _ cri _ créatures,\nSi _ Ciel nous laissa comme un monde avorté,\nAlors _ Juste opposera _ dédain à l'absence\n_ ne répondra plus que par un froid silence\n_ silence éternel _ la Divinité."</span></span></code></pre></div>
 <p><em>Technically</em>, first the pattern is split with respect to
 <code>",[ \t\n]+"</code>, then all elements are collapsed with
-<code>"|"</code>. If the flag “fixed” was also present, each element is
-first wrapped into <code>"\\Q"</code> and <code>"\\E"</code>. Finally,
-we add parentheses (to enable capture) and word boundaries
-(<code>"\\b"</code>) on both sides.</p>
+<code>"|"</code>. If the flag <code>"fixed"</code> was also present,
+each element is first wrapped into <code>"\\Q"</code> and
+<code>"\\E"</code>. Finally, we add parentheses (to enable capture) and
+word boundaries (<code>"\\b"</code>) on both sides.</p>
+</div>
+<div class="section level4">
+<h4 id="flag_magic">magic<a class="anchor" aria-label="anchor" href="#flag_magic"></a>
+</h4>
+<p>The flag <code>"magic"</code> allows the user to interpolate
+variables inside the regular expression before the regex is
+evaluated.</p>
+<p>Ex: interpolating variables inside regular expressions.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">vowels</span> <span class="op">=</span><span class="st">"aeiouy"</span></span>
+<span><span class="co"># let's keep only the vowels</span></span>
+<span><span class="co"># we want the pattern: "[^aeiouy]"</span></span>
+<span><span class="va">lmb</span> <span class="op">=</span> <span class="st">"'Tis safer to be that which we destroy</span></span>
+<span><span class="st">Than by destruction dwell in doubtful joy."</span></span>
+<span><span class="fu"><a href="../reference/str_clean.html">str_clean</a></span><span class="op">(</span><span class="va">lmb</span>, <span class="st">"magic/[^{vowels}] =&gt; _"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "__i___a_e___o__e___a____i____e__e___oy___a___y__e___u__io____e___i___ou___u___oy_"</span></span>
+<span></span>
+<span><span class="co">#</span></span>
+<span><span class="co"># Illustration of `smagick` operations before regex application</span></span>
+<span></span>
+<span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
+<span><span class="co"># Which of these models contain a digit?</span></span>
+<span><span class="va">models</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Toyota"</span>, <span class="st">"Hornet"</span>, <span class="st">"Porsche"</span><span class="op">)</span></span>
+<span><span class="co"># we want the pattern "(Toyota|Hornet|"Porsche).+\\d"</span></span>
+<span><span class="co"># we collapse the models with a pipe using '|'c</span></span>
+<span><span class="fu"><a href="../reference/str_get.html">str_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"m/({'|'c?models}).+\\d"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Hornet 4 Drive" "Porsche 914-2"</span></span>
+<span></span>
+<span><span class="co"># alternative: same as above but we first comma-split the vector</span></span>
+<span><span class="va">models_comma</span> <span class="op">=</span> <span class="st">"Toyota, Hornet, Porsche"</span></span>
+<span><span class="fu"><a href="../reference/str_get.html">str_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"m/({S, '|'c?models_comma}).+\\d"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Hornet 4 Drive" "Porsche 914-2"</span></span>
+<span></span>
+<span><span class="co">#</span></span>
+<span><span class="co"># Interpolation does not apply to regex-specific curly brackets</span></span>
+<span></span>
+<span><span class="co"># We delete only successions of 2+ vowels</span></span>
+<span><span class="co"># {2,} has a rexex meaning and is not interpolated:</span></span>
+<span><span class="fu"><a href="../reference/str_clean.html">str_clean</a></span><span class="op">(</span><span class="va">lmb</span>, <span class="st">"magic/[{vowels}]{2,} =&gt; _"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "'Tis safer to be that which we destr_\nThan by destruct_n dwell in d_btful j_."</span></span></code></pre></div>
+<p><em>Technically</em>, the algorithm does not interpolate curly
+brackets having a regular expression meaning. The expression of the form
+<code>"{a, b}"</code> with <code>"a"</code> and <code>"b"</code> digits
+means a repetition of the previous symbol of at least <code>"a"</code>
+times and at most <code>"b"</code> times. The variables are fetched in
+the calling environment. To obtain fetch them from a different location,
+you can use the argument <code>envir</code>.</p>
 </div>
 <div class="section level4">
 <h4 id="flag_total">total<a class="anchor" aria-label="anchor" href="#flag_total"></a>
 </h4>
-<p>The flag “total” is only available to functions performing a
-replacement. In that case, if a pattern is detected, <em>the full
-character string</em> is replaced (instead of just the pattern).</p>
+<p>The flag <code>"total"</code> is only available to functions
+performing a replacement. In that case, if a pattern is detected,
+<em>the full character string</em> is replaced (instead of just the
+pattern).</p>
 <p>Ex: let’s replace a few car models.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars_small</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cars_small</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Mazda RX4"         "Mazda RX4 Wag"     "Datsun 710"       </span></span>
@@ -272,14 +318,15 @@ character string</em> is replaced (instead of just the pattern).</p>
 <span><span class="fu"><a href="../reference/str_clean.html">str_clean</a></span><span class="op">(</span><span class="va">cars_small</span>, <span class="st">"ti/mazda =&gt; Mazda: sold out!"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Mazda: sold out!"  "Mazda: sold out!"  "Datsun 710"       </span></span>
 <span><span class="co">#&gt; [4] "Hornet 4 Drive"    "Hornet Sportabout" "Valiant"</span></span></code></pre></div>
-<p>On top of this, the “total” flag allows to perform logical operations
-across several regex patterns. You have more information on this in the
-<a href="#detect_logic">dedicated section</a>. In a nutshell, you can
-write <code>"pat1 &amp; !pat2 | pat3"</code> with <code>"patx"</code>
-regular expresion patterns. This means: contains <code>pat1</code> and
-does not contain <code>pat2</code>, or contains <code>pat3</code>.</p>
+<p>On top of this, the <code>"total"</code> flag allows to perform
+logical operations across several regex patterns. You have more
+information on this in the <a href="#detect_logic">dedicated
+section</a>. In a nutshell, you can write
+<code>"pat1 &amp; !pat2 | pat3"</code> with <code>"patx"</code> regular
+expresion patterns. This means: contains <code>pat1</code> and does not
+contain <code>pat2</code>, or contains <code>pat3</code>.</p>
 <p>Ex: detect car brands with a digit and no ‘e’.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars_small</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cars_small</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Mazda RX4"         "Mazda RX4 Wag"     "Datsun 710"       </span></span>
@@ -293,6 +340,22 @@ does not contain <code>pat2</code>, or contains <code>pat3</code>.</p>
 the pattern, <a href="#detect_funs"><code>str_is</code></a> is used to
 detect which element contains the pattern. Each element with the pattern
 is then substituted with the replacement.</p>
+</div>
+<div class="section level4">
+<h4 id="flag_single">single<a class="anchor" aria-label="anchor" href="#flag_single"></a>
+</h4>
+<p>The flag <code>"single"</code> is only available to functions
+performing a replacement. It allows only a single substitution to take
+place. Said differently, only the first replacement is performed.</p>
+<p>Ex: single substitutions.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">encounter</span> <span class="op">=</span> <span class="fu"><a href="../reference/str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"Hi Cyclops., Hi you. What's your name?, Odysseus is my name."</span><span class="op">)</span></span>
+<span><span class="co"># we only remove the first word</span></span>
+<span><span class="fu"><a href="../reference/str_clean.html">str_clean</a></span><span class="op">(</span><span class="va">encounter</span>, <span class="st">"single/\\w+ =&gt; ..."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "... Cyclops."               "... you. What's your name?"</span></span>
+<span><span class="co">#&gt; [3] "... is my name."</span></span></code></pre></div>
+<p><em>Technically</em>, the function <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::sub</a></code> is used
+instead of <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::gsub</a></code>.</p>
 </div>
 </div>
 <div class="section level3">
@@ -310,7 +373,7 @@ empty flag and will be discared.</li>
 <li>escape the first <code>"/"</code> with a double backslash</li>
 </ul>
 <p>Ex: let’s invert the numerator and denominator of a division.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">eq</span> <span class="op">=</span> <span class="st">"5/x = 3/2"</span></span>
 <span><span class="co"># a) escaping with empty flags</span></span>
 <span><span class="fu"><a href="../reference/str_clean.html">str_clean</a></span><span class="op">(</span><span class="va">eq</span>, <span class="st">"/(\\d)/(\\w) =&gt; \\2/\\1"</span><span class="op">)</span></span>
@@ -446,18 +509,10 @@ record, <code>str_get</code> uses <code>str_is</code> internally so
 these examples are equivalent with <code>str_is</code> or
 <code>str_which</code>.</p>
 <p>Ex.1: series of examples using the <em>recommended syntax</em>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"All cars from mtcars:\n{C, 60 width ? cars}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; All cars from mtcars:</span></span>
-<span><span class="co">#&gt; Mazda RX4, Mazda RX4 Wag, Datsun 710, Hornet 4 Drive, Hornet</span></span>
-<span><span class="co">#&gt; Sportabout, Valiant, Duster 360, Merc 240D, Merc 230, Merc</span></span>
-<span><span class="co">#&gt; 280, Merc 280C, Merc 450SE, Merc 450SL, Merc 450SLC,</span></span>
-<span><span class="co">#&gt; Cadillac Fleetwood, Lincoln Continental, Chrysler Imperial,</span></span>
-<span><span class="co">#&gt; Fiat 128, Honda Civic, Toyota Corolla, Toyota Corona, Dodge</span></span>
-<span><span class="co">#&gt; Challenger, AMC Javelin, Camaro Z28, Pontiac Firebird, Fiat</span></span>
-<span><span class="co">#&gt; X1-9, Porsche 914-2, Lotus Europa, Ford Pantera L, Ferrari</span></span>
-<span><span class="co">#&gt; Dino, Maserati Bora and Volvo 142E</span></span>
+<span><span class="co">#&gt; [1] "All cars from mtcars:\nMazda RX4, Mazda RX4 Wag, Datsun 710, Hornet 4 Drive, Hornet\nSportabout, Valiant, Duster 360, Merc 240D, Merc 230, Merc\n280, Merc 280C, Merc 450SE, Merc 450SL, Merc 450SLC,\nCadillac Fleetwood, Lincoln Continental, Chrysler Imperial,\nFiat 128, Honda Civic, Toyota Corolla, Toyota Corona, Dodge\nChallenger, AMC Javelin, Camaro Z28, Pontiac Firebird, Fiat\nX1-9, Porsche 914-2, Lotus Europa, Ford Pantera L, Ferrari\nDino, Maserati Bora and Volvo 142E"</span></span>
 <span></span>
 <span><span class="co"># cars with an 'a', an 'e', an 'i', and an 'o', all in lower case</span></span>
 <span><span class="fu"><a href="../reference/str_get.html">str_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"a &amp; e &amp; i &amp; o"</span><span class="op">)</span></span>
@@ -494,7 +549,7 @@ them with a logical OR, you need to use the argument
 <code>or = TRUE</code>. You can also pass the flags as regular function
 arguments. They then apply to all patterns.</p>
 <p>Ex.2: replication of Ex.1 using an alternative syntax.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># str_get(cars, "a &amp; e &amp; i &amp; o")</span></span>
 <span><span class="co"># cars with an 'a', an 'e', an 'i', and an 'o', all in lower case</span></span>
 <span><span class="fu"><a href="../reference/str_get.html">str_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"a"</span>, <span class="st">"e"</span>, <span class="st">"i"</span>, <span class="st">"o"</span><span class="op">)</span></span>
@@ -542,7 +597,7 @@ you obtain the vector
 <p>Using <code>seq.unik = TRUE</code> is like <code>seq</code> but
 applies the function <code><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique()</a></code> at the end.</p>
 <p>Ex: sequentially combining results.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># cars without digits, then cars with 2 'a's or 2 'e's and a digit</span></span>
 <span><span class="fu"><a href="../reference/str_get.html">str_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"!\\d"</span>, <span class="st">"i/a.+a | e.+e &amp; \\d"</span>, seq <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "Hornet Sportabout"   "Valiant"             "Cadillac Fleetwood" </span></span>
@@ -574,7 +629,7 @@ values. Note that <code>str_get</code> is the only
 <code>stringmagick</code> function to have this ability.</p>
 <p>Caching is always enabled, you don’t need to do anything.</p>
 <p>Ex: caching of the data.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Since we used `car_first` in the previous example, we don't need to provide</span></span>
 <span><span class="co"># it explicitly now</span></span>
 <span><span class="co"># =&gt; brands containing 'M' and ending with 'a' or 'i'; brands containing 'M'</span></span>
@@ -597,7 +652,7 @@ operations</a>, allowing for a compact and readable way to chain basic
 operations on character strings.</p>
 <p>Below are a few motivating examples.</p>
 <p>Ex.1: Parsing data.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># parsing an input: extracting the numbers</span></span>
 <span><span class="va">input</span> <span class="op">=</span> <span class="st">"8.5in, 5.5, .5 cm"</span></span>
 <span><span class="fu"><a href="../reference/str_ops.html">str_ops</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"','s, tws, '^\\. =&gt; 0.'r, '^\\D+|\\D+$'r, num"</span><span class="op">)</span></span>
@@ -617,7 +672,7 @@ operations on character strings.</p>
 <span><span class="co"># '^[ \\d.]+'r: removes the ' ', digit and '.' at the beginning of the string  |</span></span>
 <span><span class="co"># tws: trimming the whitespaces                                                |</span></span></code></pre></div>
 <p>Ex.2: extracing information from text.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Now using the car data</span></span>
 <span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
 <span></span>
@@ -697,7 +752,7 @@ ASCII and lowers the case.</p>
 <div class="section level3">
 <h3 id="clean_example">Example of text cleaning<a class="anchor" aria-label="anchor" href="#clean_example"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">monologue</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"For who would bear the whips and scorns of time"</span>,</span>
 <span>              <span class="st">"Th' oppressor's wrong, the proud man's contumely,"</span>,</span>
 <span>              <span class="st">"The pangs of despis'd love, the law's delay,"</span>,</span>

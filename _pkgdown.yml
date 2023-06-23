@@ -15,10 +15,11 @@ articles:
     
 reference:
   - title: String interpolation and operations
-    desc: Tools for string interpolation. Functions starting with `.` don't have error-handling. `dsb` interpolates with `.[]`.
+    desc: Tools for string interpolation. 
     contents:
       - smagick
-      - matches("sma|dsb")
+      - matches("sma")
+      - setSmagick
   - title: Other string operations
     desc: Pattern detection, operations chaining, string cleaning and more
     contents:

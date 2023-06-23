@@ -80,7 +80,8 @@
 <span>  or <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seq <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seq.unik <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  pattern <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -173,8 +174,8 @@ If that feature were available in regular code, it would be too dangerous, likel
 Hence caching is disabled when used within code (i.e. inside a function or inside an
 automated script), and function calls without the main argument will lead to errors in such scripts.</p>
     </div>
-    <div id="generic-pattern-flags">
-    <h2>Generic pattern flags</h2>
+    <div id="generic-regular-expression-flags">
+    <h2>Generic regular expression flags</h2>
     
 
 
@@ -187,16 +188,21 @@ Here the flag "fixed" removes the regular expression meaning of "." which would 
 The no-flag verion <code>str_which(c("hello...", "world"), ".")</code> returns <code>1:2</code>.</p>
 <p>Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
 comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".</p>
-<p>The three flags always available are: "ignore", "fixed" and "word".</p><ul><li><p>"ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" at the beginning of the pattern.</p></li>
+<p>The four flags always available are: "ignore", "fixed", "word" and "magic".</p><ul><li><p>"ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)"
+at the beginning of the pattern.</p></li>
 <li><p>"fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "["
 (among others) lose their special meaning and are treated for what they are: simple characters.</p></li>
 <li><p>"word" adds word boundaries (<code>"\\b"</code> in regex language) to the pattern. Further, the comma (<code>","</code>)
 becomes a word separator. Technically, "word/one, two" is treated as "\b(one|two)\b". Example:
 <code>str_clean("Am I ambushed?", "wi/am")</code> leads to " I ambushed?" thanks to the flags "ignore" and "word".</p></li>
+<li><p>"magic" allows to interpolate variables inside the pattern before regex interpretation.
+For example if <code>letters = "aiou"</code> then <code>str_clean("My great goose!", "magic/[{letters}] =&gt; e")</code>
+leads to <code>"My greet geese!"</code></p></li>
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>A few basic operation: <code><a href="str_is.html">str_is()</a></code>, <code>str_get()</code>, <code><a href="str_clean.html">str_clean()</a></code>. Chain basic operations with <code><a href="str_ops.html">str_ops()</a></code>.
+Use <code><a href="str_vec.html">str_vec()</a></code> to create simple string vectors.
 String interpolation combined with operation chaining: <code><a href="smagick.html">smagick()</a></code>.</p></div>
     </div>
     <div id="author">
@@ -249,20 +255,20 @@ String interpolation combined with operation chaining: <code><a href="smagick.ht
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># you can combine the flags</span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="smagick.html">dsb</a></span><span class="op">(</span><span class="st">"/One, two, one... Two!, Microphone, check"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="smagick.html">smagick</a></span><span class="op">(</span><span class="st">"/One, two, one... Two!, Microphone, check"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># regular</span></span></span>
 <span class="r-in"><span><span class="fu">str_get</span><span class="op">(</span><span class="va">x</span>, <span class="st">"one"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "one... Two!" "Microphone" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/One, two, one... Two!, Microphone, check"</span>
 <span class="r-in"><span><span class="co"># ignore case</span></span></span>
 <span class="r-in"><span><span class="fu">str_get</span><span class="op">(</span><span class="va">x</span>, <span class="st">"i/one"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "One"         "one... Two!" "Microphone" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/One, two, one... Two!, Microphone, check"</span>
 <span class="r-in"><span><span class="co"># + word boundaries</span></span></span>
 <span class="r-in"><span><span class="fu">str_get</span><span class="op">(</span><span class="va">x</span>, <span class="st">"iw/one"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "One"         "one... Two!"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/One, two, one... Two!, Microphone, check"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># you can escape the meaning of ! with backslashes</span></span></span>
 <span class="r-in"><span><span class="fu">str_get</span><span class="op">(</span><span class="va">x</span>, <span class="st">"\\!"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "one... Two!"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/One, two, one... Two!, Microphone, check"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Caching</span></span></span>
@@ -280,8 +286,6 @@ String interpolation combined with operation chaining: <code><a href="smagick.ht
 <span class="r-in"><span>   <span class="co"># now you don't need to specify the data</span></span></span>
 <span class="r-in"><span>   <span class="fu">str_get</span><span class="op">(</span><span class="st">"i/^m &amp; 4"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> in str_get("i/^m &amp; 4"): </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> At least one element in `...` must be provided. PROBLEM: `...` is empty.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

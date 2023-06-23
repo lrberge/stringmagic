@@ -84,7 +84,9 @@ You can also apply all sorts of cleaning operations by summoning <code><a href="
 <span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  total <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  total <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  single <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -100,8 +102,10 @@ You can also apply all sorts of cleaning operations by summoning <code><a href="
 with the string 'replacement'. By default patterns are comma separated and the replacement comes
 after a ' =&gt; ' (see args <code>sep</code> and <code>pipe</code> to change this). By default the replacement is the empty string
 (so "pat1, pat2" <em>removes</em> the patterns).</p>
-<p>Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), and 'total'.
-The flag <code>total</code> leads to a <em>total replacement</em> of the string if the pattern is found. Use flags
+<p>Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex),
+'total', 'single' and 'magic'.
+The flag <code>total</code> leads to a <em>total replacement</em> of the string if the pattern is found.
+The flag 'magic' allows to interpolate variables within the pattern.  Use flags
 with comma separation ("word, total/pat") or use only their initials ("wt/pat").</p>
 <p>Starting with an '@' leads to operations in <code><a href="str_ops.html">str_ops()</a></code>. Ex: "@ascii, lower, ws" turns
 the string into ASCII, lowers the case and normalizes white spaces (see help of <code><a href="str_ops.html">str_ops()</a></code>).</p></dd>
@@ -152,7 +156,13 @@ Example: if <code>word = TRUE</code>, then pattern = "The, mountain" will select
 <dt>total</dt>
 <dd><p>Logical scalar, default is <code>FALSE</code>. If <code>TRUE</code>, then when a pattern is found
 in a string, the full string is replaced (instead of just the pattern). Note, <em>importantly</em>,
-that when <code>total = TRUE</code> you can use logical operators in the patterns.</p>
+that when <code>total = TRUE</code> you can use logical operators in the patterns.</p></dd>
+
+
+<dt>single</dt>
+<dd><p>Logical scalar, default is <code>FALSE</code>. Whether, in substitutions, to stop at
+the first match found. Ex: <code>str_clean("abc", "[[:alpha:]] =&gt; _", single = TRUE)</code> leads
+to <code>"_bc"</code>, while <code>str_clean("abc", "[[:alpha:]] =&gt; _")</code> leads to <code>"___"</code>.</p>
 <p>Example: <code>str_clean(x, "wi/ &amp; two, three &amp; !four =&gt; ", total = TRUE)</code></p></dd>
 
 </dl></div>
@@ -164,9 +174,46 @@ that when <code>total = TRUE</code> you can use logical operators in the pattern
 Note, however, that since you can apply arbitrary <code><a href="str_ops.html">str_ops()</a></code> operations, the length and type
 of the final vector may depend on those (if they are used).</p>
     </div>
+    <div id="regular-expression-flags-specific-to-replacement">
+    <h2>Regular expression flags specific to replacement</h2>
+    
+
+
+<p>This function benefits from two specific regex flags: "total" and "single".</p><ul><li><p>"total" replaces the <em>complete string</em> if the pattern is found (remember that the
+default behavior is to replace just the pattern).</p></li>
+<li><p>"single" performs a single substitution for each string element and stops there.
+Only the first match of each string is replaced. Technically we use <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::sub()</a></code>
+internally instead of <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::gsub()</a></code>.</p></li>
+</ul></div>
+    <div id="generic-regular-expression-flags">
+    <h2>Generic regular expression flags</h2>
+    
+
+
+<p>All <code>stringmagick</code> functions support generic flags in regular-expression patterns.
+The flags are useful to quickly give extra instructions, similarly to <em>usual</em>
+<a href="https://javascript.info/regexp-introduction" class="external-link">regular expression flags</a>.</p>
+<p>Here the syntax is "flag1, flag2/pattern". That is: flags are a comma separated list of flag-names
+separated from the pattern with a slash (<code>/</code>). Example: <code>str_which(c("hello...", "world"), "fixed/.")</code> returns <code>1</code>.
+Here the flag "fixed" removes the regular expression meaning of "." which would have otherwise meant <em>"any character"</em>.
+The no-flag verion <code>str_which(c("hello...", "world"), ".")</code> returns <code>1:2</code>.</p>
+<p>Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
+comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".</p>
+<p>The four flags always available are: "ignore", "fixed", "word" and "magic".</p><ul><li><p>"ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)"
+at the beginning of the pattern.</p></li>
+<li><p>"fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "["
+(among others) lose their special meaning and are treated for what they are: simple characters.</p></li>
+<li><p>"word" adds word boundaries (<code>"\\b"</code> in regex language) to the pattern. Further, the comma (<code>","</code>)
+becomes a word separator. Technically, "word/one, two" is treated as "\b(one|two)\b". Example:
+<code>str_clean("Am I ambushed?", "wi/am")</code> leads to " I ambushed?" thanks to the flags "ignore" and "word".</p></li>
+<li><p>"magic" allows to interpolate variables inside the pattern before regex interpretation.
+For example if <code>letters = "aiou"</code> then <code>str_clean("My great goose!", "magic/[{letters}] =&gt; e")</code>
+leads to <code>"My greet geese!"</code></p></li>
+</ul></div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>A few basic operation: <code><a href="str_is.html">str_is()</a></code>, <code><a href="str_get.html">str_get()</a></code>, <code>str_clean()</code>. Chain basic operations with <code><a href="str_ops.html">str_ops()</a></code>.
+Use <code><a href="str_vec.html">str_vec()</a></code> to create simple string vectors.
 String interpolation combined with operation chaining: <code><a href="smagick.html">smagick()</a></code>.</p></div>
     </div>
     <div id="author">

@@ -46,6 +46,12 @@ knitr::opts_chunk$set(
 library(stringmagick)
 ```
 
+Before moving on, we set the global option `.smagick.class` to `TRUE` such that 
+the character vectors produced by `smagick` are displayed nicely in this vignette.
+```{r}
+setSmagick(.smagick.class = TRUE)
+```
+
 # Motivating examples and advice for reading
 
 Here's a few things the algorithm can do (don't worry if it looks like gibberish when first
@@ -157,12 +163,13 @@ but when one space is present on both sides of the `!`, then the verbatim
 expression only begins after the space. This is illustrated below
 ```{r}
 # The decorative space in verbatim mode
+#                  v                      => adds a space before 'hi'
 smagick("{upper, Q! hi}", 
-        #          ^                      => adds a space before 'hi'
+        #         v v                     => no space added (ie decorative space)
         "{upper, Q ! hi}", 
-        #         ^ ^                     => no space added (ie decorative space)
+        #         v vv                    => adds a space before 'hi'
         "{upper, Q !  hi}", .sep = "\n")
-        #         ^ ^^                    => adds a space before 'hi'
+        
 ```
 
 ### Nesting
@@ -803,19 +810,19 @@ x = 5
 smagick("This paper was rejected {Ntimes ? x}...")
 ```
 
-### cfirst, clast: First/last characters
+### firstchar, lastchar: First/last characters
 
 To select the first/last characters of each element. 
 Negative numbers remove the first/last characters.
 ```{r}
-smagick("{19 cfirst, 9 clast ! This is a very long sentence}")
+smagick("{19 firstchar, 9 lastchar ! This is a very long sentence}")
 
-smagick("delete 3 = {-3 cfirst ! delete 3}")
+smagick("delete 3 = {-3 firstchar ! delete 3}")
 ```
 
 ### k, shorten, Shorten: Shortens character strings
 
-To keep only the first `n` characters (like `cfirst` but with more options). 
+To keep only the first `n` characters (like `firstchar` but with more options). 
 (Note that `k` stands for "keep" and exists for historical reasons.)
 Available options: `"include"`, `"dots"`. The argument can be of the form `'n'` or `'n|s'` 
 with `n` a number and `s` a string. `n` provides the number of characters to keep. 

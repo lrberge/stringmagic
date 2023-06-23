@@ -82,7 +82,8 @@ specific syntax, supports negation.</p>
 <span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  or <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  pattern <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">str_which</span><span class="op">(</span></span>
@@ -92,7 +93,8 @@ specific syntax, supports negation.</p>
 <span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  or <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  pattern <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -166,8 +168,8 @@ pattern. See the documentation of this argument.</p></dd>
     
 <ul><li><p><code>str_which()</code>: Returns the indexes of the values in which a pattern is detected</p></li>
 </ul></div>
-    <div id="generic-pattern-flags">
-    <h2>Generic pattern flags</h2>
+    <div id="generic-regular-expression-flags">
+    <h2>Generic regular expression flags</h2>
     
 
 
@@ -180,16 +182,21 @@ Here the flag "fixed" removes the regular expression meaning of "." which would 
 The no-flag verion <code>str_which(c("hello...", "world"), ".")</code> returns <code>1:2</code>.</p>
 <p>Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
 comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".</p>
-<p>The three flags always available are: "ignore", "fixed" and "word".</p><ul><li><p>"ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" at the beginning of the pattern.</p></li>
+<p>The four flags always available are: "ignore", "fixed", "word" and "magic".</p><ul><li><p>"ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)"
+at the beginning of the pattern.</p></li>
 <li><p>"fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "["
 (among others) lose their special meaning and are treated for what they are: simple characters.</p></li>
 <li><p>"word" adds word boundaries (<code>"\\b"</code> in regex language) to the pattern. Further, the comma (<code>","</code>)
 becomes a word separator. Technically, "word/one, two" is treated as "\b(one|two)\b". Example:
 <code>str_clean("Am I ambushed?", "wi/am")</code> leads to " I ambushed?" thanks to the flags "ignore" and "word".</p></li>
+<li><p>"magic" allows to interpolate variables inside the pattern before regex interpretation.
+For example if <code>letters = "aiou"</code> then <code>str_clean("My great goose!", "magic/[{letters}] =&gt; e")</code>
+leads to <code>"My greet geese!"</code></p></li>
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>A few basic operation: <code>str_is()</code>, <code><a href="str_get.html">str_get()</a></code>, <code><a href="str_clean.html">str_clean()</a></code>. Chain basic operations with <code><a href="str_ops.html">str_ops()</a></code>.
+Use <code><a href="str_vec.html">str_vec()</a></code> to create simple string vectors.
 String interpolation combined with operation chaining: <code><a href="smagick.html">smagick()</a></code>.</p></div>
     </div>
     <div id="author">
@@ -203,32 +210,32 @@ String interpolation combined with operation chaining: <code><a href="smagick.ht
 <span class="r-in"><span><span class="co"># NOTA: using `str_get` instead of `str_is` may lead to a faster understanding </span></span></span>
 <span class="r-in"><span><span class="co">#       of the examples </span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="smagick.html">dsb</a></span><span class="op">(</span><span class="st">"/one, two, one... two, microphone, check"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="smagick.html">smagick</a></span><span class="op">(</span><span class="st">"/one, two, one... two, microphone, check"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># default is regular expression search</span></span></span>
 <span class="r-in"><span><span class="co"># =&gt; 3 character items</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"^...$"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE  TRUE FALSE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># to trigger fixed search use the flag 'fixed'</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"fixed/..."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span><span class="co"># you can just use the first letter</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"f/..."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># to negate, use '!'</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"!f/..."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE  TRUE FALSE  TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
 <span class="r-in"><span><span class="co"># or directly in the pattern</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"f/!..."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE  TRUE FALSE  TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># you can combine several patterns with "&amp;" or "|"</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"one &amp; c"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE FALSE  TRUE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"one | c"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE  TRUE  TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># word: adds word boundaries</span></span></span>
@@ -236,28 +243,28 @@ String interpolation combined with operation chaining: <code><a href="smagick.ht
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># compare</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"one"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE  TRUE  TRUE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span><span class="co"># with</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/one"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE  TRUE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># words can be chained with commas (it is like an OR logical operation)</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/one, two"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE  TRUE  TRUE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span><span class="co"># compare with</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/one &amp; two"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span><span class="co"># remember that you can still negate</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/one &amp; !two"</span><span class="op">)</span><span class="co">#' </span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE FALSE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># you can combine the flags</span></span></span>
 <span class="r-in"><span><span class="co"># compare</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/ONE"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE FALSE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
 <span class="r-in"><span><span class="co"># with</span></span></span>
 <span class="r-in"><span><span class="fu">str_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"wi/ONE"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE  TRUE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># str_which</span></span></span>
@@ -266,10 +273,10 @@ String interpolation combined with operation chaining: <code><a href="smagick.ht
 <span class="r-in"><span><span class="co"># it works exactly the same way as str_is</span></span></span>
 <span class="r-in"><span><span class="co"># Which are the items containing an 'e' and an 'o'?</span></span></span>
 <span class="r-in"><span><span class="fu">str_which</span><span class="op">(</span><span class="va">x</span>, <span class="st">"e"</span>, <span class="st">"o"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 3 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-in"><span><span class="co"># equivalently</span></span></span>
 <span class="r-in"><span><span class="fu">str_which</span><span class="op">(</span><span class="va">x</span>, <span class="st">"e &amp; o"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 3 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

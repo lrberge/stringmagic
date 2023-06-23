@@ -66,7 +66,7 @@ contain a slash, see the [section on escaping](#flag_escaping).
 Ex: let's find lines containing `"dt["`:
 ```{r}
 code = c("DT = as.data.table(iris)", 
-         "DT[, sma('PL/SL = {Petal.Length / Sepal.Length}')]")
+         "DT[, .(pl_sl = smagick('PL/SL = {Petal.Length / Sepal.Length}')]")
 
 str_get(code, "if/dt[")
 ```
