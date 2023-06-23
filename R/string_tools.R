@@ -142,7 +142,7 @@ str_ops = function(x, op, pre_unik = NULL){
 #' @details
 #' The internal function used to find the patterns is [base::grepl()] with `perl = TRUE`.
 #' 
-#' @section Generic pattern flags:
+#' @section Generic regular expression flags:
 #' 
 #' All `stringmagick` functions support generic flags in regular-expression patterns. 
 #' The flags are useful to quickly give extra instructions, similarly to *usual* 
@@ -156,13 +156,21 @@ str_ops = function(x, op, pre_unik = NULL){
 #' Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
 #' comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".
 #' 
-#' The three flags always available are: "ignore", "fixed" and "word". 
-#' + "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" at the beginning of the pattern.
+#' The four flags always available are: "ignore", "fixed", "word" and "magic". 
+#' 
+#' + "ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)" 
+#' at the beginning of the pattern.
+#' 
 #' + "fixed" removes the regular expression interpretation, so that the characters ".", "$", "^", "[" 
 #' (among others) lose their special meaning and are treated for what they are: simple characters. 
+#' 
 #' + "word" adds word boundaries (`"\\b"` in regex language) to the pattern. Further, the comma (`","`) 
 #' becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example: 
 #' `str_clean("Am I ambushed?", "wi/am")` leads to " I ambushed?" thanks to the flags "ignore" and "word".
+#' 
+#' + "magic" allows to interpolate variables inside the pattern before regex interpretation. 
+#' For example if `letters = "aiou"` then `str_clean("My great goose!", "magic/[{letters}] => e")` 
+#' leads to `"My greet geese!"`
 #'
 #' @return
 #' It returns a logical vector of the same length as `x`.
@@ -847,8 +855,10 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' after a ' => ' (see args `sep` and `pipe` to change this). By default the replacement is the empty string 
 #' (so "pat1, pat2" *removes* the patterns).
 #' 
-#' Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), and 'total'. 
-#' The flag `total` leads to a *total replacement* of the string if the pattern is found. Use flags
+#' Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), 
+#' 'total', 'single' and 'magic'. 
+#' The flag `total` leads to a *total replacement* of the string if the pattern is found. 
+#' The flag 'magic' allows to interpolate variables within the pattern.  Use flags
 #' with comma separation ("word, total/pat") or use only their initials ("wt/pat").
 #' 
 #' Starting with an '@' leads to operations in [str_ops()]. Ex: "@ascii, lower, ws" turns
@@ -876,8 +886,8 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' @param total Logical scalar, default is `FALSE`. If `TRUE`, then when a pattern is found 
 #' in a string, the full string is replaced (instead of just the pattern). Note, *importantly*, 
 #' that when `total = TRUE` you can use logical operators in the patterns.
-#' @param first Logical scalar, default is `FALSE`. Whether, in substitutions, to stop at 
-#' the first match found. Ex: `str_clean("abc", "[[:alpha:]] => _", first = TRUE)` leads 
+#' @param single Logical scalar, default is `FALSE`. Whether, in substitutions, to stop at 
+#' the first match found. Ex: `str_clean("abc", "[[:alpha:]] => _", single = TRUE)` leads 
 #' to `"_bc"`, while `str_clean("abc", "[[:alpha:]] => _")` leads to `"___"`.
 #' 
 #' Example: `str_clean(x, "wi/ & two, three & !four => ", total = TRUE)`
@@ -886,6 +896,19 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' The main usage returns a character vector of the same length as the vector in input.
 #' Note, however, that since you can apply arbitrary [str_ops()] operations, the length and type
 #' of the final vector may depend on those (if they are used).
+#' 
+#' @inheritSection str_is Generic regular expression flags
+#' 
+#' @section Regular expression flags specific to replacement
+#' 
+#' This function benefits from two specific regex flags: "total" and "single".
+#' 
+#' + "total" replaces the *complete string* if the pattern is found (remember that the 
+#' default behavior is to replace just the pattern). 
+#' 
+#' + "single" performs a single substitution for each string element and stops there. 
+#' Only the first match of each string is replaced. Technically we use [base::sub()]
+#' internally instead of [base::gsub()].
 #' 
 #' @author 
 #' Laurent R. Berge

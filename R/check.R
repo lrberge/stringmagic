@@ -723,7 +723,7 @@ report_smagick_parsing_error = function(x, x_parsed, .delim, error = TRUE){
       msg = .sma("PROBLEM: the opening bracket ({bq?.delim[1]}) is not ", 
                  "matched with a closing bracket ({bq?.delim[2]}).",
                  "\nNOTE: to escape the meaning of the bracket, use a ",
-                 "double backslash: \\\\{bq?.delim[1]}.")
+                 "double backslash: \\\\{.delim[1]}.")
       suggest = "INFO: see smagick(.help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
       pblm = cpp_find_closing_problem(xi, .delim)
