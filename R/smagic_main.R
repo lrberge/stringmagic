@@ -467,7 +467,12 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
         di = dots[[i]]
         if(.is_root && length(di) == 1 && is.character(di)){
           if(!now_done && grepl(".now", di, fixed = TRUE)){
-            .data[[".now"]] = Sys.time()
+            if(grepl(".now(", di, fixed = TRUE)){
+              .data[[".now"]] = function(x) format(Sys.time(), x)
+            } else {
+              .data[[".now"]] = Sys.time()
+            }
+            
             now_done = TRUE
           }
           
@@ -503,7 +508,11 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
   
   if(.is_root){
     if(grepl(".now", x, fixed = TRUE)){
-      .data[[".now"]] = Sys.time()
+      if(grepl(".now(", x, fixed = TRUE)){
+        .data[[".now"]] = function(x) format(Sys.time(), x)
+      } else {
+        .data[[".now"]] = Sys.time()
+      }
     }
     
     if(grepl(".date", x, fixed = TRUE)){
