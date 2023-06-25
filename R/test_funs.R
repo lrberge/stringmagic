@@ -445,7 +445,7 @@ run_tests = function(chunk, from = 1, source = FALSE){
       index = which(line_fail >= line_start & line_fail <= line_end)
       my_file_full = file_names[index]
       my_file_short = gsub(".+/", "", my_file_full)
-      file_info = smagick("In file {Q?my_file_short}\n==> ")
+      file_info = smagic("In file {Q?my_file_short}\n==> ")
       
       line_in_file = line_fail - line_start[index]
       

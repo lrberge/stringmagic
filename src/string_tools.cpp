@@ -1,4 +1,4 @@
-#include "stringmagick.h"
+#include "stringmagic.h"
 #include <Rcpp.h>
 #include <string>
 #include <cstring>

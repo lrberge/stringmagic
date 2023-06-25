@@ -1,4 +1,4 @@
-#include "stringmagick.h"
+#include "stringmagic.h"
 
 
 

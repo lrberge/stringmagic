@@ -7,7 +7,7 @@
 
 chunk("plural")
 
-dsb = function(...) smagick(..., .delim = ".[ ]")
+dsb = function(...) smagic(..., .delim = ".[ ]")
 
 #
 # numbers ####
@@ -51,28 +51,28 @@ test(txt, "There are five directories.")
 
 # without 0 option
 n = 0
-txt = smagick("There {#is, n ? n} file{#s} and {#N} director{#y}.")
+txt = smagic("There {#is, n ? n} file{#s} and {#N} director{#y}.")
 test(txt, "There is 0 file and zero directory.")
 
 n = 1
-txt = smagick("There {#is, n ? n} file{#s} and {#N} director{#y}.")
+txt = smagic("There {#is, n ? n} file{#s} and {#N} director{#y}.")
 test(txt, "There is 1 file and one directory.")
 
 n = 5
-txt = smagick("There {#is, n ? n} file{#s} and {#N} director{#y}.")
+txt = smagic("There {#is, n ? n} file{#s} and {#N} director{#y}.")
 test(txt, "There are 5 files and five directories.")
 
 # with 0 option
 n = 0
-txt = smagick("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
+txt = smagic("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
 test(txt, "There are no files and zero directories.")
 
 n = 1
-txt = smagick("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
+txt = smagic("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
 test(txt, "There is 1 file and one directory.")
 
 n = 5
-txt = smagick("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
+txt = smagic("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
 test(txt, "There are 5 files and five directories.")
 
 #
@@ -80,15 +80,15 @@ test(txt, "There are 5 files and five directories.")
 #
 
 x = character(0)
-txt = smagick("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
+txt = smagic("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
 test(txt, "The value `a` does not exist.")
 
 x = "append"
-txt = smagick("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
+txt = smagic("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
 test(txt, "The value `a` does not exist. Maybe you meant: `append`?")
 
 x = c("append", "array")
-txt = smagick("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
+txt = smagic("The value `a` does not exist.{$(;; Maybe you meant: {$enum.or.bq}?) ? x}")
 test(txt, "The value `a` does not exist. Maybe you meant: `append` or `array`?")
 
 
@@ -131,7 +131,7 @@ test(txt, "One observation is missing. It concerns the variable `x`.")
 
 # combining the two
 x = 1:5
-txt = smagick("{$n.u ? x} observation{$s}. He arrived {#nth.letter ? 3} and scored {#ntimes.le ? 1}.")
+txt = smagic("{$n.u ? x} observation{$s}. He arrived {#nth.letter ? 3} and scored {#ntimes.le ? 1}.")
 test(txt, "Five observations. He arrived third and scored once.")
 
 #
@@ -139,14 +139,14 @@ test(txt, "Five observations. He arrived third and scored once.")
 #
 
 pple = c("Francis", "Henry")
-txt = smagick("{$enum, is, (a;) ? pple} tall guy{$s}.",
+txt = smagic("{$enum, is, (a;) ? pple} tall guy{$s}.",
           "\n{$(He;They), like} to eat donuts.",
           "\nWhen happy, at the pub {$(he;they), goes}!",
           "\n{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?")
 test(txt, "Francis and Henry are tall guys.\nThey like to eat donuts.\nWhen happy, at the pub they go!\nDon't they have wit, they who try?")
 
 pple = "Francis"
-txt = smagick("{$enum, is, (a;) ? pple} tall guy{$s}.",
+txt = smagic("{$enum, is, (a;) ? pple} tall guy{$s}.",
           "\n{$(He;They), like} to eat donuts.",
           "\nWhen happy, at the pub {$(he;they), goes}!",
           "\n{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?")

@@ -13,15 +13,15 @@
 #' it will be converted to a character vector.
 #' @param op Character **scalar**. Character scalar containing the comma separated values 
 #' of operations to perform to the vector. The 50+ operations are detailed in the help
-#' page of [smagick()].
+#' page of [smagic()].
 #' @param pre_unik Logical scalar, default is `NULL`. Whether to first unique the vector 
 #' before applying the possibly costly string operations, and merging back the result. 
 #' For very large vectors with repeated values the time gained can be substantial. By 
 #' default, this is `TRUE` for vector of length 1M or more.
 #' 
 #' @details 
-#' This function is a simple wrapper around smagick. Formally, `str_ops(x, "op1, op2")`
-#' is equivalent to `smagick("{op1, op2 ? x}")`.
+#' This function is a simple wrapper around smagic. Formally, `str_ops(x, "op1, op2")`
+#' is equivalent to `smagic("{op1, op2 ? x}")`.
 #'
 #' @return
 #' In general it returns a character vector. It may be of a length different from the original
@@ -47,7 +47,7 @@
 #' # x: extracts the first pattern. The default pattern is "[[:alnum:]]+"
 #' #    which means an alpha-numeric word
 #' # unik: applies unique() to the vector
-#' # => see help in ?smagick for more details on the operations
+#' # => see help in ?smagic for more details on the operations
 #' 
 #' 
 #' # let's get the 3 largest numbers appearing in the car models
@@ -92,7 +92,7 @@ str_ops = function(x, op, pre_unik = NULL){
     res = res_small[x_int]
   } else {
     operation = paste0("{", op, " ? x}")
-    res = .smagick(operation, .data = list(x = x), .envir = parent.frame())
+    res = .smagic(operation, .data = list(x = x), .envir = parent.frame())
   }
 
   if("group_index" %in% names(attributes(res))){
@@ -144,7 +144,7 @@ str_ops = function(x, op, pre_unik = NULL){
 #' 
 #' @section Generic regular expression flags:
 #' 
-#' All `stringmagick` functions support generic flags in regular-expression patterns. 
+#' All `stringmagic` functions support generic flags in regular-expression patterns. 
 #' The flags are useful to quickly give extra instructions, similarly to *usual* 
 #' [regular expression flags](https://javascript.info/regexp-introduction).
 #' 
@@ -187,7 +187,7 @@ str_ops = function(x, op, pre_unik = NULL){
 #' # NOTA: using `str_get` instead of `str_is` may lead to a faster understanding 
 #' #       of the examples 
 #'
-#' x = smagick("/one, two, one... two, microphone, check")
+#' x = smagic("/one, two, one... two, microphone, check")
 #'
 #' # default is regular expression search
 #' # => 3 character items
@@ -436,7 +436,7 @@ str_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' #
 #' 
 #' # you can combine the flags
-#' x = smagick("/One, two, one... Two!, Microphone, check")
+#' x = smagic("/One, two, one... Two!, Microphone, check")
 #' # regular
 #' str_get(x, "one")
 #' # ignore case
@@ -478,15 +478,15 @@ str_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   
   # data caching in interactive mode
   is_caching = FALSE
-  is_forced_caching = isTRUE(getOption("smagick_str_get_forced_caching"))
+  is_forced_caching = isTRUE(getOption("smagic_str_get_forced_caching"))
   if(is_forced_caching || (interactive() && identical(parent.frame(), .GlobalEnv))){
     mc = match.call()
-    if(is.character(mc$x) && !is.null(getOption("stringmagick_str_get_cache"))){
+    if(is.character(mc$x) && !is.null(getOption("stringmagic_str_get_cache"))){
       is_caching = TRUE
       x_pattern = x
-      x = getOption("stringmagick_str_get_cache")
+      x = getOption("stringmagic_str_get_cache")
     } else if(length(x) > 1){
-      options(stringmagick_str_get_cache = x)
+      options(stringmagic_str_get_cache = x)
     }
   }
 
@@ -667,7 +667,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
         var_pblm = setdiff(vars, names(data))
         if(length(var_pblm) > 0){
           stop("The evaluation of the left side of `x` raised an error:\n",
-               smagick("PROBLEM: the variable{$s, enum.bq, is ? var_pblm} not in the data set (`"),
+               smagic("PROBLEM: the variable{$s, enum.bq, is ? var_pblm} not in the data set (`"),
                deparse_short(mc$data), "`).")
         }
       }
@@ -697,14 +697,14 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
       if(inherits(val, "try-error") || !is.atomic(val)){
         vars = all.vars(term)
 
-        intro = smagick("The evaluation of the right side of `x` raised an error.\n",
+        intro = smagic("The evaluation of the right side of `x` raised an error.\n",
                     "VALUE TO EVAL: {bq ? id_name}\n")
 
         if(!is.null(names(data))){
           var_pblm = setdiff(vars, names(data))
           if(length(var_pblm) > 0){
             stop(intro,
-                 smagick("PROBLEM: the variable{$s, enum.bq, is ? var_pblm} not in the data set (`"),
+                 smagic("PROBLEM: the variable{$s, enum.bq, is ? var_pblm} not in the data set (`"),
                  deparse_short(mc$data), "`).")
           }
         }
@@ -736,7 +736,7 @@ str_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
       n_id = unique(lengths(id))
       if(length(n_id) != 1 || max(n_id) != n){
         extra = ""
-        if(max(n_id) != n) extra = smagick("\nPROBELM: len x: {#n ? n} len id: {#n ? max(n_id)}.")
+        if(max(n_id) != n) extra = smagic("\nPROBELM: len x: {#n ? n} len id: {#n ? max(n_id)}.")
         stop("The argument `id` must be either a vector of identifiers or a data.frame ",
              "of identifiers of the same length as `x`.", extra)
       }
@@ -916,7 +916,7 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' @seealso 
 #' A few basic operation: [str_is()], [str_get()], [str_clean()]. Chain basic operations with [str_ops()]. 
 #' Use [str_vec()] to create simple string vectors.
-#' String interpolation combined with operation chaining: [smagick()].
+#' String interpolation combined with operation chaining: [smagic()].
 #'
 #' @examples
 #'
@@ -1154,14 +1154,14 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' or 2) write a character string that will be broken with respect to commas 
 #' (`"hi, there"` becomes `c("hi", "there")`), or 3) interpolate variables in 
 #' character strings (`"x{1:2}"` becomes `c("x1", "x2")`) with full access to 
-#' [smagick()] operations, or any combination of the three.
+#' [smagic()] operations, or any combination of the three.
 #' 
-#' @inheritParams smagick
+#' @inheritParams smagic
 #' 
 #' @param ... Character vectors that will be vectorized. If commas are present in the 
 #' character vector, it will be split with respect to commas and following blanks. 
 #' The vectors can contain any interpolation in the form `"{var}"` and 
-#' any [smagick()] operation can be applied. To change the delimiters for interpolation,
+#' any [smagic()] operation can be applied. To change the delimiters for interpolation,
 #' see `.delim`. Named arguments are used in priority for variable substitution,
 #' otherwise the value of the variables to be interpolated are fetched in the calling environment 
 #' (see argument `.envir`).
@@ -1284,7 +1284,7 @@ str_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(),
         
         for(j in 1:n_di_xpd){
           if(is_open[j]){
-            all_elements[[j]] = smagick_internal(di_expanded[j], .delim = .delim, .envir = .envir,
+            all_elements[[j]] = smagic_internal(di_expanded[j], .delim = .delim, .envir = .envir,
                                                   .data = .data, .check = TRUE)  
           } else {
             all_elements[[j]] = di_expanded[j]
@@ -1478,19 +1478,19 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
       p = info_pattern$patterns[i]
       p_escaped = gsub("(\\{( *\\d| *,))", "\\\\\\1", p)
       # we try the magic evaluation
-      p_new = try(smagick(p_escaped, .envir = envir), silent = TRUE)
+      p_new = try(smagic(p_escaped, .envir = envir), silent = TRUE)
       if(isError(p_new)){
         stop_hook("CONTEXT: concerns the pattern {bq?pattern}",
                   "{&len(info_pattern)>1;\n         when evaluating {bq?p}}",
-                  "\nThe `magic` flag expands the pattern with `smagick`.",
-                  "\nPROBLEM: the evaluation with `smagick` failed, see error below:",
+                  "\nThe `magic` flag expands the pattern with `smagic`.",
+                  "\nPROBLEM: the evaluation with `smagic` failed, see error below:",
                   "\n{'^[^\n]+\n'r?p_new}")
       }
       
       if(length(p_new) != 1){
         stop_hook("CONTEXT: concerns the pattern {bq?pattern}",
                   "{&len(info_pattern)>1;\n         when evaluating {bq?p}}",
-                  "The `magic` flag expands the pattern with `smagick`. It must return a vector of length 1.",
+                  "The `magic` flag expands the pattern with `smagic`. It must return a vector of length 1.",
                   "\nPROBLEM: the vector returned is of length {len.f?p_new}.")
       }
       

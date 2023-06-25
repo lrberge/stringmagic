@@ -1,14 +1,14 @@
 /*******************************************************
- * @file stringmagick_parser.cpp                       *
+ * @file stringmagic_parser.cpp                       *
  * @author lrberge                                     *
- * @brief main parser of the stringmagick framework,   *
+ * @brief main parser of the stringmagic framework,   *
  *        see description below                        *
  *        + secondary parsers                          *
  * @version 1.0                                        *         
  * @date 2023-05-09                                    *
  *******************************************************/
 
-#include "stringmagick.h"
+#include "stringmagic.h"
 #include <Rcpp.h>
 #include <string>
 #include <cstring>
@@ -1087,7 +1087,7 @@ void parse_box(delim &delims, bool &is_pblm, const char * str, int &i, int n,
 }
 
 // [[Rcpp::export]]
-List cpp_smagick_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_section = false){
+List cpp_smagic_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_section = false){
   // Rstr: string from R of length 1
 
   List res;

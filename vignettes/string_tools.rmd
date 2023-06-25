@@ -1,5 +1,5 @@
 ---
-title: "String tools: Magick edition"
+title: "String tools: magic edition"
 author: "Laurent R. Bergé"
 date: "`r Sys.Date()`"
 output:
@@ -29,12 +29,12 @@ knitr::opts_chunk$set(
 )
 
 # we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
-library(stringmagick)
+library(stringmagic)
 
-options("smagick_str_get_forced_caching" = TRUE)
+options("smagic_str_get_forced_caching" = TRUE)
 ```
 
-This vignette describes `stringmagick` tools for handling character vectors. 
+This vignette describes `stringmagic` tools for handling character vectors. 
 For a quick start, here are the sections describing:
 
 - how to [detect complex regex (=regular expression) patterns](#detect_funs)
@@ -42,12 +42,12 @@ For a quick start, here are the sections describing:
 - how to efficiently, and clearly, [clean character strings](#sec_clean)
 
 This vignette is also a reference for i) the [optional regex flags](#sec_regex) available to all
-`stringmagick` regular expressions, and ii) the [logical combination of regular expressions](#detect_logic).
+`stringmagic` regular expressions, and ii) the [logical combination of regular expressions](#detect_logic).
 
 
 # Regex flags {#sec_regex}
 
-All functions in `stringmagick` accept optional regex flags when regular expressions
+All functions in `stringmagic` accept optional regex flags when regular expressions
 are expected. The idea is similar to 
 [regular regex flags](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#advanced_searching_with_flags),
 but the flags are different in name and effect.
@@ -66,7 +66,7 @@ contain a slash, see the [section on escaping](#flag_escaping).
 Ex: let's find lines containing `"dt["`:
 ```{r}
 code = c("DT = as.data.table(iris)", 
-         "DT[, .(pl_sl = smagick('PL/SL = {Petal.Length / Sepal.Length}')]")
+         "DT[, .(pl_sl = smagic('PL/SL = {Petal.Length / Sepal.Length}')]")
 
 str_get(code, "if/dt[")
 ```
@@ -99,7 +99,7 @@ A poor, infirm, weak, and despis'd old man."
 # the ignore flag allows to retain words starting with the
 # upper cased letters
 # ex: getting words starting with the letter 'r' to 'z'
-smagick("{'i/\\b[r-z]\\w+'extract, c, 60 width ? unhappy}")
+smagic("{'i/\\b[r-z]\\w+'extract, c, 60 width ? unhappy}")
 ```
 
 *Technically*, the [perl](https://www.pcre.org/) expression `"(?i)"` is added at the 
@@ -148,7 +148,7 @@ Et ne répondra plus que par un froid silence
 Au silence éternel de la Divinité."
 
 # we hide a few words from this poem
-smagick("{'wi/et, le, il, au, des?, ce => _'r ? le_mont_des_oliviers}")
+smagic("{'wi/et, le, il, au, des?, ce => _'r ? le_mont_des_oliviers}")
 ```
 
 *Technically*, first the pattern is split with respect to `",[ \t\n]+"`, then all elements
@@ -171,7 +171,7 @@ Than by destruction dwell in doubtful joy."
 str_clean(lmb, "magic/[^{vowels}] => _")
 
 #
-# Illustration of `smagick` operations before regex application
+# Illustration of `smagic` operations before regex application
 
 cars = row.names(mtcars)
 # Which of these models contain a digit?
@@ -270,7 +270,7 @@ str_clean(eq, "(\\d)\\/(\\w) => \\2/\\1")
 **Warning:** when applying regular expressions on file paths, the escaping 
 of the slash can be highly confusing. This is a limitation of the current implementation 
 of the optional flags. For example `"/[^/]+$"` looks like a legit regex to get 
-the parent folder, but it won't work as expected within `stringmagick`. 
+the parent folder, but it won't work as expected within `stringmagic`. 
 To behave as expected, you would need to write `"//[^/]+$"` which looks weird, 
 or `"\\/[^/]+$"`.
 
@@ -280,7 +280,7 @@ Detecting a single regex pattern is pretty straightforward with regular tools
 like `base::grepl` or `stringr::str_detect`. Things become more complicated
 when we want to detect the presence of multiple patterns. 
 
-`stringmagick` offers three functions with an intuitive syntax to deal with 
+`stringmagic` offers three functions with an intuitive syntax to deal with 
 complex pattern detection:
 
 - [str_is](#detect_funs): returns a logical vector
@@ -357,7 +357,7 @@ these examples are equivalent with `str_is` or `str_which`.
 Ex.1: series of examples using the *recommended syntax*.
 ```{r}
 cars = row.names(mtcars)
-smagick("All cars from mtcars:\n{C, 60 width ? cars}")
+smagic("All cars from mtcars:\n{C, 60 width ? cars}")
 
 # cars with an 'a', an 'e', an 'i', and an 'o', all in lower case
 str_get(cars, "a & e & i & o")
@@ -434,7 +434,7 @@ At the exploration stage, we often run the same command with a few
 variations on the same data set. Acknowledging this, `str_get` supports the caching
 of the data argument in interactive use. This means that the user can concentrate in
 the pattern to find and need not bother to write the data from where to fectch the
-values. Note that `str_get` is the only `stringmagick` function to have this
+values. Note that `str_get` is the only `stringmagic` function to have this
 ability.
 
 Caching is always enabled, you don't need to do anything.
@@ -455,7 +455,7 @@ Even for simple tasks, the number of operations can quickly balloon, adding many
 lines of code, reducing readability, and all this for basic processing.
 
 The function `str_ops` tries to solve this problem. 
-It has access to all (50+) [`smagick` operations](https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html#sec_operations_reference), allowing for
+It has access to all (50+) [`smagic` operations](https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html#sec_operations_reference), allowing for
 a compact and readable way to chain basic operations on character strings.
 
 Below are a few motivating examples.
@@ -525,7 +525,7 @@ This function is of the form `str_clean(x, ...)` with `x` the vector to clean an
 
 1. use `"pat1, pat2 => replacement"` to replace the regex patterns `pat1` and `pat2` 
 with the value `replacement`.
-1. use `"@op1, op2"` to perform any arbitrary sequence of [`smagick` operation](https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html#sec_operations_reference)
+1. use `"@op1, op2"` to perform any arbitrary sequence of [`smagic` operation](https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html#sec_operations_reference)
 
 In the operation `"pat1, pat2 => replacement"`, the pattern is first split with respect
 to the pipe, `" => "` (change it with argument `pipe`), to get `replacement`. 
@@ -559,7 +559,7 @@ monologue = c("For who would bear the whips and scorns of time",
 
 # Cleaning a text
 str_clean(monologue, 
-          # use smagick to: lower the case and remove basic stopwords
+          # use smagic to: lower the case and remove basic stopwords
           "@lower, stopword",
           # remove a few extra stopwords(we use the flag word 'w/')
           "w/th, 's",

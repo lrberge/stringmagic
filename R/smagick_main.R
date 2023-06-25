@@ -9,13 +9,13 @@
 #### User-level ####
 ####
 
-#' Simple print function for objects of class `smagick`
+#' Simple print function for objects of class `smagic`
 #' 
-#' Print `smagick` character vectors in a nice way.
+#' Print `smagic` character vectors in a nice way.
 #' 
-#' @method print smagick
+#' @method print smagic
 #' 
-#' @param x A `smagick` object, obtained from the function `smagick`.
+#' @param x A `smagic` object, obtained from the function `smagic`.
 #' @param ... Not currently used.
 #' 
 #' @author 
@@ -32,7 +32,7 @@
 #' str_vec("The first cars are:, {6 first ? cars}")
 #' 
 #' 
-print.smagick = function(x, ...){
+print.smagic = function(x, ...){
   if(length(x) == 0){
     print(character(0))
   } else {
@@ -40,17 +40,17 @@ print.smagick = function(x, ...){
   }
 }
 
-#' Register custom operations to apply them in smagick
+#' Register custom operations to apply them in smagic
 #' 
-#' Extends the capabilities of [smagick()] by adding any custom operation
+#' Extends the capabilities of [smagic()] by adding any custom operation
 #' 
 #' @param fun A function which must have at least the arguments 'x' and '...'. 
 #' Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'group_flag'.
 #' This function must return a vector.
-#' This function will be internally called by `smagick` in the form 
+#' This function will be internally called by `smagic` in the form 
 #' `fun(x, argument, options, group, group_flag)`.`x`: the value to which the 
-#' operation applies. `argument`: the quoted `smagick` argument (always character). 
-#' `options`: a character vector of `smagick` options. The two last arguments are of use
+#' operation applies. `argument`: the quoted `smagic` argument (always character). 
+#' `options`: a character vector of `smagic` options. The two last arguments are of use
 #' only in group-wise operations if `fun` changes the lengths of vectors. `group`: an index of
 #' the group to which belongs each observation (integer). `group_flag`: value between 0
 #' and 2; 0: no grouping operation requested; 1: keep track of groups; 2: apply grouping.
@@ -64,7 +64,7 @@ print.smagick = function(x, ...){
 #' Laurent R. Berge
 #' 
 #' @seealso 
-#' `smagick()`
+#' `smagic()`
 #' 
 #' @examples
 #' 
@@ -75,11 +75,11 @@ print.smagick = function(x, ...){
 #' fun_emph = function(x, ...) paste0("*", x, "*")
 #' 
 #' # B) register it
-#' smagick_register(fun_emph, "emph")
+#' smagic_register(fun_emph, "emph")
 #' 
 #' # C) use it
 #' x = str_vec("right, now")
-#' smagick("Take heed, {emph, c? x}.")
+#' smagic("Take heed, {emph, c? x}.")
 #' 
 #' #
 #' # now let's add the option "strong"
@@ -91,10 +91,10 @@ print.smagick = function(x, ...){
 #'   }
 #' }
 #' 
-#' smagick_register(fun_emph, "emph", "strong")
+#' smagic_register(fun_emph, "emph", "strong")
 #' 
 #' x = str_vec("right, now")
-#' smagick("Take heed, {emph.strong, c? x}.")
+#' smagic("Take heed, {emph.strong, c? x}.")
 #' 
 #' #
 #' # now let's add an argument
@@ -109,15 +109,15 @@ print.smagick = function(x, ...){
 #'   paste0(arg, x, arg)
 #' }
 #' 
-#' smagick_register(fun_emph, "emph", "strong")
+#' smagic_register(fun_emph, "emph", "strong")
 #' 
 #' x = str_vec("right, now")
-#' smagick("Take heed, {'_'emph.s, c? x}.")
+#' smagic("Take heed, {'_'emph.s, c? x}.")
 #' 
 #' 
 #' 
 #' 
-smagick_register = function(fun, alias, valid_options = NULL){
+smagic_register = function(fun, alias, valid_options = NULL){
   # fun: must be a function with x and ... as arguments
   # the argument names must be in:
   # x, argument, options, group, conditonnal_flag
@@ -150,14 +150,14 @@ smagick_register = function(fun, alias, valid_options = NULL){
               "\nPROBLEM: the argument{$s, enum.bq, are?arg_pblm} invalid.")
   }
 
-  OPERATORS = getOption("smagick_operations_origin")
+  OPERATORS = getOption("smagic_operations_origin")
 
   if(alias %in% OPERATORS){
     stop_hook("The argument `alias` must not be equal to an existing internal argument.",
               "\nPROBLEM: the operation {bq?alias} is already an internal operation.")
   }
 
-  user_operators = getOption("smagick_user_ops")
+  user_operators = getOption("smagic_user_ops")
   if(is.null(user_operators)){
     user_operators = list()
   }
@@ -168,20 +168,20 @@ smagick_register = function(fun, alias, valid_options = NULL){
 
   user_operators[[alias]] = fun
 
-  options("smagick_user_ops" = user_operators)
-  options("smagick_operations" = c(OPERATORS, names(user_operators)))
+  options("smagic_user_ops" = user_operators)
+  options("smagic_operations" = c(OPERATORS, names(user_operators)))
 
 }
 
-#' Set defaults for smagick
+#' Set defaults for smagic
 #' 
-#' Se the default values for a few arguments of the function [smagick()].
+#' Se the default values for a few arguments of the function [smagic()].
 #' 
-#' @inheritParams smagick
+#' @inheritParams smagic
 #' @param reset Logical scalar, default is `FALSE`. Whether to reset all values.
 #' 
 #' @details 
-#' By default, each call to `setSmagick` adds modifications to the default values. 
+#' By default, each call to `setSmagic` adds modifications to the default values. 
 #' To set a few default values and resetting the others, you need to use `reset = TRUE`.
 #' 
 #' @author 
@@ -189,18 +189,18 @@ smagick_register = function(fun, alias, valid_options = NULL){
 #' 
 #' @examples 
 #' 
-#' # we change the default display of the results of smagick
-#' setSmagick(.smagick.class = TRUE)
-#' smagick("{S!x, y}{2 each?1:2}")
+#' # we change the default display of the results of smagic
+#' setSmagic(.smagic.class = TRUE)
+#' smagic("{S!x, y}{2 each?1:2}")
 #' 
 #' # back to a regular character vector
-#' setSmagick(reset = TRUE)
-#' smagick("{S!x, y}{2 each?1:2}")
+#' setSmagic(reset = TRUE)
+#' smagic("{S!x, y}{2 each?1:2}")
 #' 
-setSmagick = function(.smagick.class = FALSE, .delim = c("{", "}"), 
+setSmagic = function(.smagic.class = FALSE, .delim = c("{", "}"), 
                       .sep = "", .data.table = TRUE, reset = FALSE){
 
-  check_logical(.smagick.class, scalar = TRUE)
+  check_logical(.smagic.class, scalar = TRUE)
   check_logical(.data.table, scalar = TRUE)
     
   check_character(.sep, scalar = TRUE)
@@ -208,12 +208,12 @@ setSmagick = function(.smagick.class = FALSE, .delim = c("{", "}"),
   .delim = check_set_delimiters(.delim)
 
   # Getting the existing defaults
-  opts = getOption("smagick_options")
+  opts = getOption("smagic_options")
 
   if(reset || is.null(opts)){
     opts = list()
   } else if(!is.list(opts)){
-    warning("Wrong formatting of option 'smagick_options', all options are reset.")
+    warning("Wrong formatting of option 'smagic_options', all options are reset.")
     opts = list()
   }
 
@@ -226,7 +226,7 @@ setSmagick = function(.smagick.class = FALSE, .delim = c("{", "}"),
     opts[[v]] = eval(as.name(v))
   }
 
-  options(smagick_options = opts)
+  options(smagic_options = opts)
 
 }
 
@@ -250,12 +250,12 @@ set_defaults = function(opts_name){
 }
 
 ####
-#### ... smagick ####
+#### ... smagic ####
 ####
 
 
-smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
-                   .delim = c("{", "}"), .check = TRUE, .smagick.class = FALSE, 
+smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
+                   .delim = c("{", "}"), .check = TRUE, .smagic.class = FALSE, 
                    .default = TRUE,
                    .collapse = NULL, .help = NULL, .data.table = TRUE){
 
@@ -270,7 +270,7 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   set_pblm_hook()
   
   if(.default){
-    set_defaults("smagick_options")
+    set_defaults("smagic_options")
   }  
   
   check_character(.delim, no_na = TRUE)
@@ -293,7 +293,7 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
     }
   }
 
-  res = smagick_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
+  res = smagic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
                             .vectorize = .vectorize, .help = .help,
                             .collapse = .collapse, .is_root = TRUE, 
                             .data.table = .data.table,
@@ -303,8 +303,8 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
       return(invisible(NULL))
   }
 
-  if(isTRUE(.smagick.class)){
-    class(res) = c("smagick", "character")
+  if(isTRUE(.smagic.class)){
+    class(res) = c("smagic", "character")
   } else if(!is.null(attr(res, "group_index"))){
     # cleaning artifacts
     attr(res, "group_index") = NULL
@@ -313,8 +313,8 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   res
 }
 
-#' @describeIn smagick Like `smagick` but without any error handling to save a few micro seconds
-.smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
+#' @describeIn smagic Like `smagic` but without any error handling to save a few micro seconds
+.smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                     .delim = c("{", "}"), .collapse = NULL,
                     .check = FALSE, .data.table = FALSE){
 
@@ -324,39 +324,39 @@ smagick = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
     .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
   }
 
-  smagick_internal(..., .delim = .delim, .envir = .envir,
+  smagic_internal(..., .delim = .delim, .envir = .envir,
                       .sep = .sep,
                       .vectorize = .vectorize, .is_root = TRUE, 
                       .data.table = .data.table, .collapse = .collapse,
                       .check = .check)
 }
 
-.sma = .smagick
+.sma = .smagic
 
 ####
 #### Internal ####
 ####
 
-smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  .data = list(),
+smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  .data = list(),
                                .sep = "", .vectorize = FALSE,
                                .collapse = NULL,
                                .help = NULL, .is_root = FALSE, .data.table = FALSE,
                                .check = FALSE, .plural_value = NULL){
   
   # flag useful to easily identify this environment (used in error messages)
-  is_smagick_internal = TRUE
+  is_smagic_internal = TRUE
 
   if(!is.null(.help)){
     if(identical(.help, "_COMPACT_")){
-      msg = getOption("smagick_help_compact")
+      msg = getOption("smagic_help_compact")
       
       msg = paste(msg, collapse = "\n")
       stop_up("Help requested.", msg = msg)
     } else {
       
-      on.exit(smagick_dynamic_help(.help))
+      on.exit(smagic_dynamic_help(.help))
       
-      stop_up("smagick: Help requested.")
+      stop_up("smagic: Help requested.")
     }    
   }
   
@@ -404,7 +404,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
   } else if(...length() == 1){
     
     if(!is.null(...names())){
-      stop_hook("`smagick` requires at least one character scalar to work.",
+      stop_hook("`smagic` requires at least one character scalar to work.",
                 "\nNamed arguments are only used as variables on which to apply interpolation.",
                 "\nFIX: please provide at least one non-named argument.")
     }
@@ -412,14 +412,14 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
     x = as.character(..1)
     
     if(length(x) > 1){
-      stop_hook("`smagick` can only be applied to character scalars. ",
+      stop_hook("`smagic` can only be applied to character scalars. ",
                 "\nPROBLEM: the argument is not of length 1, it is of length {len.f ? x}.")
     }
 
   } else {
 
     if(.check){
-      dots = check_expr(list(...), "In `smagick`, one element of ... could not be evaluated.")
+      dots = check_expr(list(...), "In `smagic`, one element of ... could not be evaluated.")
     } else {
       dots = list(...)
     }
@@ -435,7 +435,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
     }
     
     if(length(dots) == 0){
-      stop_hook("`smagick` requires at least one character scalar to work.",
+      stop_hook("`smagic` requires at least one character scalar to work.",
                 "\nNamed arguments are only used as variables on which to apply interpolation.",
                 "\nPROBLEM: all arguments are named.",
                 "\nFIX: please provide at least one non-named argument.")
@@ -443,7 +443,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
     
     if(any(lengths(dots) > 1)){
       qui = which(lengths(dots) > 1)[1]
-      stop_hook("`smagick` can only be applied to character scalars.",
+      stop_hook("`smagic` can only be applied to character scalars.",
                 "\nPROBLEM: The ", n_th(qui),
                 " elment in ... is of length ", length(dots[[qui]]), ".")
     }
@@ -477,7 +477,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
           }
         }
         
-        res[[i]] = smagick_internal(dots[[i]], .delim = .delim, .envir = .envir, 
+        res[[i]] = smagic_internal(dots[[i]], .delim = .delim, .envir = .envir, 
                                     .data = .data, .check = .check)
       }
 
@@ -495,9 +495,9 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
     return(x)
 
   } else {
-    x_parsed = cpp_smagick_parser(x, .delim)
+    x_parsed = cpp_smagic_parser(x, .delim)
     if(length(x_parsed) == 1 && isTRUE(attr(x_parsed, "error"))){
-      report_smagick_parsing_error(x, x_parsed, .delim)
+      report_smagic_parsing_error(x, x_parsed, .delim)
     }
   }
   
@@ -570,12 +570,12 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
       if(length(operators) == 0){
 
         # we need to evaluate xi
-        xi_call = check_set_smagick_parsing(xi, .check, .delim)
+        xi_call = check_set_smagic_parsing(xi, .check, .delim)
 
         if(is.character(xi_call)){
           xi = xi_call
         } else {
-          xi = check_set_smagick_eval(xi_call, .data, .envir, .check)
+          xi = check_set_smagic_eval(xi_call, .data, .envir, .check)
         }
 
         if(ANY_PLURAL){
@@ -627,8 +627,8 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
 
               } else {
                 if(length(operators) == 1){
-                  example = 'Example: x = c("Mark", "Sarah"); smagick("{$enum, is ? x} away.")'
-                  .stop_hook("In `smagick`, the pluralization operator (`", operators[1], 
+                  example = 'Example: x = c("Mark", "Sarah"); smagic("{$enum, is ? x} away.")'
+                  .stop_hook("In `smagic`, the pluralization operator (`", operators[1], 
                              "`) must contain operations. ", '\n', example)
                 }
 
@@ -648,9 +648,9 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
 
                   if(!ok){
                     pblm = paste0(operators[1], paste0(operators[-1], collapse = ", "))
-                    example = 'Example: x = c("Mark", "Sarah"); smagick("{$enum, is ? x} away.")'
+                    example = 'Example: x = c("Mark", "Sarah"); smagic("{$enum, is ? x} away.")'
 
-                    .stop_hook("In `smagick`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
+                    .stop_hook("In `smagic`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
                             "Please provide one by adding it after a question mark.\n", example)
                   }
 
@@ -700,13 +700,13 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
         if(!is_xi_done){
           if(verbatim){
             if(grepl(BOX_OPEN, xi, fixed = TRUE)){
-              xi = smagick_internal(xi, .delim = .delim, .envir = .envir, .data = .data, 
+              xi = smagic_internal(xi, .delim = .delim, .envir = .envir, .data = .data, 
                                       .vectorize = concat_nested, .check = .check)
             }
           } else if(!verbatim){
             # evaluation
-            xi_call = check_set_smagick_parsing(xi, .check, .delim)
-            xi = check_set_smagick_eval(xi_call, .data, .envir, .check)
+            xi_call = check_set_smagic_parsing(xi, .check, .delim)
+            xi = check_set_smagic_eval(xi_call, .data, .envir, .check)
           }
         }
 
@@ -735,7 +735,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
             if(operators[1] == "&&"){
               # ERROR
               form = "{&& cond ; true}"
-              example = '\nEXAMPLE: x = c(5, 700); smagick("Value: {&&x > 20 ; > 20}")'
+              example = '\nEXAMPLE: x = c(5, 700); smagic("Value: {&&x > 20 ; > 20}")'
 
               .stop_hook("The if-else operator `&&`, of the form ", form,
                       ", requires at least one variable to be evaluated in the condition.",
@@ -753,12 +753,12 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
             
             if(do_eval){
               xi_call = str2lang(vars[1])
-              xi_val = check_set_smagick_eval(xi_call, .data, .envir, .check)
+              xi_val = check_set_smagic_eval(xi_call, .data, .envir, .check)
             }
             
             if(operators[1] == "&&" && length(xi) != length(xi_val)){
               form = "{&& cond ; true}"
-              example = 'EXAMPLE: x = c(5, 700); smagick("Value: {&&x > 20 ; > 20}")'
+              example = 'EXAMPLE: x = c(5, 700); smagic("Value: {&&x > 20 ; > 20}")'
 
               stop_hook("The if-else operator `&&`, of the form {form} ",
                       "requires that the first variable used in the condition ",
@@ -801,7 +801,7 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
               xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument,
                                               .check = .check, .envir = .envir, group_flag = group_flag,
                                               .delim = .delim),
-                                get_smagick_context(), " See error below:",
+                                get_smagic_context(), " See error below:",
                                 verbatim = TRUE, up = 1)
             } else {
               xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, .check = .check,
@@ -878,13 +878,13 @@ sma_char2operator = function(x){
 
   op_parsed = cpp_parse_operator(x)
 
-  OPERATORS = getOption("smagick_operations")
+  OPERATORS = getOption("smagic_operations")
   
   ok = FALSE
   op = op_parsed$operator
 
   if(nchar(op) == 0){
-    .stop_hook("In `smagick`, if a quoted value is present, the operators must ",
+    .stop_hook("In `smagic`, if a quoted value is present, the operators must ",
               "be of the form 'value'op, ",
               "with 'op' an operator. ",
               "\nPROBLEM: In `", escape_newline(x), "` the operator is missing.")
@@ -919,17 +919,17 @@ sma_char2operator = function(x){
     op_parsed$argument = argument
 
     if(op %in% c("R", "r", "%", "k", "K", "paste", "get", "is")){
-      ex = c("R" = 'x = "She loves me."; smagick("{\'s\\b => d\'R ? x}")',
-            "r" = 'x = "Amour"; smagick("{\'ou => e\'r ? x}...")',
-            "replace" = 'x = "Amour"; smagick("{\'ou => e\'r ? x}...")',
-            "%" = 'smagick("pi is: {%.03f ? pi}")',
-            "k" = 'smagick("The first 8 letters of the longuest word are: {8k, q ! the longuest word}.")',
-            "shorten" = 'smagick("The first 8 letters of the longuest word are: {8 shorten, q ! the longuest word}.")',
-            "Shorten" = 'smagick("The first 8 letters of the longuest word are: {8 Shorten, q ! the longuest word}.")',
-            "K" = 'x = 5:9; smagick("The first 2 elements of `x` are: {2K, C ? x}.")',
-            "get" = 'x = row.names(mtcars) ; smagick("My fav. cars are {\'toy\'get.ignore, \'the \'app, enum ? x}.")',
-            "is" = 'x = c("Bob", "Pam") ; smagick("{\'am\'is ? x}")',
-            "paste" = 'x = "those, words"; smagick("Let\'s emphasize {S, \'**\'paste.both, c ? x}.")')
+      ex = c("R" = 'x = "She loves me."; smagic("{\'s\\b => d\'R ? x}")',
+            "r" = 'x = "Amour"; smagic("{\'ou => e\'r ? x}...")',
+            "replace" = 'x = "Amour"; smagic("{\'ou => e\'r ? x}...")',
+            "%" = 'smagic("pi is: {%.03f ? pi}")',
+            "k" = 'smagic("The first 8 letters of the longuest word are: {8k, q ! the longuest word}.")',
+            "shorten" = 'smagic("The first 8 letters of the longuest word are: {8 shorten, q ! the longuest word}.")',
+            "Shorten" = 'smagic("The first 8 letters of the longuest word are: {8 Shorten, q ! the longuest word}.")',
+            "K" = 'x = 5:9; smagic("The first 2 elements of `x` are: {2K, C ? x}.")',
+            "get" = 'x = row.names(mtcars) ; smagic("My fav. cars are {\'toy\'get.ignore, \'the \'app, enum ? x}.")',
+            "is" = 'x = c("Bob", "Pam") ; smagic("{\'am\'is ? x}")',
+            "paste" = 'x = "those, words"; smagic("Let\'s emphasize {S, \'**\'paste.both, c ? x}.")')
 
       .stop_hook("The operator `", op, "` has no default value, you must provide values explicitly.", 
                  " EXAMPLE: ", ex)
@@ -951,7 +951,7 @@ sma_char2operator = function(x){
     
     if(!op %in% OPERATORS){
       
-      context = get_smagick_context()
+      context = get_smagic_context()
 
       sugg_txt = suggest_item(op, OPERATORS, newline = FALSE, info = "operator")
       
@@ -960,8 +960,8 @@ sma_char2operator = function(x){
 
       msg = .sma("{context}",
               "\nPROBLEM: {bq?op} is not a valid operator. ", sugg_txt,
-              "\n\nINFO: Type smagick('--help') for more help or smagick(.help = regex) or smagick(.help = TRUE).",
-              "\nEx. of valid stuff: smagick(\"{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
+              "\n\nINFO: Type smagic('--help') for more help or smagic(.help = regex) or smagic(.help = TRUE).",
+              "\nEx. of valid stuff: smagic(\"{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
 
       .stop_hook(msg)
     }
@@ -1184,13 +1184,13 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     # times/each ####
 
     if(!is_numeric_in_char(argument)){
-      msg = paste0("In `smagick`: the operator `", op, "` must have numeric arguments, `",
+      msg = paste0("In `smagic`: the operator `", op, "` must have numeric arguments, `",
                    argument, "` is not numeric.")
       .stop_hook(msg)
     }
     
     if(length(argument) != 1){
-      msg = paste0("In `smagick`: the operator `", op, "` must have an argument of length 1.",
+      msg = paste0("In `smagic`: the operator `", op, "` must have an argument of length 1.",
                    "\nPROBLEM: the argument is of length ", length(argument), ".")
       .stop_hook(msg)
     }
@@ -1328,7 +1328,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     nb = argument
     if(!is_numeric_in_char(nb)){
-      msg = paste0("In `smagick`: the operator `", op, "` must first contain a numeric argument. PROBLEM: `",
+      msg = paste0("In `smagic`: the operator `", op, "` must first contain a numeric argument. PROBLEM: `",
                    argument, "` is not numeric.")
       .stop_hook(msg)
     }
@@ -1474,7 +1474,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       nb_extra = arg_split[2]
       
       if(!is.null(nb_extra) && !is_numeric_in_char(nb_extra)){
-        msg = paste0("In `smagick`: in the operator `", op, "` the argument can be of the form ",
+        msg = paste0("In `smagic`: in the operator `", op, "` the argument can be of the form ",
                      "'n1|n2' with `n1` and `n2` numbers. ",
                      "\nPROBLEM: the second element `", nb_extra, "` is not numeric.")
         .stop_hook(msg)
@@ -1484,7 +1484,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     }
     
     if(!is_numeric_in_char(nb)){
-      msg = paste0("In `smagick`: the operator `", op, "` must have a numeric argument. ",
+      msg = paste0("In `smagic`: the operator `", op, "` must have a numeric argument. ",
                    "\nPROBLEM: `", argument, "` is not numeric.")
       .stop_hook(msg)
     }    
@@ -1547,7 +1547,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
           if(nb < 0){
             
             if(!is.null(nb_extra)){
-              msg = paste0("In `smagick`: in the operator `", op, "` the argument can be of the form ",
+              msg = paste0("In `smagic`: in the operator `", op, "` the argument can be of the form ",
                           "'n1|n2' with `n1` and `n2` positive numbers. ",
                           "\nPROBLEM: the first element `", nb, "` is negative.")
               .stop_hook(msg)
@@ -1564,7 +1564,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
             
             if(!is.null(nb_extra)){
               if(nb_extra < 0){
-                msg = paste0("In `smagick`: in the operator `", op, "` the argument can be of the form ",
+                msg = paste0("In `smagic`: in the operator `", op, "` the argument can be of the form ",
                             "'n1|n2' with `n1` and `n2` positive numbers. ",
                             "\nPROBLEM: the second element `", nb_extra, "` is negative.")
                 .stop_hook(msg)
@@ -2351,7 +2351,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
           .data[["."]] = xi
         }
         
-        xi = smagick_internal(instruction, .delim = .delim, .envir = .envir, 
+        xi = smagic_internal(instruction, .delim = .delim, .envir = .envir, 
                               .data = .data, .check = .check)
       }
       
@@ -2436,7 +2436,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
   } else {
     # user-defined operations ####
     
-    user_ops = getOption("smagick_user_ops")
+    user_ops = getOption("smagic_user_ops")
     if(op %in% names(user_ops)){
       fun = user_ops[[op]]
       valid_options = attr(fun, "valid_options")
@@ -2462,7 +2462,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       }
 
     } else {
-      msg = paste0("In `smagick`: the operator `", op, "` is not recognized. ",
+      msg = paste0("In `smagic`: the operator `", op, "` is not recognized. ",
                   "Internal error: this problem should have been spotted beforehand.")
       .stop_hook(msg)
     }
@@ -2499,7 +2499,7 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check){
     }
 
     if(is_pblm){
-      example = 'Example: x = 5; smagick("There {#is, N ? x} cat{#s} in the room.")'
+      example = 'Example: x = 5; smagic("There {#is, N ? x} cat{#s} in the room.")'
 
       extra = ""
       reason = NULL
@@ -2594,7 +2594,7 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check){
          (op == "singular" && !IS_PLURAL && !(any(grepl("zero$", operators)) && IS_ZERO)) || 
          (op == "plural" && IS_PLURAL)){
           
-          value = smagick_internal(argument, .delim = .delim, .envir = .envir, .data = .data,
+          value = smagic_internal(argument, .delim = .delim, .envir = .envir, .data = .data,
                                       .check = .check,
                                       .plural_value = xi)
         if(value != ""){
@@ -2609,7 +2609,7 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check){
       # The verb is always last
 
       if(nchar(op) < 2){
-        example = 'Example: x = c("Charles", "Alice"); smagick("{$Is, enum ? x} crazy? Yes {$(he:they), are}.")'
+        example = 'Example: x = c("Charles", "Alice"); smagic("{$Is, enum ? x} crazy? Yes {$(he:they), are}.")'
         .stop_hook("In pluralization, `", op, "` is expected to be a verb ",
                    "and verbs must always be composed of at least two letters.\n", example)
       }
@@ -2637,7 +2637,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
   if(!is.logical(xi)){
     form = "{&cond ; true ; false}"
     if(is_double_amp) form = "{&&cond ; true}"
-    example = '\nEXAMPLE: x = Sys.time(); smagick("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
+    example = '\nEXAMPLE: x = Sys.time(); smagic("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
 
     .stop_hook("The if-else operator `", amp, "`, of the form ", form,
             ", accepts only logical values in the condition. ",
@@ -2648,7 +2648,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
   if(anyNA(xi)){
     form = "{&cond ; true ; false}"
     if(is_double_amp) form = "{&&cond ; true}"
-    example = '\nEXAMPLE: x = Sys.time(); smagick("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
+    example = '\nEXAMPLE: x = Sys.time(); smagic("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
 
     .stop_hook("The if-else operator `", amp, "`, of the form ", form,
               ", accepts only non-NA logical values.\n",
@@ -2665,9 +2665,9 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
                "be filled with the value of the variable in the condition). ",
               "\nFIX: remove the false statement or use the if-else operator `&` (single ampersand).",
               "\nEXAMPLE: x = 1:5",
-              "           compare smagick(\"{x} = {&x %% 2;odd;even}\")",
-              "\n              to smagick(\"{x} = {&x %% 2;odd}\")",
-              "\n              to smagick(\"{x} = {&&x %% 2;odd}\")")
+              "           compare smagic(\"{x} = {&x %% 2;odd;even}\")",
+              "\n              to smagic(\"{x} = {&x %% 2;odd}\")",
+              "\n              to smagic(\"{x} = {&&x %% 2;odd}\")")
   }
   
   if(is.na(false)) false = ""
@@ -2691,7 +2691,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
           .data[[".len"]] = length(xi_val)
         }
         
-        log_op_eval = smagick_internal(log_op, .delim = .delim, .envir = .envir, .data = .data,
+        log_op_eval = smagic_internal(log_op, .delim = .delim, .envir = .envir, .data = .data,
                               .check = .check,  
                               .plural_value = xi_val)
         
@@ -2761,7 +2761,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
         .data[[".N"]] = length(xi_val)
         .data[[".len"]] = length(xi_val)
       }
-    res = smagick_internal(res, .delim = .delim, .envir = .envir, .data = .data,
+    res = smagic_internal(res, .delim = .delim, .envir = .envir, .data = .data,
                            .check = .check,  
                            .plural_value = xi_val)
   }
@@ -2784,14 +2784,14 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
     last = gsub("_;;;_", ";", tail(op_all, 1))
     extra = ""
     if(last %in% c("!", "?")){
-      extra = smagick("The character {bq?last} is forbidden in operations.")
+      extra = smagic("The character {bq?last} is forbidden in operations.")
     } else if(last != "_ERROR_"){
-      extra = smagick("Operations must be of the form `'arg'operator.option` but the value {bq?last} is ill formed.")
+      extra = smagic("Operations must be of the form `'arg'operator.option` but the value {bq?last} is ill formed.")
     } else {
-      extra = smagick("The value {bq?operations} could not be parsed.")
+      extra = smagic("The value {bq?operations} could not be parsed.")
     }
       
-    msg = smagick("The operator {bq?op} expects a suite of valid operations (format: {bq?op_msg}). ",
+    msg = smagic("The operator {bq?op} expects a suite of valid operations (format: {bq?op_msg}). ",
                "\nPROBLEM: the operations were not formatted correctly. ", extra)
     
     .stop_hook(msg)
@@ -2866,8 +2866,8 @@ setup_operations = function(){
                 "ws", "tws", "trim", "get", "is", "which",
                 "n", "N", "len", "Len", "width", "dtime",
                 "stopwords", "nth", "Nth", "ntimes", "Ntimes")
-  options("smagick_operations" = sort(OPERATORS))
-  options("smagick_operations_origin" = sort(OPERATORS))
+  options("smagic_operations" = sort(OPERATORS))
+  options("smagic_operations_origin" = sort(OPERATORS))
 }
 
 

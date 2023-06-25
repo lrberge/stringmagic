@@ -1,5 +1,5 @@
 ---
-title: "`smagick`: Magical string interpolation"
+title: "`smagic`: Magical string interpolation"
 author: "Laurent R. Berge"
 date: "`r Sys.Date()`"
 output:
@@ -16,7 +16,7 @@ output:
     toc: yes
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{smagick_walkthrough}
+  %\VignetteIndexEntry{smagic_walkthrough}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -31,8 +31,8 @@ Like normalizing the case, trimming at 40 characters, or concatenating?
 In general, you can't. Well, actually you can but have to use the language's own native tools. 
 And it can be surprising how performing a few basic operations can quickly amount to lot of typing.
 
-The aim of the package `stringmagick` is to simplify and empower string interpolation. 
-With the `smagick` function, you can apply 50+ basic operations to interpolated variables, 
+The aim of the package `stringmagic` is to simplify and empower string interpolation. 
+With the `smagic` function, you can apply 50+ basic operations to interpolated variables, 
 interpolations can be nested, there is advanced support for pluralization, and much more.
 
 ```{r setup, include=FALSE}
@@ -43,13 +43,13 @@ knitr::opts_chunk$set(
 )
 
 # we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
-library(stringmagick)
+library(stringmagic)
 ```
 
-Before moving on, we set the global option `.smagick.class` to `TRUE` such that 
-the character vectors produced by `smagick` are displayed nicely in this vignette.
+Before moving on, we set the global option `.smagic.class` to `TRUE` such that 
+the character vectors produced by `smagic` are displayed nicely in this vignette.
 ```{r}
-setSmagick(.smagick.class = TRUE)
+setSmagic(.smagic.class = TRUE)
 ```
 
 # Motivating examples and advice for reading
@@ -57,19 +57,19 @@ setSmagick(.smagick.class = TRUE)
 Here's a few things the algorithm can do (don't worry if it looks like gibberish when first
 discovering it: it will make sense later!):
 ```{r}
-library(stringmagick)
+library(stringmagic)
 name = "john doe"
-smagick("Hi {title ? name}.")
+smagic("Hi {title ? name}.")
 
 cars = row.names(mtcars)
 print(cars)
-smagick("I like cars starting with C like {'i/^c'get, x, unik, enum.or ? cars}.")
+smagic("I like cars starting with C like {'i/^c'get, x, unik, enum.or ? cars}.")
 
 friends = c("Piglet", "Eeyore")
-smagick("My best friend{$s, are, enum ? friends}. Who am I?")
+smagic("My best friend{$s, are, enum ? friends}. Who am I?")
 
 friends = "Mercutio"
-smagick("My best friend{$s, are, enum ? friends}. Who am I?")
+smagic("My best friend{$s, are, enum ? friends}. Who am I?")
 ```
 
 If you discover this package, since it's a lot of content, here's some advice:
@@ -85,7 +85,7 @@ And you should be good to go for some basic usage.
 the error messages will remind you the available operations. 
 You can also use the argument `help = TRUE` to get 
 interactive help (use `help = "regex"` to perform a regex search on the full doc!).
-Finally, `smagick("--help")` gives you a compact help.
+Finally, `smagic("--help")` gives you a compact help.
 
 Once you're a bit comfortable, here are extra sections of interest:
 
@@ -102,13 +102,13 @@ To interpolate a variable, say `x`, simply use `{x}`.
 
 ```{r hello-world}
 x = "world"
-smagick("hello {x}")
+smagic("hello {x}")
 ```
 
 As we can see, anything in curly brackets gets interpolated. This behavior is similar
 to the well known function [glue](https://glue.tidyverse.org/) from the tidyverse.
 
-Now let's come to what `smagick` really brings to the table.
+Now let's come to what `smagic` really brings to the table.
 
 # Interpolation with operations: Principle {#sec_interpol}
 
@@ -118,7 +118,7 @@ This means upper casing all letters of the interpolated variable and adding a sp
 each of them. Let's do it:
 
 ```{r hw-ops}
-smagick("hello {upper, ''s, c ? x}")
+smagic("hello {upper, ''s, c ? x}")
 ```
 
 Now let's explain what happened. Within the `{}` *box*, we first write a set of 
@@ -139,23 +139,23 @@ with a dot followed by the option name. Formally: `op.option1.option2`, etc. Exa
 
 ```{r ex-ops}
 x = "hi there. what's up? fine."
-smagick("He said: {upper.sentence, Q ? x}")
+smagic("He said: {upper.sentence, Q ? x}")
 ```
 
-Both operators and options are partially matched. So `smagick("He said: {up.s, Q ? x}")` would 
+Both operators and options are partially matched. So `smagic("He said: {up.s, Q ? x}")` would 
 also work. You have more details on the operations syntax in the [syntax section](#sec_syntax). 
 
 # Verbatim interpolation and nesting: Principle {#sec_verbatim}
 
 Instead of interpolating a variable, say `x`, with `{x}`, you can use an exclamation 
-mark to trigger verbatim evaluation. For example `smagick("hello {!x}")` would lead to "hello x". 
+mark to trigger verbatim evaluation. For example `smagic("hello {!x}")` would lead to "hello x". 
 (To use `!` as a regular logical operator, see the [section on special cases](#sec_special_cases).)
 Please hold on a little bit to see the point.
 
 Verbatim evaluation is a powerful way to apply operations to plain text. For example:
 
 ```{r}
-smagick("hello {upper, ''s, c ! world}")
+smagic("hello {upper, ''s, c ! world}")
 ```
 
 Before moving on, a necessary detail. The spaces surrounding the exclamation mark are non necessary,
@@ -164,7 +164,7 @@ expression only begins after the space. This is illustrated below
 ```{r}
 # The decorative space in verbatim mode
 #                  v                      => adds a space before 'hi'
-smagick("{upper, Q! hi}", 
+smagic("{upper, Q! hi}", 
         #         v v                     => no space added (ie decorative space)
         "{upper, Q ! hi}", 
         #         v vv                    => adds a space before 'hi'
@@ -175,7 +175,7 @@ smagick("{upper, Q! hi}",
 ### Nesting
 
 The main advantage, and real power, of verbatim evaluations is *nesting*. Anything in a verbatim 
-expression becomes evaluated with the function `smagick`.
+expression becomes evaluated with the function `smagic`.
 This means that any *box* will be evaluated as previously described. 
 
 Let's give an example. You want to write the expression of a polynomial of order `n`: `a + bx + cx^2 + etc`.
@@ -183,12 +183,12 @@ You can do that with nesting:
 
 ```{r}
 n = 2
-smagick("poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}")
+smagic("poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}")
 ```
 
 How does it work? The verbatim expression (the one following the exclamation mark),
-here `"{letters[1 + 0:n]}x^{0:n}"`, is evaluated with `smagick`.
-`smagick("{letters[1 + 0:n]}x^{0:n}")` leads to the vector `c("ax^0", "bx^1", "cx^2")`.
+here `"{letters[1 + 0:n]}x^{0:n}"`, is evaluated with `smagic`.
+`smagic("{letters[1 + 0:n]}x^{0:n}")` leads to the vector `c("ax^0", "bx^1", "cx^2")`.
 
 The operation `' + 'c` then concatenates (or collapses) that vector with `' + '`.
 This value is then appended to the previous string.
@@ -198,7 +198,7 @@ by the empty string. Let's do it:
 
 ```{r}
 n = 4
-smagick("poly({n}): {' + 'c, 'f/x^0, ^1'clean ! {letters[1 + 0:n]}x^{0:n}}")
+smagic("poly({n}): {' + 'c, 'f/x^0, ^1'clean ! {letters[1 + 0:n]}x^{0:n}}")
 ```
 
 We obtain the desired result. 
@@ -213,7 +213,7 @@ Operations can have arguments, and operations can also have options. The general
 syntax, with argument and options, is:
 
 ```{r, eval=FALSE}
-smagick("{'arg1'op1.optionA.optionB, arg2 op2.optionC, 
+smagic("{'arg1'op1.optionA.optionB, arg2 op2.optionC, 
           `arg3`op3, 51op4, op5 ? x}")
 ```
 
@@ -236,25 +236,25 @@ for example, that command `"upper.first"` is equivalent to `"up.f"`.
 Here are examples for each types of arguments:
 ```{r}
 # quoted argument
-smagick("y = {'x'paste, ' + 'c ? 1:2}")
+smagic("y = {'x'paste, ' + 'c ? 1:2}")
 
 # verbatim argument, space separated
-smagick("y = {x paste, ' + 'c ? 1:2}")
+smagic("y = {x paste, ' + 'c ? 1:2}")
 
 # evaluated argument
 x = "z"
-smagick("y = {`x`paste, ' + 'c ? 1:2}")
+smagic("y = {`x`paste, ' + 'c ? 1:2}")
 
 # digits accolated to the operator
-smagick("y = {0paste, ' + 'c ? 1:2}")
+smagic("y = {0paste, ' + 'c ? 1:2}")
 
 # options `bq` (back quote) and `a` passed to operator `enum`
-smagick("y = the sum of {'x'paste, enum.bq.a ? 1:2}")
+smagic("y = the sum of {'x'paste, enum.bq.a ? 1:2}")
 ```
 
 A few operators have two arguments. Pass multiple arguments using a pipe as follows:
 ```{r, eval = FALSE}
-smagick("{'arg1|arg2'op, 'arg1||arg2'op ? x}")
+smagic("{'arg1|arg2'op, 'arg1||arg2'op ? x}")
 ```
 You can escape the meaning of the pipe as a separator with a double backslash. 
 Some operators accept a double pipe which modifies the behavior of the second argument.
@@ -262,17 +262,17 @@ Here is an example:
 ```{r}
 x = "Quels sont ces serpents qui sifflent sur vos têtes?"
 # let's shorten this
-smagick("Oreste: {s, '4|..'k, c, Q ? x}")
+smagic("Oreste: {s, '4|..'k, c, Q ? x}")
 
 rome = c("Rome qui t'a vu naître et que ton coeur adore",
          "Rome enfin, que je hais parce qu'elle t'honore!")
 # the double pipe triggers a different behavior in this operator
-smagick("Camille: {s, '4||..'k, c, Q ? rome}")
+smagic("Camille: {s, '4||..'k, c, Q ? rome}")
 ```
 
 # Regular operations: Reference {#sec_operations_reference}
 
-This section references all `smagick`'s regular operations.
+This section references all `smagic`'s regular operations.
 
 ## Basic string operations
 
@@ -280,7 +280,7 @@ This section describes some of the most common string operations: extracting,
 replacing, collapsing, splitting, etc. Because they are so common, many of these 
 operations have a name composed of just one letter.
 These functions accept generic flags ("ignore", "fixed", "word") in their patterns (syntax: "flags/pattern"). 
-For more information on regex flags, see the [dedicated section](https://lrberge.github.io/stringmagick/articles/string_tools.html).
+For more information on regex flags, see the [dedicated section](https://lrberge.github.io/stringmagic/articles/string_tools.html).
 
 ### s, S, split, Split
 
@@ -291,21 +291,21 @@ When character strings are split, their identity is kept in memory
 so that group-wise operations can be applied. See the [section on group-wise operations](#sec_group_wise).
 ```{r}
 # 'S' with its default (comma separation)
-smagick("{S ! romeo, juliet}")
+smagic("{S ! romeo, juliet}")
 
 # result with 's' is different
-smagick("{s ! romeo, juliet}")
+smagic("{s ! romeo, juliet}")
 
 # with argument: 's' and 'S' are identical
 # note the flag 'fixed' (`f/`) to remove regex interpretation
-smagick("{'f/+'s, '-'c ! 5 + 2} = 3")
+smagic("{'f/+'s, '-'c ! 5 + 2} = 3")
 
 # group wise operations (here `~(sort, c)`, see dedicated section)
 prince_talk = c("O that this too too solid flesh would melt",
                 "Thaw, and resolve itself into a dew!",
                 "Or that the Everlasting had not fix'd",
                 "His canon 'gainst self-slaughter!")
-smagick("Order matters:\n{s, ~(sort, c), fill.c, lower, upper.sentence,
+smagic("Order matters:\n{s, ~(sort, c), fill.c, lower, upper.sentence,
                           Q, '\n'c ? prince_talk}")
 ```
 
@@ -323,17 +323,17 @@ so that group-wise operations can be applied. See the section on group-wise oper
 ```{r}
 # regular way
 x = 1:4
-smagick("And {' and 'c ? x}!")
+smagic("And {' and 'c ? x}!")
 
 # with s2
-smagick("Choose: {', | or 'c ? 2:4}?")
+smagic("Choose: {', | or 'c ? 2:4}?")
 
 # default of C: enumeration
 wines = c("Saint-Estephe", "Margaux")
-smagick("I like {C?wines}.")
+smagic("I like {C?wines}.")
 
 # default of c: space concatenation
-smagick("{s, '.{5,}'get, c ! I don't like short words}")
+smagic("{s, '.{5,}'get, c ! I don't like short words}")
 ```
 
 ### extract, x, X
@@ -347,20 +347,20 @@ When patterns are extracted, the identity of each original character string is k
 so that group-wise operations can be applied. See the [section on group-wise operations](#sec_group_wise).
 ```{r}
 x = c("margo: 32, 1m75", "luke doe: 27, 1m71")
-smagick("{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}")
+smagic("{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}")
 
 # illustrating multiple extractions
 # group-wise operation (~()) is detailed in its own section
 x = c("Combien de marins, combien de capitaines.",
       "Qui sont partis joyeux pour des courses lointaines,",
       "Dans ce morne horizon se sont évanouis !")
-smagick("Endings with i: {'i\\w*'extract, ~(', 'c), enum.1 ? x}.")
+smagic("Endings with i: {'i\\w*'extract, ~(', 'c), enum.1 ? x}.")
 
 x = c("6 feet under", "mahogany")
 # single extraction
-smagick("{'\\w{3}'x ? x}")
+smagic("{'\\w{3}'x ? x}")
 # multiple extraction
-smagick("{'\\w{3}'X ? x}")
+smagic("{'\\w{3}'X ? x}")
 ```
 
 ### r, R, replace
@@ -376,35 +376,35 @@ If the option `"single"` is provided, only a single substitution is performed (t
 That is, the function `base::sub` is used instead of `base::gsub`.
 ```{r}
 # regex without replacement (ie removing)
-smagick("{'e'replace ! Where is the letter e?}")
+smagic("{'e'replace ! Where is the letter e?}")
 
 # regex with replacement
-smagick("{'(?<!\\b)e => a'replace ! Where is the letter e?}")
+smagic("{'(?<!\\b)e => a'replace ! Where is the letter e?}")
 
 # with option "single"
-smagick("{'(?<!\\b)e => a'replace.single ! Where is the letter e?}")
+smagic("{'(?<!\\b)e => a'replace.single ! Where is the letter e?}")
 
 # we replace the full string with the flag total (`t/`)
 x = c("Where is the letter e?", "Not this way!")
-smagick("{'t/e => here!'r ? x}")
+smagic("{'t/e => here!'r ? x}")
 ```
 
 ### clean {#op_clean}
 
 Replaces a pattern with a string. Similar to the operation `r`, except that here the comma is
 a pattern separator. The argument is of the form `"flags/pattern1, pattern2 => replacement"`. 
-See detailed explanations in [`str_clean()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#sec_clean). 
+See detailed explanations in [`str_clean()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_clean). 
 
 ```{r}
 # we use the fixed pattern to remove the regex meaning
-smagick("{'f/[, ]'clean ! x[a]}")
+smagic("{'f/[, ]'clean ! x[a]}")
 ```
 
 ### get
 
 Restricts the string vector to only the values respecting a pattern. This operation has no default.
 Accepts the options `"equal"` and `"in"`.
-By default it uses the same syntax as [`str_get()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#detect_funs) 
+By default it uses the same syntax as [`str_get()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
 so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
 If the option `"equal"` is used, a simple string equality with the argument is tested (hence
@@ -414,18 +414,18 @@ and then set inclusion is tested.
 ```{r}
 x = row.names(mtcars)
 #  we only keep models containing "Merc" and ending with a letter ([[:alpha:]]$)
-smagick("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, C ? x}.")
+smagic("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, C ? x}.")
 
 models = c("Merc 230", "Merc 450SE", "Merc 480")
 # we only ekep the ones in the set
-smagick("Mercedes models: {`models`get.in, C ? x}.")
+smagic("Mercedes models: {`models`get.in, C ? x}.")
 ```
 
 ### is
 
 Detects if a pattern is present in a string, returns a logical vector. This operation has no default.
-Mostly useful as the final operation in a [`str_ops()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#sec_ops) call.
-By default it uses the same syntax as [`str_is()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#detect_funs) 
+Mostly useful as the final operation in a [`str_ops()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_ops) call.
+By default it uses the same syntax as [`str_is()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
 so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
 If the option `"equal"` is used, a simple string equality with the argument is tested (hence
@@ -434,24 +434,24 @@ and then set inclusion is tested.
 ```{r}
 x = c("Mark", "Lucas")
 # note that we use the flag `i/` to ignore the case
-smagick("Mark? {'i/mark'is, C ? x}")
+smagic("Mark? {'i/mark'is, C ? x}")
 ```
 
 ### which
 
 Returns the index of string containing a specified pattern. With no default, can be applied
 to a logical vector directly. 
-By default it uses the same syntax as [`str_which()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#detect_funs) 
+By default it uses the same syntax as [`str_which()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
 so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
 If the option `"equal"` is used, a simple string equality with the argument is tested (hence
 no flags are accepted). If the option `"in"` is used, the argument is first split with respect to commas
 and then set inclusion is tested. 
-Mostly useful as the final operation in a [`str_ops()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#sec_ops) call.
+Mostly useful as the final operation in a [`str_ops()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_ops) call.
 ```{r}
 x = c("Mark", "Lucas", "Markus")
 # note that we use the flag `i` to ignore the case and `w` to add word boundaries
-smagick("Mark is number {'iw/mark'which ? x}.")
+smagic("Mark is number {'iw/mark'which ? x}.")
 ```
 
 ## Operations changing the length or the order {#subsec_op_length}
@@ -461,13 +461,13 @@ smagick("Mark is number {'iw/mark'which ? x}.")
 Keeps only the first `n` elements. 
 
 ```{r}
-smagick("First 3 mpg values: {3 first, C ? mtcars$mpg}.")
+smagic("First 3 mpg values: {3 first, C ? mtcars$mpg}.")
 
 # you could have done the same with regular R in the expression...
-smagick("First 3 mpg values: {C ? head(mtcars$mpg, 3)}.")
+smagic("First 3 mpg values: {C ? head(mtcars$mpg, 3)}.")
 
 # ...but not in the middle of an operations chain
-smagick("First 3 integer mpg values: {'!f/.'get, 3 first, C ? mtcars$mpg}.")
+smagic("First 3 integer mpg values: {'!f/.'get, 3 first, C ? mtcars$mpg}.")
 ```
 
 Negative numbers as argument remove the 
@@ -475,11 +475,11 @@ first `n` values. You can add a second argument in the form `'n1|n2'first` in wh
 `n2` values are kept; `n1` and `n2` must be positive numbers.
 
 ```{r}
-smagick("Letters in the middle: {13 first, 5 last, C ? letters}.")
+smagic("Letters in the middle: {13 first, 5 last, C ? letters}.")
 
-smagick("First and last letters: {'3|3'first, C ? letters}.")
+smagic("First and last letters: {'3|3'first, C ? letters}.")
 
-smagick("Last letters: {-21 first, C ? letters}.")
+smagic("Last letters: {-21 first, C ? letters}.")
 ```
 
 ### K
@@ -494,10 +494,10 @@ The string `s` accepts specials values:
 
 ```{r}
 # basic use
-smagick("First 3 letters: {'3'K, q, C ? letters}.")
+smagic("First 3 letters: {'3'K, q, C ? letters}.")
 
 # advanced use: using the extra argument
-smagick("The letters are: {q, '3|:rest: others'K, C ? letters}.")
+smagic("The letters are: {q, '3|:rest: others'K, C ? letters}.")
 ```
 
 ### last
@@ -505,9 +505,9 @@ smagick("The letters are: {q, '3|:rest: others'K, C ? letters}.")
 Keeps only the last `n` elements. Negative numbers as argument remove the 
 last `n` values.
 ```{r}
-smagick("Last 3 mpg values: {3 last, C ? mtcars$mpg}.")
+smagic("Last 3 mpg values: {3 last, C ? mtcars$mpg}.")
 
-smagick("Removing the 3 last elements leads to {-3 last, C ! x{1:5}}.")
+smagic("Removing the 3 last elements leads to {-3 last, C ! x{1:5}}.")
 ```
 
 ### sort
@@ -516,17 +516,17 @@ Sorts the vector in increasing order. Accepts an optional argument and the optio
 ```{r}
 x = c("sort", "me")
 # basic use
-smagick("{sort, c ? x}")
+smagic("{sort, c ? x}")
 ```
 If an argument is provided, it must be a regex pattern that will be applied to
-the vector using [`str_clean()`](https://lrberge.github.io/stringmagick/articles/string_tools.html#sec_clean). 
+the vector using [`str_clean()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_clean). 
 The sorting will be applied to the modified version of the vector
 and the original vector will be ordered according to this sorting. 
 ```{r}
 # first modifying the string before sorting
 # here the regex first removes the first word, meaning that we sort on the last names
 x = c("Jon Snow", "Khal Drogo")
-smagick("{'.+ 'sort, C?x}")
+smagic("{'.+ 'sort, C?x}")
 ```
 
 The option `"num"` sorts over a numeric version 
@@ -535,10 +535,10 @@ Values which could not be converted are last.
 ```{r}
 x = "Mark is 34, Bianca is 55, Odette is 101, Julie is 21 and Frank is 5"
 # sort on the "character string" number
-smagick("{', | and 's, '\\D'sort, C ? x}")
+smagic("{', | and 's, '\\D'sort, C ? x}")
 
 # we extract the numbers, then convert to numeric, then sort
-smagick("{', | and 's, '\\D'sort.num, C ? x}")
+smagic("{', | and 's, '\\D'sort.num, C ? x}")
 ```
 **Important note**: the sorting operation is applied before any character conversion.
 If previous operations were applied, it is likely that numeric data were transformed to character.
@@ -546,9 +546,9 @@ If previous operations were applied, it is likely that numeric data were transfo
 # note the difference
 x = c(20, 100, 10)
 # sorting on numeric
-smagick("{sort, ' + 'c ? x}")
+smagic("{sort, ' + 'c ? x}")
 # sorting on character since 'n' operation transformed the vector to character
-smagick("{n, sort, ' + 'c ? x}")
+smagic("{n, sort, ' + 'c ? x}")
 ```
 
 ### dsort
@@ -556,21 +556,21 @@ smagick("{n, sort, ' + 'c ? x}")
 Sorts the vector in decreasing order. It accepts an optional argument and 
 the option `"num"`. See the operation `"sort"` for a description of the argument and the option.
 ```{r}
-smagick("5 = {dsort, ' + 'c ? 2:3}")
+smagic("5 = {dsort, ' + 'c ? 2:3}")
 ```
 
 ### rev
 
 Reverses the vector.
 ```{r}
-smagick("{rev, ''c ? 1:3}")
+smagic("{rev, ''c ? 1:3}")
 ```
 
 ### unik
 
 Makes the string vector unique. 
 ```{r}
-smagick("Iris species: {unik, upper.first, C ? iris$Species}.")
+smagic("Iris species: {unik, upper.first, C ? iris$Species}.")
 ```
 
 ### each
@@ -579,10 +579,10 @@ Repeats each element of the vector `n` times. Option `"c"` then collapses the fu
 with the empty string as a separator. 
 ```{r}
 # note: operation `S` splits splits wrt to commas (default behavior)
-smagick("{S!x, y}{2 each ? 1:2}")
+smagic("{S!x, y}{2 each ? 1:2}")
 
 # illustrating collapsing
-smagick("Large number: 1{5 each.c ! 0}")
+smagic("Large number: 1{5 each.c ! 0}")
 ```
 
 ### times
@@ -590,7 +590,7 @@ smagick("Large number: 1{5 each.c ! 0}")
 Repeats the vector sequence `n` times. Option `"c"` then collapses the full vector 
 with the empty string as a separator. 
 ```{r}
-smagick("What{6 times.c ! ?}")
+smagic("What{6 times.c ! ?}")
 ```
 
 ### rm
@@ -599,7 +599,7 @@ Removes elements from the vector. Options: `"empty"`, `"blank"`, `"noalpha"`, `"
 The *optional* argument represents the pattern used to detect strings to be deleted. 
 ```{r}
 x = c("Luke", "Charles")
-smagick("{'i/lu'rm ? x}")
+smagic("{'i/lu'rm ? x}")
 ```
 
 By default it removes empty strings. 
@@ -610,7 +610,7 @@ the dedicated section). If an argument is provided, only the options `"empty"` a
 
 ```{r}
 x = c("I want to enter.", "Age?", "21.")
-smagick("Nightclub conversation: {rm.noalpha, c ! - {x}}")
+smagic("Nightclub conversation: {rm.noalpha, c ! - {x}}")
 ```
 
 ### nuke
@@ -620,7 +620,7 @@ Useful in conditions, see the dedicated section.
 ```{r}
 x = c(5, 7, 453, 647)
 # here we use a condition: see the dedicated section for more information
-smagick("Small numbers only: {if(.>20 ; nuke), C ? x}.")
+smagic("Small numbers only: {if(.>20 ; nuke), C ? x}.")
 ```
 
 ### insert
@@ -629,7 +629,7 @@ Inserts a new element to the vector. Options: `"right"` and `"both"`. Option `"r
 the new element to the right. Option `"both"` inserts the new element on the two sides of the vector.
 
 ```{r}
-smagick("{'3'insert.right, ' + 'c ? 1:2}")
+smagic("{'3'insert.right, ' + 'c ? 1:2}")
 ```
 
 ## Formatting operations
@@ -639,7 +639,7 @@ smagick("{'3'insert.right, ' + 'c ? 1:2}")
 Lower cases the full string.
 ```{r}
 x = "MesSeD uP CaSe"
-smagick("from a {x} to {lower?x}")
+smagic("from a {x} to {lower?x}")
 ```
 
 ### upper
@@ -650,7 +650,7 @@ upper cases the first letter after punctuation.
 
 ```{r}
 x = "hi. how are you? fine."
-smagick("{upper.sentence ? x}")
+smagic("{upper.sentence ? x}")
 ```
 
 ### title
@@ -663,13 +663,13 @@ Option `"ignore"` ignores a few small prepositions ("a", "the", "of", etc).
 x = "bryan is in the KITCHEN"
 
 # default: respects upper cases
-smagick("{title ? x}")
+smagic("{title ? x}")
 
 # force: force to title case
-smagick("{title.force ? x}")
+smagic("{title.force ? x}")
 
 # ignore: ignores small prepositions
-smagick("{title.force.ignore ? x}")
+smagic("{title.force.ignore ? x}")
 ```
 
 ### ws
@@ -679,11 +679,11 @@ of whitespaces into a single one. Can also be used to further clean the string w
 Options: `"punct"`, `"digit"`, `"isolated"`. Option `"punct"` cleans the punctuation. Option `"digit"` cleans digits.
 Option `"isolated"` cleans isolated letters. WS normalization always come after any of these options.
 **Important note:** punctuation (or digits) are replaced with WS and **not** 
-the empty string. This means that `smagick("ws.punct ! Meg's car")` will become `"Meg s car"`.
+the empty string. This means that `smagic("ws.punct ! Meg's car")` will become `"Meg s car"`.
 
 ```{r}
 x = "   I    should? review 85 4 this text!!"
-smagick("v0: {x}", 
+smagic("v0: {x}", 
         "v1: {ws ? x}",
         "v2: {ws.punct ? x}",
         "v3: {ws.punct.digit ? x}",
@@ -700,7 +700,7 @@ To add quotes to the strings. q: single quotes, Q: double quotes, bq:
 back quotes.
 ```{r}
 x = c("Mark", "Pam")
-smagick("Hello {q, C ? x}!")
+smagic("Hello {q, C ? x}!")
 ```
 
 ### format, Format
@@ -712,7 +712,7 @@ Options `"0"` or `"zero"` fills the blanks with 0s: useful to format numbers. Op
 and `"center"` centers the strings.
 ```{r}
 x = c(1, 12345) 
-smagick("left:   {format, q, C ? x}", 
+smagic("left:   {format, q, C ? x}", 
         "right:  {Format, q, C ? x}",
         "center: {format.center, q, C ? x}",
         "zero:   {format.0, q, C ? x}", .sep = "\n")
@@ -723,7 +723,7 @@ smagick("left:   {format, q, C ? x}",
 Applies `base::sprintf()` formatting. The syntax is `'arg'%` with arg an sprintf formatting,
 or directly the sprint formatting.
 ```{r}
-smagick("pi = {%.3f ? pi}")
+smagic("pi = {%.3f ? pi}")
 ```
 
 ### stopwords
@@ -733,7 +733,7 @@ The stopwords are replaced with an empty space but the left and right WS are
 untouched. So WS normalization may be needed (see operation `ws`).
 ```{r}
 x = c("He is tall", "He isn't young")
-smagick("Is he {stop, ws, C ? x}?")
+smagic("Is he {stop, ws, C ? x}?")
 ```
 
 ### ascii
@@ -745,7 +745,7 @@ is done with `base::iconv()`, option `"utf8"` indicates that the source endocing
 in some cases.
 ```{r}
 author = "Laurent Bergé"
-smagick("This package has been developped by {ascii ? author}.")
+smagic("This package has been developped by {ascii ? author}.")
 ```
 
 ### n, N: Formatting integers
@@ -759,21 +759,21 @@ with `utils::as.roman`. The lower case version writes them in lower case.
 The upper case command (`N`) adds the option `"letter"`.
 ```{r}
 x = c(5, 12, 52123)
-smagick("She owes {n, '$'paste, C ? x}.")
+smagic("She owes {n, '$'paste, C ? x}.")
 
 # option 0: all same width, no ',' for thousands
-smagick("|---|\n{n.0, '\n'c ? x}")
+smagic("|---|\n{n.0, '\n'c ? x}")
 
 # option "upper"
 n = 5
-smagick("{n.upper ? n} is my favourite number.")
+smagic("{n.upper ? n} is my favourite number.")
 
 # N: like "n.letter"
 x = 5
-smagick("He's {N ? x} years old.")
+smagic("He's {N ? x} years old.")
 
 # roman
-smagick("What's nicer? {c?11:13}, {n.roman, c?11:13} or {n.Roman, c?11:13}?")
+smagic("What's nicer? {c?11:13}, {n.roman, c?11:13} or {n.Roman, c?11:13}?")
 ```
 
 ### nth, Nth: Numbered position
@@ -782,18 +782,18 @@ When applied to a number, this operator writes them as a rank. Options: `"letter
 `"upper"`, `"compact"`. 
 ```{r}
 n = c(3, 7)
-smagick("They finished {nth, enum ? n}!")
+smagic("They finished {nth, enum ? n}!")
 ```
 Option `"letter"` tries to write the numbers in letters, but note that it stops at 20. Option `"upper"`
 is the same as `"letter"` but uppercases the first letter. Option `"compact"` aggregates
 consecutive sequences in the form `"start_n_th to end_n_th"`. 
 ```{r}
-smagick("They arrived {nth.compact ? 5:20}.")
+smagic("They arrived {nth.compact ? 5:20}.")
 ```
 The upper case command (`Nth`) adds the option `"letter"`.
 ```{r}
 n = c(3, 7)
-smagick("They finished {Nth, enum ? n}!")
+smagic("They finished {Nth, enum ? n}!")
 ```
 
 ### ntimes, Ntimes: Number of times
@@ -802,12 +802,12 @@ Write numbers in the form `n` times. Options: `"letter"`, `"upper"`. Option
 `"letter"` writes the number in letters (up to 100). Option `"upper"` does the same as `"letter"` 
 and uppercases the first letter. 
 ```{r}
-smagick("They lost {C ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}.")
+smagic("They lost {C ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}.")
 ```
 The upper case command (`Ntimes`) adds the option `"letter"`.
 ```{r}
 x = 5
-smagick("This paper was rejected {Ntimes ? x}...")
+smagic("This paper was rejected {Ntimes ? x}...")
 ```
 
 ### firstchar, lastchar: First/last characters
@@ -815,9 +815,9 @@ smagick("This paper was rejected {Ntimes ? x}...")
 To select the first/last characters of each element. 
 Negative numbers remove the first/last characters.
 ```{r}
-smagick("{19 firstchar, 9 lastchar ! This is a very long sentence}")
+smagic("{19 firstchar, 9 lastchar ! This is a very long sentence}")
 
-smagick("delete 3 = {-3 firstchar ! delete 3}")
+smagic("delete 3 = {-3 firstchar ! delete 3}")
 ```
 
 ### k, shorten, Shorten: Shortens character strings
@@ -843,7 +843,7 @@ for the argument `s`, like in `'n||s'`.
 
 ```{r}
 x = "long sentence"
-smagick("v0: {x}", 
+smagic("v0: {x}", 
         "v1: {4 shorten ? x}", 
         "v2: {'4|..'shorten ? x}", 
         "v3: {'4|..'shorten.include ? x}", 
@@ -861,14 +861,14 @@ argument `s` is a symbol used to fill the blanks. By default `s` is equal to a w
 
 Option `"right"` right aligns and `"center"` centers the strings.
 
-See help for [`str_fill()`](https://lrberge.github.io/stringmagick/reference/str_fill.html) 
+See help for [`str_fill()`](https://lrberge.github.io/stringmagic/reference/str_fill.html) 
 for more information.
 ```{r}
 life = "full of sound and fury, Signifying nothing"
-smagick("{'[ ,]+'s, upper.first, fill.center, q, '\n'c ? life}")
+smagic("{'[ ,]+'s, upper.first, fill.center, q, '\n'c ? life}")
 
 # fixing the length and filling with 0s
-smagick("{'5|0'fill.right, C ? c(1, 55)}")
+smagic("{'5|0'fill.right, C ? c(1, 55)}")
 ```
 
 ### paste
@@ -880,7 +880,7 @@ Option `"right"` pastes on the right and `"both"` pastes on both sides. Option `
 pastes on the first element while option `"back"` only pastes on the last element. Option `"delete"`
 first replaces all elements with the empty string.
 ```{r}
-smagick("6 = {'|'paste.both, ' + 'c ? -3:-1}")
+smagic("6 = {'|'paste.both, ' + 'c ? -3:-1}")
 ```
 
 
@@ -897,7 +897,7 @@ Option `"rm"` converts and removes the elements that could not be converted.
 Option `"clear"` turns failed conversions into the empty string, and hence lead to a character vector.
 ```{r}
 x = c(5, "six")
-smagick("   origin: {C, q ? x}", 
+smagic("   origin: {C, q ? x}", 
         "      num: {num, C, q ? x}", 
         "   num.rm: {num.rm, C, q ? x}", 
         " num.soft: {num.soft, C, q ? x}", 
@@ -911,7 +911,7 @@ separated list of elements.
 If there are more than 7 elements, only the first 6 are shown and the number of
 items left is written.
 ```{r}
-smagick("enum ? 1:5")
+smagic("enum ? 1:5")
 ```
 You can add the following options:
 
@@ -921,18 +921,18 @@ You can add the following options:
   + a number: to tell the number of items to display
 ```{r}
 x = c("Marv", "Nancy")
-smagick("The murderer must be {enum.or ? x}.")
+smagic("The murderer must be {enum.or ? x}.")
 
 x = c("oranges", "milk", "rice")
-smagick("Shopping list: {enum.i.q ? x}.")
+smagic("Shopping list: {enum.i.q ? x}.")
 
 # enum is made for display: when vectors are too long, they are truncated
 # default is at 7
-x = smagick("x{sample(100, 30)}")
-smagick("The problematic variables are {'x'sort.num, enum ? x}.")
+x = smagic("x{sample(100, 30)}")
+smagic("The problematic variables are {'x'sort.num, enum ? x}.")
 
 # you can augment or reduce the numbers to display with an option
-smagick("The problematic variables are {'x'sort.num, enum.3 ? x}.")
+smagic("The problematic variables are {'x'sort.num, enum.3 ? x}.")
 ```
 
 
@@ -942,11 +942,11 @@ Gives the length of the vector. Options `"letter"`, `"upper"`, `"format"`.
 Option `"letter"` writes the length in words (up to 100). Option `"upper"` is the same 
 as letter but uppercases the first letter. Option `"format"` add comma separation for thousands.
 ```{r}
-smagick("Size = {len.format ? 1:5000}")
+smagic("Size = {len.format ? 1:5000}")
 ```
 The upper case command (`Len`) adds the option `"letter"`.
 ```{r}
-smagick("Its size is {Len ? 1:8}")
+smagic("Its size is {Len ? 1:8}")
 ```
 
 ### width
@@ -962,7 +962,7 @@ target size as a fraction of the current screen. Finally it can be an expression
 uses the variable `.sw` which will capture the value of the current screen width.
 ```{r}
 x = "this is a long sentence"
-smagick("------ version 0 ------\n{x}", 
+smagic("------ version 0 ------\n{x}", 
         "------ version 1 ------\n{15 width ? x}", 
         "------ version 2 ------\n{'15|#>'width ? x}",
         "------ version 3 ------\n{'15|#>_'width ? x}", .sep = "\n")
@@ -975,12 +975,12 @@ operation fails. It accepts either objects of class `POSIXt` or `difftime`.
 ```{r}
 x = Sys.time()
 Sys.sleep(0.15) 
-smagick("Time: {dtime ? x}")
+smagic("Time: {dtime ? x}")
 ```
 
 # Group-wise operations {#sec_group_wise}
 
-In `smagick`, the operations `s` (split) and `extract` keep a memory of the strings 
+In `smagic`, the operations `s` (split) and `extract` keep a memory of the strings 
 that were split (i.e. they provide multiple results for each initial string element). 
 
 Use the tilde operator, of the form `~(op1, op2)`, to apply operations
@@ -988,7 +988,7 @@ group-wise, to each of the split strings. Better with an example.
 
 ```{r}
 x = c("Oreste, Hermione", "Hermione, Pyrrhus", "Pyrrhus, Andromaque")
-smagick("Troubles ahead: {S, ~(' loves 'c), C ? x}.")
+smagic("Troubles ahead: {S, ~(' loves 'c), C ? x}.")
 ```
 
 Almost all operations can be applied group-wise (although only operations changing the order or 
@@ -1008,7 +1008,7 @@ Ex.1: Let's take a sentence, delete words of less than 4 characters, and trim
 words of 7+ characters. 
 ```{r}
 x = "Songe Céphise à cette nuit cruelle qui fut pour tout un peuple une nuit éternelle"
-smagick("{s, if(.nchar<=4 ; nuke ; '7|..'k), c ? x}")
+smagic("{s, if(.nchar<=4 ; nuke ; '7|..'k), c ? x}")
 ```
 
 Let's break it down. First the sentence is split w.r.t. spaces (command `s`), leading to a vector
@@ -1037,14 +1037,14 @@ Ex.2: we write the sum of several elements, if the vector is longer than 4, we r
 remaining elements with an ellispsis.
 ```{r}
 # same expression for two values of x give different results
-x_short = smagick("x{1:4}")
+x_short = smagic("x{1:4}")
 # the false statement is missing: it means that nothing is done is .N<=4
-smagick("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x_short}")
-# here equiv to: smagick("y = {' + 'c ? x_short}")
+smagic("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x_short}")
+# here equiv to: smagic("y = {' + 'c ? x_short}")
 
-x_long = smagick("x{1:10}")
-smagick("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x_long}")
-# here equiv to: smagick("y = {3 first, '...'insert.right, ' + 'c ? x_long}")
+x_long = smagic("x{1:10}")
+smagic("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x_long}")
+# here equiv to: smagic("y = {3 first, '...'insert.right, ' + 'c ? x_long}")
 ```
 
 For `vif`, the syntax is `vif(cond ; verb_true ; verb_false)` with `verb_true`
@@ -1055,15 +1055,15 @@ Ex.3: we want to replace all values lower than 10 by the the string "<10", and t
 create an enumeration.
 ```{r}
 x = c(1, 25, 12, 6)
-smagick("Values: {vif(.<10 ; <10), C ? x}")
+smagic("Values: {vif(.<10 ; <10), C ? x}")
 ```
 
 In Ex.3 the condition is of the same length as the vector, so an element-wise 
 operation is triggered. Conditions of length 1 apply the replacement 
 to the full vector. Knowing this, let's redo Ex.3 differently:
 ```{r}
-x = smagick("x{1:10}")
-smagick("y = {vif(.N>4 ; {x[1]} + ... + {last?x} ; {' + 'c?x}) ? x}")
+x = smagic("x{1:10}")
+smagic("y = {vif(.N>4 ; {x[1]} + ... + {last?x} ; {' + 'c?x}) ? x}")
 ```
 
 Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
@@ -1082,7 +1082,7 @@ Ex.5: we take in numeric values, keep only the last 4 values,
 append `x` for odd numbers and `y` for 
 even numbers, we further revert the order of the even numbers. 
 ```{r}
-smagick("{4 last, vif(. %% 2 ; x{.} ; y{rev?.}), C ? 1:11}")
+smagic("{4 last, vif(. %% 2 ; x{.} ; y{rev?.}), C ? 1:11}")
 ```
 
 Let's break it down. We take in `1:11`, and after the command `4 last` we're left
@@ -1115,13 +1115,13 @@ lower than 10 then we write the message `"x is short"`, otherwise we write `"x i
 and insert `"very"` depending on the number of digits.
 ```{r}
 x = 1:5
-smagick("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
+smagic("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
 
 x = 1:50
-smagick("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
+smagic("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
 
 x = 1:5000
-smagick("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
+smagic("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
 ```
 
 If a condition leads to a result of length 1, the full string is replaced by the verbatim 
@@ -1142,7 +1142,7 @@ Ex.2: illustration of element-wise replacements.
 ```{r}
 x = 1:4
 y = letters[1:4]
-smagick("{&x %% 2 ; odd ; {y}}")
+smagic("{&x %% 2 ; odd ; {y}}")
 ```
 
 In that example, when x is odd, it is replaced with `"odd"`, and when even it is
@@ -1155,10 +1155,10 @@ default for `verb_false` is the variable used in the condition itself. So the sy
 Ex.3: let's write the integer `i` in letters when equal to 3 only.
 ```{r}
 i = 3 
-smagick("i = {&&i == 3 ; three}")
+smagic("i = {&&i == 3 ; three}")
 
 i = 5
-smagick("i = {&&i == 3 ; three}")
+smagic("i = {&&i == 3 ; three}")
 ```
 
 # Special interpolation: Pluralization {#sec_pluralization}
@@ -1177,10 +1177,10 @@ use as first character:
 Ex.1: we add an ending 's' based on a number.
 ```{r}
 x = 5
-smagick("I bought {N?x} book{#s}.")
+smagic("I bought {N?x} book{#s}.")
 
 x = 1
-smagick("I bought {N?x} book{#s}.")
+smagic("I bought {N?x} book{#s}.")
 ```
 
 The syntax is `{#plural_ops ? variable}` or `{#plural_ops}` where `plural_ops` are
@@ -1198,10 +1198,10 @@ at all, an error is thrown.
 Ex.2: we add an ending 's' and conjugate the verb 'be' based on the length of a vector.
 ```{r}
 x = c("J.", "M.")
-smagick("My BFF{$s, are} {C?x}!")
+smagic("My BFF{$s, are} {C?x}!")
 
 x = "J."
-smagick("My BFF{$s, are} {C?x}!")
+smagic("My BFF{$s, are} {C?x}!")
 ```
 
 As you can notice in Ex.2, you can chain operations. In that case a whitespace is 
@@ -1220,16 +1220,16 @@ treats a 0-length or a 0-value as plural.
 
 ```{r}
 nfiles = 1
-smagick("We've found {&nfiles;{.};no} file{#s}.")
+smagic("We've found {&nfiles;{.};no} file{#s}.")
 
 nfiles = 0
-smagick("We've found {&nfiles;{.};no} file{#s}.")
+smagic("We've found {&nfiles;{.};no} file{#s}.")
 
 nfiles = 0
-smagick("We've found {&nfiles;{.};no} file{#s.0}.")
+smagic("We've found {&nfiles;{.};no} file{#s.0}.")
 
 nfiles = 4
-smagick("We've found {&nfiles;{.};no} file{#s.0}.")
+smagic("We've found {&nfiles;{.};no} file{#s.0}.")
 ```
 
 ### y or ies
@@ -1239,13 +1239,13 @@ treats a 0-length or a 0-value as plural.
 
 ```{r}
 ndir = 1
-smagick("We've found {ndir} director{#y}.")
+smagic("We've found {ndir} director{#y}.")
 
 ndir = 5
-smagick("We've found {ndir} director{#y}.")
+smagic("We've found {ndir} director{#y}.")
 
 ndir = 1
-smagick("We've found {ndir} director{#ies}.")
+smagic("We've found {ndir} director{#ies}.")
 ```
 
 ### enum
@@ -1254,10 +1254,10 @@ Enumerates the elements (see help for the regular operation `enum`).
 
 ```{r}
 fruits = c("apples", "oranges")
-smagick("The fruit{$s ? fruits} I love {$are, enum}.")
+smagic("The fruit{$s ? fruits} I love {$are, enum}.")
 
 fruits = "apples"
-smagick("The fruit{$s ? fruits} I love {$are, enum}.")
+smagic("The fruit{$s ? fruits} I love {$are, enum}.")
 ```
 
 ### n, N, len, Len
@@ -1268,10 +1268,10 @@ and `upper` (to uppercase the first letter).
 
 ```{r}
 nfiles = 5
-smagick("{#N.upper ? nfiles} file{#s, are} compromised.")
+smagic("{#N.upper ? nfiles} file{#s, are} compromised.")
 
 nfiles = 1
-smagick("{#N.upper ? nfiles} file{#s, are} compromised.")
+smagic("{#N.upper ? nfiles} file{#s, are} compromised.")
 ```
 
 ### nth, ntimes
@@ -1281,7 +1281,7 @@ to write the numbers in letters (uppercase version of the operator does the same
 
 ```{r}
 n = 2
-smagick("Writing the same sentence {#Ntimes ? n} is unnecessary.")
+smagic("Writing the same sentence {#Ntimes ? n} is unnecessary.")
 ```
 
 ### is, or any verb
@@ -1297,13 +1297,13 @@ conditional statements described in the next section.
 Ex.3: multiple verbs and conditional statements.
 ```{r}
 pple = c("Francis", "Henry")
-smagick("{$enum, is, (a;) ? pple} tall guy{$s}.",
+smagic("{$enum, is, (a;) ? pple} tall guy{$s}.",
         "{$(He;They), like} to eat donuts.",
         "When happy, at the pub {$(he;they), goes}!",
         "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", .sep = "\n")
 
 pple = "Francis"
-smagick("{$enum, is, (a;) ? pple} tall guy{$s}.",
+smagic("{$enum, is, (a;) ? pple} tall guy{$s}.",
         "{$(He;They), like} to eat donuts.",
         "When happy, at the pub {$(he;they), goes}!",
         "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", .sep = "\n")
@@ -1324,13 +1324,13 @@ you need not refer explicitly to the variable for pluralization interpolations.
 
 ```{r}
 x = 0
-smagick("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
+smagic("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
 
 x = 1
-smagick("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
+smagic("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
 
 x = 3
-smagick("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
+smagic("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
 ```
 
 For more example of conditional statements, see Ex.3 described in verb operations.
@@ -1346,23 +1346,23 @@ was open. On the other hand, you need to escape it in Ex.2.
 
 ```{r}
 # the closing bracket does not have a special meaning since no open bracket
-smagick("open = \\{, close = }")
+smagic("open = \\{, close = }")
 
 # we need to escape the first closing bracket
-smagick("many {5 times.c ! \\}}")
+smagic("many {5 times.c ! \\}}")
 ```
 
 Alternatively, use the argument `.delim` to change the delimiters. 
 
 Ex.3: changing the delimiter.
 ```{r}
-smagick("Here I {interpolate} with .[this] ", .delim = ".[ ]", this = ".[]")
+smagic("Here I {interpolate} with .[this] ", .delim = ".[ ]", this = ".[]")
 ```
 
 You can also use the following hack:
 Ex.4: using regular interpolation to pass verbatim text.
 ```{r}
-smagick("I {'can {write} {{what}} I want'}")
+smagic("I {'can {write} {{what}} I want'}")
 ```
 
 Since `{expr}` evaluates `expr`, the stuff inside the *box*, you can pass a 
@@ -1373,10 +1373,10 @@ escaped with a double backslash.
 
 ```{r}
 is_c = TRUE
-smagick("{&is_c ; int i =1\\; ; i = 1}")
+smagic("{&is_c ; int i =1\\; ; i = 1}")
 
 is_c = FALSE
-smagick("{&is_c ; int i =1\\; ; i = 1}")
+smagic("{&is_c ; int i =1\\; ; i = 1}")
 ```
 
 In interpolations, the exclamation mark (`!`) signals a verbatim expression. But what
@@ -1386,14 +1386,14 @@ algorithm that you want to evaluate the expression.
 
 Ex.4: using the `?` hack to use `!` as a logical operation.
 ```{r}
-smagick("{!TRUE} is {?!TRUE}")
+smagic("{!TRUE} is {?!TRUE}")
 ```
 
 
 # Creating your own operations {#sec_creation}
 
-You can add any arbitraty operation to `smagick`. You only need to 
-use the function `smagick_register`. 
+You can add any arbitraty operation to `smagic`. You only need to 
+use the function `smagic_register`. 
 
 First you need to create a function that will be applied to a character vector. 
 That function must have at least the arguments 'x' and '...'. 
@@ -1402,7 +1402,7 @@ Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'group_
 Second, this function must return a vector or a list of two items: `x` and `group`. The latter
 form is only used in functions modifying the length or order of the vector.
 
-Finally, you need to register the function with `smagick_register` and provide it an
+Finally, you need to register the function with `smagic_register` and provide it an
 alias. Optionnally, you can provide a list of valid options. 
 
 Ex.1: a new operation adding markdown emphasis.
@@ -1411,22 +1411,22 @@ Ex.1: a new operation adding markdown emphasis.
 fun_emph = function(x, ...) paste0("*", x, "*")
  
 # B) register it
-smagick_register(fun_emph, "emph")
+smagic_register(fun_emph, "emph")
 
 # C) use it
 x = str_vec("right, now")
-smagick("Take heed, {emph, c? x}.")
+smagic("Take heed, {emph, c? x}.")
 ```
 
 Above, we have created a simple functon that adds markdown emphasis to words.
 
-More generally, the function taken by `smagick_register` is called internally 
-by `smagick` in the form `fun(x, argument, options, group, group_flag)`.
+More generally, the function taken by `smagic_register` is called internally 
+by `smagic` in the form `fun(x, argument, options, group, group_flag)`.
 Here is the meaning of the arguments:
 
 - `x`: the value to which the operation applies. 
-- `argument`: the quoted `smagick` argument (always character). 
-- `options`: a character vector of `smagick` options. 
+- `argument`: the quoted `smagic` argument (always character). 
+- `options`: a character vector of `smagic` options. 
 - `group`: an index of the group to which belongs each observation (integer). 
 - `group_flag`: value between 0 and 2; 0: no grouping operation requested; 
 1: keep track of groups; 2: apply grouping.
@@ -1449,13 +1449,13 @@ fun_emph = function(x, argument, options, ...){
   paste0(arg, x, arg)
 }
 
-smagick_register(fun_emph, "emph", "strong")
+smagic_register(fun_emph, "emph", "strong")
 
 x = str_vec("right, now")
-smagick("Take heed, {'_'emph.s, c? x}.")
+smagic("Take heed, {'_'emph.s, c? x}.")
 
-# In smagick_register, the valid_option argument is used to validate them.
-try(smagick("Take heed, {'_'emph.aaa, c? x}."))
+# In smagic_register, the valid_option argument is used to validate them.
+try(smagic("Take heed, {'_'emph.aaa, c? x}."))
 ```
 
 Finally let's illustrate an example with group-wise axareness. 
@@ -1468,7 +1468,7 @@ keep_varnames = function(x, group, group_flag, ...){
   
   if(group_flag != 0){
     group = group[is_ok]
-    group = stringmagick:::cpp_recreate_index(group)
+    group = stringmagic:::cpp_recreate_index(group)
   } 
   
   res = list(x = x[is_ok], group = group)
@@ -1476,12 +1476,12 @@ keep_varnames = function(x, group, group_flag, ...){
   return(res)
 }
 
-smagick_register(keep_varnames, "keepvar")
+smagic_register(keep_varnames, "keepvar")
 
 expr = c("x1 + 52", "73 %% 5 == x", "y[y > .z_5]")
-smagick("All vars: {'[^[:alnum:]_.]+'s, keepvar, unik, bq, C ? expr}.")
+smagic("All vars: {'[^[:alnum:]_.]+'s, keepvar, unik, bq, C ? expr}.")
 
 # thanks to the group flag, we can apply group-wise operations
-smagick("Vars in each expr:\n",
+smagic("Vars in each expr:\n",
         "{'\n'c ! - {1:3}) {'[^[:alnum:]_.]+'s, keepvar, bq, ~(unik, C) ? expr}}")
 ```

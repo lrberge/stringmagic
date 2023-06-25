@@ -11,12 +11,12 @@
 setup_help_compact = function(){
 
   msg = c(
-    "# Welcome to smagick compact help (also try smagick(.help = TRUE) for more extensive help)",
-    "Usage: smagick(s) with 's' a character string",
+    "# Welcome to smagic compact help (also try smagic(.help = TRUE) for more extensive help)",
+    "Usage: smagic(s) with 's' a character string",
     " ",
     "# BASIC usage -------------------------|",
-    "  smagick evaluates anything in '{}' and inserts it in 's'.",
-    '  Ex: if x = "John", then smagick("Hi {x}!") -> "Hi John!"',
+    "  smagic evaluates anything in '{}' and inserts it in 's'.",
+    '  Ex: if x = "John", then smagic("Hi {x}!") -> "Hi John!"',
     " ",
     "# STRING OPERATIONS -------------------|",
     "  Each {} instance supports one or more string operations.",
@@ -28,25 +28,25 @@ setup_help_compact = function(){
     "      + ?: evaluates the expression x",
     "      + !: takes x as verbatim",
     "    - x an expression to be evaluated or some verbatim text (no quote needed).",
-    '  Ex: smagick("{\' + \'c?1:3} = 6") -> "1 + 2 + 3 = 6". 1:3 is collapsed (c) with \' + \'.',
+    '  Ex: smagic("{\' + \'c?1:3} = 6") -> "1 + 2 + 3 = 6". 1:3 is collapsed (c) with \' + \'.',
     "",
     "  Using ! instead of ? applies the operation to the *verbatim* of the expression.",
-    '  Ex: smagick("{\': => 2\'r ! 1:3} = 6") -> "123 = 6".',
+    '  Ex: smagic("{\': => 2\'r ! 1:3} = 6") -> "123 = 6".',
     "      In the string '1:3', ':' is replaced (r) with '2'.",
     "",
     "  Operations can be chained using comma-separation. The syntax is: {'s1'op1, 's2'op2?x}",
     "  Evaluations are from left to right.",
-    '  Ex: smagick("{\': => 2\'r, \'\'s, \' + \'c!1:3} = 6") -> "1 + 2 + 3 = 6',
+    '  Ex: smagic("{\': => 2\'r, \'\'s, \' + \'c!1:3} = 6") -> "1 + 2 + 3 = 6',
     "      1) '1:3'            -> ':' is replaced (r) with '2'  -> '123',",
     "      2) '123'            -> is split (s) with ''          -> c('1', '2', '3')",
     "      3) c('1', '2', '3') -> is collapsed (c) with ' + '   -> '1 + 2 + 3'",
     "",
     "  Nesting works, but only in verbatim components.",
     "  Ex: x = c(\"Doe\", \"Smith\")",
-    "      smagick(\"Hi {' and 'c ! John {x}}\") -> \"Hi John Doe and John Smith\"",
+    "      smagic(\"Hi {' and 'c ! John {x}}\") -> \"Hi John Doe and John Smith\"",
     "",
     "  Operators have default values, so the quoted argument is optional.",
-    '  Ex: smagick("{c ? 1:3}") -> "1 2 3". 1:3 is collapsed (c) with \' \', its default.',
+    '  Ex: smagic("{c ? 1:3}") -> "1 2 3". 1:3 is collapsed (c) with \' \', its default.',
     "",
     "# OPERATORS ---------------------------|",
     "  Below is a compact list of operators; their default arg. is in quotes, ",
@@ -80,8 +80,8 @@ setup_help_compact = function(){
     "  There are two pluralization tags: `$` and `#`.",
     "  - use `$` to pluralize on the *length* of the variable",
     "  - use `#` to pluralize on the *value* of the variable",
-    "  ex, length: x = c(\"Mark\", \"Francis\"); smagick(\"{$enum, is?x} here.\")",
-    "  ex, value: n = 1; smagick(\"{n} file{#s, were} found.\")",
+    "  ex, length: x = c(\"Mark\", \"Francis\"); smagic(\"{$enum, is?x} here.\")",
+    "  ex, value: n = 1; smagic(\"{n} file{#s, were} found.\")",
     "",
     "  When pluralizing you can perform the following operations:",
     "    - s, es: adds an 's' (or 'es') if it is plural",
@@ -93,30 +93,30 @@ setup_help_compact = function(){
     "    - is, or any verb: conjugates the verb appropriately",
     "    - n, N: add the number of elements as a number (n) or in letters (N)",
     "  You can chain operations, in that case a whitespace is automatically added between them.",
-    "  ex: x = sample(20, 5); smagick(\"The winning number{$s, is, enum ? sort(x)}.\")",
+    "  ex: x = sample(20, 5); smagic(\"The winning number{$s, is, enum ? sort(x)}.\")",
     "",
     "  You need not provide the value over which to pluralize if it has been used previously or will be used afterwards:",
-    "  ex: x = \"Mara\"; smagick(\"I like {C ? x}, {$(she;they), is} my best friend{$s}.\")",
+    "  ex: x = \"Mara\"; smagic(\"I like {C ? x}, {$(she;they), is} my best friend{$s}.\")",
     "",
     "# SPECIALS ----------------------------|",
     "  In quoted arguments, use backticks to evaluate them from the calling environment.",
-    '  Ex: n = 3 ; smagick("{`n`times.c!$}") -> "$$$". The \'$\' is replicated n times, then collapsed.'
+    '  Ex: n = 3 ; smagic("{`n`times.c!$}") -> "$$$". The \'$\' is replicated n times, then collapsed.'
   )
 
-  options("smagick_help_compact" = msg)
+  options("smagic_help_compact" = msg)
 }
 
 
 generate_help_extensive = function(){
   
-  if(!is_smagick_root()) return(NULL)
+  if(!is_smagic_root()) return(NULL)
   
   if(!identical(parent.frame(), .GlobalEnv) && 
          !identical(deparse(sys.calls()[[1]]), "devtools::load_all()")){
     return(NULL)
   }
   
-  mtime_origin = floor(as.numeric(file.info("R/smagick_doc.R")["mtime"]))
+  mtime_origin = floor(as.numeric(file.info("R/smagic_doc.R")["mtime"]))
   mtime_destination = readLines("R/AUTO_help.R", n = 1)
   mtime_destination = as.numeric(str_trim(mtime_destination, 2))
     
@@ -137,10 +137,10 @@ generate_help_extensive = function(){
   
   message("Help rewritten.")
   
-  smagick_txt = readLines("R/smagick_doc.R")
+  smagic_txt = readLines("R/smagic_doc.R")
   
-  i_smagick = str_which(smagick_txt, "^\"smagick\"")
-  doc = smagick_txt[1:(i_smagick - 1)]
+  i_smagic = str_which(smagic_txt, "^\"smagic\"")
+  doc = smagic_txt[1:(i_smagic - 1)]
   i_start_doc = max(str_which(doc, "!^#'")) + 1
   
   doc = doc[i_start_doc:length(doc)]
@@ -179,7 +179,7 @@ generate_help_extensive = function(){
               "setup_help_extensive = function(){",
               text_dp,
               "",
-              "  options(smagick_help_extensive = txt)",
+              "  options(smagic_help_extensive = txt)",
               "}")
   
   writeLines(fun_txt, "./R/AUTO_help.R")
@@ -190,7 +190,7 @@ format_help = function(pattern = NULL, x = NULL){
   # pattern = "replace"
   
   if(is.null(x)){
-    x = getOption("smagick_help_extensive")
+    x = getOption("smagic_help_extensive")
   }
   
   select = logical(length(x))
@@ -316,7 +316,7 @@ format_help = function(pattern = NULL, x = NULL){
     return(invisible(NULL))
   }
   
-  message(.sma("Welcome to smagick dynamic help:\n", 
+  message(.sma("Welcome to smagic dynamic help:\n", 
                "enter = continue ; p = next paragraph ; n = next match ; N = next section ; q or Q = quit"))
   
   msg(text, 1, 5)
@@ -394,9 +394,9 @@ format_help = function(pattern = NULL, x = NULL){
 
 general_help = function(){
   
-  message("Welcome to smagick help. Please choose which sections to read.")
+  message("Welcome to smagic help. Please choose which sections to read.")
   
-  x = getOption("smagick_help_extensive")
+  x = getOption("smagic_help_extensive")
   
   #
   # showing the titles
@@ -564,7 +564,7 @@ general_help = function(){
   
 }
 
-smagick_dynamic_help = function(help){
+smagic_dynamic_help = function(help){
   if(isTRUE(help)){
     general_help()
   } else {

@@ -1,5 +1,5 @@
 
-library(stringmagick)
+library(stringmagic)
 
-stringmagick:::run_tests(source = TRUE)
+stringmagic:::run_tests(source = TRUE)
 
