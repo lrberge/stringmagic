@@ -6,7 +6,7 @@ Authors@R:
   c(person(given = "Laurent R", family = "Berge", role = c("aut", "cre"), email = "laurent.berge@u-bordeaux.fr",
          comment = c(ORCID = "3-2736-1917")))
 Imports: Rcpp(>= 1.0.5), utils
-Suggests: knitr, data.table
+Suggests: knitr, rmarkdown, data.table
 LinkingTo: Rcpp
 Description: Performs complex string operations compactly and efficiently. Supports string interpolation jointly with over 50 string operations. Also enhances regular string functions (like `grep` and co).
 License: MIT + file LICENSE
