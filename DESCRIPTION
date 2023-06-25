@@ -1,6 +1,6 @@
-Package: stringmagick
+Package: stringmagic
 Type: Package
-Title: Character String Operations and Interpolation, Magick Edition
+Title: Character String Operations and Interpolation, Magic Edition
 Version: 1.0.0
 Authors@R: 
   c(person(given = "Laurent R", family = "Berge", role = c("aut", "cre"), email = "laurent.berge@u-bordeaux.fr",
@@ -11,8 +11,8 @@ LinkingTo: Rcpp
 Description: Performs complex string operations compactly and efficiently. Supports string interpolation jointly with over 50 string operations. Also enhances regular string functions (like `grep` and co).
 License: MIT + file LICENSE
 Encoding: UTF-8
-BugReports: https://github.com/lrberge/stringmagick/issues
-URL: https://lrberge.github.io/stringmagick/, https://github.com/lrberge/stringmagick
+BugReports: https://github.com/lrberge/stringmagic/issues
+URL: https://lrberge.github.io/stringmagic/, https://github.com/lrberge/stringmagic
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)

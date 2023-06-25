@@ -1,16 +1,16 @@
-useDynLib(stringmagick, .registration = TRUE)
+useDynLib(stringmagic, .registration = TRUE)
 
 # str_*
 export(str_ops, str_is, str_which, str_get, str_clean, str_split2df,
        str_split2dt, str_fill, str_vec)
 
-# smagick
-export(smagick, .smagick)
-export(smagick_register)
-export(setSmagick)
+# smagic
+export(smagic, .smagic)
+export(smagic_register)
+export(setSmagic)
 
 # Methods
-S3method(print, smagick)
+S3method(print, smagic)
 
 #
 # imports

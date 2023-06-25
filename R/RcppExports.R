@@ -37,8 +37,8 @@ cpp_parse_regex_pattern <- function(Rstr, parse_flags, parse_logical) {
     .Call(`_stringmagick_cpp_parse_regex_pattern`, Rstr, parse_flags, parse_logical)
 }
 
-cpp_smagick_parser <- function(Rstr, Rdelimiters, only_last_parsed_section = FALSE) {
-    .Call(`_stringmagick_cpp_smagick_parser`, Rstr, Rdelimiters, only_last_parsed_section)
+cpp_smagic_parser <- function(Rstr, Rdelimiters, only_last_parsed_section = FALSE) {
+    .Call(`_stringmagick_cpp_smagic_parser`, Rstr, Rdelimiters, only_last_parsed_section)
 }
 
 cpp_extract_quote_from_op <- function(Rstr) {
