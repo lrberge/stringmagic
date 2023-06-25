@@ -16,7 +16,7 @@ str_vec(
 \item{...}{Character vectors that will be vectorized. If commas are present in the
 character vector, it will be split with respect to commas and following blanks.
 The vectors can contain any interpolation in the form \code{"{var}"} and
-any \code{\link[=smagick]{smagick()}} operation can be applied. To change the delimiters for interpolation,
+any \code{\link[=smagic]{smagic()}} operation can be applied. To change the delimiters for interpolation,
 see \code{.delim}. Named arguments are used in priority for variable substitution,
 otherwise the value of the variables to be interpolated are fetched in the calling environment
 (see argument \code{.envir}).
@@ -56,7 +56,7 @@ Create string vectors in multiple ways: 1) add successive string elements (like 
 or 2) write a character string that will be broken with respect to commas
 (\code{"hi, there"} becomes \code{c("hi", "there")}), or 3) interpolate variables in
 character strings (\code{"x{1:2}"} becomes \code{c("x1", "x2")}) with full access to
-\code{\link[=smagick]{smagick()}} operations, or any combination of the three.
+\code{\link[=smagic]{smagic()}} operations, or any combination of the three.
 }
 \details{
 The default of the argument \code{.protect.vars} is \code{FALSE} so as to avoid unwanted
@@ -90,7 +90,7 @@ str_vec("\\\\usepackage{.[S!graphicx, fourier, standalone]}",
 \seealso{
 A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
 Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
-String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
+String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}.
 }
 \author{
 Laurent Berge

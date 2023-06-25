@@ -1,25 +1,25 @@
 
 
-title: fixest
+title: stringmagic
 
 articles:
   - title: Get started
     navbar: ~
     contents:
-    - stringmagick_tour
+    - stringmagic_tour
   - title: Guides
     navbar: Guides
     contents:
-    - smagick_walkthrough
+    - smagic_walkthrough
     - string_tools
     
 reference:
   - title: String interpolation and operations
     desc: Tools for string interpolation. 
     contents:
-      - smagick
+      - smagic
       - matches("sma")
-      - setSmagick
+      - setSmagic
   - title: Other string operations
     desc: Pattern detection, operations chaining, string cleaning and more
     contents:

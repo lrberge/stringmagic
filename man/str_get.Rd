@@ -89,7 +89,7 @@ automated script), and function calls without the main argument will lead to err
 \section{Generic regular expression flags}{
 
 
-All \code{stringmagick} functions support generic flags in regular-expression patterns.
+All \code{stringmagic} functions support generic flags in regular-expression patterns.
 The flags are useful to quickly give extra instructions, similarly to \emph{usual}
 \href{https://javascript.info/regexp-introduction}{regular expression flags}.
 
@@ -151,7 +151,7 @@ str_get(car_first, "a$", "i$", seq.unik = TRUE)
 #
 
 # you can combine the flags
-x = smagick("/One, two, one... Two!, Microphone, check")
+x = smagic("/One, two, one... Two!, Microphone, check")
 # regular
 str_get(x, "one")
 # ignore case
@@ -186,7 +186,7 @@ if(interactive() && is.null(sys.calls())){
 \seealso{
 A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
 Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
-String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
+String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}.
 }
 \author{
 Laurent R. Berge

@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>String tools: Magick edition • fixest</title>
+<title>String tools: magic edition • fixest</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="String tools: Magick edition">
-<meta property="og:description" content="stringmagick">
+<script src="../pkgdown.js"></script><meta property="og:title" content="String tools: magic edition">
+<meta property="og:description" content="stringmagic">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -50,16 +50,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/stringmagick_tour.html">`stringmagick`: A quick tour</a>
+      <a href="../articles/stringmagic_tour.html">`stringmagic`: A quick tour</a>
     </li>
     <li class="divider">
     </li>
 <li class="dropdown-header">Guides</li>
     <li>
-      <a href="../articles/smagick_walkthrough.html">`smagick`: Magical string interpolation</a>
+      <a href="../articles/smagic_walkthrough.html">`smagic`: Magical string interpolation</a>
     </li>
     <li>
-      <a href="../articles/string_tools.html">String tools: Magick edition</a>
+      <a href="../articles/string_tools.html">String tools: magic edition</a>
     </li>
   </ul>
 </li>
@@ -69,7 +69,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/lrberge/stringmagick/" class="external-link">
+  <a href="https://github.com/lrberge/stringmagic/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -87,20 +87,20 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>String tools: Magick edition</h1>
+      <h1 data-toc-skip>String tools: magic edition</h1>
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-06-23</h4>
+            <h4 data-toc-skip class="date">2023-06-25</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagick/blob/HEAD/vignettes/string_tools.rmd" class="external-link"><code>vignettes/string_tools.rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/string_tools.rmd" class="external-link"><code>vignettes/string_tools.rmd</code></a></small>
       <div class="hidden name"><code>string_tools.rmd</code></div>
 
     </div>
 
     
     
-<p>This vignette describes <code>stringmagick</code> tools for handling
+<p>This vignette describes <code>stringmagic</code> tools for handling
 character vectors. For a quick start, here are the sections
 describing:</p>
 <ul>
@@ -115,12 +115,12 @@ character strings</a>
 </li>
 </ul>
 <p>This vignette is also a reference for i) the <a href="#sec_regex">optional regex flags</a> available to all
-<code>stringmagick</code> regular expressions, and ii) the <a href="#detect_logic">logical combination of regular expressions</a>.</p>
+<code>stringmagic</code> regular expressions, and ii) the <a href="#detect_logic">logical combination of regular expressions</a>.</p>
 <div class="section level2">
 <h2 id="sec_regex">Regex flags<a class="anchor" aria-label="anchor" href="#sec_regex"></a>
 </h2>
-<p>All functions in <code>stringmagick</code> accept optional regex
-flags when regular expressions are expected. The idea is similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#advanced_searching_with_flags" class="external-link">regular
+<p>All functions in <code>stringmagic</code> accept optional regex flags
+when regular expressions are expected. The idea is similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#advanced_searching_with_flags" class="external-link">regular
 regex flags</a>, but the flags are different in name and effect.</p>
 <div class="section level3">
 <h3 id="regex-flags-syntax">Regex flags: Syntax<a class="anchor" aria-label="anchor" href="#regex-flags-syntax"></a>
@@ -138,10 +138,10 @@ added. If your regex should contain a slash, see the <a href="#flag_escaping">se
 <p>Ex: let’s find lines containing <code>"dt["</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">code</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DT = as.data.table(iris)"</span>, </span>
-<span>         <span class="st">"DT[, sma('PL/SL = {Petal.Length / Sepal.Length}')]"</span><span class="op">)</span></span>
+<span>         <span class="st">"DT[, .(pl_sl = smagic('PL/SL = {Petal.Length / Sepal.Length}')]"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/str_get.html">str_get</a></span><span class="op">(</span><span class="va">code</span>, <span class="st">"if/dt["</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "DT[, sma('PL/SL = {Petal.Length / Sepal.Length}')]"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "DT[, .(pl_sl = smagic('PL/SL = {Petal.Length / Sepal.Length}')]"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="regex-flags-reference">Regex flags: Reference<a class="anchor" aria-label="anchor" href="#regex-flags-reference"></a>
@@ -182,7 +182,7 @@ alphabet.</p>
 <span><span class="co"># the ignore flag allows to retain words starting with the</span></span>
 <span><span class="co"># upper cased letters</span></span>
 <span><span class="co"># ex: getting words starting with the letter 'r' to 'z'</span></span>
-<span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'i/\\b[r-z]\\w+'extract, c, 60 width ? unhappy}"</span><span class="op">)</span></span>
+<span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'i/\\b[r-z]\\w+'extract, c, 60 width ? unhappy}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Rumble thy Spit spout rain rain wind thunder tax you you\nwith unkindness you you You subscription Then Your stand\nyour slave weak"</span></span></code></pre></div>
 <p><em>Technically</em>, the <a href="https://www.pcre.org/" class="external-link">perl</a>
 expression <code>"(?i)"</code> is added at the beginning of the
@@ -245,7 +245,7 @@ readability. For example, with the flag <code>"word"</code>,
 <span><span class="st">Au silence éternel de la Divinité."</span></span>
 <span></span>
 <span><span class="co"># we hide a few words from this poem</span></span>
-<span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"{'wi/et, le, il, au, des?, ce =&gt; _'r ? le_mont_des_oliviers}"</span><span class="op">)</span></span>
+<span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'wi/et, le, il, au, des?, ce =&gt; _'r ? le_mont_des_oliviers}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "S'_ est vrai qu'_ Jardin sacré _ Écritures,\n_ Fils _ l'homme ai dit _ qu'on voit rapporté ;\nMuet, aveugle _ sourd _ cri _ créatures,\nSi _ Ciel nous laissa comme un monde avorté,\nAlors _ Juste opposera _ dédain à l'absence\n_ ne répondra plus que par un froid silence\n_ silence éternel _ la Divinité."</span></span></code></pre></div>
 <p><em>Technically</em>, first the pattern is split with respect to
 <code>",[ \t\n]+"</code>, then all elements are collapsed with
@@ -271,7 +271,7 @@ evaluated.</p>
 <span><span class="co">#&gt; [1] "__i___a_e___o__e___a____i____e__e___oy___a___y__e___u__io____e___i___ou___u___oy_"</span></span>
 <span></span>
 <span><span class="co">#</span></span>
-<span><span class="co"># Illustration of `smagick` operations before regex application</span></span>
+<span><span class="co"># Illustration of `smagic` operations before regex application</span></span>
 <span></span>
 <span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
 <span><span class="co"># Which of these models contain a digit?</span></span>
@@ -387,8 +387,8 @@ paths, the escaping of the slash can be highly confusing. This is a
 limitation of the current implementation of the optional flags. For
 example <code>"/[^/]+$"</code> looks like a legit regex to get the
 parent folder, but it won’t work as expected within
-<code>stringmagick</code>. To behave as expected, you would need to
-write <code>"//[^/]+$"</code> which looks weird, or
+<code>stringmagic</code>. To behave as expected, you would need to write
+<code>"//[^/]+$"</code> which looks weird, or
 <code>"\\/[^/]+$"</code>.</p>
 </div>
 </div>
@@ -399,7 +399,7 @@ write <code>"//[^/]+$"</code> which looks weird, or
 regular tools like <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::grepl</a></code> or
 <code><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">stringr::str_detect</a></code>. Things become more complicated when we
 want to detect the presence of multiple patterns.</p>
-<p><code>stringmagick</code> offers three functions with an intuitive
+<p><code>stringmagic</code> offers three functions with an intuitive
 syntax to deal with complex pattern detection:</p>
 <ul>
 <li>
@@ -511,7 +511,7 @@ these examples are equivalent with <code>str_is</code> or
 <p>Ex.1: series of examples using the <em>recommended syntax</em>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/smagick.html">smagick</a></span><span class="op">(</span><span class="st">"All cars from mtcars:\n{C, 60 width ? cars}"</span><span class="op">)</span></span>
+<span><span class="fu">smagic</span><span class="op">(</span><span class="st">"All cars from mtcars:\n{C, 60 width ? cars}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "All cars from mtcars:\nMazda RX4, Mazda RX4 Wag, Datsun 710, Hornet 4 Drive, Hornet\nSportabout, Valiant, Duster 360, Merc 240D, Merc 230, Merc\n280, Merc 280C, Merc 450SE, Merc 450SL, Merc 450SLC,\nCadillac Fleetwood, Lincoln Continental, Chrysler Imperial,\nFiat 128, Honda Civic, Toyota Corolla, Toyota Corona, Dodge\nChallenger, AMC Javelin, Camaro Z28, Pontiac Firebird, Fiat\nX1-9, Porsche 914-2, Lotus Europa, Ford Pantera L, Ferrari\nDino, Maserati Bora and Volvo 142E"</span></span>
 <span></span>
 <span><span class="co"># cars with an 'a', an 'e', an 'i', and an 'o', all in lower case</span></span>
@@ -626,7 +626,7 @@ variations on the same data set. Acknowledging this,
 interactive use. This means that the user can concentrate in the pattern
 to find and need not bother to write the data from where to fectch the
 values. Note that <code>str_get</code> is the only
-<code>stringmagick</code> function to have this ability.</p>
+<code>stringmagic</code> function to have this ability.</p>
 <p>Caching is always enabled, you don’t need to do anything.</p>
 <p>Ex: caching of the data.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -647,7 +647,7 @@ for parsing, text analysis, etc). Even for simple tasks, the number of
 operations can quickly balloon, adding many lines of code, reducing
 readability, and all this for basic processing.</p>
 <p>The function <code>str_ops</code> tries to solve this problem. It has
-access to all (50+) <a href="https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html#sec_operations_reference" class="external-link"><code>smagick</code>
+access to all (50+) <a href="https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html#sec_operations_reference" class="external-link"><code>smagic</code>
 operations</a>, allowing for a compact and readable way to chain basic
 operations on character strings.</p>
 <p>Below are a few motivating examples.</p>
@@ -728,7 +728,7 @@ cleaning operations which can be of two types:</p>
 <li>use <code>"pat1, pat2 =&gt; replacement"</code> to replace the regex
 patterns <code>pat1</code> and <code>pat2</code> with the value
 <code>replacement</code>.</li>
-<li>use <code>"@op1, op2"</code> to perform any arbitrary sequence of <a href="https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html#sec_operations_reference" class="external-link"><code>smagick</code>
+<li>use <code>"@op1, op2"</code> to perform any arbitrary sequence of <a href="https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html#sec_operations_reference" class="external-link"><code>smagic</code>
 operation</a>
 </li>
 </ol>
@@ -769,7 +769,7 @@ ASCII and lowers the case.</p>
 <span></span>
 <span><span class="co"># Cleaning a text</span></span>
 <span><span class="fu"><a href="../reference/str_clean.html">str_clean</a></span><span class="op">(</span><span class="va">monologue</span>, </span>
-<span>          <span class="co"># use smagick to: lower the case and remove basic stopwords</span></span>
+<span>          <span class="co"># use smagic to: lower the case and remove basic stopwords</span></span>
 <span>          <span class="st">"@lower, stopword"</span>,</span>
 <span>          <span class="co"># remove a few extra stopwords(we use the flag word 'w/')</span></span>
 <span>          <span class="st">"w/th, 's"</span>,</span>

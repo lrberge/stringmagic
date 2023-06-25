@@ -12,7 +12,7 @@ it will be converted to a character vector.}
 
 \item{op}{Character \strong{scalar}. Character scalar containing the comma separated values
 of operations to perform to the vector. The 50+ operations are detailed in the help
-page of \code{\link[=smagick]{smagick()}}.}
+page of \code{\link[=smagic]{smagic()}}.}
 
 \item{pre_unik}{Logical scalar, default is \code{NULL}. Whether to first unique the vector
 before applying the possibly costly string operations, and merging back the result.
@@ -27,8 +27,8 @@ one, depending on the operations performed.
 Simple tool to perform multiple operations to character vectors.
 }
 \details{
-This function is a simple wrapper around smagick. Formally, \code{str_ops(x, "op1, op2")}
-is equivalent to \code{smagick("{op1, op2 ? x}")}.
+This function is a simple wrapper around smagic. Formally, \code{str_ops(x, "op1, op2")}
+is equivalent to \code{smagic("{op1, op2 ? x}")}.
 }
 \examples{
 
@@ -45,7 +45,7 @@ str_ops(cars, "'i/^m'get, x, unik")
 # x: extracts the first pattern. The default pattern is "[[:alnum:]]+"
 #    which means an alpha-numeric word
 # unik: applies unique() to the vector
-# => see help in ?smagick for more details on the operations
+# => see help in ?smagic for more details on the operations
 
 
 # let's get the 3 largest numbers appearing in the car models
@@ -65,7 +65,7 @@ str_ops(cars, "'\\\\d+'x, rm, unik, num, dsort, 3 first")
 \seealso{
 A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
 Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
-String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
+String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}.
 }
 \author{
 Laurent R. Berge

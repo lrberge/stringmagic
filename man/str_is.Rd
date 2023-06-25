@@ -85,7 +85,7 @@ The internal function used to find the patterns is \code{\link[base:grep]{base::
 \section{Generic regular expression flags}{
 
 
-All \code{stringmagick} functions support generic flags in regular-expression patterns.
+All \code{stringmagic} functions support generic flags in regular-expression patterns.
 The flags are useful to quickly give extra instructions, similarly to \emph{usual}
 \href{https://javascript.info/regexp-introduction}{regular expression flags}.
 
@@ -117,7 +117,7 @@ leads to \code{"My greet geese!"}
 # NOTA: using `str_get` instead of `str_is` may lead to a faster understanding 
 #       of the examples 
 
-x = smagick("/one, two, one... two, microphone, check")
+x = smagic("/one, two, one... two, microphone, check")
 
 # default is regular expression search
 # => 3 character items
@@ -174,7 +174,7 @@ str_which(x, "e & o")
 \seealso{
 A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
 Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
-String interpolation combined with operation chaining: \code{\link[=smagick]{smagick()}}.
+String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}.
 }
 \author{
 Laurent R. Berge

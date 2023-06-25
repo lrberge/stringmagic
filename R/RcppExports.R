@@ -2,78 +2,78 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 cpp_paste_conditional <- function(x, id, sep = "", sep_last = "") {
-    .Call(`_stringmagick_cpp_paste_conditional`, x, id, sep, sep_last)
+    .Call(`_stringmagic_cpp_paste_conditional`, x, id, sep, sep_last)
 }
 
 cpp_normalize_ws <- function(Rstr) {
-    .Call(`_stringmagick_cpp_normalize_ws`, Rstr)
+    .Call(`_stringmagic_cpp_normalize_ws`, Rstr)
 }
 
 cpp_normalize_string <- function(Rstr, clean_punct, clean_digit, clean_isolated) {
-    .Call(`_stringmagick_cpp_normalize_string`, Rstr, clean_punct, clean_digit, clean_isolated)
+    .Call(`_stringmagic_cpp_normalize_string`, Rstr, clean_punct, clean_digit, clean_isolated)
 }
 
 cpp_trimws_in_place <- function(x) {
-    .Call(`_stringmagick_cpp_trimws_in_place`, x)
+    .Call(`_stringmagic_cpp_trimws_in_place`, x)
 }
 
 cpp_which_empty <- function(Rstr) {
-    .Call(`_stringmagick_cpp_which_empty`, Rstr)
+    .Call(`_stringmagic_cpp_which_empty`, Rstr)
 }
 
 cpp_find_first_index <- function(index, nb, is_last) {
-    .Call(`_stringmagick_cpp_find_first_index`, index, nb, is_last)
+    .Call(`_stringmagic_cpp_find_first_index`, index, nb, is_last)
 }
 
 cpp_group_rev_index <- function(index) {
-    .Call(`_stringmagick_cpp_group_rev_index`, index)
+    .Call(`_stringmagic_cpp_group_rev_index`, index)
 }
 
 cpp_recreate_index <- function(id) {
-    .Call(`_stringmagick_cpp_recreate_index`, id)
+    .Call(`_stringmagic_cpp_recreate_index`, id)
 }
 
 cpp_parse_regex_pattern <- function(Rstr, parse_flags, parse_logical) {
-    .Call(`_stringmagick_cpp_parse_regex_pattern`, Rstr, parse_flags, parse_logical)
+    .Call(`_stringmagic_cpp_parse_regex_pattern`, Rstr, parse_flags, parse_logical)
 }
 
 cpp_smagic_parser <- function(Rstr, Rdelimiters, only_last_parsed_section = FALSE) {
-    .Call(`_stringmagick_cpp_smagic_parser`, Rstr, Rdelimiters, only_last_parsed_section)
+    .Call(`_stringmagic_cpp_smagic_parser`, Rstr, Rdelimiters, only_last_parsed_section)
 }
 
 cpp_extract_quote_from_op <- function(Rstr) {
-    .Call(`_stringmagick_cpp_extract_quote_from_op`, Rstr)
+    .Call(`_stringmagic_cpp_extract_quote_from_op`, Rstr)
 }
 
 cpp_parse_operator <- function(Rstr) {
-    .Call(`_stringmagick_cpp_parse_operator`, Rstr)
+    .Call(`_stringmagic_cpp_parse_operator`, Rstr)
 }
 
 cpp_extract_pipe <- function(Rstr, check_double = FALSE) {
-    .Call(`_stringmagick_cpp_extract_pipe`, Rstr, check_double)
+    .Call(`_stringmagic_cpp_extract_pipe`, Rstr, check_double)
 }
 
 cpp_parse_simple_operations <- function(Rstr, Rdelimiters) {
-    .Call(`_stringmagick_cpp_parse_simple_operations`, Rstr, Rdelimiters)
+    .Call(`_stringmagic_cpp_parse_simple_operations`, Rstr, Rdelimiters)
 }
 
 cpp_parse_slash <- function(Rstr, Rdelimiters) {
-    .Call(`_stringmagick_cpp_parse_slash`, Rstr, Rdelimiters)
+    .Call(`_stringmagic_cpp_parse_slash`, Rstr, Rdelimiters)
 }
 
 cpp_find_closing_problem <- function(Rstr, Rdelimiters) {
-    .Call(`_stringmagick_cpp_find_closing_problem`, Rstr, Rdelimiters)
+    .Call(`_stringmagic_cpp_find_closing_problem`, Rstr, Rdelimiters)
 }
 
 cpp_to_integer <- function(x) {
-    .Call(`_stringmagick_cpp_to_integer`, x)
+    .Call(`_stringmagic_cpp_to_integer`, x)
 }
 
 cpp_combine_clusters <- function(cluster_list, index) {
-    .Call(`_stringmagick_cpp_combine_clusters`, cluster_list, index)
+    .Call(`_stringmagic_cpp_combine_clusters`, cluster_list, index)
 }
 
 cpp_create_pos <- function(index) {
-    .Call(`_stringmagick_cpp_create_pos`, index)
+    .Call(`_stringmagic_cpp_create_pos`, index)
 }
 
