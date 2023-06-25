@@ -251,11 +251,20 @@ test_err_contains = function(x, pattern){
 
 run_tests = function(chunk, from = 1, source = FALSE){
   
-  dir_tests = list.dirs("tests", recursive = FALSE)
+  wd = getwd()
+  
+  location = "tests"
+  if(grepl("/tests$", wd)){
+    location = "."
+  }
+  
+  dir_tests = list.dirs(location, recursive = FALSE)
   if(length(dir_tests) > 0){
+    # either all files in the dirs
     all_files = list.files(dir_tests, pattern = ".R$", full.names = TRUE)
   } else {
-    all_files = list.files("tests", pattern = ".R$", full.names = TRUE)
+    # either the files in the main test dir
+    all_files = list.files(location, pattern = ".R$", full.names = TRUE)
   }
   
   if(length(all_files) == 0){
@@ -265,11 +274,13 @@ run_tests = function(chunk, from = 1, source = FALSE){
   if(isTRUE(source)){
     assign("chunk", get("chunk", mode = "function"), parent.frame())
     assign("test", get("test", mode = "function"), parent.frame())
+    assign("test_contains", get("test_contains", mode = "function"), parent.frame())
     assign("test_err_contains", test_err_contains, parent.frame())
     
     for(f in all_files){
       source(f)
     }
+    return(NULL)
   }  
 
   test_code = c()
@@ -416,6 +427,7 @@ run_tests = function(chunk, from = 1, source = FALSE){
   assign("INSIDE_LOOP", FALSE, env)
   assign("chunk", get("chunk", mode = "function"), env)
   assign("test", test, env)
+  assign("test_contains", get("test_contains", mode = "function"), parent.frame())
   assign("test_err_contains", test_err_contains, env)
 
   my_eval = try(eval(parsed_code, env))
