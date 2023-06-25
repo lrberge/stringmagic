@@ -1246,12 +1246,16 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     is_right = "right" %in% options || op == "Format" || is_zero
     is_center = any(options == "center")
     is_left = !is_right && !is_center
-
-    if(is_right){
-      res = format(x, justify = "right", big.mark = ",")
+    
+    pos = "left"
+    if(is_right) pos = "right"
+    if(is_center) pos = "center"
+    
+    if(nchar(argument) > 0){
+      res = format(x, argument, justify = "right", big.mark = ",")
     } else {
-      res = format(x, big.mark = ",")
-    }   
+      res = format(x, justify = "right", big.mark = ",")
+    }
 
     if(is.numeric(x)){
       if(is_zero){
