@@ -268,6 +268,15 @@ test(txt, "The numbers are:\n- 1       | 123,456\n- 123     |     123\n- 123,456
 txt = smagick("The numbers are:\n{'\n'c ! - {format.0 ? x} | {rev, Format.zero ? x}}")
 test(txt, "The numbers are:\n- 0000001 | 123,456\n- 0000123 | 0000123\n- 123,456 | 0000001")
 
+today = structure(19531, class = "Date")
+txt = smagick("Today is {'%d, %m, %Y'for ? today}")
+test(txt, "Today is 23, 06, 2023")
+
+txt = smagick("Today is {'%d, %m, %Y'for ? .date}")
+test_contains(txt, "\\d\\d, \\d\\d, \\d{4}")
+
+txt = smagick("Today is {.now}")
+test_contains(txt, "\\d{4} & \\d:\\d")
 
 #
 # sprintf ####

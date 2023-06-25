@@ -458,7 +458,25 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
       # vectorize
       n = length(dots)
       res = vector("list", n)
+      
+      now_done = FALSE
+      date_done = FALSE
+      
       for(i in 1:n){
+        
+        di = dots[[i]]
+        if(.is_root && length(di) == 1 && is.character(di)){
+          if(!now_done && grepl(".now", di, fixed = TRUE)){
+            .data[[".now"]] = Sys.time()
+            now_done = TRUE
+          }
+          
+          if(!date_done && grepl(".date", di, fixed = TRUE)){
+            .data[[".date"]] = Sys.Date()
+            date_done = TRUE
+          }
+        }
+        
         res[[i]] = smagick_internal(dots[[i]], .delim = .delim, .envir = .envir, 
                                     .data = .data, .check = .check)
       }
@@ -480,6 +498,16 @@ smagick_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
     x_parsed = cpp_smagick_parser(x, .delim)
     if(length(x_parsed) == 1 && isTRUE(attr(x_parsed, "error"))){
       report_smagick_parsing_error(x, x_parsed, .delim)
+    }
+  }
+  
+  if(.is_root){
+    if(grepl(".now", x, fixed = TRUE)){
+      .data[[".now"]] = Sys.time()
+    }
+    
+    if(grepl(".date", x, fixed = TRUE)){
+      .data[[".date"]] = Sys.Date()
     }
   }
 

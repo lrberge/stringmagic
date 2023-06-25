@@ -49,6 +49,10 @@
 #' @param .default Logical scalar, default is `TRUE`. Whether to use the global defaults 
 #' set with the function [setSmagick()]. If `FALSE`, then the default value of the arguments
 #' is guaranteed to be ones of the function definition.
+#' @param .smagick.class Logical scalar, default is `FALSE`. If `TRUE`, the vector
+#' returned will be of class `smagick`. This class has a simple `print` method which is
+#' useful to display small vectors.
+#' 
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
