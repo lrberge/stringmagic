@@ -127,7 +127,7 @@ smagic_register = function(fun, alias, valid_options = NULL){
   }
 
   if(!is.function(fun)){
-    stop_hook("The argument `fun` must be a function. ",
+    stopi("The argument `fun` must be a function. ",
               "PROBLEM: it is not a function, instead it is of class {enum.bq?class(fun)}.")
   }
 
@@ -139,21 +139,21 @@ smagic_register = function(fun, alias, valid_options = NULL){
   arg_must = c("...", "x")
   arg_missing = setdiff(arg_must, fun_args)
   if(length(arg_missing) > 0){
-    stop_hook("The argument `fun` must be a function with {enum.bq?arg_missing} in its arguments.",
+    stopi("The argument `fun` must be a function with {enum.bq?arg_missing} in its arguments.",
               "\nPROBLEM: it has no argument {enum.bq.or?arg_missing}.")
   }
 
   valid_args = str_vec("x, argument, options, group, group_flag")
   arg_pblm = setdiff(setdiff(fun_args, "..."), valid_args)
   if(length(arg_pblm) > 0){
-    stop_hook("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
+    stopi("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
               "\nPROBLEM: the argument{$s, enum.bq, are?arg_pblm} invalid.")
   }
 
   OPERATORS = getOption("smagic_operations_origin")
 
   if(alias %in% OPERATORS){
-    stop_hook("The argument `alias` must not be equal to an existing internal argument.",
+    stopi("The argument `alias` must not be equal to an existing internal argument.",
               "\nPROBLEM: the operation {bq?alias} is already an internal operation.")
   }
 
@@ -190,14 +190,14 @@ smagic_register = function(fun, alias, valid_options = NULL){
 #' @examples 
 #' 
 #' # we change the default display of the results of smagic
-#' setSmagic(.smagic.class = TRUE)
+#' setSmagic(.class = "smagic")
 #' smagic("{S!x, y}{2 each?1:2}")
 #' 
 #' # back to a regular character vector
 #' setSmagic(reset = TRUE)
 #' smagic("{S!x, y}{2 each?1:2}")
 #' 
-setSmagic = function(.smagic.class = FALSE, .delim = c("{", "}"), 
+setSmagic = function(.class = "smagic", .delim = c("{", "}"), 
                       .sep = "", .data.table = TRUE, reset = FALSE){
 
   check_logical(.smagic.class, scalar = TRUE)
@@ -253,9 +253,9 @@ set_defaults = function(opts_name){
 #### ... smagic ####
 ####
 
-
+#' @describeIn smagic String interpolation with operation chaining
 smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
-                   .delim = c("{", "}"), .check = TRUE, .smagic.class = FALSE, 
+                   .delim = c("{", "}"), .check = TRUE, .class = NULL, 
                    .default = TRUE,
                    .collapse = NULL, .help = NULL, .data.table = TRUE){
 
@@ -303,9 +303,11 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
       return(invisible(NULL))
   }
 
-  if(isTRUE(.smagic.class)){
-    class(res) = c("smagic", "character")
-  } else if(!is.null(attr(res, "group_index"))){
+  if(!missnull(.class)){
+    class(res) = .class
+  }
+  
+  if(!is.null(attr(res, "group_index"))){
     # cleaning artifacts
     attr(res, "group_index") = NULL
   }

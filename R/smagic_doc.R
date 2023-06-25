@@ -49,9 +49,9 @@
 #' @param .default Logical scalar, default is `TRUE`. Whether to use the global defaults 
 #' set with the function [setSmagic()]. If `FALSE`, then the default value of the arguments
 #' is guaranteed to be ones of the function definition.
-#' @param .smagic.class Logical scalar, default is `FALSE`. If `TRUE`, the vector
-#' returned will be of class `smagic`. This class has a simple `print` method which is
-#' useful to display small vectors.
+#' @param .class Character vector representing the class to give to the object returned. 
+#' By default it is `NULL`. Note that the class `smagic` has a specific `print` method, usually
+#' nicer for small vectors (it [base::cat()]s the elements).
 #' 
 #'
 #' @details 

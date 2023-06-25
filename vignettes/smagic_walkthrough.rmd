@@ -49,7 +49,7 @@ library(stringmagic)
 Before moving on, we set the global option `.smagic.class` to `TRUE` such that 
 the character vectors produced by `smagic` are displayed nicely in this vignette.
 ```{r}
-setSmagic(.smagic.class = TRUE)
+setSmagic(.class = TRUE)
 ```
 
 # Motivating examples and advice for reading
@@ -911,7 +911,7 @@ separated list of elements.
 If there are more than 7 elements, only the first 6 are shown and the number of
 items left is written.
 ```{r}
-smagic("enum ? 1:5")
+smagic("{enum ? 1:5}")
 ```
 You can add the following options:
 
