@@ -208,11 +208,10 @@ smagic_register = function(fun, alias, valid_options = NULL, scope = NULL){
 setSmagic = function(.class = "smagic", .delim = c("{", "}"), 
                       .sep = "", .data.table = TRUE, reset = FALSE){
 
-  check_logical(.class, scalar = TRUE, null = TRUE)
+,   check_character(.class, scalar = TRUE, null = TRUE)
   check_logical(.data.table, scalar = TRUE)
     
   check_character(.sep, scalar = TRUE)
-  check_character(scope, scalar = TRUE)
   
   .delim = check_set_delimiters(.delim)
 
@@ -221,7 +220,7 @@ setSmagic = function(.class = "smagic", .delim = c("{", "}"),
   if(is.null(opts_all)){
     # => used for init
     opts_all = list()
-  } else if(!is.list(opts)){
+  } else if(!is.list(opts_all)){
     # => we should never be here
     opts_all = list()
   }
@@ -257,7 +256,7 @@ set_defaults = function(opts_name){
     return(NULL)
   }
   
-  scope = get_namespace_above()
+  scope = get_namespace_above(n = 4)
   opts = opts_all[[scope]]
   if(is.null(opts) || length(opts) == 0){
     return(NULL)
@@ -282,7 +281,7 @@ set_defaults = function(opts_name){
 #' @describeIn smagic String interpolation with operation chaining
 smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
                    .delim = c("{", "}"), .check = TRUE, .class = NULL, 
-                   .default = TRUE,
+                   .default = TRUE, .last = NULL,
                    .collapse = NULL, .help = NULL, .data.table = TRUE){
 
 
@@ -292,6 +291,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
   if(!missing(.sep)) check_character(.sep, scalar = TRUE)
   if(!missing(.envir)) check_envir(.envir)
+  if(!missing(.last)) check_character(.last, scalar = TRUE, null = TRUE)
   
   set_pblm_hook()
   
@@ -323,7 +323,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                             .vectorize = .vectorize, .help = .help,
                             .collapse = .collapse, .is_root = TRUE, 
                             .data.table = .data.table,
-                            .check = .check)
+                            .check = .check, .last = .last)
 
   if(inherits(res, "help")){
       return(invisible(NULL))
@@ -343,7 +343,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 
 #' @describeIn smagic Like `smagic` but without any error handling to save a few micro seconds
 .smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
-                    .delim = c("{", "}"), .collapse = NULL,
+                    .delim = c("{", "}"), .collapse = NULL, .last = NULL,
                     .check = FALSE, .data.table = FALSE){
 
   set_pblm_hook()
@@ -356,9 +356,10 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                       .sep = .sep,
                       .vectorize = .vectorize, .is_root = TRUE, 
                       .data.table = .data.table, .collapse = .collapse,
-                      .check = .check)
+                      .check = .check, .last = .last)
 }
 
+# This is an internal alias (not exported)
 .sma = .smagic
 
 ####
@@ -367,7 +368,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 
 smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  .data = list(),
                                .sep = "", .vectorize = FALSE,
-                               .collapse = NULL,
+                               .collapse = NULL, .last = NULL,
                                .help = NULL, .is_root = FALSE, .data.table = FALSE,
                                .check = FALSE, .plural_value = NULL){
   
@@ -901,6 +902,12 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
         }
       }
     }
+  }
+
+  if(!is.null(.last)){
+    res = apply_simple_operations(res, ".last", .last, .check, .envir,
+                                  group_flag = 1 * grepl("~", .last, fixed = TRUE), .delim)
+    
   }
 
   if(!is.null(.collapse) && length(res) > 1){

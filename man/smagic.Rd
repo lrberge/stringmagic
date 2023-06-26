@@ -20,6 +20,7 @@ smagic(
   .check = TRUE,
   .class = NULL,
   .default = TRUE,
+  .last = NULL,
   .collapse = NULL,
   .help = NULL,
   .data.table = TRUE
@@ -32,6 +33,7 @@ smagic(
   .vectorize = FALSE,
   .delim = c("{", "}"),
   .collapse = NULL,
+  .last = NULL,
   .check = FALSE,
   .data.table = FALSE
 )
@@ -81,6 +83,10 @@ nicer for small vectors (it \code{\link[base:cat]{base::cat()}}s the elements).}
 \item{.default}{Logical scalar, default is \code{TRUE}. Whether to use the global defaults
 set with the function \code{\link[=setSmagic]{setSmagic()}}. If \code{FALSE}, then the default value of the arguments
 is guaranteed to be ones of the function definition.}
+
+\item{.last}{Character scalar or \code{NULL} (default). If provided, it must be an \code{smagic}
+chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
+are applied just before returning the vector.}
 
 \item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
 that should be returned is collapsed with the value of this argument. This leads

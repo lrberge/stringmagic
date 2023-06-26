@@ -52,7 +52,9 @@
 #' @param .class Character vector representing the class to give to the object returned. 
 #' By default it is `NULL`. Note that the class `smagic` has a specific `print` method, usually
 #' nicer for small vectors (it [base::cat()]s the elements).
-#' 
+#' @param .last Character scalar or `NULL` (default). If provided, it must be an `smagic`
+#' chain of operations of the form `"'arg1'op1, op2, etc"`. All these operations
+#' are applied just before returning the vector.
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 

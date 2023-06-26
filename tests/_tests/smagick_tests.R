@@ -278,6 +278,9 @@ test_contains(txt, "\\d\\d, \\d\\d, \\d{4}")
 txt = smagic("Today is {.now}")
 test_contains(txt, "\\d{4} & \\d:\\d")
 
+txt = smagic("We're {.now('%H:%M %Y')}")
+test_contains(txt, "\\d:\\d & \\d{4}")
+
 #
 # sprintf ####
 #
@@ -971,6 +974,19 @@ test(txt, "The numbers are 1, 2 and 3")
 
 txt = smagic("The number{$s, is, ({v};{$enum}) ? x}", x = 3, v = "error")
 test(txt, "The number is error")
+
+#
+# default options ####
+#
+
+setSmagic(.delim = "$[ ]")
+txt = smagic("x$[1:2]", .last = "C")
+test(txt, "x1 and x2")
+
+setSmagic(reset = TRUE)
+txt = smagic("x$[1:2] or {C ! x{1:2}}")
+test(txt, "x$[1:2] or x1 and x2")
+
 
 #
 # data.table ####
