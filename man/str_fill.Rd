@@ -66,7 +66,8 @@ str_fill(x, na = "(missing)")
 \seealso{
 A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
 Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
-String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}.
+String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}. You can change \code{smagic}
+default values with \code{\link[=smagic_alias]{smagic_alias()}} and add custom operations with \code{\link[=smagic_register_fun]{smagic_register_fun()}}.
 }
 \author{
 Laurent R. Berge

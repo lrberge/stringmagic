@@ -916,7 +916,8 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' @seealso 
 #' A few basic operation: [str_is()], [str_get()], [str_clean()]. Chain basic operations with [str_ops()]. 
 #' Use [str_vec()] to create simple string vectors.
-#' String interpolation combined with operation chaining: [smagic()].
+#' String interpolation combined with operation chaining: [smagic()]. You can change `smagic`
+#' default values with [smagic_alias()] and add custom operations with [smagic_register_fun()].
 #'
 #' @examples
 #'

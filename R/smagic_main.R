@@ -61,16 +61,48 @@ print.smagic = function(x, ...){
 #' @param valid_options A character vector or NULL (default). Represents a list of 
 #' valid options for the operation. This is used: a) to enable auto-completion,
 #' b) for error-handling purposes.
+#' @param namespace Character scalar or `NULL` (default). **Only useful for package developers.**
+#' As a regular end-user you shouldn't care! If your package uses `smagic`, you should care. 
+#' If the function `smagic_register_*` is located in the `onLoad` function (see `help("onLoad")`), 
+#' there is nothing to do. Otherwise, pass the name of your package in this argument to 
+#' make all the new operation definitions scoped (i.e. only your package can access it and 
+#' it can't be messed up by end users).
+#' 
 #' 
 #' @details 
-#' The new operations created are scoped. They are attached to the namespace in which 
-#' it was created. This means that if a package uses `smagic`, and the user creates 
-#' new operations that may conflict with the ones used by the package author, there will 
-#' be no mess up.
-#' 
+#'  
 #' We try to strongly check the new operations since it's always better to find out problems
 #' sooner than later. This means that when the function is defined, it is also 
 #' tested.
+#' 
+#' @section Writing a package using `smagic`:
+#' 
+#' If you want to use `smagic` in your package and want to make use of custom operations:
+#' 
+#' - place any `smagic_register_fun` and `smagic_register_ops` in your `.onLoad` function
+#' (see `help("onLoad")`). The .onLoad function is run whenever the package is loaded 
+#' for the first time. It's a function that you can place anywhere in your `R/*` files 
+#' and which looks like this:
+#' ```{r}
+#' .onLoad = function(libname, pkgname){
+#'   # smagic custom operations
+#'   smagic_register_ops("'80|-'fill", "h1")
+#' 
+#'   invisible()
+#' }
+#' ```
+#' - if you don't want to place the `smagic_register_*` functions in the .onLoad function, 
+#' you can, but then you **must** provide the argument `namespace`:
+#' ```{r}
+#' smagic_register_ops("'80|-'fill", "h1", namespace = "myPackageName")
+#' ```
+#' - you must create an [smagic_alias()] to create an alias to [smagic()] and use the 
+#' argument `.namespace = "myPackageName"`. Use this opportunity to change the 
+#' defaults if you wish. You can even override the `smagic` function:
+#'  ```{r}
+#' # creating an alias with the same name + changing the delimiter
+#' smagic = stringmagic::smagic_alias(.namespace = "myPackageName", .delim = "{{ }}")
+#' ```
 #' 
 #' @author 
 #' Laurent R. Berge
@@ -128,7 +160,7 @@ print.smagic = function(x, ...){
 #' 
 #' 
 #' 
-smagic_register_fun = function(fun, alias, valid_options = NULL){
+smagic_register_fun = function(fun, alias, valid_options = NULL, namespace = NULL){
   # fun: must be a function with x and ... as arguments
   # the argument names must be in:
   # x, argument, options, group, conditonnal_flag
@@ -187,12 +219,15 @@ smagic_register_fun = function(fun, alias, valid_options = NULL){
   # saving within a namespace
   #
   
-  namespace = get_namespace_above()
+  if(get_function_above() == ".onLoad"){
+    namespace = get_namespace_above()
+  }  
+  
   save_user_fun(fun, alias, namespace)
 }
 
-#' @describeIn smagic_register_funs Create new combinations of `smagic` operations
-smagic_register_ops = function(ops, alias){
+#' @describeIn smagic_register_fun Create new combinations of `smagic` operations
+smagic_register_ops = function(ops, alias, namespace = NULL){
   
   #
   # checking
@@ -222,12 +257,19 @@ smagic_register_ops = function(ops, alias){
   # saving within a namespace
   #
   
-  namespace = get_namespace_above()
+  if(get_function_above() == ".onLoad"){
+    namespace = get_namespace_above()
+  } 
+  
   save_user_fun(ops, alias, namespace)  
 }
 
 save_user_fun = function(fun, alias, namespace){
   # We save the user function in the global options
+  
+  if(is.null(namespace)){
+    namespace = "R_GlobalEnv"
+  }
   
   # We forbid the redefinition of internal operations
   # => only for V1, so that later versions don't break code
@@ -262,103 +304,73 @@ save_user_fun = function(fun, alias, namespace){
   options("smagic_user_ops" = user_ops_all)
 }
 
-#' Set defaults for smagic
+#' Create `smagic` aliases with custom defaults
 #' 
-#' Se the default values for a few arguments of the function [smagic()].
+#' Utility to easily create `smagic` aliases with custom default
 #' 
 #' @inheritParams smagic
-#' @param reset Logical scalar, default is `FALSE`. Whether to reset all values.
 #' 
 #' @details 
-#' By default, each call to `setSmagic` adds modifications to the default values. 
-#' To set a few default values and resetting the others, you need to use `reset = TRUE`.
 #' 
-#' If you are a package developer: note that these options are scoped. This means that if you want to 
-#' change the behavior of `smagic` within your package: you can and there will
-#' be no conflic if the user also uses smagic with her own, different, options.
-#' To define options, you should add a call to `setSmagic` in your `.onLoad()` function
-#' which is run at package startup (see `help(".onLoad")`). 
-#' It is important that the `setSmagic` call should be in that function.
+#' Use this function if you want to change `smagic` default values. For example,
+#' if you want the interpolation to be done with "{{}}" (instead of `{}`) or if you want the 
+#' default separation to be the space (instead of the empty string). 
+#' 
+#' 
 #' 
 #' @author 
 #' Laurent Berge
 #' 
 #' @examples 
 #' 
-#' # we change the default display of the results of smagic
-#' setSmagic(.class = "smagic")
-#' smagic("{S!x, y}{2 each?1:2}")
+#' # we create the function sma2 with different defaults
+#' sma2 = smagic_alias(.delim = ".[ ]", .sep = "", .class = `smagick`)
 #' 
-#' # back to a regular character vector
-#' setSmagic(reset = TRUE)
-#' smagic("{S!x, y}{2 each?1:2}")
+#' person = "john doe"
+#' sma2("Hello", "{title ? person}")
 #' 
-setSmagic = function(.class = "smagic", .delim = c("{", "}"), 
-                      .sep = "", .data.table = TRUE, reset = FALSE){
-
-  check_character(.class, scalar = TRUE, null = TRUE)
-  check_logical(.data.table, scalar = TRUE)
-    
+#' 
+#' 
+smagic_alias = function(.sep = "", .vectorize = FALSE, 
+                        .delim = c("{", "}"), .last = NULL, 
+                        .collapse = NULL,  .check = TRUE, 
+                        .class = NULL, .data.table = TRUE, .namespace = NULL){
+  #
+  
   check_character(.sep, scalar = TRUE)
+  check_logical(.vectorize, scalar = TRUE)
+  check_character(.delim, no_na = TRUE)
+  check_last(.last)
+  check_character(.collapse, scalar = TRUE, null = TRUE)
+  check_logical(.check, scalar = TRUE)
+  check_character(.class, no_na = TRUE, null = TRUE)
+  check_logical(.data.table, scalar = TRUE)
+  check_character(.namespace, scalar = TRUE, null = TRUE)
   
-  .delim = check_set_delimiters(.delim)
-
-  # Getting the existing defaults
-  opts_all = getOption("smagic_options")
-  if(is.null(opts_all)){
-    # => used for init
-    opts_all = list()
-  } else if(!is.list(opts_all)){
-    # => we should never be here
-    opts_all = list()
-  }
+  # forcing evaluations
+  sep = .sep
+  vectorize = .vectorize
+  delim = check_set_delimiters(.delim)
+  last = .last
+  collapse = .collapse
+  check = .check
+  class = .class
+  data.table = .data.table
+  namespace = .namespace
   
-  scope = get_namespace_above()
-  opts = opts_all[[scope]]
-
-  if(reset || is.null(opts)){
-    opts = list()
-  } else if(!is.list(opts)){
-    opts = list()
-  }
-
-  # Saving the default values
-  mc = match.call()
-  args_default = setdiff(names(mc)[-1], "reset")
-
-  # NOTA: only elements in opts will be later set to their default
-  for(v in args_default){
-    opts[[v]] = eval(as.name(v))
-  }
-  
-  opts_all[[scope]] = opts
-
-  options(smagic_options = opts_all)
-
-}
-
-set_smagic_defaults = function(namespace){
-
-  opts_all = getOption("smagic_options")
-  if(is.null(opts_all) || length(opts_all) == 0){
-    return(NULL)
+  res = function(..., .envir = parent.frame(), .sep = sep, .vectorize = vectorize, 
+                   .delim = delim, .last = last, 
+                   .collapse = collapse, 
+                   .check = check, .class = class, .help = NULL, 
+                   .data.table = data.table, .namespace = namespace){
+                    
+    smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
+            .delim = .delim, .last = .last, .collapse = .collapse,
+            .check = .check, .class = .class, .help = .help,
+            .data.table = .data.table, .namespace = .namespace)
   }
   
-  opts = opts_all[[namespace]]
-  if(is.null(opts) || length(opts) == 0){
-    return(NULL)
-  }
-
-  sysOrigin = sys.parent()
-  mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
-  args_in = names(mc)
-
-  args2set = setdiff(names(opts), args_in)
-
-  for(v in args2set){
-    assign(v, opts[[v]], parent.frame())
-  }
-
+  res
 }
 
 ####
@@ -370,25 +382,21 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                    .delim = c("{", "}"), .last = NULL, 
                    .collapse = NULL, 
                    .check = TRUE, .class = NULL, .help = NULL, 
-                   .data.table = TRUE, .default = TRUE){
+                   .data.table = TRUE, .namespace = NULL){
 
 
-  if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
-  if(!missing(.default)) check_logical(.default, scalar = TRUE)
-  if(!missing(.data.table)) check_logical(.data.table, scalar = TRUE)
-  if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
-  if(!missing(.sep)) check_character(.sep, scalar = TRUE)
-  if(!missing(.envir)) check_envir(.envir)
-  if(!missing(.last)) check_character(.last, scalar = TRUE, null = TRUE)
-  
+  if(.check){
+    if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
+    if(!missing(.data.table)) check_logical(.data.table, scalar = TRUE)
+    if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
+    if(!missing(.sep)) check_character(.sep, scalar = TRUE)
+    if(!missing(.envir)) check_envir(.envir)
+    if(!missing(.last)){
+      check_last(.last)
+    }
+  }
+    
   set_pblm_hook()
-  
-  # half a microsecond, atm I don't see how to avoid it
-  .namespace = get_namespace_above()
-  
-  if(.default){
-    set_smagic_defaults(.namespace)
-  }  
   
   check_character(.delim, no_na = TRUE)
   if(length(.delim) == 1){
@@ -442,12 +450,9 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   if(length(.delim) == 1){
     .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
   }
-  
-  # half a microsecond, atm I don't see how to avoid it
-  .namespace = get_namespace_above()
 
   smagic_internal(..., .delim = .delim, .envir = .envir,
-                      .sep = .sep, .namespace = .namespace,
+                      .sep = .sep, 
                       .vectorize = .vectorize, .is_root = TRUE, 
                       .data.table = .data.table, .collapse = .collapse,
                       .check = .check, .last = .last)
@@ -460,7 +465,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 #### Internal ####
 ####
 
-smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  .data = list(),
+smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .data = list(),
                                .sep = "", .vectorize = FALSE,
                                .collapse = NULL, .last = NULL,
                                .help = NULL, .is_root = FALSE, .data.table = FALSE,
@@ -528,6 +533,9 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
   }
   
   if(.is_root){
+    if(is.null(.namespace)){
+      .namespace = "R_GlobalEnv"
+    }
     user_ops_all = getOption("smagic_user_ops")
     # beware the sneaky assignment!
     if(!is.null(user_ops_all) && !is.null(user_info <- user_ops_all[[.namespace]])){
@@ -536,8 +544,6 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
     } else {
       .valid_operators = getOption("smagic_operations_default")
     }
-    print(.namespace)
-    print(user_info)
   }
 
   if(...length() == 1){
@@ -636,9 +642,8 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
 
   BOX_OPEN = .delim[1]
   
-  if(!grepl(BOX_OPEN, x, fixed = TRUE)){
+  if(!grepl(BOX_OPEN, x, fixed = TRUE) && is.null(.last)){
     return(x)
-
   } else {
     x_parsed = cpp_smagic_parser(x, .delim)
     if(length(x_parsed) == 1 && isTRUE(attr(x_parsed, "error"))){
@@ -1021,13 +1026,16 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
       }
     }
   }
-
+  
   if(!is.null(.last)){
-    res = apply_simple_operations(res, ".last", .last, .check, .envir,
-                                  group_flag = 1 * grepl("~", .last, fixed = TRUE), 
-                                  .delim, .user_funs = .user_funs, 
-                                  .valid_operators = .valid_operators)
-    
+    if(is.function(.last)){
+      res = .last(res)
+    } else {
+      res = apply_simple_operations(res, ".last", .last, .check, .envir,
+                                    group_flag = 1 * grepl("~", .last, fixed = TRUE), 
+                                    .delim, .user_funs = .user_funs, 
+                                    .valid_operators = .valid_operators)
+    }
   }
 
   if(!is.null(.collapse) && length(res) > 1){
@@ -1144,8 +1152,6 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
   extra = attr(x, "extra")
   group_index = attr(x, "group_index")
-  
-  browser()
   
   # beware the sneaky assignment!!!!!
   if(!is.null(.user_funs) && !is.null(fun <- .user_funs[[op]])){

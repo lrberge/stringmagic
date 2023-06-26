@@ -5,6 +5,8 @@
 #'
 #' This is firstly a string interpolation tool. On top of this it can apply, and chain, over 50
 #' basic string operations to the interpolated variables. Advanced support for pluralization.
+#' 
+#' @rdname smagic
 #'
 #' @param ... Character scalars that will be collapsed with the argument `sep`. Note that 
 #' named arguments are used for substitution.
@@ -37,8 +39,9 @@
 #' @param .collapse Character scalar, default is `NULL`. If provided, the character vector
 #' that should be returned is collapsed with the value of this argument. This leads
 #' to return a string of length 1.
-#' @param .check Logical scalar, default is `TRUE`. Whether to enable error-handling. 
-#' Without errorhandling you can save something of the order of 40us. Useful only
+#' @param .check Logical scalar, default is `TRUE`. Whether to enable error-handling (i.e.
+#' human readable error messages). 
+#' Without error-handling you can save something of the order of 40us. Useful only
 #' in long loops.
 #' @param .delim Character vector of length 1 or 2. Default is `c("{", "}")`. Defines 
 #' the opening and the closing delimiters for interpolation. 
@@ -52,9 +55,10 @@
 #' @param .class Character vector representing the class to give to the object returned. 
 #' By default it is `NULL`. Note that the class `smagic` has a specific `print` method, usually
 #' nicer for small vectors (it [base::cat()]s the elements).
-#' @param .last Character scalar or `NULL` (default). If provided, it must be an `smagic`
-#' chain of operations of the form `"'arg1'op1, op2, etc"`. All these operations
-#' are applied just before returning the vector.
+#' @param .last Character scalar, a function, or `NULL` (default). If provided and character: 
+#' it must be an `smagic` chain of operations of the form `"'arg1'op1, op2, etc"`. All these operations
+#' are applied just before returning the vector. If a function, 
+#' it will be applied to the resulting vector.
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
@@ -71,6 +75,9 @@
 #'  + default options are not applied: hence the user must always explicitly provide the arguments
 #' 
 #' This leads to a faster processing time (of about 50 microseconds) at the cost of user experience.
+#' 
+#' If you want to change the default values of `smagic` (like changing the delimiter), use
+#' the function [smagic_alias()].
 #'
 #' Access a compact help on the console with `smagic("--help")` or use the argument `.help` to which
 #' you can pass keywords or regular expressions and fecth select pieces from the main documentation.

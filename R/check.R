@@ -422,6 +422,18 @@ check_set_options = function(x, options, op = NULL, free = FALSE, case = FALSE){
   res
 }
 
+check_last = function(.last){
+  if(is.null(.last) || is.function(.last)){
+    # ok, no check
+  } else if(!is.character(.last)){
+    stop_hook("Argument `.last` mut be equal to an `smagic` operations chain", 
+              " or a function.",
+              "\nPROBLEM: instead it is of class {enum.bq?class(.last)}.")
+  } else {
+    check_character(.last, null = TRUE, scalar = TRUE)
+  }
+}
+
 check_set_delimiters = function(.delim){
   check_character(.delim, no_na = TRUE, up = 1)
   

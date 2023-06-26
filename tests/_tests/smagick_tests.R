@@ -884,6 +884,7 @@ test(txt, "I'm saying 'ha ] ha'!")
 # user-defined ops ####
 #
 
+# without scope
 xplode = function(x, argument, options, ...){
   unlist(strsplit(as.character(x), ""))
 }
@@ -896,6 +897,16 @@ test(txt, c("bonj", "bono", "bonu", "bonr"))
 smagic_register_ops("'50|-'fill", "h2")
 txt = smagic("my header ", .last = "h2")
 
+
+# with scope
+smagic_register_ops("''s, x paste, ' + 'c", "equick", namespace = "test_ns")
+
+sma_test = smagic_alias(.namespace = "test_ns")
+txt = sma_test("y = {equick!173ab}")
+test(txt, "y = x1 + x7 + x3 + xa + xb")
+
+test_err_contains(smagic("y = {equick!173ab}"), "valid operator")
+test_err_contains(sma_test("y = {aezgfaffs!173ab}"), "!xplode")
 
 #
 # errors ####
@@ -983,14 +994,9 @@ test(txt, "The number is error")
 # default options ####
 #
 
-setSmagic(.delim = "$[ ]")
-txt = smagic("x$[1:2]", .last = "C")
+sma2 = smagic_alias(.delim = "$[ ]")
+txt = sma2("x$[1:2]", .last = "C")
 test(txt, "x1 and x2")
-
-setSmagic(reset = TRUE)
-txt = smagic("x$[1:2] or {C ! x{1:2}}")
-test(txt, "x$[1:2] or x1 and x2")
-
 
 #
 # data.table ####

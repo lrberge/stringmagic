@@ -634,11 +634,18 @@ names_xpd = function(x){
   nm
 }
 
+get_function_above = function(n = 2){
+  sc = sys.calls()
+  n_sc = length(sc)
+  
+  if(n_sc <= 2) return("nothing_above")
+  
+  fun_name = deparse_short(sc[[n_sc - 2]][[1]])
+  fun_name
+}
+
 get_namespace_above = function(n = -2){
-  
-  
-  browser()
-  
+    
   if(sys.nframe() >= n){
     res = environmentName(environment(sys.function(n)))
     if(res == ""){
