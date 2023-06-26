@@ -4,7 +4,7 @@
 \alias{smagic_register}
 \title{Register custom operations to apply them in smagic}
 \usage{
-smagic_register(fun, alias, valid_options = NULL)
+smagic_register(fun, alias, valid_options = NULL, scope = NULL)
 }
 \arguments{
 \item{fun}{A function which must have at least the arguments 'x' and '...'.

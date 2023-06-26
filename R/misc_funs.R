@@ -634,6 +634,20 @@ names_xpd = function(x){
   nm
 }
 
+get_namespace_above = function(n = 3){
+  
+  if(sys.nframe() >= n){
+    res = environmentName(environment(sys.function(n)))
+    if(res == ""){
+      res = "R_GlobalEnv"
+    }
+  } else {
+    res = "R_GlobalEnv"
+  }
+  
+  res
+}
+
 
 is_operator = function(x, op){
   # operators in formulas

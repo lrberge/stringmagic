@@ -5,7 +5,7 @@
 \title{Set defaults for smagic}
 \usage{
 setSmagic(
-  .smagic.class = FALSE,
+  .class = "smagic",
   .delim = c("{", "}"),
   .sep = "",
   .data.table = TRUE,
@@ -13,9 +13,9 @@ setSmagic(
 )
 }
 \arguments{
-\item{.smagic.class}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the vector
-returned will be of class \code{smagic}. This class has a simple \code{print} method which is
-useful to display small vectors.}
+\item{.class}{Character vector representing the class to give to the object returned.
+By default it is \code{NULL}. Note that the class \code{smagic} has a specific \code{print} method, usually
+nicer for small vectors (it \code{\link[base:cat]{base::cat()}}s the elements).}
 
 \item{.delim}{Character vector of length 1 or 2. Default is \code{c("{", "}")}. Defines
 the opening and the closing delimiters for interpolation.
@@ -42,11 +42,18 @@ Se the default values for a few arguments of the function \code{\link[=smagic]{s
 \details{
 By default, each call to \code{setSmagic} adds modifications to the default values.
 To set a few default values and resetting the others, you need to use \code{reset = TRUE}.
+
+If you are a package developer: note that these options are scoped. This means that if you want to
+change the behavior of \code{smagic} within your package: you can and there will
+be no conflic if the user also uses smagic with her own, different, options.
+To define options, you should add a call to \code{setSmagic} in your \code{.onLoad()} function
+which is run at package startup (see \code{help(".onLoad")}).
+It is important that the \code{setSmagic} call should be in that function.
 }
 \examples{
 
 # we change the default display of the results of smagic
-setSmagic(.smagic.class = TRUE)
+setSmagic(.class = "smagic")
 smagic("{S!x, y}{2 each?1:2}")
 
 # back to a regular character vector

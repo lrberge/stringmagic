@@ -11,6 +11,20 @@ An object of class \code{function} of length 1.
 \usage{
 smagic
 
+smagic(
+  ...,
+  .envir = parent.frame(),
+  .sep = "",
+  .vectorize = FALSE,
+  .delim = c("{", "}"),
+  .check = TRUE,
+  .class = NULL,
+  .default = TRUE,
+  .collapse = NULL,
+  .help = NULL,
+  .data.table = TRUE
+)
+
 .smagic(
   ...,
   .envir = parent.frame(),
@@ -56,17 +70,21 @@ The default value is equivalent to \code{"{ }"}.
 [ ]: R:\%20
 [", "]: R:\%22,\%20\%22}
 
-\item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
-that should be returned is collapsed with the value of this argument. This leads
-to return a string of length 1.}
-
 \item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling.
 Without errorhandling you can save something of the order of 40us. Useful only
 in long loops.}
 
-\item{.data.table}{Logical, default is \code{TRUE}. If you use \code{smagic} in a \code{data.table} call
-and interpolate variables within the \code{data.table}, you want this argument to be \code{TRUE}.
-It only incurs a small overhead.}
+\item{.class}{Character vector representing the class to give to the object returned.
+By default it is \code{NULL}. Note that the class \code{smagic} has a specific \code{print} method, usually
+nicer for small vectors (it \code{\link[base:cat]{base::cat()}}s the elements).}
+
+\item{.default}{Logical scalar, default is \code{TRUE}. Whether to use the global defaults
+set with the function \code{\link[=setSmagic]{setSmagic()}}. If \code{FALSE}, then the default value of the arguments
+is guaranteed to be ones of the function definition.}
+
+\item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
+that should be returned is collapsed with the value of this argument. This leads
+to return a string of length 1.}
 
 \item{.help}{Character scalar or \code{TRUE}, default is \code{NULL}. This argument
 is used to generate a dynamic help on the console. If \code{TRUE}, the user can select which
@@ -75,13 +93,9 @@ navigate the help pages. If a character scalar, then a regex search is perfomed 
 documentation and any section containining a match is displayed. The user can easily
 navigate across matches.}
 
-\item{.default}{Logical scalar, default is \code{TRUE}. Whether to use the global defaults
-set with the function \code{\link[=setSmagic]{setSmagic()}}. If \code{FALSE}, then the default value of the arguments
-is guaranteed to be ones of the function definition.}
-
-\item{.smagic.class}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, the vector
-returned will be of class \code{smagic}. This class has a simple \code{print} method which is
-useful to display small vectors.}
+\item{.data.table}{Logical, default is \code{TRUE}. If you use \code{smagic} in a \code{data.table} call
+and interpolate variables within the \code{data.table}, you want this argument to be \code{TRUE}.
+It only incurs a small overhead.}
 }
 \value{
 It returns a character vector whose length depends on the elements and operations in the interpolations.
@@ -94,9 +108,18 @@ basic string operations to the interpolated variables. Advanced support for plur
 There are over 50 basic string operations, it supports pluralization, string operations can be
 nested, operations can be applied group-wise or conditionally and
 operators have sensible defaults.
-(it may be the most powerful feature)
 You can also declare your own operations with \code{\link[=smagic_register]{smagic_register()}}. They will be
 seamlessly integrated to \code{smagic}.
+
+The function \code{.smagic} (prefixed with a dot) is a leaner version of the function \code{smagic}.
+It does the same operations but with the following differences:
+\itemize{
+\item there is no error handling: meaning that the error messages, if any, will be poor and
+hard to understand
+\item default options are not applied: hence the user must always explicitly provide the arguments
+}
+
+This leads to a faster processing time (of about 50 microseconds) at the cost of user experience.
 
 Access a compact help on the console with \code{smagic("--help")} or use the argument \code{.help} to which
 you can pass keywords or regular expressions and fecth select pieces from the main documentation.
@@ -109,6 +132,8 @@ not exposed in its API, it is by construction unstable. \code{smagic} has been t
 }
 \section{Functions}{
 \itemize{
+\item \code{smagic()}: String interpolation with operation chaining
+
 \item \code{.smagic()}: Like \code{smagic} but without any error handling to save a few micro seconds
 
 }}

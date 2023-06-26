@@ -117,7 +117,7 @@ print.smagic = function(x, ...){
 #' 
 #' 
 #' 
-smagic_register = function(fun, alias, valid_options = NULL){
+smagic_register = function(fun, alias, valid_options = NULL, scope = NULL){
   # fun: must be a function with x and ... as arguments
   # the argument names must be in:
   # x, argument, options, group, conditonnal_flag
@@ -133,6 +133,7 @@ smagic_register = function(fun, alias, valid_options = NULL){
 
   check_character(alias, scalar = TRUE, mbt = TRUE)
   check_character(valid_options, no_na = TRUE, null = TRUE)
+  check_character(scope, no_na = TRUE, null = TRUE)
 
   fun_args = names(formals(fun))
   
@@ -184,6 +185,13 @@ smagic_register = function(fun, alias, valid_options = NULL){
 #' By default, each call to `setSmagic` adds modifications to the default values. 
 #' To set a few default values and resetting the others, you need to use `reset = TRUE`.
 #' 
+#' If you are a package developer: note that these options are scoped. This means that if you want to 
+#' change the behavior of `smagic` within your package: you can and there will
+#' be no conflic if the user also uses smagic with her own, different, options.
+#' To define options, you should add a call to `setSmagic` in your `.onLoad()` function
+#' which is run at package startup (see `help(".onLoad")`). 
+#' It is important that the `setSmagic` call should be in that function.
+#' 
 #' @author 
 #' Laurent Berge
 #' 
@@ -200,20 +208,30 @@ smagic_register = function(fun, alias, valid_options = NULL){
 setSmagic = function(.class = "smagic", .delim = c("{", "}"), 
                       .sep = "", .data.table = TRUE, reset = FALSE){
 
-  check_logical(.smagic.class, scalar = TRUE)
+  check_logical(.class, scalar = TRUE, null = TRUE)
   check_logical(.data.table, scalar = TRUE)
     
   check_character(.sep, scalar = TRUE)
+  check_character(scope, scalar = TRUE)
   
   .delim = check_set_delimiters(.delim)
 
   # Getting the existing defaults
-  opts = getOption("smagic_options")
+  opts_all = getOption("smagic_options")
+  if(is.null(opts_all)){
+    # => used for init
+    opts_all = list()
+  } else if(!is.list(opts)){
+    # => we should never be here
+    opts_all = list()
+  }
+  
+  scope = get_namespace_above()
+  opts = opts_all[[scope]]
 
   if(reset || is.null(opts)){
     opts = list()
   } else if(!is.list(opts)){
-    warning("Wrong formatting of option 'smagic_options', all options are reset.")
     opts = list()
   }
 
@@ -225,14 +243,22 @@ setSmagic = function(.class = "smagic", .delim = c("{", "}"),
   for(v in args_default){
     opts[[v]] = eval(as.name(v))
   }
+  
+  opts_all[[scope]] = opts
 
-  options(smagic_options = opts)
+  options(smagic_options = opts_all)
 
 }
 
 set_defaults = function(opts_name){
 
-  opts = getOption(opts_name)
+  opts_all = getOption(opts_name)
+  if(is.null(opts_all) || length(opts_all) == 0){
+    return(NULL)
+  }
+  
+  scope = get_namespace_above()
+  opts = opts_all[[scope]]
   if(is.null(opts) || length(opts) == 0){
     return(NULL)
   }

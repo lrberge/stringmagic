@@ -58,9 +58,17 @@
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
 #' nested, operations can be applied group-wise or conditionally and
 #' operators have sensible defaults. 
-#'  (it may be the most powerful feature)
 #' You can also declare your own operations with [smagic_register()]. They will be 
 #' seamlessly integrated to `smagic`.
+#' 
+#' The function `.smagic` (prefixed with a dot) is a leaner version of the function `smagic`.
+#' It does the same operations but with the following differences:
+#' 
+#'  + there is no error handling: meaning that the error messages, if any, will be poor and
+#' hard to understand
+#'  + default options are not applied: hence the user must always explicitly provide the arguments
+#' 
+#' This leads to a faster processing time (of about 50 microseconds) at the cost of user experience.
 #'
 #' Access a compact help on the console with `smagic("--help")` or use the argument `.help` to which
 #' you can pass keywords or regular expressions and fecth select pieces from the main documentation.
