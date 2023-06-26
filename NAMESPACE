@@ -6,7 +6,7 @@ export(str_ops, str_is, str_which, str_get, str_clean, str_split2df,
 
 # smagic
 export(smagic, .smagic)
-export(smagic_register)
+export(smagic_register_fun, smagic_register_ops)
 export(setSmagic)
 
 # Methods

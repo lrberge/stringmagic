@@ -54,17 +54,28 @@ print.smagic = function(x, ...){
 #' only in group-wise operations if `fun` changes the lengths of vectors. `group`: an index of
 #' the group to which belongs each observation (integer). `group_flag`: value between 0
 #' and 2; 0: no grouping operation requested; 1: keep track of groups; 2: apply grouping.
+#' @param ops Character scalar representing a valid chain of `smagic` operations. It should
+#' be of the form `"op1, 'arg'op2, etc"`. For example `"'80|-'fill"` fills the line
+#' with dashes up to 80 characters. 
 #' @param alias Character scalar, the name of the operation.
 #' @param valid_options A character vector or NULL (default). Represents a list of 
 #' valid options for the operation. This is used: a) to enable auto-completion,
 #' b) for error-handling purposes.
 #' 
+#' @details 
+#' The new operations created are scoped. They are attached to the namespace in which 
+#' it was created. This means that if a package uses `smagic`, and the user creates 
+#' new operations that may conflict with the ones used by the package author, there will 
+#' be no mess up.
+#' 
+#' We try to strongly check the new operations since it's always better to find out problems
+#' sooner than later. This means that when the function is defined, it is also 
+#' tested.
 #' 
 #' @author 
 #' Laurent R. Berge
 #' 
-#' @seealso 
-#' `smagic()`
+#' @inherit str_clean seealso
 #' 
 #' @examples
 #' 
@@ -117,7 +128,7 @@ print.smagic = function(x, ...){
 #' 
 #' 
 #' 
-smagic_register = function(fun, alias, valid_options = NULL, scope = NULL){
+smagic_register_fun = function(fun, alias, valid_options = NULL){
   # fun: must be a function with x and ... as arguments
   # the argument names must be in:
   # x, argument, options, group, conditonnal_flag
@@ -133,7 +144,6 @@ smagic_register = function(fun, alias, valid_options = NULL, scope = NULL){
 
   check_character(alias, scalar = TRUE, mbt = TRUE)
   check_character(valid_options, no_na = TRUE, null = TRUE)
-  check_character(scope, no_na = TRUE, null = TRUE)
 
   fun_args = names(formals(fun))
   
@@ -150,28 +160,106 @@ smagic_register = function(fun, alias, valid_options = NULL, scope = NULL){
     stopi("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
               "\nPROBLEM: the argument{$s, enum.bq, are?arg_pblm} invalid.")
   }
-
-  OPERATORS = getOption("smagic_operations_origin")
-
-  if(alias %in% OPERATORS){
-    stopi("The argument `alias` must not be equal to an existing internal argument.",
-              "\nPROBLEM: the operation {bq?alias} is already an internal operation.")
+  
+  run = try(fun(x = 1:5))
+  if(isError(run)){
+    mc = match.call()
+    fun_dp = if(length(mc$fun) == 1) deparse_short(fun) else ""
+    stopi("The function defined in argument `fun` failed to run for a simple case.",
+          "\n{&nchar(fun_dp)>0 ; {.}(x = 1:5) ; Running it on x = 1:5} leads to an error,",
+          " see below:",
+          "\n{run}")
   }
-
-  user_operators = getOption("smagic_user_ops")
-  if(is.null(user_operators)){
-    user_operators = list()
-  }
-
+  
+  #
+  # adding attributes
+  #
+  
   if(!is.null(valid_options)){
     attr(fun, "valid_options") = valid_options
   }
+  
+  if("group_flag" %in% fun_args){
+    attr(fun, "group_flag") = TRUE
+  }
+  
+  #
+  # saving within a namespace
+  #
+  
+  namespace = get_namespace_above()
+  save_user_fun(fun, alias, namespace)
+}
 
-  user_operators[[alias]] = fun
+#' @describeIn smagic_register_funs Create new combinations of `smagic` operations
+smagic_register_ops = function(ops, alias){
+  
+  #
+  # checking
+  #
+  
+  check_character(ops, scalar = TRUE, mbt = TRUE)
+  check_character(alias, scalar = TRUE, mbt = TRUE)
+  
+  run = try(smagic("x{1:5}", .last = ops))
+  
+  if(isError(run)){
+    stopi("The argument `ops` must refer to valid `smagic` operations.", 
+          "\nPROBLEM: running `smagic(\"x\\{1:5}\", .last = {Q?ops})` leads ",
+          "to an error, see below:",
+          "\n{run}")
+  }
+  
+  #
+  # adding attributes
+  #
+  
+  if(!is.null(ops)){
+    attr(ops, "simple_ops") = TRUE
+  }
+  
+  #
+  # saving within a namespace
+  #
+  
+  namespace = get_namespace_above()
+  save_user_fun(ops, alias, namespace)  
+}
 
-  options("smagic_user_ops" = user_operators)
-  options("smagic_operations" = c(OPERATORS, names(user_operators)))
+save_user_fun = function(fun, alias, namespace){
+  # We save the user function in the global options
+  
+  # We forbid the redefinition of internal operations
+  # => only for V1, so that later versions don't break code
+  #    if user did defined operations with the same name of the new ones
+  OPERATORS_v1.0.0 = getOption("smagic_operations_v1.0.0")
+  if(alias %in% OPERATORS_v1.0.0){
+    stopi("The argument `alias` must not be equal to an existing internal argument.",
+              "\nPROBLEM: the operation {bq?alias} is already an internal operation.")
+  }
+  
+  user_ops_all = getOption("smagic_user_ops")
+  if(is.null(user_ops_all) || !is.list(user_ops_all)){
+    user_ops_all = list()
+  }
+  
+  user_info = user_ops_all[[namespace]]
+  if(is.null(user_info)){
+    funs = list()
+    funs[[alias]] = fun
+    operators_default = getOption("smagic_operations_default")
+    operators = c(operators_default, alias)
+  } else {
+    funs = user_info$funs
+    funs[[alias]] = fun
+    operators = user_info$operators
+    operators = unique(c(operators, alias))
+  }
+  
+  user_info = list(funs = funs, operators = operators)
+  user_ops_all[[namespace]] = user_info
 
+  options("smagic_user_ops" = user_ops_all)
 }
 
 #' Set defaults for smagic
@@ -208,7 +296,7 @@ smagic_register = function(fun, alias, valid_options = NULL, scope = NULL){
 setSmagic = function(.class = "smagic", .delim = c("{", "}"), 
                       .sep = "", .data.table = TRUE, reset = FALSE){
 
-,   check_character(.class, scalar = TRUE, null = TRUE)
+  check_character(.class, scalar = TRUE, null = TRUE)
   check_logical(.data.table, scalar = TRUE)
     
   check_character(.sep, scalar = TRUE)
@@ -249,15 +337,14 @@ setSmagic = function(.class = "smagic", .delim = c("{", "}"),
 
 }
 
-set_defaults = function(opts_name){
+set_smagic_defaults = function(namespace){
 
-  opts_all = getOption(opts_name)
+  opts_all = getOption("smagic_options")
   if(is.null(opts_all) || length(opts_all) == 0){
     return(NULL)
   }
   
-  scope = get_namespace_above(n = 4)
-  opts = opts_all[[scope]]
+  opts = opts_all[[namespace]]
   if(is.null(opts) || length(opts) == 0){
     return(NULL)
   }
@@ -280,9 +367,10 @@ set_defaults = function(opts_name){
 
 #' @describeIn smagic String interpolation with operation chaining
 smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
-                   .delim = c("{", "}"), .check = TRUE, .class = NULL, 
-                   .default = TRUE, .last = NULL,
-                   .collapse = NULL, .help = NULL, .data.table = TRUE){
+                   .delim = c("{", "}"), .last = NULL, 
+                   .collapse = NULL, 
+                   .check = TRUE, .class = NULL, .help = NULL, 
+                   .data.table = TRUE, .default = TRUE){
 
 
   if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
@@ -295,8 +383,11 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   
   set_pblm_hook()
   
+  # half a microsecond, atm I don't see how to avoid it
+  .namespace = get_namespace_above()
+  
   if(.default){
-    set_defaults("smagic_options")
+    set_smagic_defaults(.namespace)
   }  
   
   check_character(.delim, no_na = TRUE)
@@ -322,7 +413,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   res = smagic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
                             .vectorize = .vectorize, .help = .help,
                             .collapse = .collapse, .is_root = TRUE, 
-                            .data.table = .data.table,
+                            .data.table = .data.table, .namespace = .namespace,
                             .check = .check, .last = .last)
 
   if(inherits(res, "help")){
@@ -351,9 +442,12 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   if(length(.delim) == 1){
     .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
   }
+  
+  # half a microsecond, atm I don't see how to avoid it
+  .namespace = get_namespace_above()
 
   smagic_internal(..., .delim = .delim, .envir = .envir,
-                      .sep = .sep,
+                      .sep = .sep, .namespace = .namespace,
                       .vectorize = .vectorize, .is_root = TRUE, 
                       .data.table = .data.table, .collapse = .collapse,
                       .check = .check, .last = .last)
@@ -370,6 +464,8 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
                                .sep = "", .vectorize = FALSE,
                                .collapse = NULL, .last = NULL,
                                .help = NULL, .is_root = FALSE, .data.table = FALSE,
+                               .namespace = NULL, .user_funs = NULL,
+                               .valid_operators = NULL,
                                .check = FALSE, .plural_value = NULL){
   
   # flag useful to easily identify this environment (used in error messages)
@@ -387,6 +483,10 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
       
       stop_up("smagic: Help requested.")
     }    
+  }
+  
+  if(...length() == 0){
+    return("")
   }
   
   if(.is_root && .data.table){
@@ -426,11 +526,21 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
       }
     }
   }
+  
+  if(.is_root){
+    user_ops_all = getOption("smagic_user_ops")
+    # beware the sneaky assignment!
+    if(!is.null(user_ops_all) && !is.null(user_info <- user_ops_all[[.namespace]])){
+      .user_funs = user_info$funs
+      .valid_operators = user_info$operators          
+    } else {
+      .valid_operators = getOption("smagic_operations_default")
+    }
+    print(.namespace)
+    print(user_info)
+  }
 
-  if(...length() == 0){
-    return("")
-
-  } else if(...length() == 1){
+  if(...length() == 1){
     
     if(!is.null(...names())){
       stop_hook("`smagic` requires at least one character scalar to work.",
@@ -512,7 +622,8 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
         }
         
         res[[i]] = smagic_internal(dots[[i]], .delim = .delim, .envir = .envir, 
-                                    .data = .data, .check = .check)
+                                    .data = .data, .check = .check,
+                                    .user_funs = .user_funs, .valid_operators = .valid_operators)
       }
 
       return(unlist(res))
@@ -739,7 +850,8 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
           if(verbatim){
             if(grepl(BOX_OPEN, xi, fixed = TRUE)){
               xi = smagic_internal(xi, .delim = .delim, .envir = .envir, .data = .data, 
-                                      .vectorize = concat_nested, .check = .check)
+                                   .vectorize = concat_nested, .check = .check, 
+                                   .user_funs = .user_funs, .valid_operators = .valid_operators)
             }
           } else if(!verbatim){
             # evaluation
@@ -762,7 +874,8 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
         #
 
         if(is_plural){
-          xi = sma_pluralize(operators, xi, .delim, .envir, .data, .check)
+          xi = sma_pluralize(operators, xi, .delim, .envir, .data, .check, 
+                             .user_funs, .valid_operators)
 
         } else if(is_ifelse){
 
@@ -816,7 +929,8 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
           }
 
           xi = sma_ifelse(operators, xi, xi_val, .envir = .envir, .data = .data,
-                          .check = .check, .delim = .delim)
+                          .check = .check, .delim = .delim, 
+                          .user_funs = .user_funs, .valid_operators = .valid_operators)
         } else {
           #
           # REGULAR OPERATORS
@@ -826,7 +940,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
           
           for(j in seq_along(operators)){
             opi = operators[[j]]
-            op_parsed = sma_char2operator(opi)
+            op_parsed = sma_char2operator(opi, .valid_operators)
 
             if(op_parsed$eval){
               argument_call = check_set_oparg_parse(op_parsed$argument, opi, .check)
@@ -837,14 +951,18 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
 
             if(.check){
               xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument,
-                                              .check = .check, .envir = .envir, group_flag = group_flag,
-                                              .delim = .delim),
+                                              .check = .check, .envir = .envir, 
+                                              group_flag = group_flag,
+                                              .delim = .delim, .user_funs = .user_funs, 
+                                              .valid_operators = .valid_operators),
                                 get_smagic_context(), " See error below:",
                                 verbatim = TRUE, up = 1)
             } else {
-              xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, .check = .check,
+              xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
+                                 .check = .check,
                                  .envir = .envir, group_flag = group_flag,
-                                 .delim = .delim)
+                                 .delim = .delim, .user_funs = .user_funs, 
+                                 .valid_operators = .valid_operators)
             }
           }
         }
@@ -906,7 +1024,9 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
 
   if(!is.null(.last)){
     res = apply_simple_operations(res, ".last", .last, .check, .envir,
-                                  group_flag = 1 * grepl("~", .last, fixed = TRUE), .delim)
+                                  group_flag = 1 * grepl("~", .last, fixed = TRUE), 
+                                  .delim, .user_funs = .user_funs, 
+                                  .valid_operators = .valid_operators)
     
   }
 
@@ -918,11 +1038,9 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(),  
 }
 
 
-sma_char2operator = function(x){
+sma_char2operator = function(x, .valid_operators){
 
   op_parsed = cpp_parse_operator(x)
-
-  OPERATORS = getOption("smagic_operations")
   
   ok = FALSE
   op = op_parsed$operator
@@ -938,8 +1056,8 @@ sma_char2operator = function(x){
   do_eval = op_parsed$eval
   
   # we partially match operators if needed
-  if(!op %in% OPERATORS){
-    op = check_set_options(op, OPERATORS, case = TRUE, free = TRUE)
+  if(!op %in% .valid_operators){
+    op = check_set_options(op, .valid_operators, case = TRUE, free = TRUE)
     op_parsed$operator = op
   }
 
@@ -988,16 +1106,16 @@ sma_char2operator = function(x){
     op_parsed$argument = argument
   }
     
-  if(!ok && !op %in% OPERATORS){
+  if(!ok && !op %in% .valid_operators){
     
-    op = check_set_options(op, OPERATORS, case = TRUE, free = TRUE)
+    op = check_set_options(op, .valid_operators, case = TRUE, free = TRUE)
     op_parsed$operator = op
     
-    if(!op %in% OPERATORS){
+    if(!op %in% .valid_operators){
       
       context = get_smagic_context()
 
-      sugg_txt = suggest_item(op, OPERATORS, newline = FALSE, info = "operator")
+      sugg_txt = suggest_item(op, .valid_operators, newline = FALSE, info = "operator")
       
       op = escape_newline(op)
       op = gsub("\t", "\\\\t", op)
@@ -1016,8 +1134,9 @@ sma_char2operator = function(x){
 }
 
 
-sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL, .data = list(),
-                         group_flag = 0, .delim = c("{", "}")){
+sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL, 
+                         .data = list(), group_flag = 0, .delim = c("{", "}"),  
+                         .user_funs = NULL, .valid_operators = NULL){
 
   # group_flag:  0 nothing
   #                    1 keep track of conditional things
@@ -1025,7 +1144,63 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
   extra = attr(x, "extra")
   group_index = attr(x, "group_index")
+  
+  browser()
+  
+  # beware the sneaky assignment!!!!!
+  if(!is.null(.user_funs) && !is.null(fun <- .user_funs[[op]])){
+    #                                     ^ sneaky (but saves half a us)
+    # user-defined operations ####
+    
+    # EXPLANATION: why do we check user operations first?
+    # - I want this package to last and be stable
+    # - I also want forward stability for packages that use stringmagic as a dependency
+    # - example of use case:
+    #   * pkg matchmaker uses stringmagic and defines the operation 'h1'
+    #   * all works fine with SM 1.0.0
+    #   * now SM 1.1.0 introduces the operator h1!!!!
+    #   * what happens?
+    #     + matchmaker should work for both SM 1.0.0 and SM 1.1.0
+    #     + it should work even if h1 has a new definition in SM 1.1.0 => the h1 used
+    #       should be the one of the user, defined in the package.
+    # - hence I need to:
+    #   * allow users to redefine existing operations
+    #   * check user defined version first
+    #
+    
+    if(isTRUE(attr(fun, "simple_ops"))){
+      res = apply_simple_operations(x, op, fun, .check, .envir, 
+                                    group_flag = group_flag, .delim, 
+                                    .user_funs = .user_funs, 
+                                    .valid_operators = .valid_operators)
+                                
+      # res already has a group_index attribute
+      
+    } else {
+      # This is a regular function
+      valid_options = attr(fun, "valid_options")
+      if(!is.null(valid_options)){
+        options = check_set_options(options, valid_options)
+      }
 
+      res = fun(x = x, argument = argument, options = options, group = group_index, 
+                group_flag = group_flag)
+
+      group_index = attr(res, "group_index")
+      if(group_flag != 0 && is.null(group_index) && !isTRUE(attr(fun, "group_flag")) 
+          && length(x) == length(res)){
+        # This is the case in which there is grouping but we don"t impose
+        # to the user to define the grouping behavior
+        # if the lengths are different: it's messed up and so be it
+        attr(res, "group_index") = attr(x, "group_index")
+      }
+    }
+    
+    return(res)
+  } 
+  
+  # We carry on
+  
   if(op %in% c("c", "C", "collapse", "Collapse")){
     # C, collapse ####
     # collapse
@@ -2380,7 +2555,9 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         n_old = length(xi)
         cond_flag = +grepl("~(", instruction, fixed = TRUE)
         xi = apply_simple_operations(xi, op, instruction, .check, .envir, 
-                                     group_flag = cond_flag, .delim)
+                                     group_flag = cond_flag, .delim,
+                                     .user_funs = .user_funs, 
+                                     .valid_operators = .valid_operators)
         
         if(is_elementwise && !length(xi) %in% c(0, n_old)){
           stop_hook("In {bq?op} operations, when conditions are of length > 1, the ",
@@ -2396,7 +2573,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         }
         
         xi = smagic_internal(instruction, .delim = .delim, .envir = .envir, 
-                              .data = .data, .check = .check)
+                             .data = .data, .check = .check, 
+                             .user_funs = .user_funs, .valid_operators = .valid_operators)
       }
       
       if(state == "true"){
@@ -2473,43 +2651,15 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
   } else if(op == "~"){
     # Group wise: ~ ####
     res = apply_simple_operations(x, op, argument, .check, .envir, 
-                                  group_flag = 2, .delim)
+                                  group_flag = 2, .delim, .user_funs = .user_funs, 
+                                  .valid_operators = .valid_operators)
                                   
     group_index = attr(res, "group_index")
 
   } else {
-    # user-defined operations ####
-    
-    user_ops = getOption("smagic_user_ops")
-    if(op %in% names(user_ops)){
-      fun = user_ops[[op]]
-      valid_options = attr(fun, "valid_options")
-
-      if(!is.null(valid_options)){
-        options = check_set_options(options, valid_options, free = any(valid_options == ""))
-      }
-
-      tmp = fun(x = x, argument = argument, options = options, group = group_index, 
-                group_flag = group_flag)
-
-      if(is.list(tmp)){
-        if(!all(c("x", "group") %in% names(tmp))){
-          pblm  = setdiff(c("x", "group") %in% names(tmp))
-          stop_hook("The user-defined operation {bq?alias} is not well formed. The function should",
-                    " return either a vector, either a list of exactly two elements 'x' and 'group'.",
-                    "\nPROBLEM: it returns a list but the item{$s, are ? pblm} missing.")
-        }
-        res = tmp$x
-        group_index = tmp$group
-      } else {
-        res = tmp
-      }
-
-    } else {
-      msg = paste0("In `smagic`: the operator `", op, "` is not recognized. ",
-                  "Internal error: this problem should have been spotted beforehand.")
-      .stop_hook(msg)
-    }
+    msg = paste0("In `smagic`: the operator `", op, "` is not recognized. ",
+                "Internal error: this problem should have been spotted beforehand.")
+    .stop_hook(msg)
   }
 
   if(length(extra) > 0){
@@ -2525,7 +2675,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
 
 
-sma_pluralize = function(operators, xi, .delim, .envir, .data, .check){
+sma_pluralize = function(operators, xi, .delim, .envir, .data, .check, 
+                         .user_funs, .valid_operators){
 
   plural_len = operators[1] == "$"
 
@@ -2639,8 +2790,8 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check){
          (op == "plural" && IS_PLURAL)){
           
           value = smagic_internal(argument, .delim = .delim, .envir = .envir, .data = .data,
-                                      .check = .check,
-                                      .plural_value = xi)
+                                  .check = .check, .plural_value = xi, 
+                                  .user_funs = .user_funs, .valid_operators = .valid_operators)
         if(value != ""){
           res[i] = value
         }        
@@ -2670,7 +2821,8 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check){
   paste(res, collapse = " ")
 }
 
-sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
+sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check, 
+                      .user_funs, .valid_operators){
 
   if(is.numeric(xi)){
     xi = xi != 0
@@ -2736,8 +2888,8 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
         }
         
         log_op_eval = smagic_internal(log_op, .delim = .delim, .envir = .envir, .data = .data,
-                              .check = .check,  
-                              .plural_value = xi_val)
+                                      .check = .check, .plural_value = xi_val, 
+                                      .user_funs = .user_funs, .valid_operators = .valid_operators)
         
         if(!length(log_op) %in% c(1, n_x)){
           form = "{&cond ; true ; false}"
@@ -2806,8 +2958,8 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
         .data[[".len"]] = length(xi_val)
       }
     res = smagic_internal(res, .delim = .delim, .envir = .envir, .data = .data,
-                           .check = .check,  
-                           .plural_value = xi_val)
+                           .check = .check, .plural_value = xi_val, 
+                           .user_funs = .user_funs, .valid_operators = .valid_operators)
   }
 
   res
@@ -2815,7 +2967,8 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check){
 
 
 apply_simple_operations = function(x, op, operations_string, .check = FALSE, .envir = NULL, 
-                                 group_flag = 0, .delim = c("{", "}")){
+                                   group_flag = 0, .delim = c("{", "}"), 
+                                   .valid_operators = NULL, .user_funs = NULL){
                                   
   op_all = cpp_parse_simple_operations(operations_string, .delim)
     
@@ -2824,15 +2977,19 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
   }
   
   if(identical(op_all[1], "_ERROR_")){
-    op_msg = if(op =='~') "~(op1, op2)" else "if(cond ; op1, op2 ; op3, op4)"
+    op_msg = "'arg'op1, op2"
+    if(op =='~') op_msg = "~(op1, op2)" 
+    if(op == "if") op_msg = "if(cond ; op1, op2 ; op3, op4)"
+    
     last = gsub("_;;;_", ";", tail(op_all, 1))
     extra = ""
     if(last %in% c("!", "?")){
       extra = smagic("The character {bq?last} is forbidden in operations.")
     } else if(last != "_ERROR_"){
-      extra = smagic("Operations must be of the form `'arg'operator.option` but the value {bq?last} is ill formed.")
+      extra = smagic("Operations must be of the form `'arg'operator.option` but",
+                     " the value {bq?last} is ill formed.")
     } else {
-      extra = smagic("The value {bq?operations} could not be parsed.")
+      extra = smagic("The value {bq?operations_string} could not be parsed.")
     }
       
     msg = smagic("The operator {bq?op} expects a suite of valid operations (format: {bq?op_msg}). ",
@@ -2850,7 +3007,7 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
   for(i in seq_along(op_all)){
     opi = op_all[i]
 
-    op_parsed = sma_char2operator(opi)
+    op_parsed = sma_char2operator(opi, .valid_operators)
 
     if(op_parsed$eval){
       if(.check){
@@ -2880,14 +3037,16 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
 
     if(.check){
       xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
-                                      group_flag = group_flag, .delim = .delim),
+                                      group_flag = group_flag, .delim = .delim, 
+                                      .user_funs = .user_funs, .valid_operators = .valid_operators),
                                      "In the operation `{op}()`, the ",
                                      "{&length(op_all) == 1 ; operation ; chain of operations} ",
                                      " {bq?operations_string} led to a problem.", 
                                      "\nPROBLEM: the operation {opi} failed. Look up the doc?")
     } else {
       xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
-                         group_flag = group_flag, .delim = .delim)
+                         group_flag = group_flag, .delim = .delim, 
+                         .user_funs = .user_funs, .valid_operators = .valid_operators)
     }
   }
 
@@ -2910,8 +3069,9 @@ setup_operations = function(){
                 "ws", "tws", "trim", "get", "is", "which",
                 "n", "N", "len", "Len", "width", "dtime",
                 "stopwords", "nth", "Nth", "ntimes", "Ntimes")
-  options("smagic_operations" = sort(OPERATORS))
-  options("smagic_operations_origin" = sort(OPERATORS))
+                
+  options("smagic_operations_v1.0.0" = sort(OPERATORS))
+  options("smagic_operations_default" = sort(OPERATORS))
 }
 
 

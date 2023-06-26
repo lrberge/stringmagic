@@ -35,8 +35,8 @@ str_to_ascii = function(x, options){
     nbfail = 0
 
     if(!is_silent){
-      warning(fit_screen("The encoding was a bit nasty (nchar couldn't be used!): please check the conversion to ASCII.",
-              "\n(Ignore this message with the `silent` option [ex: `ascii.silent`]. Pass the native encoding as an option?)"))
+      warn_hook("In operation `ascii`, the encoding was a bit nasty (nchar couldn't be used!): please check the conversion to ASCII.",
+              "\n(Ignore this message with the `silent` option [ex: `ascii.silent`]. Pass the native encoding as an option?)")
     }
 
   } else {
@@ -634,7 +634,10 @@ names_xpd = function(x){
   nm
 }
 
-get_namespace_above = function(n = 3){
+get_namespace_above = function(n = -2){
+  
+  
+  browser()
   
   if(sys.nframe() >= n){
     res = environmentName(environment(sys.function(n)))

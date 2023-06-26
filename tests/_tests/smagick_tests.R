@@ -885,13 +885,17 @@ test(txt, "I'm saying 'ha ] ha'!")
 #
 
 xplode = function(x, argument, options, ...){
-  unlist(strsplit(x, ""))
+  unlist(strsplit(as.character(x), ""))
 }
 
-smagic_register(xplode, "xplode")
+smagic_register_fun(xplode, "xplode")
 
 txt = smagic("bon{xplode!jour}")
 test(txt, c("bonj", "bono", "bonu", "bonr"))
+
+smagic_register_ops("'50|-'fill", "h2")
+txt = smagic("my header ", .last = "h2")
+
 
 #
 # errors ####
