@@ -127,6 +127,7 @@ String interpolation combined with operation chaining: \code{\link[=smagic]{smag
 default values with \code{\link[=smagic_alias]{smagic_alias()}} and add custom operations with \code{\link[=smagic_register_fun]{smagic_register_fun()}}.
 
 Other tools with aliases: 
+\code{\link{cat_magic_alias}()},
 \code{\link{smagic_alias}()},
 \code{\link{smagic}()},
 \code{\link{string_ops_alias}()},

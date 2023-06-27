@@ -121,6 +121,7 @@ string_vec("\\\\usepackage{.[S!graphicx, fourier, standalone]}",
 }
 \seealso{
 Other tools with aliases: 
+\code{\link{cat_magic_alias}()},
 \code{\link{smagic_alias}()},
 \code{\link{smagic}()},
 \code{\link{string_clean_alias}()},

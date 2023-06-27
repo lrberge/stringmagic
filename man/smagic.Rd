@@ -16,7 +16,6 @@ smagic(
   .check = TRUE,
   .class = NULL,
   .help = NULL,
-  .data.table = TRUE,
   .namespace = NULL
 )
 
@@ -29,7 +28,6 @@ smagic(
   .collapse = NULL,
   .last = NULL,
   .check = FALSE,
-  .data.table = FALSE,
   .namespace = NULL
 )
 }
@@ -92,10 +90,6 @@ navigate the help pages. If a character scalar, then a regex search is perfomed 
 documentation and any section containining a match is displayed. The user can easily
 navigate across matches.}
 
-\item{.data.table}{Logical, default is \code{TRUE}. If you use \code{smagic} in a \code{data.table} call
-and interpolate variables within the \code{data.table}, you want this argument to be \code{TRUE}.
-It only incurs a small overhead.}
-
 \item{.default}{Logical scalar, default is \code{TRUE}. Whether to use the global defaults
 set with the function \code{\link[=setSmagic]{setSmagic()}}. If \code{FALSE}, then the default value of the arguments
 is guaranteed to be ones of the function definition.}
@@ -129,12 +123,6 @@ the function \code{\link[=smagic_alias]{smagic_alias()}}.
 
 Access a compact help on the console with \code{smagic("--help")} or use the argument \code{.help} to which
 you can pass keywords or regular expressions and fecth select pieces from the main documentation.
-
-This function is compatible with calls within a \code{data.table} without named arguments.
-Note that it shouldn't work (try \href{https://glue.tidyverse.org/index.html}{glue} for instance)!
-To make it work, we made use of how \code{data.table} works internally and, since we used stuff
-not exposed in its API, it is by construction unstable. \code{smagic} has been tested, and works, on
-\code{data.table} version 1.14.2 (2021-09-27) and version 1.14.8 (2023-02-17).
 }
 \section{Functions}{
 \itemize{
@@ -247,8 +235,9 @@ This section describes some of the most common string operations: extracting, re
 These functions accept generic flags ("ignore", "fixed", "word") in their patterns (syntax: "flags/pattern").
 Please see the dedicated section for more information on flags.
 \itemize{
-\item s, S: splits the string according to a pattern. The two operations have different defaults: \code{' '}
-for \code{s} and \code{',[ \\t\\n}*'} for \code{S} (i.e. comma separation).
+\item s, split, S, Split: splits the string according to a pattern.
+The operations have different defaults: \code{' '}
+for \code{s} and 'split', and \code{',[ \\t\\n]*'} for \code{S} and 'Split' (i.e. comma separation).
 Ex.1: \code{smagic("{S ! romeo, juliet}")} leads to the vector c("romeo", "juliet").
 Ex.2: \code{smagic("{'f/+'s, '-'c ! 5 + 2} = 3")} leads to "5 - 2 = 3" (note the flag "fixed" in \code{s}'s pattern).
 \item c, C: to concatenate multiple strings into a single one. The two operations are
@@ -462,6 +451,13 @@ Option "right" pastes on the right and "both" pastes on both sides. Option "fron
 pastes on the first element while option "back" only pastes on the last element. Option "delete"
 first replaces all elements with the empty string.
 Example: \code{smagic("6 = {'|'paste.both, ' + 'c ? -3:-1}")} leads to "6 = |-3| + |-2| + |-1|".
+\item join: joins lines ending with a double backslash. Ex: \code{x = "the sun \\\\\\n is shining"};
+\code{smagic("{join ? x}")} leads to "the sun is shining".
+\item escape: adds backslashes in front of specific characters. Options \code{"nl"}, \code{"tab"}.
+Option \code{"nl"} escapes the newlines (\verb{\\n}), leading them to be displayed as \code{"\\\\\\\\n"}.
+Option \code{"tab"} does the same for tabs (\code{"\\t"}). This is useful to make the value free
+of space formatters.
+The default behavior is to escape both newlines and tabs.
 }
 }
 
@@ -1117,21 +1113,6 @@ smagic("Why do you develop packages? For {`dollar`times.c ! $}?",
     "For money? No... for {upper,''s, c ? reason}!", .sep = "\n")
 
 
-#
-# COMPATIBILITY WITH data.table ####
-# 
-
-# smagic is compatible with data.table (tested on version 1.14.2)
-
-if(requireNamespace("data.table")){
-  library(data.table)
-  dt_iris = as.data.table(iris)
-  dt_small = dt_iris[, .(species_PL = smagic("{first, 10 fill.c ? Species}: {\%.1f ? mean(Petal.Length)}")), 
-                     by = Species]
-  print(dt_small)
-}
-
-
    
 
 }
@@ -1144,6 +1125,7 @@ If you want to apply a chain of operations on a single vector, see \code{\link[=
 may be more appropriate.
 
 Other tools with aliases: 
+\code{\link{cat_magic_alias}()},
 \code{\link{smagic_alias}()},
 \code{\link{string_clean_alias}()},
 \code{\link{string_ops_alias}()},

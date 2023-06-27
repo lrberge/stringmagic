@@ -80,6 +80,7 @@ string_ops(cars, "'\\\\d+'x, rm, unik, num, dsort, 3 first")
 }
 \seealso{
 Other tools with aliases: 
+\code{\link{cat_magic_alias}()},
 \code{\link{smagic_alias}()},
 \code{\link{smagic}()},
 \code{\link{string_clean_alias}()},

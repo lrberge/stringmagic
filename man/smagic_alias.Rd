@@ -12,7 +12,6 @@ smagic_alias(
   .collapse = NULL,
   .check = TRUE,
   .class = NULL,
-  .data.table = TRUE,
   .namespace = NULL
 )
 }
@@ -50,10 +49,6 @@ in long loops.}
 \item{.class}{Character vector representing the class to give to the object returned.
 By default it is \code{NULL}. Note that the class \code{smagic} has a specific \code{print} method, usually
 nicer for small vectors (it \code{\link[base:cat]{base::cat()}}s the elements).}
-
-\item{.data.table}{Logical, default is \code{TRUE}. If you use \code{smagic} in a \code{data.table} call
-and interpolate variables within the \code{data.table}, you want this argument to be \code{TRUE}.
-It only incurs a small overhead.}
 }
 \description{
 Utility to easily create \code{smagic} aliases with custom default
@@ -118,6 +113,7 @@ Other related to \code{smagic}:
 \code{\link{smagic_register_fun}()}
 
 Other tools with aliases: 
+\code{\link{cat_magic_alias}()},
 \code{\link{smagic}()},
 \code{\link{string_clean_alias}()},
 \code{\link{string_ops_alias}()},
