@@ -168,7 +168,7 @@ SEXP cpp_trimws_in_place(SEXP x){
     const char* str = Rf_translateCharUTF8(STRING_ELT(x, i_vec));
     int n = std::strlen(str);
 
-    if(str[0] == ' ' || str[n - 1] == ' '){
+    if(is_blank(str[0]) || is_blank(str[n - 1])){
       int i = 0;
       while(i < n && is_blank(str, i)) ++i;
       while(n > 0 && is_blank(str, n - 1)) --n;

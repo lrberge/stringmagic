@@ -2013,9 +2013,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     res = string_fill(x, argument, symbol = symbol, right = right, center = center)
     
   } else if(op == "join"){
-    
-    res = gsub(" *\\\\\\\\ *\n *", " ", res, perl = TRUE)
-    
+    res = gsub(" *\\\\ *\n *", " ", x, perl = TRUE)    
   } else if(op == "unik"){
     # unik ####
 
