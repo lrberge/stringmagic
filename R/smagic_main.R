@@ -1983,12 +1983,13 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       options = c("nl", "tab")
     }
     
+    res = x
     if("nl" %in% options){
-      res = gsub("\n", "\\\\n", x, perl = TRUE)
+      res = gsub("\n", "\\\\n", res, perl = TRUE)
     }
     
     if("tab" %in% options){
-      res = gsub("\t", "\\\\t", x, perl = TRUE)
+      res = gsub("\t", "\\\\t", res, perl = TRUE)
     }
     
   } else if(op == "unik"){

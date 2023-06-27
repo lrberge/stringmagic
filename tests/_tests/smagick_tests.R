@@ -590,7 +590,7 @@ test(txt, "Text: bonjour les gens\n est-ce que ca va?")
 
 x = "bon\njour \t les \t gens"
 txt = smagic(x, .last = "escape")
-test(txt, "bon\njour \\t les \\t gens")
+test(txt, "bon\\njour \\t les \\t gens")
 
 #
 # unik ####
