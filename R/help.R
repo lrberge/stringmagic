@@ -118,7 +118,7 @@ generate_help_extensive = function(){
   
   mtime_origin = floor(as.numeric(file.info("R/smagic_doc.R")["mtime"]))
   mtime_destination = readLines("R/AUTO_help.R", n = 1)
-  mtime_destination = as.numeric(str_trim(mtime_destination, 2))
+  mtime_destination = as.numeric(string_trim(mtime_destination, 2))
     
   if(mtime_origin <= mtime_destination){
     return(NULL)
@@ -139,15 +139,15 @@ generate_help_extensive = function(){
   
   smagic_txt = readLines("R/smagic_doc.R")
   
-  i_smagic = str_which(smagic_txt, "^\"smagic\"")
+  i_smagic = string_which(smagic_txt, "^\"smagic\"")
   doc = smagic_txt[1:(i_smagic - 1)]
-  i_start_doc = max(str_which(doc, "!^#'")) + 1
+  i_start_doc = max(string_which(doc, "!^#'")) + 1
   
   doc = doc[i_start_doc:length(doc)]
   
   # We select only the sections
-  i_at = str_which(doc, "#' @")
-  is_sec = str_is(doc[i_at], "#' @section")
+  i_at = string_which(doc, "#' @")
+  is_sec = string_is(doc[i_at], "#' @section")
   i_end = c(i_at[-1], length(doc)) - 1
   
   # we extract + format the section
@@ -155,16 +155,16 @@ generate_help_extensive = function(){
   for(id_sec in which(is_sec)){
     my_sec = doc[i_at[id_sec]:i_end[id_sec]]
         
-    title = str_ops(my_sec[1], "'.+@section'r, tws, ':$'r, '# 'paste, ' ----|'paste.right")
-    content = str_ops(my_sec[-1], "'^#.'r, tws, '_ENDLINE_'paste.right, ''c")
+    title = string_ops(my_sec[1], "'.+@section'r, tws, ':$'r, '# 'paste, ' ----|'paste.right")
+    content = string_ops(my_sec[-1], "'^#.'r, tws, '_ENDLINE_'paste.right, ''c")
     
-    content = str_clean(content, 
+    content = string_clean(content, 
                         "^(_ENDLINE_)+|(_ENDLINE_)+$",
                         "(_ENDLINE_){2,} => _NEWLINE__NEWLINE_",
                         "_ENDLINE_([+-]) => _NEWLINE_  \\1",
                         " *_ENDLINE_ * =>  ")
                         
-    content = str_ops(content, "'_NEWLINE_'s")
+    content = string_ops(content, "'_NEWLINE_'s")
     
     text = c(text, "", title, "", content)
   }
@@ -198,7 +198,7 @@ format_help = function(pattern = NULL, x = NULL){
   for(i in seq_along(pattern)){
     p = pattern[i]
 
-    qui = str_is(x, p, ignore.case = TRUE)
+    qui = string_is(x, p, ignore.case = TRUE)
 
     if(!any(qui)){
       stop_up("In argument `.help`, the pattern `", p, "` did not match any element of the documentation.")
@@ -211,7 +211,7 @@ format_help = function(pattern = NULL, x = NULL){
   # of each selected line
 
   line_id = which(select)
-  section_id = str_which(x, "^# ")
+  section_id = string_which(x, "^# ")
   empty_id = which(x == "")
 
   start = end = c()
@@ -246,8 +246,8 @@ format_help = function(pattern = NULL, x = NULL){
   text = strsplit(text, "\n")[[1]]
   
   # we format the sections
-  if(any(str_is(text, "fixed/---|"))){
-    qui_sec = str_is(text, "fixed/---|")
+  if(any(string_is(text, "fixed/---|"))){
+    qui_sec = string_is(text, "fixed/---|")
     text[qui_sec] = .sma("{80k ! {'f/|'r ? text[qui_sec]}{80 times.c ! -}}|")
   }
   
@@ -255,7 +255,7 @@ format_help = function(pattern = NULL, x = NULL){
   highlights = list(line = NULL, value = NULL)
   for(i in seq_along(pattern)){
     p = pattern[i]
-    qui = str_is(text, p, ignore.case = TRUE)
+    qui = string_is(text, p, ignore.case = TRUE)
     
     pat_parsed = format_simple_regex_flags(p, ignore = TRUE)
     p = pat_parsed$pattern
@@ -277,7 +277,7 @@ format_help = function(pattern = NULL, x = NULL){
       start = as.numeric(info)
       len = attr(info, "match.length")
       
-      replace = str_fill("", max(len), symbol = "^")
+      replace = string_fill("", max(len), symbol = "^")
       
       for(k in seq_along(start)){
         substr(line_new, start[k], start[k] + len[k] - 1) = replace
@@ -300,10 +300,10 @@ format_help = function(pattern = NULL, x = NULL){
   
   n = length(text)
   
-  section_id = str_which(text, "^# ")
+  section_id = string_which(text, "^# ")
   empty_id = which(text == "")
-  match_id = str_which(text, "(^| +)\\^+( +|$)")
-  bullet_id = str_which(text, "^ *[+-]")
+  match_id = string_which(text, "(^| +)\\^+( +|$)")
+  bullet_id = string_which(text, "^ *[+-]")
   
   msg = function(x, start = 1, len = 1){
     my_range = start:min(start + len - 1, length(text))
@@ -402,19 +402,19 @@ general_help = function(){
   # showing the titles
   #
   
-  section_titles = str_ops(x, "'^#'get, '^#|-+\\|'r, tws")
+  section_titles = string_ops(x, "'^#'get, '^#|-+\\|'r, tws")
   
   max_w = getOption("width") / 2 - 5
   
-  section_titles = str_ops(section_titles, "`max_w`width, ':01:: 'paste, '\n => \n    'r")
+  section_titles = string_ops(section_titles, "`max_w`width, ':01:: 'paste, '\n => \n    'r")
   n_sec = length(section_titles)
   
   if(length(section_titles) %% 2 == 1){
     section_titles = c(section_titles, " ")
   }
     
-  if(any(str_is(section_titles, "\n"))){
-    no_nl = str_which(section_titles, "!\n")
+  if(any(string_is(section_titles, "\n"))){
+    no_nl = string_which(section_titles, "!\n")
     section_titles[no_nl] = paste0(section_titles[no_nl], "\n ")
     
     section_titles_split = unlist(strsplit(section_titles, "\n"))
@@ -434,8 +434,8 @@ general_help = function(){
   titles_odd = section_titles[index %% 2 == 1] 
   titles_even = section_titles[index %% 2 == 0]
   
-  mat_titles = cbind(str_fill(titles_odd), str_fill(titles_even))
-  is_empty = str_is(titles_odd, "^\\s*$") & str_is(titles_even, "^\\s*$")
+  mat_titles = cbind(string_fill(titles_odd), string_fill(titles_even))
+  is_empty = string_is(titles_odd, "^\\s*$") & string_is(titles_even, "^\\s*$")
   
   mat_titles = mat_titles[!is_empty, , drop = FALSE]
   
@@ -465,7 +465,7 @@ general_help = function(){
   
   section_choice = choice_fmt
   
-  section_id = str_which(x, "^#")
+  section_id = string_which(x, "^#")
   
   text = c()
   for(id in section_choice){
@@ -480,8 +480,8 @@ general_help = function(){
   }
   
   # we format the sections
-  if(any(str_is(text, "fixed/---|"))){
-    qui_sec = str_is(text, "fixed/---|")
+  if(any(string_is(text, "fixed/---|"))){
+    qui_sec = string_is(text, "fixed/---|")
     text[qui_sec] = .sma("{80k ! {'f/|'r ? text[qui_sec]}{80 times.c ! -}}|")
   }
   
@@ -498,8 +498,8 @@ general_help = function(){
   message("enter = continue ; p = next paragraph ; N = next section ; s = search a regex ; Q = quit")
   
   empty_id = which(text == "")
-  section_id = str_which(text, "^#")
-  bullet_id = str_which(text, "^ *[+-]")
+  section_id = string_which(text, "^#")
+  bullet_id = string_which(text, "^ *[+-]")
   
   msg(text, 1, 5)
   
@@ -543,7 +543,7 @@ general_help = function(){
         return(invisible(NULL))
       }
       
-      while(!any(str_is(text, pattern))){
+      while(!any(string_is(text, pattern))){
         message(.sma("The pattern {bq?pattern} does not match any item. Please provide a new one:"))
         pattern = readline("")
         if(pattern %in% c("q", "Q")){

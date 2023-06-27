@@ -80,8 +80,8 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
   res
 }
 
-#' @describeIn str_ops `str_ops` alias with custom defaults
-str_ops_alias = function(pre_unik = NULL, namespace = NULL){
+#' @describeIn string_ops `string_ops` alias with custom defaults
+string_ops_alias = function(pre_unik = NULL, namespace = NULL){
   #
   
   check_logical(pre_unik, null = TRUE, scalar = TRUE)
@@ -92,14 +92,14 @@ str_ops_alias = function(pre_unik = NULL, namespace = NULL){
   force(namespace)
   
   res = function(x, op, pre_unik = pre_unik, namespace = namespace){                  
-    str_ops(x, op, pre_unik = pre_unik, namespace = namespace)
+    string_ops(x, op, pre_unik = pre_unik, namespace = namespace)
   }
   
   res
 }
 
-#' @describeIn str_clean Create a `str_clean` alias with custom defaults
-str_clean_alias = function(replacement = "", pipe = " => ", split = ",[ \n\t]+", 
+#' @describeIn string_clean Create a `string_clean` alias with custom defaults
+string_clean_alias = function(replacement = "", pipe = " => ", split = ",[ \n\t]+", 
                            ignore.case = FALSE, fixed = FALSE, word = FALSE, 
                            total = FALSE, single = FALSE, 
                            namespace = NULL){
@@ -129,7 +129,7 @@ str_clean_alias = function(replacement = "", pipe = " => ", split = ",[ \n\t]+",
                      ignore.case = ignore.case, fixed = fixed, word = word, 
                      total = total, single = single, envir = parent.frame(), 
                      namespace = namespace){                  
-    str_clean(x, ..., replacement = replacement, pipe = pipe, split = split, 
+    string_clean(x, ..., replacement = replacement, pipe = pipe, split = split, 
                      ignore.case = ignore.case, fixed = fixed, word = word, 
                      total = total, single = single, envir = envir, 
                      namespace = namespace)
@@ -138,8 +138,8 @@ str_clean_alias = function(replacement = "", pipe = " => ", split = ",[ \n\t]+",
   res  
 }
 
-#' @describeIn str_vec Create `str_vec` aliases with custom defaults
-str_vec_alias = function(.delim = c("{", "}"), .split = TRUE, 
+#' @describeIn string_vec Create `string_vec` aliases with custom defaults
+string_vec_alias = function(.delim = c("{", "}"), .split = TRUE, 
                          .protect.vars = TRUE, .sep = NULL, 
                          .collapse = NULL, .namespace = NULL){
   
@@ -160,7 +160,7 @@ str_vec_alias = function(.delim = c("{", "}"), .split = TRUE,
   res = function(..., .delim = .delim, .envir = parent.frame(), 
                    .split = .split, .protect.vars = .protect.vars, .sep = .sep, 
                    .collapse = .collapse, .namespace = .namespace){
-    str_vec(..., .delim = .delim, .envir = .envir, 
+    string_vec(..., .delim = .delim, .envir = .envir, 
                    .split = .split, .protect.vars = .protect.vars, .sep = .sep, 
                    .collapse = .collapse, .namespace = .namespace)
   }

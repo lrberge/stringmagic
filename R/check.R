@@ -464,7 +464,7 @@ check_delimiters = function(.delim){
   forbid_regex = paste0("[", forbid, "]")
   if(any(grepl(forbid_regex, .delim))){
     i = which(grepl(forbid_regex, .delim))[1]
-    pblm = str_ops(.delim[i], paste0("'", forbid_regex, "'X"))
+    pblm = string_ops(.delim[i], paste0("'", forbid_regex, "'X"))
     info = smagic("{&i == 1;opening;closing} delimiter (equal to {bq?.delim[i]})")
     stop_hook("Argument `.delim` cannot contain the following, reserved, ",
               "characters: {''s, bq, C?forbid}.",
@@ -711,9 +711,9 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
     } else {
       # we diagnose the substring
       if(is_box_open(xi, .delim)){
-        xi_small = str_trim(xi, 1)
+        xi_small = string_trim(xi, 1)
       } else {
-        xi_small = str_trim(xi, nchar(open), nchar(close))
+        xi_small = string_trim(xi, nchar(open), nchar(close))
       }
       
       xi_small_parsed = cpp_smagic_parser(xi_small, .delim)
@@ -751,8 +751,8 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
       msg = .sma("PROBLEM: {pblm}")
     }    
     
-  } else if(str_x(error_msg, 7) == "if-else"){
-    type = if(str_x(xi, 2, 1 + nchar(open)) == "&&") "&&" else "&"
+  } else if(string_x(error_msg, 7) == "if-else"){
+    type = if(string_x(xi, 2, 1 + nchar(open)) == "&&") "&&" else "&"
     syntax = if(type == "&&") "{&&cond ; verb_true}" else "{&cond ; verb_true ; verb_false}"
     intro = .sma("The syntax of the if-else operation is {syntax}, with ", 
                  "`verb_.` a verbatim expression (possibly containing interpolations).")
@@ -775,7 +775,7 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
     # pluralization
     
     suggest = "INFO: see smagic(.help = TRUE) and go to the section 'Special interpolation: Pluralization'"
-    type = str_x(xi, 1, 1 + nchar(open))
+    type = string_x(xi, 1, 1 + nchar(open))
     syntax = .sma("{open}{type}op1, op2{close} or {open}{type}op1, op2 ? variable{close}")
     
     if(error_msg == "pluralization: operators cannot contain parentheses"){
@@ -788,7 +788,7 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
                  "\nPROBLEM: The pluralization did not end correctly.")
     } else {
       # (v1;v2) case
-      type = str_ops(error_msg, "(first|second|third) x")
+      type = string_ops(error_msg, "(first|second|third) x")
       pblm = switch(type, 
                     "first" = "The semi-colon to delimit the first part is missing.",
                     "second" = "The semi-colon or closing parenthesis to delimit the second part is missing.",
@@ -1257,7 +1257,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
       msg_split = strsplit(msg, "\n")[[1]]
       err_split = strsplit(err, "\n")[[1]]
       while(i_clean < min(length(msg_split), length(err_split))){
-        if(str_x(msg_split[i_clean + 1], 15) == str_x(err_split[i_clean + 1], 15)){
+        if(string_x(msg_split[i_clean + 1], 15) == string_x(err_split[i_clean + 1], 15)){
           i_clean = i_clean + 1
         } else {
           break
@@ -1269,7 +1269,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
       }
       
       if(!missing(clean)){
-        err = str_clean(err, clean)
+        err = string_clean(err, clean)
       }
       stop_up(msg, "\n", call_error, err, verbatim = TRUE, up = up)
     }

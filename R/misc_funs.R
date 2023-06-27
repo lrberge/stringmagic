@@ -10,7 +10,7 @@
 #### string manipulation ####
 ####
 
-str_to_ascii = function(x, options){
+string_to_ascii = function(x, options){
   # force to ASCII using iconv. Keeps track of encoding error
 
   opts = c("silent", "utf8")
@@ -71,7 +71,7 @@ is_numeric_in_char = function(x){
 }
 
 
-str_x = function(x, n, from){
+string_x = function(x, n, from){
   # string extract
 
   if(is.character(n)){
@@ -92,7 +92,7 @@ str_x = function(x, n, from){
   substr(x, from, to)
 }
 
-str_trim = function(x, n_first = 0, n_last = 0){
+string_trim = function(x, n_first = 0, n_last = 0){
   # positive values: first
   # negative values: last
 
@@ -604,7 +604,7 @@ conjugate = function(verb, plural){
         res = paste0(verb, "es")
 
       } else if(grepl("[^aeo]y$", verb)){
-        res = paste0(str_trim(verb, -1), "ies")
+        res = paste0(string_trim(verb, -1), "ies")
 
       } else {
         res = paste0(verb, "s")
@@ -935,7 +935,7 @@ eval_dt = function(call, data = list(), envir){
 
 # substitute to sprintf which does not handle char length properly
 # slower but safer
-simple_str_fill = function(x, n = NULL, symbol = " ", right = FALSE, center = FALSE){
+simple_string_fill = function(x, n = NULL, symbol = " ", right = FALSE, center = FALSE){
   
   x_nc = nchar(x)
   if(is.null(n)){

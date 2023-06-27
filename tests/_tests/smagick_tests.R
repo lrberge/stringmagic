@@ -34,7 +34,7 @@ test(smagic("win = {c ? x}"), "win = 1 2 3")
 test(smagic("win = {''c ? x}"), "win = 123")
 
 # conditional collapse
-x = str_vec("bonjour les gens., comment ca va?, bien?, bien.")
+x = string_vec("bonjour les gens., comment ca va?, bien?, bien.")
 txt = smagic("{' 'S, ~(firstchar.3, '.'c) ? x}")
 test(txt, c("bon.les.gen", "com.ca.va?", "bie", "bie"))
 
@@ -96,7 +96,7 @@ txt = smagic("She said: {'w/Bla, blanc => \\1\\1'r, ws ? x}")
 test(txt, "She said: Blanche dit 'BlaBla bla blancblanc'.")
 
 # total replacement
-x = str_vec("jingle bells, jingle bells, jingle, all the way")
+x = string_vec("jingle bells, jingle bells, jingle, all the way")
 txt = smagic("{', 'c ! {'t/jing => [sound]'r ? x}}")
 test(txt, "[sound], [sound], [sound], all the way")
 
@@ -177,7 +177,7 @@ txt = smagic("{'ignore, word/bla'X ? x}")
 test(txt, c("Bla", "bla"))
 
 # conditional
-x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 txt = smagic("info: {'\\d+'X, ~('-'c), C ? x}")
 test(txt, "info: 57-26, 32-7, 29-8 and 55")
 
@@ -193,14 +193,14 @@ txt = smagic("A few quotes:\n{Q, 'i/mary | charles & \\!'get, '  'paste, '\n'c ?
 test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
 
 x = c("It's me again.", "What do you mean a gain?", "Yes, again!", "Ah AGAIN, I thought A GAIN!")
-index = str_ops(x, "'gain'which.w.ig")
+index = string_ops(x, "'gain'which.w.ig")
 test(index, c(2, 4))
 
-index = str_ops(x, "'gain & .'is.fixed")
+index = string_ops(x, "'gain & .'is.fixed")
 test(index, c(TRUE, FALSE, FALSE, FALSE))
 
 # conditional
-x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 txt = smagic("info: {' 'S, '!\\d'get, ~('-'c), C ? x}")
 test(txt, "info: laura-and, charles-and, charly-and and june")
 
@@ -410,7 +410,7 @@ txt = smagic("{'3||et :REST:/:N:'K ? x}")
 test(txt, c("1", "2", "et three/five"))
 
 # conditional
-x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 test(smagic("info: {' 'S, ~(2Ko), C ? x}"), "err")
 
 #
@@ -646,7 +646,7 @@ x = c("bonjour les gens", "la pluie", "est drue, je rentre")
 txt = smagic("Number of words: {' 'S, ~(len), C ? x}.")
 test(txt, "Number of words: 3, 2 and 4.")
 
-num = str_ops(x, "' 'S, ~(len), num")
+num = string_ops(x, "' 'S, ~(len), num")
 test(num, c(3, 2, 4))
 
 #
@@ -709,7 +709,7 @@ txt = smagic("{5 firstchar, 'pour'rm.blank, ', 'c ? x}")
 test(txt, "556, :!, serpe")
 
 # conditional
-x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 txt = smagic("{' 'S, rm.noalpha, ~('-'c), C ? x}")
 test(txt, "laura-and, charles-and, charly-and and june")
 
@@ -718,7 +718,7 @@ test(txt, "laura-and, charles-and, charly-and and june")
 #
 
 x = "parse55this"
-txt = str_ops(x, "'\\d+'x, num")
+txt = string_ops(x, "'\\d+'x, num")
 test(txt, 55)
 
 x = c("55", "abc")
@@ -735,7 +735,7 @@ txt = smagic("{num.rm ? x}")
 test(txt, 55)
 
 # conditional
-x = str_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
+x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
 txt = smagic("{' 'S, num.rm, ~('-'c), C ? x}")
 test(txt, "57-26, 32-7, 29-8 and 55")
 
@@ -940,7 +940,7 @@ test_err_contains(smagic("error operation: {if(fakfak%m; upper ; lower) ! ohohoh
 
 test_err_contains(smagic("error operation: {S, ~(sekg) ! ohohoh, hihihi}"), "not a valid op")
 
-test_err_contains(str_vec("hi, {there"), "bracket & matched & escape")
+test_err_contains(string_vec("hi, {there"), "bracket & matched & escape")
 
 #
 # multi line expressions ####

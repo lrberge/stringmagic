@@ -213,11 +213,11 @@
 #' Ex.2: `smagic("{'(?<!\\b)e => a'R ! Where is the letter e?}")` leads to "Whara is tha lattar e?".
 #' Ex.3: `smagic("{'t/e => here'r ! Where is the letter e?}")` leads to "here".
 #' + clean: replacement with a string. Similar to the operation `r`, except that here the comma is
-#' a pattern separator, see detailed explanations in [str_clean()]. Ex: `smagic("{'f/[, ]'clean ! x[a]}")` 
+#' a pattern separator, see detailed explanations in [string_clean()]. Ex: `smagic("{'f/[, ]'clean ! x[a]}")` 
 #' leads to "xa".
 #' + get: restricts the string only to values respecting a pattern. This operation has no default.
 #' Accepts the options "equal" and "in".
-#' By default it uses the same syntax as [str_get()] so that you can use regex flags and 
+#' By default it uses the same syntax as [string_get()] so that you can use regex flags and 
 #' include logical operations with `' & '` and `' | '` to detect patterns.
 #' If the option "equal" is used, a simple string equality with the argument is tested (hence
 #' no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
@@ -226,21 +226,21 @@
 #' leads to "Mercedes models: 240D, 280C, 450SE, 450SL and 450SLC".
 #' + is: detects if a pattern is present in a string, returns a logical vector. This operation has no default.
 #' Accepts the options "equal" and "in".
-#' By default it uses the same syntax as [str_is()] so that you can use regex flags and 
+#' By default it uses the same syntax as [string_is()] so that you can use regex flags and 
 #' include logical operations with `' & '` and `' | '` to detect patterns.
 #' If the option "equal" is used, a simple string equality with the argument is tested (hence
 #' no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
 #' and then set inclusion is tested. 
-#' Mostly useful as the final operation in a [str_ops()] call.
+#' Mostly useful as the final operation in a [string_ops()] call.
 #' Example: `x = c("Mark", "Lucas") ; smagic("Mark? {'i/mark'is, C ? x}")` leads to "Mark? TRUE and FALSE".
 #' + which: returns the index of string containing a specified pattern. With no default, can be applied
 #' to a logical vector directly. 
-#' By default it uses the same syntax as str_which() so that you can use regex flags and 
+#' By default it uses the same syntax as string_which() so that you can use regex flags and 
 #' include logical operations with `' & '` and `' | '` to detect patterns.
 #' If the option "equal" is used, a simple string equality with the argument is tested (hence
 #' no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
 #' and then set inclusion is tested. 
-#' Mostly useful as the final operation in a [str_ops()] call.
+#' Mostly useful as the final operation in a [string_ops()] call.
 #' Ex.1: `x = c("Mark", "Lucas") ; smagic("Mark is number {'i/mark'which ? x}.")` leads to 
 #' "Mark is number 1.".
 #' 
@@ -266,7 +266,7 @@
 #' + sort: sorts the vector in increasing order. Accepts optional arguments and the option "num". 
 #' Example: `x = c("sort", "me") ; smagic("{sort, c ? x}")` leads to "me sort". 
 #' If an argument is provided, it must be a regex pattern that will be applied to
-#' the vector using [str_clean()]. The sorting will be applied to the modified version of the vector
+#' the vector using [string_clean()]. The sorting will be applied to the modified version of the vector
 #' and the original vector will be ordered according to this sorting. 
 #' Ex: `x = c("Jon Snow", "Khal Drogo")`; `smagic("{'.+ 'sort, C?x}")` leads to 
 #' "Khal Drogo and Jon Snow". The option "num" sorts over a numeric version 
@@ -386,7 +386,7 @@
 #' Default is left-alignment of the strings. 
 #' Option "right" right aligns and "center" centers the strings. When using `'n|s'`, the symbol `s`
 #' is used for the filling. By default if no argument is provided, the
-#' maximum size of the character string is used. See help for [str_fill()] for more information.
+#' maximum size of the character string is used. See help for [string_fill()] for more information.
 #' Ex.1: `smagic("Numbers: {'5|0'fill.right, C ? c(1, 55)}")` leads to "Numbers: 00001 and 00055".
 #' + paste: pastes some character to all elements of the string. This operation has no default.
 #' Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
@@ -645,7 +645,7 @@
 #' Ex.4: `smagic("{!TRUE} is {?!TRUE}")` leads to "TRUE is FALSE". The first expression is
 #' taken verbatim while the second is evaluated.
 #' 
-#' @inheritSection str_is Generic regular expression flags
+#' @inheritSection string_is Generic regular expression flags
 #'
 #' @return
 #' It returns a character vector whose length depends on the elements and operations in the interpolations.
@@ -659,7 +659,7 @@
 #' 
 #' To modify the default values of smagic, use the function [setSmagic()].
 #' 
-#' If you want to apply a chain of operations on a single vector, see [str_ops()] which 
+#' If you want to apply a chain of operations on a single vector, see [string_ops()] which 
 #' may be more appropriate.
 #' 
 #'
@@ -680,7 +680,7 @@
 #'
 #' # Splitting a comma separated string
 #' # The mechanism is explained later
-#' str_vec("J. Mills, David, Agnes, Dr Strong")
+#' string_vec("J. Mills, David, Agnes, Dr Strong")
 #'
 #' # Nota: this is equivalent to (explained later)
 #' smagic("{', *'S ! J. Mills, David, Agnes, Dr Strong}")
@@ -867,7 +867,7 @@
 #' 
 #'
 #' # Enumerations
-#' acad = str_vec("you like admin, you enjoy working on weekends, you really love emails")
+#' acad = string_vec("you like admin, you enjoy working on weekends, you really love emails")
 #' smagic("Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}.")
 #' 
 #' # You can also use the enum command
@@ -886,7 +886,7 @@
 #' #         'n|s'k: same + adds 's' at the end of shortened strings
 #' #         'n||s'k: same but 's' counts in the n characters kept
 #'
-#' words = str_vec("short, constitutional")
+#' words = string_vec("short, constitutional")
 #' smagic("{5k ? words}")
 #'
 #' smagic("{'5|..'k ? words}")
@@ -901,7 +901,7 @@
 #' #
 #' # Special values :rest: and :REST:, give the number of items dropped
 #'
-#' bx = str_vec("Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
+#' bx = string_vec("Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
 #' smagic("Bordeaux wines I like: {3K, ', 'C ? bx}.")
 #'
 #' smagic("Bordeaux wines I like: {'3|etc..'K, ', 'C ? bx}.")
@@ -963,7 +963,7 @@
 #' 
 #' smagic("{rm.all ? x}")
 #'
-#' x = str_vec("1, 12, 123, 1234, 123456, 1234567")
+#' x = string_vec("1, 12, 123, 1234, 123456, 1234567")
 #' # we delete elements whose number of characters is lower or equal to 3
 #' # => see later section CONDITIONS
 #' smagic("{if(.nchar > 3 ; nuke) ? x}")

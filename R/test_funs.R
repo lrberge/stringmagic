@@ -227,7 +227,7 @@ test_contains = function(x, pattern){
     stop("Internal error: test_contains only works with vectors of length 1.")
   }
   
-  if(!str_is(x, pattern)){
+  if(!string_is(x, pattern)){
     stopi("The pattern {bq?pattern} was not found in the following string:", 
             "\n\n{x}")
   }
@@ -242,7 +242,7 @@ test_err_contains = function(x, pattern){
             "\nPROBLEM: {bq?x_dp} is not an error.")
   }
   
-  if(!str_is(err, pattern)){
+  if(!string_is(err, pattern)){
     stopi("The pattern {bq?pattern} was not found in the following error message:", 
             "\n\n{err}")
   }
@@ -501,7 +501,7 @@ non_ascii = function(folder = "R"){
         text = all_R_text[[i]]
         all_lines = which(grepl("[^ -~\t]", text))
         for(line in all_lines){
-            cat("-> line ", str_fill(line, max(nchar(all_lines))), ":\n===|", text[line], "\n")
+            cat("-> line ", string_fill(line, max(nchar(all_lines))), ":\n===|", text[line], "\n")
             cat("===|", gsub("[^ -~\t]", "__HERE__", text[line]), "\n")
 
             if(line != tail(all_lines, 1)) cat("\n")

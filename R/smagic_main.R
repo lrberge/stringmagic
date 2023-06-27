@@ -21,7 +21,7 @@
 #' @author 
 #' Laurent Berge
 #' 
-#' @inherit str_clean seealso 
+#' @inherit string_clean seealso 
 #' 
 #' @examples 
 #' 
@@ -29,7 +29,7 @@
 #' 
 #' print(cars)
 #' 
-#' str_vec("The first cars are:, {6 first ? cars}")
+#' string_vec("The first cars are:, {6 first ? cars}")
 #' 
 #' 
 print.smagic = function(x, ...){
@@ -111,7 +111,7 @@ print.smagic = function(x, ...){
 #' 
 #' @family related to `smagic`
 #' 
-#' @inherit str_clean seealso
+#' @inherit string_clean seealso
 #' 
 #' @examples
 #' 
@@ -125,7 +125,7 @@ print.smagic = function(x, ...){
 #' smagic_register(fun_emph, "emph")
 #' 
 #' # C) use it
-#' x = str_vec("right, now")
+#' x = string_vec("right, now")
 #' smagic("Take heed, {emph, c? x}.")
 #' 
 #' #
@@ -140,7 +140,7 @@ print.smagic = function(x, ...){
 #' 
 #' smagic_register(fun_emph, "emph", "strong")
 #' 
-#' x = str_vec("right, now")
+#' x = string_vec("right, now")
 #' smagic("Take heed, {emph.strong, c? x}.")
 #' 
 #' #
@@ -158,7 +158,7 @@ print.smagic = function(x, ...){
 #' 
 #' smagic_register(fun_emph, "emph", "strong")
 #' 
-#' x = str_vec("right, now")
+#' x = string_vec("right, now")
 #' smagic("Take heed, {'_'emph.s, c? x}.")
 #' 
 #' 
@@ -190,7 +190,7 @@ smagic_register_fun = function(fun, alias, valid_options = NULL, namespace = NUL
               "\nPROBLEM: it has no argument {enum.bq.or?arg_missing}.")
   }
 
-  valid_args = str_vec("x, argument, options, group, group_flag")
+  valid_args = string_vec("x, argument, options, group, group_flag")
   arg_pblm = setdiff(setdiff(fun_args, "..."), valid_args)
   if(length(arg_pblm) > 0){
     stopi("The argument `fun` must have specific argument names. Valid arguments are {enum.bq.or?valid_args}.",
@@ -876,7 +876,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
           # REGULAR OPERATORS
           #
 
-          group_flag = any(str_x(operators, 1) == "~")
+          group_flag = any(string_x(operators, 1) == "~")
           
           for(j in seq_along(operators)){
             opi = operators[[j]]
@@ -920,19 +920,19 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
             xi = c(xi, extra$element_add_last)
           }
 
-          if(length(extra$str_add_first) > 0){
+          if(length(extra$string_add_first) > 0){
             if(length(xi) > 0){
-              xi[1] = paste0(extra$str_add_first, xi[1])
+              xi[1] = paste0(extra$string_add_first, xi[1])
             } else {
-              xi = extra$str_add_first
+              xi = extra$string_add_first
             }
           }
 
-          if(length(extra$str_add_last) > 0){
+          if(length(extra$string_add_last) > 0){
             if(length(xi) > 0){
-              xi[length(xi)] = paste0(xi[length(xi)], extra$str_add_last)
+              xi[length(xi)] = paste0(xi[length(xi)], extra$string_add_last)
             } else {
-              xi = extra$str_add_last
+              xi = extra$string_add_last
             }
           }
 
@@ -1212,7 +1212,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     }
 
     if(op %in% c("s", "S", "split", "X", "x", "extract")){
-      # otherwise => dealt with in str_is or str_clean
+      # otherwise => dealt with in string_is or string_clean
       # we don't repeat the processing (otherwise => bugs)
       
       pat_parsed = format_simple_regex_flags(argument, fixed = is_fixed, word = is_word, 
@@ -1266,7 +1266,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       
       sep = if(op == "clean") ",[ \t\n]+" else ""
       
-      res = str_clean(x, argument, pipe = pipe, sep = sep, 
+      res = string_clean(x, argument, pipe = pipe, sep = sep, 
                       ignore.case = is_ignore, fixed = is_fixed, word = is_word, 
                       total = is_total, single = is_single, envir = .envir)
 
@@ -1308,7 +1308,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       }
       
     } else {
-      # default is str_is
+      # default is string_is
       if("equal" %in% options || "in" %in% options){
         if("equal" %in% options){
           res = x == argument
@@ -1318,7 +1318,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         }
         
       } else {
-        res = str_is(x, pattern = argument, fixed = is_fixed, 
+        res = string_is(x, pattern = argument, fixed = is_fixed, 
                      ignore.case = is_ignore, word = is_word, envir = .envir)
       }
 
@@ -1660,7 +1660,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     nb = as.numeric(nb)
 
-    if(str_x(op, -4) == "char"){
+    if(string_x(op, -4) == "char"){
       # we select the first/last characters
       
       if(!true_character(x)){
@@ -1774,7 +1774,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     is_modified = FALSE
     if(nchar(argument) > 0){
       is_modified = TRUE
-      x2sort = str_clean(x, argument, envir = .envir)
+      x2sort = string_clean(x, argument, envir = .envir)
     }
     
     options = check_set_options(options, "num")
@@ -1875,7 +1875,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
               if(length(tmp_split) > 1){
                 txt = switch(p,
                              ":1:" = 1:n_x,
-                             ":01:" = str_fill(1:n_x, right = TRUE, symbol = "0"),
+                             ":01:" = string_fill(1:n_x, right = TRUE, symbol = "0"),
                              ":i:" = tolower(as.roman(1:n_x)),
                              ":I:" = as.character(as.roman(1:n_x)),
                              ":a:" = enum_letter(n_x),
@@ -1961,11 +1961,11 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       }
 
       if(nchar(left) > 0){
-        extra$str_add_first = paste0(extra$str_add_first, left)
+        extra$string_add_first = paste0(extra$string_add_first, left)
       }
 
       if(nchar(right) > 0){
-        extra$str_add_last = paste0(extra$str_add_last, right)
+        extra$string_add_last = paste0(extra$string_add_last, right)
       }
 
     }
@@ -2010,7 +2010,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       }
     }
     
-    res = str_fill(x, argument, symbol = symbol, right = right, center = center)
+    res = string_fill(x, argument, symbol = symbol, right = right, center = center)
     
   } else if(op == "unik"){
     # unik ####
@@ -2153,9 +2153,9 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       nb = NULL
     }
 
-    if(str_x(comment, -1) == "_"){
+    if(string_x(comment, -1) == "_"){
       # the underscore means that we don't add a space
-      comment = str_trim(comment, -1)
+      comment = string_trim(comment, -1)
     } else if(comment != ""){
       comment = paste0(comment, " ")
     }
@@ -2184,7 +2184,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       is_word = "word" %in% options
       is_ignore = "ignore" %in% options
 
-      qui = str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, 
+      qui = string_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, 
                    word = is_word, envir = .envir)
 
       res[qui] = ""
@@ -2205,7 +2205,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       is_word = "word" %in% options
       is_ignore = "ignore" %in% options
 
-      qui = !str_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, 
+      qui = !string_is(x, pattern = argument, fixed = is_fixed, ignore.case = is_ignore, 
                     word = is_word, envir = .envir)
       
       options = setdiff(options, c("fixed", "ignore", "word"))
@@ -2304,7 +2304,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
   } else if(op == "ascii"){
     # ascii, stop ####
-    res = str_to_ascii(x, options)
+    res = string_to_ascii(x, options)
 
   } else if(op == "stopwords"){
 
@@ -2391,15 +2391,15 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       # REGEX
       
       if(.check){
-        cond = check_expr(str_is(x, cond_parsed, envir = .envir), 
+        cond = check_expr(string_is(x, cond_parsed, envir = .envir), 
                   .sma("The operation is of the form {bq?op}(cond ; true ; false). ",
-                  "When `cond` is a pure character string, the function `str_is()` ",
+                  "When `cond` is a pure character string, the function `string_is()` ",
                   "is applied with `cond` being the searched pattern.",
                   "\nPROBLEM: in {op}({'_;;;_ => ;'R ? argument}), the condition ",
                   "{bq?cond_raw} led to an error, see below:"),
                   verbatim = TRUE)
       } else {
-        cond = str_is(x, cond_parsed, envir = .envir)
+        cond = string_is(x, cond_parsed, envir = .envir)
       }      
       
     } else {
@@ -2582,12 +2582,12 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
           extra$element_add_last = c(extra$element_add_last, extra_if$element_add_last)
         }
 
-        if(length(extra_if$str_add_first) > 0){
-          extra$str_add_first = paste0(extra$str_add_first, extra_if$str_add_first)
+        if(length(extra_if$string_add_first) > 0){
+          extra$string_add_first = paste0(extra$string_add_first, extra_if$string_add_first)
         }
 
-        if(length(extra_if$str_add_last) > 0){
-          extra$str_add_last = paste0(extra$str_add_last, extra_if$str_add_last)
+        if(length(extra_if$string_add_last) > 0){
+          extra$string_add_last = paste0(extra$string_add_last, extra_if$string_add_last)
         }
       }
     }
