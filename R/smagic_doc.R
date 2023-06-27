@@ -6,7 +6,7 @@
 #' This is firstly a string interpolation tool. On top of this it can apply, and chain, over 50
 #' basic string operations to the interpolated variables. Advanced support for pluralization.
 #' 
-#' @rdname smagic
+#' @name smagic
 #'
 #' @param ... Character scalars that will be collapsed with the argument `sep`. Note that 
 #' named arguments are used for substitution.
@@ -650,6 +650,9 @@
 #' @return
 #' It returns a character vector whose length depends on the elements and operations in the interpolations.
 #' 
+#' @family `smagic` functions
+#' @family tools with aliases
+#' 
 #' @seealso 
 #' 
 #' To set new operators, see the function [smagic_register()].
@@ -1033,4 +1036,4 @@
 #'
 #'    
 #'
-"smagic"
+NULL

@@ -479,7 +479,7 @@ get_smagic_context = function(){
   while(!get0("is_smagic_internal", parent.frame(up), inherits = FALSE, ifnotfound = FALSE)){
     up = up + 1
     if(identical(parent.frame(up), .GlobalEnv)){
-      stop("Internal error: is_smagic_internal not found when it should have been.")
+      return("")
     }
   }
   

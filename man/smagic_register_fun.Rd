@@ -45,6 +45,8 @@ Extends the capabilities of \code{\link[=smagic]{smagic()}} by adding any custom
 We try to strongly check the new operations since it's always better to find out problems
 sooner than later. This means that when the function is defined, it is also
 tested.
+
+If you pass a function, note that it should work for non-character arguments in \code{x}.
 }
 \section{Functions}{
 \itemize{
@@ -140,11 +142,11 @@ smagic("Take heed, {'_'emph.s, c? x}.")
 
 }
 \seealso{
-A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
-Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
-String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}. You can change \code{smagic}
-default values with \code{\link[=smagic_alias]{smagic_alias()}} and add custom operations with \code{\link[=smagic_register_fun]{smagic_register_fun()}}.
+Other related to \code{smagic}: 
+\code{\link{smagic_alias}()},
+\code{\link{smagic}()}
 }
 \author{
 Laurent R. Berge
 }
+\concept{related to \code{smagic}}

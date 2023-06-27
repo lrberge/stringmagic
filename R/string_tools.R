@@ -8,6 +8,8 @@
 #' Chains basic operations to character vectors
 #'
 #' Simple tool to perform multiple operations to character vectors.
+#' 
+#' @inheritParams str_clean
 #'
 #' @param x A character vector. If not a character vector but atomistic (i.e. not a list), 
 #' it will be converted to a character vector.
@@ -31,6 +33,8 @@
 #' Laurent R. Berge
 #' 
 #' @inherit str_clean seealso
+#' 
+#' @family tools with aliases
 #'
 #' @examples
 #' 
@@ -63,7 +67,7 @@
 #' # 3 first: keeps only the first three elements
 #' 
 #' 
-str_ops = function(x, op, pre_unik = NULL){
+str_ops = function(x, op, pre_unik = NULL, namespace = NULL){
 
   if(missing(x)){
     stop("Argument `x` must be provided. PROBLEM: it is currently missing.")
@@ -72,10 +76,16 @@ str_ops = function(x, op, pre_unik = NULL){
   if(!is.atomic(x)){
     stop("Argument `x` must be atomic. Currently it is of class `", class(x)[1], "`")
   }
+  
+  if(length(x) == 0){
+    return(x)
+  }
 
   if(!true_character(x)){
     x = as.character(x)
   }
+  
+  set_pblm_hook()
 
   check_character(op, mbt = TRUE, scalar = TRUE)
   check_logical(pre_unik, null = TRUE, scalar = TRUE)
@@ -91,8 +101,27 @@ str_ops = function(x, op, pre_unik = NULL){
     res_small = str_ops(x_small, op, pre_unik = FALSE)
     res = res_small[x_int]
   } else {
-    operation = paste0("{", op, " ? x}")
-    res = .smagic(operation, .data = list(x = x), .envir = parent.frame())
+    
+    if(is.null(namespace)){
+      namespace = "R_GlobalEnv"
+    }
+    
+    user_ops_all = getOption("smagic_user_ops")
+    # beware the sneaky assignment!
+    if(!is.null(user_ops_all) && !is.null(user_info <- user_ops_all[[namespace]])){
+      .user_funs = user_info$funs
+      .valid_operators = user_info$operators          
+    } else {
+      .user_funs = NULL
+      .valid_operators = getOption("smagic_operations_default")
+    }
+    
+    .envir = parent.frame()
+    group_flag = 1 * grepl("~", op, fixed = TRUE)
+    res = apply_simple_operations(x, "str_ops", op, .check = TRUE, .envir = .envir,
+                                    .data = list(), group_flag = group_flag, 
+                                    .delim = c("{", "}"), .user_funs = .user_funs, 
+                                    .valid_operators = .valid_operators)
   }
 
   if("group_index" %in% names(attributes(res))){
@@ -869,15 +898,15 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' For example in `str_clean(x, "e => a")` the default pipe is found in "e => a", so the pattern 
 #' "e" will be replaced with "a". In other terms, this is equivalent to `str_clean(x, "e", replacement = "a")`.
 #' Example changing the pipe: you can obtain the previous result with `str_clean(x, "e|>a", pipe = "|>")`.
-#' @param sep Character scalar, default is `",[ \t\n]+"` (which means a comma followed with spaces 
+#' @param split Character scalar, default is `",[ \t\n]+"` (which means a comma followed with spaces 
 #' and/or new lines). By default the patterns to be replaced are comma separated, that is 
-#' the pattern is split w.r.t. the argument `sep` and a replacement is done for each sub-pattern.
+#' the pattern is split w.r.t. the argument `split` and a replacement is done for each sub-pattern.
 #' 
 #' Use `NULL` or the empty string to disable pattern separation.
 #' 
 #' For example: let's look at `str_clean(x, "w/one, two => three")`. First the flag "word" is extracted from
 #' the pattern (see arg. `...`) as well as the replacement (see arg. `pipe`), leading to "one, two" the 
-#' pattern to be replaced. Then the pattern is split w.r.t. `sep`, leading 
+#' pattern to be replaced. Then the pattern is split w.r.t. `split`, leading 
 #' to two patterns "one" and "two". Hence the words (thanks to the flag "w") "one" and "two" from
 #' the string `x` will be replaced with "three".
 #' @param replacement Character scalar, default is the empty string. It represents the default 
@@ -886,11 +915,19 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' @param total Logical scalar, default is `FALSE`. If `TRUE`, then when a pattern is found 
 #' in a string, the full string is replaced (instead of just the pattern). Note, *importantly*, 
 #' that when `total = TRUE` you can use logical operators in the patterns.
+#' 
+#' Example: `str_clean(x, "wi/ & two, three & !four => ", total = TRUE)`
 #' @param single Logical scalar, default is `FALSE`. Whether, in substitutions, to stop at 
 #' the first match found. Ex: `str_clean("abc", "[[:alpha:]] => _", single = TRUE)` leads 
 #' to `"_bc"`, while `str_clean("abc", "[[:alpha:]] => _")` leads to `"___"`.
+#' @param namespace Character scalar or `NULL` (default). **Only useful for package developers.**
+#' As a regular end-user you shouldn't care! If your package uses `smagic`, you should care. 
+#' It is useful **only** if your package uses 'custom' `smagic` operations, set with 
+#' [smagic_register_fun()] or [smagic_register_ops()].
 #' 
-#' Example: `str_clean(x, "wi/ & two, three & !four => ", total = TRUE)`
+#' If so pass the name of your package in this argument so that your function can access 
+#' the new `smagic` operations defined within your package.
+#' 
 #'
 #' @return
 #' The main usage returns a character vector of the same length as the vector in input.
@@ -912,6 +949,8 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' 
 #' @author 
 #' Laurent R. Berge
+#' 
+#' @family tools with aliases
 #' 
 #' @seealso 
 #' A few basic operation: [str_is()], [str_get()], [str_clean()]. Chain basic operations with [str_ops()]. 
@@ -950,9 +989,10 @@ str_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE
 #' cbind(cars, new)
 #'
 #'
-str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+", 
+str_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\t]+", 
                      ignore.case = FALSE, fixed = FALSE, word = FALSE, 
-                     total = FALSE, single = FALSE, envir = parent.frame()){
+                     total = FALSE, single = FALSE, envir = parent.frame(), 
+                     namespace = NULL){
 
   x = check_set_character(x, l0 = TRUE)
   if(length(x) == 0){
@@ -961,9 +1001,9 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 
   check_character(replacement, scalar = TRUE)
   check_character(pipe, scalar = TRUE)
-  check_character(sep, scalar = TRUE, null = TRUE)
+  check_character(split, scalar = TRUE, null = TRUE)
 
-  is_sep = length(sep) > 0 && nchar(sep) > 0
+  is_split = length(split) > 0 && nchar(split) > 0
   is_pipe = length(pipe) > 0 && nchar(pipe) > 0
 
   check_logical(ignore.case, scalar = TRUE)
@@ -993,7 +1033,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
     }
 
     if(is_str_ops){
-      res = str_ops(res, di)
+      res = str_ops(res, di, namespace = namespace)
       next
     }
 
@@ -1019,8 +1059,8 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
     is_word = word || "word" %in% flags
     is_single = single || "single" %in% flags
 
-    if(is_sep){
-      all_patterns = strsplit(patterns, split = sep)[[1]]
+    if(is_split){
+      all_patterns = strsplit(patterns, split = split)[[1]]
     } else {
       all_patterns = patterns
     }
@@ -1158,6 +1198,7 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' [smagic()] operations, or any combination of the three.
 #' 
 #' @inheritParams smagic
+#' @inheritParams str_clean
 #' 
 #' @param ... Character vectors that will be vectorized. If commas are present in the 
 #' character vector, it will be split with respect to commas and following blanks. 
@@ -1180,6 +1221,17 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' @param .split Logical, default is `TRUE`. Whether to split the vector with 
 #' respect to commas. Ex: by default `str_vec("hi, there")` leads to the 
 #' vector `c("hi", "there")`.
+#' @param .sep Character scalar or `NULL` (default). If not `NULL`, the function
+#' [base::paste()] is applied to the resulting vector with `sep = .sep`.
+#' @param .collapse Character scalar or `NULL` (default). If not `NULL`, the function
+#' [base::paste()] is applied to the resulting vector with `collapse = .collapse`.
+#' @param .namespace Character scalar or `NULL` (default). **Only useful for package developers.**
+#' As a regular end-user you shouldn't care! If your package uses `smagic`, you should care. 
+#' It is useful **only** if your package uses 'custom' `smagic` operations, set with 
+#' [smagic_register_fun()] or [smagic_register_ops()].
+#' 
+#' If so pass the name of your package in this argument so that your function can access 
+#' the new `smagic` operations defined within your package.
 #' 
 #' @details 
 #' The default of the argument `.protect.vars` is `FALSE` so as to avoid unwanted 
@@ -1189,6 +1241,8 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' 
 #' @author 
 #' Laurent Berge
+#' 
+#' @family tools with aliases
 #' 
 #' @inherit str_clean seealso
 #' 
@@ -1215,11 +1269,16 @@ str_clean = function(x, ..., replacement = "", pipe = " => ", sep = ",[ \n\t]+",
 #' 
 #' 
 str_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
-                   .split = TRUE, .protect.vars = TRUE){
+                   .split = TRUE, .protect.vars = TRUE, .sep = NULL, 
+                   .collapse = NULL, .namespace = NULL){
   
   # checks
   set_pblm_hook()  
   .delim = check_set_delimiters(.delim)
+  check_character(.sep, scalar = TRUE, null = TRUE)
+  check_character(.collapse, scalar = TRUE, null = TRUE)
+  check_logical(.split, scalar = TRUE)
+  check_logical(.protect.vars, scalar = TRUE)
   
   check_envir(.envir)
   
@@ -1285,8 +1344,10 @@ str_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(),
         
         for(j in 1:n_di_xpd){
           if(is_open[j]){
-            all_elements[[j]] = smagic_internal(di_expanded[j], .delim = .delim, .envir = .envir,
-                                                  .data = .data, .check = TRUE)  
+            all_elements[[j]] = smagic_internal(di_expanded[j], .delim = .delim, 
+                                                  .envir = .envir,
+                                                  .data = .data, .check = TRUE, 
+                                                  .namespace = .namespace)  
           } else {
             all_elements[[j]] = di_expanded[j]
           }        
@@ -1301,8 +1362,14 @@ str_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(),
     }
   }
   
-  res = do.call(base::c, res_list)
-  
+  if(!is.null(.sep) || !is.null(.collapse)){
+    res_list$.sep = .sep
+    res_list$.collapse = .collapse
+    res = do.call(base::paste, res_list)
+  } else {
+    res = do.call(base::c, res_list)
+  }
+    
   res  
 }
 

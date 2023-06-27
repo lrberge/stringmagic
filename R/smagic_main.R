@@ -75,6 +75,8 @@ print.smagic = function(x, ...){
 #' sooner than later. This means that when the function is defined, it is also 
 #' tested.
 #' 
+#' If you pass a function, note that it should work for non-character arguments in `x`.
+#' 
 #' @section Writing a package using `smagic`:
 #' 
 #' If you want to use `smagic` in your package and want to make use of custom operations:
@@ -106,6 +108,8 @@ print.smagic = function(x, ...){
 #' 
 #' @author 
 #' Laurent R. Berge
+#' 
+#' @family related to `smagic`
 #' 
 #' @inherit str_clean seealso
 #' 
@@ -304,75 +308,6 @@ save_user_fun = function(fun, alias, namespace){
   options("smagic_user_ops" = user_ops_all)
 }
 
-#' Create `smagic` aliases with custom defaults
-#' 
-#' Utility to easily create `smagic` aliases with custom default
-#' 
-#' @inheritParams smagic
-#' 
-#' @details 
-#' 
-#' Use this function if you want to change `smagic` default values. For example,
-#' if you want the interpolation to be done with "{{}}" (instead of `{}`) or if you want the 
-#' default separation to be the space (instead of the empty string). 
-#' 
-#' 
-#' 
-#' @author 
-#' Laurent Berge
-#' 
-#' @examples 
-#' 
-#' # we create the function sma2 with different defaults
-#' sma2 = smagic_alias(.delim = ".[ ]", .sep = "", .class = `smagick`)
-#' 
-#' person = "john doe"
-#' sma2("Hello", "{title ? person}")
-#' 
-#' 
-#' 
-smagic_alias = function(.sep = "", .vectorize = FALSE, 
-                        .delim = c("{", "}"), .last = NULL, 
-                        .collapse = NULL,  .check = TRUE, 
-                        .class = NULL, .data.table = TRUE, .namespace = NULL){
-  #
-  
-  check_character(.sep, scalar = TRUE)
-  check_logical(.vectorize, scalar = TRUE)
-  check_character(.delim, no_na = TRUE)
-  check_last(.last)
-  check_character(.collapse, scalar = TRUE, null = TRUE)
-  check_logical(.check, scalar = TRUE)
-  check_character(.class, no_na = TRUE, null = TRUE)
-  check_logical(.data.table, scalar = TRUE)
-  check_character(.namespace, scalar = TRUE, null = TRUE)
-  
-  # forcing evaluations
-  sep = .sep
-  vectorize = .vectorize
-  delim = check_set_delimiters(.delim)
-  last = .last
-  collapse = .collapse
-  check = .check
-  class = .class
-  data.table = .data.table
-  namespace = .namespace
-  
-  res = function(..., .envir = parent.frame(), .sep = sep, .vectorize = vectorize, 
-                   .delim = delim, .last = last, 
-                   .collapse = collapse, 
-                   .check = check, .class = class, .help = NULL, 
-                   .data.table = data.table, .namespace = namespace){
-                    
-    smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
-            .delim = .delim, .last = .last, .collapse = .collapse,
-            .check = .check, .class = .class, .help = .help,
-            .data.table = .data.table, .namespace = .namespace)
-  }
-  
-  res
-}
-
 ####
 #### ... smagic ####
 ####
@@ -419,7 +354,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   }
 
   res = smagic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
-                            .vectorize = .vectorize, .help = .help,
+                            .vectorize = .vectorize, .help = .help, 
                             .collapse = .collapse, .is_root = TRUE, 
                             .data.table = .data.table, .namespace = .namespace,
                             .check = .check, .last = .last)
@@ -443,7 +378,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 #' @describeIn smagic Like `smagic` but without any error handling to save a few micro seconds
 .smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                     .delim = c("{", "}"), .collapse = NULL, .last = NULL,
-                    .check = FALSE, .data.table = FALSE){
+                    .check = FALSE, .data.table = FALSE, .namespace = NULL){
 
   set_pblm_hook()
   
@@ -451,8 +386,8 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
     .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
   }
 
-  smagic_internal(..., .delim = .delim, .envir = .envir,
-                      .sep = .sep, 
+  smagic_internal(..., .delim = .delim, .envir = .envir, 
+                      .sep = .sep, .namespace = .namespace,
                       .vectorize = .vectorize, .is_root = TRUE, 
                       .data.table = .data.table, .collapse = .collapse,
                       .check = .check, .last = .last)
@@ -467,7 +402,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 
 smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .data = list(),
                                .sep = "", .vectorize = FALSE,
-                               .collapse = NULL, .last = NULL,
+                               .collapse = NULL, .last = NULL,  
                                .help = NULL, .is_root = FALSE, .data.table = FALSE,
                                .namespace = NULL, .user_funs = NULL,
                                .valid_operators = NULL,
@@ -1031,7 +966,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     if(is.function(.last)){
       res = .last(res)
     } else {
-      res = apply_simple_operations(res, ".last", .last, .check, .envir,
+      res = apply_simple_operations(res, ".last", .last, .check, .envir, .data,
                                     group_flag = 1 * grepl("~", .last, fixed = TRUE), 
                                     .delim, .user_funs = .user_funs, 
                                     .valid_operators = .valid_operators)
@@ -1040,7 +975,10 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
 
   if(!is.null(.collapse) && length(res) > 1){
     res = paste0(res, collapse = .collapse)
-  }
+  } else if(!true_character(res)){
+    # we always return something in character form
+    res = as.character(res)
+  }  
 
   return(res)
 }
@@ -1175,7 +1113,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     #
     
     if(isTRUE(attr(fun, "simple_ops"))){
-      res = apply_simple_operations(x, op, fun, .check, .envir, 
+      res = apply_simple_operations(x, op, fun, .check, .envir,  .data,
                                     group_flag = group_flag, .delim, 
                                     .user_funs = .user_funs, 
                                     .valid_operators = .valid_operators)
@@ -2560,7 +2498,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       if(op == "if"){
         n_old = length(xi)
         cond_flag = +grepl("~(", instruction, fixed = TRUE)
-        xi = apply_simple_operations(xi, op, instruction, .check, .envir, 
+        xi = apply_simple_operations(xi, op, instruction, .check, .envir, .data,
                                      group_flag = cond_flag, .delim,
                                      .user_funs = .user_funs, 
                                      .valid_operators = .valid_operators)
@@ -2656,7 +2594,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
   } else if(op == "~"){
     # Group wise: ~ ####
-    res = apply_simple_operations(x, op, argument, .check, .envir, 
+    res = apply_simple_operations(x, op, argument, .check, .envir, .data,
                                   group_flag = 2, .delim, .user_funs = .user_funs, 
                                   .valid_operators = .valid_operators)
                                   
@@ -2973,7 +2911,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
 
 
 apply_simple_operations = function(x, op, operations_string, .check = FALSE, .envir = NULL, 
-                                   group_flag = 0, .delim = c("{", "}"), 
+                                   .data = list(), group_flag = 0, .delim = c("{", "}"), 
                                    .valid_operators = NULL, .user_funs = NULL){
                                   
   op_all = cpp_parse_simple_operations(operations_string, .delim)
@@ -3079,6 +3017,3 @@ setup_operations = function(){
   options("smagic_operations_v1.0.0" = sort(OPERATORS))
   options("smagic_operations_default" = sort(OPERATORS))
 }
-
-
-

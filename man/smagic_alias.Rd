@@ -61,19 +61,64 @@ Utility to easily create \code{smagic} aliases with custom default
 \details{
 Use this function if you want to change \code{smagic} default values. For example,
 if you want the interpolation to be done with "{{}}" (instead of \code{{}}) or if you want the
-default separation to be the space (instead of the empty string).
+default separation to be the space (instead of the empty string). See the example.
 }
+\section{Writing a package using \code{smagic}}{
+
+
+If you want to use \code{smagic} in your package and want to make use of custom operations:
+\itemize{
+\item place any \code{smagic_register_fun} and \code{smagic_register_ops} in your \code{.onLoad} function
+(see \code{help("onLoad")}). The .onLoad function is run whenever the package is loaded
+for the first time. It's a function that you can place anywhere in your \verb{R/*} files
+and which looks like this:
+}
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{.onLoad = function(libname, pkgname)\{
+  # smagic custom operations
+  smagic_register_ops("'80|-'fill", "h1")
+
+  invisible()
+\}
+}\if{html}{\out{</div>}}
+\itemize{
+\item if you don't want to place the \verb{smagic_register_*} functions in the .onLoad function,
+you can, but then you \strong{must} provide the argument \code{namespace}:
+}
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{smagic_register_ops("'80|-'fill", "h1", namespace = "myPackageName")
+}\if{html}{\out{</div>}}
+\itemize{
+\item you must create an \code{\link[=smagic_alias]{smagic_alias()}} to create an alias to \code{\link[=smagic]{smagic()}} and use the
+argument \code{.namespace = "myPackageName"}. Use this opportunity to change the
+defaults if you wish. You can even override the \code{smagic} function:
+}
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# creating an alias with the same name + changing the delimiter
+smagic = stringmagic::smagic_alias(.namespace = "myPackageName", .delim = "\{\{ \}\}")
+}\if{html}{\out{</div>}}
+}
+
 \examples{
 
 # we create the function sma2 with different defaults
-sma2 = smagic_alias(.delim = ".[ ]", .sep = "", .class = `smagick`)
+sma2 = smagic_alias(.delim = ".[ ]", .sep = " ", .class = "smagic")
 
 person = "john doe"
-sma2("Hello", "{title ? person}")
+sma2("Hello", ".[title ? person]")
+
+# you can use the arguments whose default has been changed
+sma2("Hello", ".[title ? person]", .sep = ": ")
 
 
 
+}
+\seealso{
+Other related to \code{smagic}: 
+\code{\link{smagic_register_fun}()},
+\code{\link{smagic}()}
 }
 \author{
 Laurent Berge
 }
+\concept{related to \code{smagic}}
