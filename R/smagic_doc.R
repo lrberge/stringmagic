@@ -177,8 +177,9 @@
 #' These functions accept generic flags ("ignore", "fixed", "word") in their patterns (syntax: "flags/pattern"). 
 #' Please see the dedicated section for more information on flags.
 #' 
-#' + s, S: splits the string according to a pattern. The two operations have different defaults: `' '` 
-#' for `s` and `',[ \t\n}*'` for `S` (i.e. comma separation). 
+#' + s, split, S, Split: splits the string according to a pattern. 
+#' The operations have different defaults: `' '` 
+#' for `s` and 'split', and `',[ \t\n]*'` for `S` and 'Split' (i.e. comma separation). 
 #' Ex.1: `smagic("{S ! romeo, juliet}")` leads to the vector c("romeo", "juliet"). 
 #' Ex.2: `smagic("{'f/+'s, '-'c ! 5 + 2} = 3")` leads to "5 - 2 = 3" (note the flag "fixed" in `s`'s pattern).
 #' + c, C: to concatenate multiple strings into a single one. The two operations are 
@@ -385,6 +386,13 @@
 #' pastes on the first element while option "back" only pastes on the last element. Option "delete"
 #' first replaces all elements with the empty string.
 #' Example: `smagic("6 = {'|'paste.both, ' + 'c ? -3:-1}")` leads to "6 = |-3| + |-2| + |-1|".
+#' + join: joins lines ending with a double backslash. Ex: `x = "the sun \\\n is shining"`; 
+#' `smagic("{join ? x}")` leads to "the sun is shining".
+#' + escape: adds backslashes in front of specific characters. Options `"nl"`, `"tab"`. 
+#' Option `"nl"` escapes the newlines (`\n`), leading them to be displayed as `"\\\\n"`.
+#' Option `"tab"` does the same for tabs (`"\t"`). This is useful to make the value free
+#' of space formatters. 
+#' The default behavior is to escape both newlines and tabs. 
 #' 
 #' 
 #' @section Other operations:

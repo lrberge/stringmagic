@@ -883,6 +883,30 @@ first replaces all elements with the empty string.
 smagic("6 = {'|'paste.both, ' + 'c ? -3:-1}")
 ```
 
+### join
+
+Joins lines ending with a double backslash. 
+
+```{r}
+sun = "The sun \\
+is shining."
+smagic("How is the sun? {join ? sun}")
+```
+
+### escape
+
+Adds backslashes in front of specific characters. Options `"nl"`, `"tab"`. 
+Option `"nl"` escapes the newlines (`\n`), leading them to be displayed as `"\\\\n"`.
+Option `"tab"` does the same for tabs (`"\t"`). This is useful to make the value free
+of space formatters. 
+The default behavior is to escape both newlines and tabs.
+
+```{r}
+input = "yes \n\n no"
+msg = smagic("Your input, equal to {escape, bq ? input} is incorrect.")
+cat(msg, "\n")
+```
+
 
 ## Other operations:
 
