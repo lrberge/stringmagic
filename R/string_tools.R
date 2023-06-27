@@ -198,7 +198,7 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL){
 #' + "word" adds word boundaries (`"\\b"` in regex language) to the pattern. Further, the comma (`","`) 
 #' becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example: 
 #' `string_clean("Am I ambushed?", "wi/am")` leads to " I ambushed?" thanks to the flags "ignore" and "word".
-#' 
+#'
 #' + "magic" allows to interpolate variables inside the pattern before regex interpretation. 
 #' For example if `letters = "aiou"` then `string_clean("My great goose!", "magic/[{letters}] => e")` 
 #' leads to `"My greet geese!"`
@@ -1384,7 +1384,7 @@ string_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(),
         for(j in 1:n_di_xpd){
           if(is_open[j]){
             all_elements[[j]] = smagic_internal(di_expanded[j], .delim = .delim, 
-                                                  .envir = .envir,
+                                                  .envir = .envir, .is_root = TRUE,
                                                   .data = .data, .check = TRUE, 
                                                   .namespace = .namespace)  
           } else {

@@ -20,15 +20,21 @@ cars = row.names(mtcars)
 
 print(cars)
 
-str_vec("The first cars are:, {6 first ? cars}")
+string_vec("The first cars are:, {6 first ? cars}")
 
 
 }
 \seealso{
-A few basic operation: \code{\link[=str_is]{str_is()}}, \code{\link[=str_get]{str_get()}}, \code{\link[=str_clean]{str_clean()}}. Chain basic operations with \code{\link[=str_ops]{str_ops()}}.
-Use \code{\link[=str_vec]{str_vec()}} to create simple string vectors.
+A few basic operation: \code{\link[=string_is]{string_is()}}, \code{\link[=string_get]{string_get()}}, \code{\link[=string_clean]{string_clean()}}. Chain basic operations with \code{\link[=string_ops]{string_ops()}}.
+Use \code{\link[=string_vec]{string_vec()}} to create simple string vectors.
 String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}. You can change \code{smagic}
 default values with \code{\link[=smagic_alias]{smagic_alias()}} and add custom operations with \code{\link[=smagic_register_fun]{smagic_register_fun()}}.
+
+Other tools with aliases: 
+\code{\link{smagic_alias}()},
+\code{\link{smagic}()},
+\code{\link{string_ops_alias}()},
+\code{\link{string_vec_alias}()}
 }
 \author{
 Laurent Berge

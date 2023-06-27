@@ -580,14 +580,9 @@ test(txt, "'005' and '015'")
 # join ####
 #
 
-x = "
-  bonjour \\
-  les gens
-  
-  est-ce que ca va?
-"
+x = "\n    bonjour \\\n   les gens\n est-ce que ca va?"
 txt = smagic("Text: {tws, join ? x}")
-test(txt, "Text: bonjour les gens\n  \n  est-ce que ca va?")
+test(txt, "Text: bonjour les gens\n est-ce que ca va?")
 
 #
 # escape ####

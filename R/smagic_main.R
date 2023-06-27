@@ -445,24 +445,24 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
       }
 
       if(is_dt){
-          is_by = ".BY" %in% ls_i && ".Random.seed" %in% ls(envir = parent.frame(i + 1), all.names = TRUE)
+        is_by = ".BY" %in% ls_i && ".Random.seed" %in% ls(envir = parent.frame(i + 1), all.names = TRUE)
 
-          if(is_by){
-            # that's not great but it works somehow
-            dt_call = sc[[n_sc - i - 1]]
-            dt_name = dt_call[[2]]
-            dt_data = unclass(eval(dt_name, parent.frame(i + 1)))
-            for(v in c(".I", ".N", ".GRP", ".BY")){
-              dt_data[[v]] = get(v, parent.frame(i))
-            }
-          } else {
-            dt_data = unclass(get("x", parent.frame(i + 2)))
-            for(v in c(".N", ".GRP")){
-              dt_data[[v]] = get(v, parent.frame(i))
-            }
+        if(is_by){
+          # that's not great but it works somehow
+          dt_call = sc[[n_sc - i - 1]]
+          dt_name = dt_call[[2]]
+          dt_data = unclass(eval(dt_name, parent.frame(i + 1)))
+          for(v in c(".I", ".N", ".GRP", ".BY")){
+            dt_data[[v]] = get(v, parent.frame(i))
           }
+        } else {
+          dt_data = unclass(get("x", parent.frame(i + 2)))
+          for(v in c(".N", ".GRP")){
+            dt_data[[v]] = get(v, parent.frame(i))
+          }
+        }
 
-          attr(.envir, "dt_data") = dt_data
+        attr(.envir, "dt_data") = dt_data
       }
     }
   }
@@ -1069,7 +1069,7 @@ sma_char2operator = function(x, .valid_operators){
       msg = .sma("{context}",
               "\nPROBLEM: {bq?op} is not a valid operator. ", sugg_txt,
               "\n\nINFO: Type smagic('--help') for more help or smagic(.help = regex) or smagic(.help = TRUE).",
-              "\nEx. of valid stuff: smagic(\"{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
+              "\nEx. of valid stuff: smagic(\"Letters: \\{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
 
       .stop_hook(msg)
     }

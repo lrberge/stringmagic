@@ -101,7 +101,7 @@ fun_emph = function(x, ...) paste0("*", x, "*")
 smagic_register(fun_emph, "emph")
 
 # C) use it
-x = str_vec("right, now")
+x = string_vec("right, now")
 smagic("Take heed, {emph, c? x}.")
 
 #
@@ -116,7 +116,7 @@ fun_emph = function(x, options, ...) {
 
 smagic_register(fun_emph, "emph", "strong")
 
-x = str_vec("right, now")
+x = string_vec("right, now")
 smagic("Take heed, {emph.strong, c? x}.")
 
 #
@@ -134,7 +134,7 @@ fun_emph = function(x, argument, options, ...){
 
 smagic_register(fun_emph, "emph", "strong")
 
-x = str_vec("right, now")
+x = string_vec("right, now")
 smagic("Take heed, {'_'emph.s, c? x}.")
 
 
@@ -143,8 +143,7 @@ smagic("Take heed, {'_'emph.s, c? x}.")
 }
 \seealso{
 Other related to \code{smagic}: 
-\code{\link{smagic_alias}()},
-\code{\link{smagic}()}
+\code{\link{smagic_alias}()}
 }
 \author{
 Laurent R. Berge

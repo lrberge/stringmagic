@@ -29,7 +29,8 @@ smagic(
   .collapse = NULL,
   .last = NULL,
   .check = FALSE,
-  .data.table = FALSE
+  .data.table = FALSE,
+  .namespace = NULL
 )
 }
 \arguments{
@@ -273,11 +274,11 @@ Ex.1: \code{smagic("{'e'r ! Where is the letter e?}")} leads to "Whr is th lttr 
 Ex.2: \code{smagic("{'(?<!\\\\b)e => a'R ! Where is the letter e?}")} leads to "Whara is tha lattar e?".
 Ex.3: \code{smagic("{'t/e => here'r ! Where is the letter e?}")} leads to "here".
 \item clean: replacement with a string. Similar to the operation \code{r}, except that here the comma is
-a pattern separator, see detailed explanations in \code{\link[=str_clean]{str_clean()}}. Ex: \code{smagic("{'f/[, ]'clean ! x[a]}")}
+a pattern separator, see detailed explanations in \code{\link[=string_clean]{string_clean()}}. Ex: \code{smagic("{'f/[, ]'clean ! x[a]}")}
 leads to "xa".
 \item get: restricts the string only to values respecting a pattern. This operation has no default.
 Accepts the options "equal" and "in".
-By default it uses the same syntax as \code{\link[=str_get]{str_get()}} so that you can use regex flags and
+By default it uses the same syntax as \code{\link[=string_get]{string_get()}} so that you can use regex flags and
 include logical operations with \code{' & '} and \code{' | '} to detect patterns.
 If the option "equal" is used, a simple string equality with the argument is tested (hence
 no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
@@ -286,21 +287,21 @@ Example: \verb{x = row.names(mtcars) ; smagic("Mercedes models: \{'Merc & [[:alp
 leads to "Mercedes models: 240D, 280C, 450SE, 450SL and 450SLC".
 \item is: detects if a pattern is present in a string, returns a logical vector. This operation has no default.
 Accepts the options "equal" and "in".
-By default it uses the same syntax as \code{\link[=str_is]{str_is()}} so that you can use regex flags and
+By default it uses the same syntax as \code{\link[=string_is]{string_is()}} so that you can use regex flags and
 include logical operations with \code{' & '} and \code{' | '} to detect patterns.
 If the option "equal" is used, a simple string equality with the argument is tested (hence
 no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
 and then set inclusion is tested.
-Mostly useful as the final operation in a \code{\link[=str_ops]{str_ops()}} call.
+Mostly useful as the final operation in a \code{\link[=string_ops]{string_ops()}} call.
 Example: \verb{x = c("Mark", "Lucas") ; smagic("Mark? \{'i/mark'is, C ? x\}")} leads to "Mark? TRUE and FALSE".
 \item which: returns the index of string containing a specified pattern. With no default, can be applied
 to a logical vector directly.
-By default it uses the same syntax as str_which() so that you can use regex flags and
+By default it uses the same syntax as string_which() so that you can use regex flags and
 include logical operations with \code{' & '} and \code{' | '} to detect patterns.
 If the option "equal" is used, a simple string equality with the argument is tested (hence
 no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
 and then set inclusion is tested.
-Mostly useful as the final operation in a \code{\link[=str_ops]{str_ops()}} call.
+Mostly useful as the final operation in a \code{\link[=string_ops]{string_ops()}} call.
 Ex.1: \verb{x = c("Mark", "Lucas") ; smagic("Mark is number \{'i/mark'which ? x\}.")} leads to
 "Mark is number 1.".
 }
@@ -331,7 +332,7 @@ last \code{n} values.
 \item sort: sorts the vector in increasing order. Accepts optional arguments and the option "num".
 Example: \verb{x = c("sort", "me") ; smagic("\{sort, c ? x\}")} leads to "me sort".
 If an argument is provided, it must be a regex pattern that will be applied to
-the vector using \code{\link[=str_clean]{str_clean()}}. The sorting will be applied to the modified version of the vector
+the vector using \code{\link[=string_clean]{string_clean()}}. The sorting will be applied to the modified version of the vector
 and the original vector will be ordered according to this sorting.
 Ex: \code{x = c("Jon Snow", "Khal Drogo")}; \code{smagic("{'.+ 'sort, C?x}")} leads to
 "Khal Drogo and Jon Snow". The option "num" sorts over a numeric version
@@ -453,7 +454,7 @@ Accepts arguments of the form \code{'n'} or \code{'n|s'}, with \code{n} a number
 Default is left-alignment of the strings.
 Option "right" right aligns and "center" centers the strings. When using \code{'n|s'}, the symbol \code{s}
 is used for the filling. By default if no argument is provided, the
-maximum size of the character string is used. See help for \code{\link[=str_fill]{str_fill()}} for more information.
+maximum size of the character string is used. See help for \code{\link[=string_fill]{string_fill()}} for more information.
 Ex.1: \code{smagic("Numbers: {'5|0'fill.right, C ? c(1, 55)}")} leads to "Numbers: 00001 and 00055".
 \item paste: pastes some character to all elements of the string. This operation has no default.
 Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
@@ -738,9 +739,9 @@ The flags are useful to quickly give extra instructions, similarly to \emph{usua
 \href{https://javascript.info/regexp-introduction}{regular expression flags}.
 
 Here the syntax is "flag1, flag2/pattern". That is: flags are a comma separated list of flag-names
-separated from the pattern with a slash (\code{/}). Example: \code{str_which(c("hello...", "world"), "fixed/.")} returns \code{1}.
+separated from the pattern with a slash (\code{/}). Example: \code{string_which(c("hello...", "world"), "fixed/.")} returns \code{1}.
 Here the flag "fixed" removes the regular expression meaning of "." which would have otherwise meant \emph{"any character"}.
-The no-flag verion \code{str_which(c("hello...", "world"), ".")} returns \code{1:2}.
+The no-flag verion \code{string_which(c("hello...", "world"), ".")} returns \code{1:2}.
 
 Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
 comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".
@@ -753,9 +754,9 @@ at the beginning of the pattern.
 (among others) lose their special meaning and are treated for what they are: simple characters.
 \item "word" adds word boundaries (\code{"\\\\b"} in regex language) to the pattern. Further, the comma (\code{","})
 becomes a word separator. Technically, "word/one, two" is treated as "\\b(one|two)\\b". Example:
-\code{str_clean("Am I ambushed?", "wi/am")} leads to " I ambushed?" thanks to the flags "ignore" and "word".
+\code{string_clean("Am I ambushed?", "wi/am")} leads to " I ambushed?" thanks to the flags "ignore" and "word".
 \item "magic" allows to interpolate variables inside the pattern before regex interpretation.
-For example if \code{letters = "aiou"} then \code{str_clean("My great goose!", "magic/[{letters}] => e")}
+For example if \code{letters = "aiou"} then \code{string_clean("My great goose!", "magic/[{letters}] => e")}
 leads to \code{"My greet geese!"}
 }
 }
@@ -777,7 +778,7 @@ smagic("Hello {x[1]}, ",
 
 # Splitting a comma separated string
 # The mechanism is explained later
-str_vec("J. Mills, David, Agnes, Dr Strong")
+string_vec("J. Mills, David, Agnes, Dr Strong")
 
 # Nota: this is equivalent to (explained later)
 smagic("{', *'S ! J. Mills, David, Agnes, Dr Strong}")
@@ -964,7 +965,7 @@ smagic("{'|'paste.both, ' + 'c ! x{1:4}}")
 
 
 # Enumerations
-acad = str_vec("you like admin, you enjoy working on weekends, you really love emails")
+acad = string_vec("you like admin, you enjoy working on weekends, you really love emails")
 smagic("Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}.")
 
 # You can also use the enum command
@@ -983,7 +984,7 @@ smagic("{stop, ws ! It is a tale told by an idiot, full of sound and fury, signi
 #         'n|s'k: same + adds 's' at the end of shortened strings
 #         'n||s'k: same but 's' counts in the n characters kept
 
-words = str_vec("short, constitutional")
+words = string_vec("short, constitutional")
 smagic("{5k ? words}")
 
 smagic("{'5|..'k ? words}")
@@ -998,7 +999,7 @@ smagic("{'5||..'k ? words}")
 #
 # Special values :rest: and :REST:, give the number of items dropped
 
-bx = str_vec("Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
+bx = string_vec("Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac")
 smagic("Bordeaux wines I like: {3K, ', 'C ? bx}.")
 
 smagic("Bordeaux wines I like: {'3|etc..'K, ', 'C ? bx}.")
@@ -1060,7 +1061,7 @@ smagic("{'A'rm ? x}")
 
 smagic("{rm.all ? x}")
 
-x = str_vec("1, 12, 123, 1234, 123456, 1234567")
+x = string_vec("1, 12, 123, 1234, 123456, 1234567")
 # we delete elements whose number of characters is lower or equal to 3
 # => see later section CONDITIONS
 smagic("{if(.nchar > 3 ; nuke) ? x}")
@@ -1139,11 +1140,14 @@ To set new operators, see the function \code{\link[=smagic_register]{smagic_regi
 
 To modify the default values of smagic, use the function \code{\link[=setSmagic]{setSmagic()}}.
 
-If you want to apply a chain of operations on a single vector, see \code{\link[=str_ops]{str_ops()}} which
+If you want to apply a chain of operations on a single vector, see \code{\link[=string_ops]{string_ops()}} which
 may be more appropriate.
 
-Other related to \code{smagic}: 
+Other tools with aliases: 
 \code{\link{smagic_alias}()},
-\code{\link{smagic_register_fun}()}
+\code{\link{string_clean_alias}()},
+\code{\link{string_ops_alias}()},
+\code{\link{string_vec_alias}()}
 }
-\concept{related to \code{smagic}}
+\concept{\code{smagic} functions}
+\concept{tools with aliases}
