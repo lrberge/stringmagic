@@ -1,8 +1,10 @@
 useDynLib(stringmagic, .registration = TRUE)
 
-# str_*
-export(str_ops, str_is, str_which, str_get, str_clean, str_split2df,
-       str_split2dt, str_fill, str_vec)
+# string_*
+export(string_ops, string_is, string_which, string_get, string_clean, string_split2df,
+       string_split2dt, string_fill, string_vec)
+
+export(string_ops_alias, string_vec_alias, string_clean_alias)
 
 # smagic
 export(smagic, .smagic)

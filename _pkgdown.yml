@@ -23,6 +23,6 @@ reference:
   - title: Other string operations
     desc: Pattern detection, operations chaining, string cleaning and more
     contents:
-      - matches("^str_")
+      - matches("^string_")
       - _index_
 

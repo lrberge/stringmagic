@@ -2012,6 +2012,10 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     
     res = string_fill(x, argument, symbol = symbol, right = right, center = center)
     
+  } else if(op == "join"){
+    
+    res = gsub(" *\\\\\\\\ *\n *", " ", res, perl = TRUE)
+    
   } else if(op == "unik"){
     # unik ####
 
@@ -3001,7 +3005,7 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
 setup_operations = function(){
   OPERATORS = c("s", "S", "split", "Split", "x", "X", "extract", 
                 "c", "C", "collapse", "Collapse", "r", "R", "replace", "clean",
-                "times", "each", "fill",
+                "times", "each", "fill", "join",
                 "~", "if", "vif",
                 "upper", "lower", "q", "Q", "bq", 
                 "format", "Format", "%",
