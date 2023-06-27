@@ -1013,46 +1013,6 @@ sma2 = smagic_alias(.delim = "$[ ]")
 txt = sma2("x$[1:2]", .last = "C")
 test(txt, "x1 and x2")
 
-#
-# data.table ####
-#
-
-if(FALSE && requireNamespace("data.table", quietly = TRUE)){
-  # For some reason these tests don't work in non interactive use
-  # I have to run them manually.
-  # Don't have time to investigate, so be it.
-  
-  library(data.table)
-  dt = as.data.table(iris)
-  
-  # variable creation
-  dt[, sepal_info := smagic("{%.0f ? Sepal.Length}-{%.0f ? Sepal.Width}")]
-  test(dt[1, "sepal_info"], "5-4")
-  
-  # variable creation with grouping
-  dt[, species_SL := 
-          smagic("{first, up.f ? Species}: {mean(Sepal.Length)}"),
-      by = Species]
-  test(dt[1, "species_SL"], "Setosa: 5.006")
-  
-  # variable creation with grouping using DT special var
-  dt[, species_N := 
-          smagic("{first, 5k ? Species}: {.N}"),
-      by = Species]
-  test(dt[1, "species_N"], "setos: 50")
-  
-  # variable selection
-  dt_small = dt[, .(petal_info = smagic("{%.0f ? Petal.Length}-{%.0f ? Petal.Width}"))]
-  test(dt_small[1, "petal_info"], "1-0")
-  
-  # variable selection with grouping
-  dt_small = dt[, .(species_PL = smagic("{first, 10 fill.c ? Species}: {%.1f ? mean(Petal.Length)}")), 
-                 by = Species]
-  test(dt_small[1, "species_PL"], "  setosa  : 1.5")
-  
-  
-}
-
 
 
 

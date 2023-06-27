@@ -42,7 +42,7 @@
 smagic_alias = function(.sep = "", .vectorize = FALSE, 
                         .delim = c("{", "}"), .last = NULL, 
                         .collapse = NULL,  .check = TRUE, 
-                        .class = NULL, .data.table = TRUE, .namespace = NULL){
+                        .class = NULL, .namespace = NULL){
   #
   
   check_character(.sep, scalar = TRUE)
@@ -51,7 +51,6 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
   check_character(.collapse, scalar = TRUE, null = TRUE)
   check_logical(.check, scalar = TRUE)
   check_character(.class, no_na = TRUE, null = TRUE)
-  check_logical(.data.table, scalar = TRUE)
   check_character(.namespace, scalar = TRUE, null = TRUE)
   
   # forcing evaluations
@@ -62,19 +61,18 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
   collapse = .collapse
   check = .check
   class = .class
-  data.table = .data.table
   namespace = .namespace
   
   res = function(..., .envir = parent.frame(), .sep = sep, .vectorize = vectorize, 
                    .delim = delim, .last = last, 
                    .collapse = collapse, 
                    .check = check, .class = class, .help = NULL, 
-                   .data.table = data.table, .namespace = namespace){
+                   .namespace = namespace){
                     
     smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
             .delim = .delim, .last = .last, .collapse = .collapse,
             .check = .check, .class = .class, .help = .help,
-            .data.table = .data.table, .namespace = .namespace)
+            .namespace = .namespace)
   }
   
   res

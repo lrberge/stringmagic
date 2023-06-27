@@ -33,9 +33,6 @@
 #' navigate the help pages. If a character scalar, then a regex search is perfomed on the main
 #' documentation and any section containining a match is displayed. The user can easily
 #' navigate across matches.
-#' @param .data.table Logical, default is `TRUE`. If you use `smagic` in a `data.table` call
-#' and interpolate variables within the `data.table`, you want this argument to be `TRUE`.
-#' It only incurs a small overhead.
 #' @param .collapse Character scalar, default is `NULL`. If provided, the character vector
 #' that should be returned is collapsed with the value of this argument. This leads
 #' to return a string of length 1.
@@ -81,12 +78,6 @@
 #'
 #' Access a compact help on the console with `smagic("--help")` or use the argument `.help` to which
 #' you can pass keywords or regular expressions and fecth select pieces from the main documentation.
-#' 
-#' This function is compatible with calls within a `data.table` without named arguments. 
-#' Note that it shouldn't work (try [glue](https://glue.tidyverse.org/index.html) for instance)!
-#' To make it work, we made use of how `data.table` works internally and, since we used stuff 
-#' not exposed in its API, it is by construction unstable. `smagic` has been tested, and works, on
-#' `data.table` version 1.14.2 (2021-09-27) and version 1.14.8 (2023-02-17).
 #' 
 #' 
 #' @section Interpolation and string operations: Principle:
@@ -1018,21 +1009,6 @@
 #' smagic("Why do you develop packages? For {`dollar`times.c ! $}?",
 #'     "For money? No... for {upper,''s, c ? reason}!", .sep = "\n")
 #' 
-#' 
-#' #
-#' # COMPATIBILITY WITH data.table ####
-#' # 
-#' 
-#' # smagic is compatible with data.table (tested on version 1.14.2)
-#' 
-#' if(requireNamespace("data.table")){
-#'   library(data.table)
-#'   dt_iris = as.data.table(iris)
-#'   dt_small = dt_iris[, .(species_PL = smagic("{first, 10 fill.c ? Species}: {%.1f ? mean(Petal.Length)}")), 
-#'                      by = Species]
-#'   print(dt_small)
-#' }
-#'
 #'
 #'    
 #'

@@ -317,12 +317,11 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                    .delim = c("{", "}"), .last = NULL, 
                    .collapse = NULL, 
                    .check = TRUE, .class = NULL, .help = NULL, 
-                   .data.table = TRUE, .namespace = NULL){
+                   .namespace = NULL){
 
 
   if(.check){
     if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
-    if(!missing(.data.table)) check_logical(.data.table, scalar = TRUE)
     if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
     if(!missing(.sep)) check_character(.sep, scalar = TRUE)
     if(!missing(.envir)) check_envir(.envir)
@@ -356,7 +355,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   res = smagic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
                             .vectorize = .vectorize, .help = .help, 
                             .collapse = .collapse, .is_root = TRUE, 
-                            .data.table = .data.table, .namespace = .namespace,
+                            .namespace = .namespace,
                             .check = .check, .last = .last)
 
   if(inherits(res, "help")){
@@ -378,7 +377,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 #' @describeIn smagic Like `smagic` but without any error handling to save a few micro seconds
 .smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                     .delim = c("{", "}"), .collapse = NULL, .last = NULL,
-                    .check = FALSE, .data.table = FALSE, .namespace = NULL){
+                    .check = FALSE, .namespace = NULL){
 
   set_pblm_hook()
   
@@ -389,7 +388,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   smagic_internal(..., .delim = .delim, .envir = .envir, 
                       .sep = .sep, .namespace = .namespace,
                       .vectorize = .vectorize, .is_root = TRUE, 
-                      .data.table = .data.table, .collapse = .collapse,
+                      .collapse = .collapse,
                       .check = .check, .last = .last)
 }
 
@@ -403,7 +402,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .data = list(),
                                .sep = "", .vectorize = FALSE,
                                .collapse = NULL, .last = NULL,  
-                               .help = NULL, .is_root = FALSE, .data.table = FALSE,
+                               .help = NULL, .is_root = FALSE, 
                                .namespace = NULL, .user_funs = NULL,
                                .valid_operators = NULL,
                                .check = FALSE, .plural_value = NULL){
@@ -427,44 +426,6 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
   
   if(...length() == 0){
     return("")
-  }
-  
-  if(.is_root && .data.table){
-    # we check for data table calls
-    is_dt = FALSE
-    sc = sys.calls()
-    n_sc = length(sc)
-    if(n_sc >= 4){
-
-      for(i in 2:(n_sc - 2)){
-        ls_i = ls(envir = parent.frame(i), all.names = TRUE)
-        is_dt = all(c(".SD", ".I", ".N") %in% ls_i)
-        if(is_dt){
-          break
-        }
-      }
-
-      if(is_dt){
-        is_by = ".BY" %in% ls_i && ".Random.seed" %in% ls(envir = parent.frame(i + 1), all.names = TRUE)
-
-        if(is_by){
-          # that's not great but it works somehow
-          dt_call = sc[[n_sc - i - 1]]
-          dt_name = dt_call[[2]]
-          dt_data = unclass(eval(dt_name, parent.frame(i + 1)))
-          for(v in c(".I", ".N", ".GRP", ".BY")){
-            dt_data[[v]] = get(v, parent.frame(i))
-          }
-        } else {
-          dt_data = unclass(get("x", parent.frame(i + 2)))
-          for(v in c(".N", ".GRP")){
-            dt_data[[v]] = get(v, parent.frame(i))
-          }
-        }
-
-        attr(.envir, "dt_data") = dt_data
-      }
-    }
   }
   
   if(.is_root){
