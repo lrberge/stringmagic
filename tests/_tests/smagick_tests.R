@@ -590,6 +590,14 @@ txt = smagic("Text: {tws, join ? x}")
 test(txt, "Text: bonjour les gens\n  \n  est-ce que ca va?")
 
 #
+# escape ####
+#
+
+x = "bon\njour \t les \t gens"
+txt = smagic(x, .last = "escape")
+test(txt, "bon\njour \\t les \\t gens")
+
+#
 # unik ####
 #
 

@@ -2013,7 +2013,23 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     res = string_fill(x, argument, symbol = symbol, right = right, center = center)
     
   } else if(op == "join"){
+    # join, escape ####
     res = gsub(" *\\\\ *\n *", " ", x, perl = TRUE)    
+  } else if(op == "escape"){
+    # later, I can inclue latex, markdown, etc
+    options = check_set_options(options, c("nl", "tab"))
+    if(length(options) == 0){
+      options = c("nl", "tab")
+    }
+    
+    if("nl" %in% options){
+      res = gsub("\n", "\\\\n", x, perl = TRUE)
+    }
+    
+    if("tab" %in% options){
+      res = gsub("\t", "\\\\t", x, perl = TRUE)
+    }
+    
   } else if(op == "unik"){
     # unik ####
 
@@ -3003,7 +3019,7 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
 setup_operations = function(){
   OPERATORS = c("s", "S", "split", "Split", "x", "X", "extract", 
                 "c", "C", "collapse", "Collapse", "r", "R", "replace", "clean",
-                "times", "each", "fill", "join",
+                "times", "each", "fill", "join", "escape",
                 "~", "if", "vif",
                 "upper", "lower", "q", "Q", "bq", 
                 "format", "Format", "%",
