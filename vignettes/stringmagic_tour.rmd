@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 # we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
 library(stringmagic)
 
-options("smagic_str_get_forced_caching" = TRUE)
+options("smagic_string_get_forced_caching" = TRUE)
 ```
 
 Text is everywhere in data science, so better be equipped with the right tools!
@@ -110,7 +110,7 @@ Here we provide an overview, for more information, see the [associated vignette]
 ## Cleaning text: Quick and easy please {#fun_clean}
 
 One common (and tedious) task in data sciencce is *cleaning* character strings. 
-The function `str_clean` is specialized in cleaning and has a dedicated syntax:
+The function `string_clean` is specialized in cleaning and has a dedicated syntax:
 
 - use `"pat1, pat2 => r"` to replace the regex patterns `pat1` and `pat2` with the value `r`.
 - use `"@op1, op2"` to use `smagic` operations.
@@ -130,7 +130,7 @@ tragedy = c("P: Grâces au ciel, mes mains ne sont point criminelles.",
             "Je n'en mourrai pas moins, j'en mourrai plus coupable.")
 
 # Cleaning a text
-str_clean(tragedy, 
+string_clean(tragedy, 
           # use smagic to: turn to ascii with transliteration, lower the case
           # remove the punctuation + isolated letters + normalize the whitespaces, 
           # remove empty strings
@@ -148,11 +148,11 @@ str_clean(tragedy,
 ## Fast character string detection {#fun_detect}
 
 When you want to detect a single pattern in a string, `base::grepl` or 
-`stringr::str_detect` works pretty well. You feed a regex, and done. 
+`stringr::string_detect` works pretty well. You feed a regex, and done. 
 But what if you want to detect the presence, at the same time, of two distinct regular expressions.
 This quickly becomes messier (try to get the examples below with a single `grepl` call!).
 
-For pattern detection, `stringmagic` offers three functions: `str_is`, `str_which` and `str_get`.
+For pattern detection, `stringmagic` offers three functions: `string_is`, `string_which` and `string_get`.
 Their syntax is as follows: `"pat1 & !pat2 | pat3"` with `patx` a regular expression. 
 This example means: find the elements that: contain `pat1` and do not contain `pat2`, 
 or contain `pat3`. See the examples below:
@@ -163,19 +163,19 @@ cars = row.names(mtcars)
 smagic("Cars from the `mtcars` data set:\n{sort, C, 80 width ? cars}.")
 
 # cars containing 'a', 'e', 'i' and 'o'
-str_get(cars, "a & e & i & o")
+string_get(cars, "a & e & i & o")
 
-# in interactive mode, str_get keeps the previous item in memory, 
+# in interactive mode, string_get keeps the previous item in memory, 
 # so you can avoid providing the first argument
 
 # cars not containing any digit nor the letter 'e'
-str_get("!\\d & !e")
+string_get("!\\d & !e")
 ```
 
 ## Chaining string operations {#fun_chain}
 
 If you want to apply a sequence of operations to a single character vector,
-you can use `str_ops`. It has access to all operations available to `smagic`.
+you can use `string_ops`. It has access to all operations available to `smagic`.
 
 ```{r}
 cars = row.names(mtcars)
@@ -183,10 +183,10 @@ cars = row.names(mtcars)
 smagic("Cars from the `mtcars` data set:\n{sort, C, 80 width ? cars}.")
 
 # let's get the brands starting with an "m"
-str_ops(cars, "'i/^m'get, x, unik")
+string_ops(cars, "'i/^m'get, x, unik")
 
 # let's get the 3 largest numbers appearing in the car models
-str_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
+string_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
 ```
 
 

@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 # we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
 library(stringmagic)
 
-options("smagic_str_get_forced_caching" = TRUE)
+options("smagic_string_get_forced_caching" = TRUE)
 ```
 
 This vignette describes `stringmagic` tools for handling character vectors. 
@@ -68,7 +68,7 @@ Ex: let's find lines containing `"dt["`:
 code = c("DT = as.data.table(iris)", 
          "DT[, .(pl_sl = smagic('PL/SL = {Petal.Length / Sepal.Length}')]")
 
-str_get(code, "if/dt[")
+string_get(code, "if/dt[")
 ```
 
 ## Regex flags: Reference
@@ -113,13 +113,13 @@ and treats it as verbatim.
 Ex: let's fix the equation by changing the operators. 
 ```{r}
 x = "50 + 5 * 5 = 40"
-str_clean(x, "f/+, * => -")
+string_clean(x, "f/+, * => -")
 
 # Without the fixed flag, we would have gotten an error since '+' or '*'
 # have a special meaning in regular expressions and expects something before
 
 # Here's the error
-try(str_clean(x, "+, * => -"))
+try(string_clean(x, "+, * => -"))
 ```
 
 *Technically*, if `"fixed"` is the only flag, then the functions `base::grepl` or `base::gsub`
@@ -168,7 +168,7 @@ vowels ="aeiouy"
 # we want the pattern: "[^aeiouy]"
 lmb = "'Tis safer to be that which we destroy
 Than by destruction dwell in doubtful joy."
-str_clean(lmb, "magic/[^{vowels}] => _")
+string_clean(lmb, "magic/[^{vowels}] => _")
 
 #
 # Illustration of `smagic` operations before regex application
@@ -178,18 +178,18 @@ cars = row.names(mtcars)
 models = c("Toyota", "Hornet", "Porsche")
 # we want the pattern "(Toyota|Hornet|"Porsche).+\\d"
 # we collapse the models with a pipe using '|'c
-str_get(cars, "m/({'|'c?models}).+\\d")
+string_get(cars, "m/({'|'c?models}).+\\d")
 
 # alternative: same as above but we first comma-split the vector
 models_comma = "Toyota, Hornet, Porsche"
-str_get(cars, "m/({S, '|'c?models_comma}).+\\d")
+string_get(cars, "m/({S, '|'c?models_comma}).+\\d")
 
 #
 # Interpolation does not apply to regex-specific curly brackets
 
 # We delete only successions of 2+ vowels
 # {2,} has a rexex meaning and is not interpolated:
-str_clean(lmb, "magic/[{vowels}]{2,} => _")
+string_clean(lmb, "magic/[{vowels}]{2,} => _")
 ```
 
 *Technically*, the algorithm does not interpolate curly brackets having a 
@@ -209,7 +209,7 @@ Ex: let's replace a few car models.
 cars_small = head(row.names(mtcars))
 print(cars_small)
 
-str_clean(cars_small, "ti/mazda => Mazda: sold out!")
+string_clean(cars_small, "ti/mazda => Mazda: sold out!")
 ```
 
 On top of this, the `"total"` flag allows to perform logical operations across
@@ -223,10 +223,10 @@ Ex: detect car brands with a digit and no 'e'.
 cars_small = head(row.names(mtcars))
 print(cars_small)
 
-str_clean(cars_small, "ti/\\d & !e => I don't like that brand!")
+string_clean(cars_small, "ti/\\d & !e => I don't like that brand!")
 ```
 
-*Technically*, instead of using `gsub` to replace the pattern, [`str_is`](#detect_funs) is used
+*Technically*, instead of using `gsub` to replace the pattern, [`string_is`](#detect_funs) is used
 to detect which element contains the pattern. Each element with the pattern
 is then substituted with the replacement.
 
@@ -238,9 +238,9 @@ first replacement is performed.
 
 Ex: single substitutions.
 ```{r}
-encounter = str_vec("Hi Cyclops., Hi you. What's your name?, Odysseus is my name.")
+encounter = string_vec("Hi Cyclops., Hi you. What's your name?, Odysseus is my name.")
 # we only remove the first word
-str_clean(encounter, "single/\\w+ => ...")
+string_clean(encounter, "single/\\w+ => ...")
 ```
 
 *Technically*, the function `base::sub` is used instead of `base::gsub`.
@@ -261,10 +261,10 @@ Ex: let's invert the numerator and denominator of a division.
 ```{r}
 eq = "5/x = 3/2"
 # a) escaping with empty flags
-str_clean(eq, "/(\\d)/(\\w) => \\2/\\1")
+string_clean(eq, "/(\\d)/(\\w) => \\2/\\1")
 
 # b) escaping with backslashes
-str_clean(eq, "(\\d)\\/(\\w) => \\2/\\1")
+string_clean(eq, "(\\d)\\/(\\w) => \\2/\\1")
 ```
 
 **Warning:** when applying regular expressions on file paths, the escaping 
@@ -277,15 +277,15 @@ or `"\\/[^/]+$"`.
 # Intuivite detection of regex patterns
 
 Detecting a single regex pattern is pretty straightforward with regular tools
-like `base::grepl` or `stringr::str_detect`. Things become more complicated
+like `base::grepl` or `stringr::string_detect`. Things become more complicated
 when we want to detect the presence of multiple patterns. 
 
 `stringmagic` offers three functions with an intuitive syntax to deal with 
 complex pattern detection:
 
-- [str_is](#detect_funs): returns a logical vector
-- [str_which](#detect_funs): returns the indexes of the matches
-- [str_get](#detect_funs): returns the matches
+- [string_is](#detect_funs): returns a logical vector
+- [string_which](#detect_funs): returns the indexes of the matches
+- [string_get](#detect_funs): returns the matches
 
 As described in the next section., these tools benefit from a streamlined syntax to 
 logically combine several regex patterns. 
@@ -339,20 +339,20 @@ When you add flags to a pattern, these apply to *all* regex sub-patterns.
 This means that `"f/( | )"` treats the two parentheses as "fixed". 
 *You cannot add flags specific to a single sub-pattern.*
 
-The functions `str_is`, `str_which` and `str_get` accept a negation before the 
+The functions `string_is`, `string_which` and `string_get` accept a negation before the 
 flags (they're the only ones).   
 In that case, the result of all the sub-patterns is negated. You can add the
 empty flag to make this work without flags. For example `"!/a & b & c"` means `x` does not contain
 (`a` AND `b` AND `c`). 
 
-## Pattern detection with `str_is`, `str_which` and `str_get` {#detect_funs}
+## Pattern detection with `string_is`, `string_which` and `string_get` {#detect_funs}
 
-Use `str_is`, `str_which` and `str_get` to detect patterns in character vectors and obtain either 
+Use `string_is`, `string_which` and `string_get` to detect patterns in character vectors and obtain either 
 a logical vector, an integer vector, or the values.
 
-In this section we give examples for `str_get` which hopefully will be explicit 
-enough to illustrate how it works. For the record, `str_get` uses `str_is` internally so
-these examples are equivalent with `str_is` or `str_which`. 
+In this section we give examples for `string_get` which hopefully will be explicit 
+enough to illustrate how it works. For the record, `string_get` uses `string_is` internally so
+these examples are equivalent with `string_is` or `string_which`. 
 
 Ex.1: series of examples using the *recommended syntax*.
 ```{r}
@@ -360,22 +360,22 @@ cars = row.names(mtcars)
 smagic("All cars from mtcars:\n{C, 60 width ? cars}")
 
 # cars with an 'a', an 'e', an 'i', and an 'o', all in lower case
-str_get(cars, "a & e & i & o")
+string_get(cars, "a & e & i & o")
 
 # cars with no 'e' and at least one digit
-str_get(cars, "!e & \\d")
+string_get(cars, "!e & \\d")
 
 # we use the empty flag trick to negate the full pattern
 # NOT(cars with an 'e' AND one digit)
-str_get(cars, "!/e & \\d")
+string_get(cars, "!/e & \\d")
 
 # flags apply to all
 # contains the 'words' 2, 9 or l
 # alternative syntax for flags: "wi/2 | 9 | l"
-str_get(cars, "word, ignore/2 | 9 | l")
+string_get(cars, "word, ignore/2 | 9 | l")
 ```
 
-The default syntax is `str_get(x, ...)` (same for `str_is` and `str_which`), 
+The default syntax is `string_get(x, ...)` (same for `string_is` and `string_which`), 
 where `...` contains any number of patterns
 to detect. By default the results of these pattern detections are combined with 
 a logical AND. To combine them with a logical OR, you need to use the argument
@@ -384,21 +384,21 @@ apply to all patterns.
 
 Ex.2: replication of Ex.1 using an alternative syntax.
 ```{r}
-# str_get(cars, "a & e & i & o")
+# string_get(cars, "a & e & i & o")
 # cars with an 'a', an 'e', an 'i', and an 'o', all in lower case
-str_get(cars, "a", "e", "i", "o")
+string_get(cars, "a", "e", "i", "o")
 
-# str_get(cars, "!e & \\d")
+# string_get(cars, "!e & \\d")
 # cars with no 'e' and at least one digit
-str_get(cars, "!e", "\\d")
+string_get(cars, "!e", "\\d")
 
-# str_get(cars, "!/e & \\d")
+# string_get(cars, "!/e & \\d")
 # This example cannot be replicated directly, we need to apply logical equivalence
-str_get(cars, "!e", "!\\d", or = TRUE)
+string_get(cars, "!e", "!\\d", or = TRUE)
 
-# str_get(cars, "wi/2 | 9 | l")
+# string_get(cars, "wi/2 | 9 | l")
 # contains the 'words' 2, 9 or l
-str_get(cars, "2", "9", "l", or = TRUE, word = TRUE, ignore.case = TRUE)
+string_get(cars, "2", "9", "l", or = TRUE, word = TRUE, ignore.case = TRUE)
 ```
 
 ### Specificities of `srt_get` {#detect_get}
@@ -418,23 +418,23 @@ Using `seq.unik = TRUE` is like `seq` but applies the function `unique()` at the
 Ex: sequentially combining results.
 ```{r}
 # cars without digits, then cars with 2 'a's or 2 'e's and a digit
-str_get(cars, "!\\d", "i/a.+a | e.+e & \\d", seq = TRUE)
+string_get(cars, "!\\d", "i/a.+a | e.+e & \\d", seq = TRUE)
 
 # let's get the first word of each car name
-car_first = str_ops(cars, "extract.first")
+car_first = string_ops(cars, "extract.first")
 # we select car brands ending with 'a', then ending with 'i'
-str_get(car_first, "a$", "i$", seq = TRUE)
+string_get(car_first, "a$", "i$", seq = TRUE)
 # seq.unik is similar to seq but applies unique()
-str_get(car_first, "a$", "i$", seq.unik = TRUE)
+string_get(car_first, "a$", "i$", seq.unik = TRUE)
 ```
 
 #### Caching {#get_caching}
 
 At the exploration stage, we often run the same command with a few
-variations on the same data set. Acknowledging this, `str_get` supports the caching
+variations on the same data set. Acknowledging this, `string_get` supports the caching
 of the data argument in interactive use. This means that the user can concentrate in
 the pattern to find and need not bother to write the data from where to fectch the
-values. Note that `str_get` is the only `stringmagic` function to have this
+values. Note that `string_get` is the only `stringmagic` function to have this
 ability.
 
 Caching is always enabled, you don't need to do anything.
@@ -444,17 +444,17 @@ Ex: caching of the data.
 # Since we used `car_first` in the previous example, we don't need to provide
 # it explicitly now
 # => brands containing 'M' and ending with 'a' or 'i'; brands containing 'M'
-str_get("M & [ai]$", "M", seq.unik = TRUE)
+string_get("M & [ai]$", "M", seq.unik = TRUE)
 ```
 
-# Chaining string operations with `str_ops` {#sec_ops}
+# Chaining string operations with `string_ops` {#sec_ops}
 
 Formatting text data often requires applying many functions
 (be it for parsing, text analysis, etc). 
 Even for simple tasks, the number of operations can quickly balloon, adding many
 lines of code, reducing readability, and all this for basic processing.
 
-The function `str_ops` tries to solve this problem. 
+The function `string_ops` tries to solve this problem. 
 It has access to all (50+) [`smagic` operations](https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html#sec_operations_reference), allowing for
 a compact and readable way to chain basic operations on character strings.
 
@@ -464,7 +464,7 @@ Ex.1: Parsing data.
 ```{r}
 # parsing an input: extracting the numbers
 input = "8.5in, 5.5, .5 cm"
-str_ops(input, "','s, tws, '^\\. => 0.'r, '^\\D+|\\D+$'r, num")
+string_ops(input, "','s, tws, '^\\. => 0.'r, '^\\D+|\\D+$'r, num")
 # Explanation------------------------------------------------------------------|
 # ','s: splitting w.r.t. ','                                                   |
 # tws: trimming the whitespaces                                                |
@@ -473,7 +473,7 @@ str_ops(input, "','s, tws, '^\\. => 0.'r, '^\\D+|\\D+$'r, num")
 # num: converts to numeric                                                     |
 
 # now extracting the units
-str_ops(input, "','s, '^[ \\d.]+'r, tws")
+string_ops(input, "','s, '^[ \\d.]+'r, tws")
 # Explanation------------------------------------------------------------------|
 # ','s: splitting w.r.t. ','                                                   |
 # '^[ \\d.]+'r: removes the ' ', digit and '.' at the beginning of the string  |
@@ -486,7 +486,7 @@ Ex.2: extracing information from text.
 cars = row.names(mtcars)
 
 # let's get the brands starting with an "m"
-str_ops(cars, "'i/^m'get, x, unik")
+string_ops(cars, "'i/^m'get, x, unik")
 # Explanation------------------------------------------------------------------|
 # 'i/^m'get: keeps only the elements starting with an m,                       |
 #            i/ is the 'regex-flag' "ignore" to ignore the case                |
@@ -496,7 +496,7 @@ str_ops(cars, "'i/^m'get, x, unik")
 # unik: applies unique() to the vector                                         |
 
 # let's get the 3 largest numbers appearing in the car models
-str_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
+string_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
 # Explanation------------------------------------------------------------------|
 # '\\d+'x: extracts the first pattern, the pattern meaning "a succession"      |
 #          of digits in regex language                                         |
@@ -510,9 +510,9 @@ str_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
 As you can see, an operation that would take multiple lines to read and understand
 now can be read from left to right in a single line.
 
-# `str_clean`: One function to clean them all {#sec_clean}
+# `string_clean`: One function to clean them all {#sec_clean}
 
-The function `str_clean` streamlines the cleaning of character vectors by providing:
+The function `string_clean` streamlines the cleaning of character vectors by providing:
 
 - i) a specialized syntax to replace multiple regex patterns, 
 - ii) a direct access to many low level string operations, and 
@@ -520,7 +520,7 @@ The function `str_clean` streamlines the cleaning of character vectors by provid
 
 ## Cleaning syntax
 
-This function is of the form `str_clean(x, ...)` with `x` the vector to clean and
+This function is of the form `string_clean(x, ...)` with `x` the vector to clean and
 `...` any number of cleaning operations which can be of two types:
 
 1. use `"pat1, pat2 => replacement"` to replace the regex patterns `pat1` and `pat2` 
@@ -536,8 +536,8 @@ to get `pat1` and `pat2`. A sequence of `base::gsub` calls is performed to repla
 By default the replacement is the empty string. This means that writting `"pat1, pat2"`
 will lead to erasing these two patterns.
 
-If a pattern starts with an `"@"`, the subsequent character string is sent to `str_ops`.
-For example `"@ascii, lower"` is equivalent to `str_ops(x, "ascii, lower")` which 
+If a pattern starts with an `"@"`, the subsequent character string is sent to `string_ops`.
+For example `"@ascii, lower"` is equivalent to `string_ops(x, "ascii, lower")` which 
 turns `x` to ASCII and lowers the case. 
 
 ## Example of text cleaning {#clean_example}
@@ -558,7 +558,7 @@ monologue = c("For who would bear the whips and scorns of time",
               "Than fly to others that we know not of?")
 
 # Cleaning a text
-str_clean(monologue, 
+string_clean(monologue, 
           # use smagic to: lower the case and remove basic stopwords
           "@lower, stopword",
           # remove a few extra stopwords(we use the flag word 'w/')

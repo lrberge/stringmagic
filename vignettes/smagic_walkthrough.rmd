@@ -393,7 +393,7 @@ smagic("{'t/e => here!'r ? x}")
 
 Replaces a pattern with a string. Similar to the operation `r`, except that here the comma is
 a pattern separator. The argument is of the form `"flags/pattern1, pattern2 => replacement"`. 
-See detailed explanations in [`str_clean()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_clean). 
+See detailed explanations in [`string_clean()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_clean). 
 
 ```{r}
 # we use the fixed pattern to remove the regex meaning
@@ -404,7 +404,7 @@ smagic("{'f/[, ]'clean ! x[a]}")
 
 Restricts the string vector to only the values respecting a pattern. This operation has no default.
 Accepts the options `"equal"` and `"in"`.
-By default it uses the same syntax as [`str_get()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
+By default it uses the same syntax as [`string_get()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
 so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
 If the option `"equal"` is used, a simple string equality with the argument is tested (hence
@@ -424,8 +424,8 @@ smagic("Mercedes models: {`models`get.in, C ? x}.")
 ### is
 
 Detects if a pattern is present in a string, returns a logical vector. This operation has no default.
-Mostly useful as the final operation in a [`str_ops()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_ops) call.
-By default it uses the same syntax as [`str_is()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
+Mostly useful as the final operation in a [`string_ops()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_ops) call.
+By default it uses the same syntax as [`string_is()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
 so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
 If the option `"equal"` is used, a simple string equality with the argument is tested (hence
@@ -441,13 +441,13 @@ smagic("Mark? {'i/mark'is, C ? x}")
 
 Returns the index of string containing a specified pattern. With no default, can be applied
 to a logical vector directly. 
-By default it uses the same syntax as [`str_which()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
+By default it uses the same syntax as [`string_which()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
 so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
 If the option `"equal"` is used, a simple string equality with the argument is tested (hence
 no flags are accepted). If the option `"in"` is used, the argument is first split with respect to commas
 and then set inclusion is tested. 
-Mostly useful as the final operation in a [`str_ops()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_ops) call.
+Mostly useful as the final operation in a [`string_ops()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_ops) call.
 ```{r}
 x = c("Mark", "Lucas", "Markus")
 # note that we use the flag `i` to ignore the case and `w` to add word boundaries
@@ -519,7 +519,7 @@ x = c("sort", "me")
 smagic("{sort, c ? x}")
 ```
 If an argument is provided, it must be a regex pattern that will be applied to
-the vector using [`str_clean()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_clean). 
+the vector using [`string_clean()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_clean). 
 The sorting will be applied to the modified version of the vector
 and the original vector will be ordered according to this sorting. 
 ```{r}
@@ -861,7 +861,7 @@ argument `s` is a symbol used to fill the blanks. By default `s` is equal to a w
 
 Option `"right"` right aligns and `"center"` centers the strings.
 
-See help for [`str_fill()`](https://lrberge.github.io/stringmagic/reference/str_fill.html) 
+See help for [`string_fill()`](https://lrberge.github.io/stringmagic/reference/string_fill.html) 
 for more information.
 ```{r}
 life = "full of sound and fury, Signifying nothing"
@@ -1414,7 +1414,7 @@ fun_emph = function(x, ...) paste0("*", x, "*")
 smagic_register(fun_emph, "emph")
 
 # C) use it
-x = str_vec("right, now")
+x = string_vec("right, now")
 smagic("Take heed, {emph, c? x}.")
 ```
 
@@ -1451,7 +1451,7 @@ fun_emph = function(x, argument, options, ...){
 
 smagic_register(fun_emph, "emph", "strong")
 
-x = str_vec("right, now")
+x = string_vec("right, now")
 smagic("Take heed, {'_'emph.s, c? x}.")
 
 # In smagic_register, the valid_option argument is used to validate them.
