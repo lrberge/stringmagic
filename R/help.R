@@ -55,9 +55,9 @@ setup_help_compact = function(){
     "  %, ascii[silent, utf8], bq, ' 'c, ' 'collapse, ', | and 'C, ', | and 'Collapse, ", 
     "  firstchar, lastchar, clean, dsort[num], dtime[silent], each[c], ",
     "  enum[bq, q, Q, or, nor, 1, i, I, a, A, oxford], ", 
-    "  erase, '[[:alnum:]]+'extract[first], fill[right, center], first, ",
+    "  erase, escape[nl, tab], '[[:alnum:]]+'extract[first], fill[right, center], first, ",
     "  format[letter, upper, right, center], get[equal, in], insert[right], is[equal, in], ",
-    "  k[include, dots], K, last, len[letter, upper, format], lower, ",
+    "  join, k[include, dots], K, last, len[letter, upper, format], lower, ",
     "  n[letter, upper, 0, roman, Roman], ",
     "  nth[letter, upper, compact], ntimes[letter, upper], nuke, ",
     "  num[warn, soft, rm, clear], paste[right, front, back], q, Q, ", 
@@ -139,7 +139,7 @@ generate_help_extensive = function(){
   
   smagic_txt = readLines("R/smagic_doc.R")
   
-  i_smagic = string_which(smagic_txt, "^\"smagic\"")
+  i_smagic = string_which(smagic_txt, "^NULL")
   doc = smagic_txt[1:(i_smagic - 1)]
   i_start_doc = max(string_which(doc, "!^#'")) + 1
   

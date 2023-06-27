@@ -197,7 +197,7 @@ smagic_register_fun = function(fun, alias, valid_options = NULL, namespace = NUL
               "\nPROBLEM: the argument{$s, enum.bq, are?arg_pblm} invalid.")
   }
   
-  run = try(fun(x = 1:5))
+  run = try(fun(x = 1:5), silent = TRUE)
   if(isError(run)){
     mc = match.call()
     fun_dp = if(length(mc$fun) == 1) deparse_short(fun) else ""
@@ -240,7 +240,7 @@ smagic_register_ops = function(ops, alias, namespace = NULL){
   check_character(ops, scalar = TRUE, mbt = TRUE)
   check_character(alias, scalar = TRUE, mbt = TRUE)
   
-  run = try(smagic("x{1:5}", .last = ops))
+  run = try(smagic("x{1:5}", .last = ops), silent = TRUE)
   
   if(isError(run)){
     stopi("The argument `ops` must refer to valid `smagic` operations.", 
@@ -306,6 +306,149 @@ save_user_fun = function(fun, alias, namespace){
   user_ops_all[[namespace]] = user_info
 
   options("smagic_user_ops" = user_ops_all)
+}
+
+#' Display messages using interpolated strings
+#' 
+#' Utilities to display messages using `smagic` interpolation and operations to generate the message.
+#' 
+#' @inheritParams smagic
+#' 
+#' @param .end Character scalar, default is `""` (the empty string). This string 
+#' will be collated at the end of the message (a common alternative is `"\n"`).
+#' @param .width Can be 1) a positive integer, 2) a number in (0;1), 3) `FALSE` (default 
+#' for `cat_magic`), or 4) `NULL` (default for `message_magic`). It represents the target 
+#' width of the message on the user console. Newlines will be added *between words* to fit the
+#' target width.
+#' 
+#' 1. positive integer: number of characters
+#' 2. number (0;1): fraction of the screen
+#' 3. `FALSE`: does not add newlines
+#' 4. `NULL`: the min between 120 characters and 90% of the screen width
+#' 
+#' Note that you can use the special variable `.sw` to refer to the screen width. Hence the value
+#' `NULL` is equivalent to using `min(120, 0.9*.sw)`.
+#' @param .leader Character scalar, default is `TRUE`. Only used if argument `.width` is not `FALSE`. 
+#' Whether to add a leading character string right after the extra new lines.
+#' 
+#' @details 
+#' These functions are [base::cat()]/[message()] wrappers aroung [smagic()]. There is one notable difference
+#' with respect to `cat`/`message`. It's the ability to add newlines after words for 
+#' the message to fit a target width. This is controlled with the argument `.width`. This is 
+#' active by default for `message_magic` (default is `.width = NULL` which leads to the 
+#' minimum betwen 120 characters and 90% of the screen width).
+#' 
+#' You can very easily change the default values with the alias generators `cat_magic_alias` and 
+#' `message_magic_alias`.
+#' 
+#' `[Advanced]` A note for package developers who would use these functions **and**
+#' also have created and use custom `smagic` operations created with [smagic_register_fun()] or
+#' [smagic_register_ops()]. To ensure forward compatibility the new operations created 
+#' should be defined in the package namespace (see the ad hoc section in [smagic_register_fun()] help).
+#' To access these operators in their specific namespaces, you must use an alias with 
+#' `cat_magic_alias` or `message_magic_alias` with the argument `.namespace = "myPackageName"`.
+#' 
+#' 
+#' @family tools with aliases
+#' 
+#' @inherit string_clean seealso
+#' 
+#' @examples 
+#' 
+#' start = Sys.time()
+#' Sys.sleep(0.05)
+#' message_magic("This example has run in {dtime ? start}.")
+#' 
+#' cat_magic("Let's write a very long message to illustrate how .width work.", 
+#'           .width = 40)
+#' 
+#' # Let's add a leader
+#' cat_magic("Let's write a very long message to illustrate how `.width` work.", 
+#'           "And now we add `.leader`.", .width = 40, .leader = "#> ")
+#' 
+#' # newlines respect the introductory spaces
+#' cat_magic("Here's a list:", 
+#'           "    + short item", 
+#'           "    + this is a very long item that likely overflows", 
+#'          .width = 30, .sep = "\n")
+#' 
+#' #
+#' # define custom defaults
+#' #
+#' 
+#' # Unhappy about the default values? Create an alias!
+#' 
+#' # Here we change the defaults to mimic the printing of a column
+#' cat_column = cat_magic_alias(.sep = "\n", .end = "\n", .vectorize = TRUE, 
+#'                             .last = "fill.center, ' + 'paste.both")
+#'
+#' cat_column("code smagic", "write the docs", "write the vignettes")
+#' 
+cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "", 
+                         .envir = parent.frame(), 
+                         .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
+                         .collapse = NULL, 
+                         .check = TRUE, .help = NULL, 
+                         .namespace = NULL){
+  
+  set_pblm_hook()
+  txt = smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
+            .delim = .delim, .last = .last, .collapse = .collapse,
+            .check = .check, .help = .help,
+            .namespace = .namespace)
+            
+  check_character(.end, scalar = TRUE)
+  
+  # all this is needed to implement lazy default values with  yet to be evaluated expressions (.sw)
+  is_call = isTRUE(try(is.call(.width), silent = TRUE))
+  .width = if(is_call) .width else substitute(.width)
+  .width = check_set_width(.width)
+  if(is.finite(.width)){
+    txt = fit_screen(txt, .width, leader = .leader)
+  }
+  
+  if(length(txt) > 1){
+    txt = paste0(txt, collapse = .sep)
+  }
+  
+  if(nchar(.end) > 0){
+    txt = paste0(txt, .end)
+  }
+
+  cat(txt)
+}
+
+#' @describeIn cat_magic Display messages using interpolated strings
+message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "", 
+                         .envir = parent.frame(), 
+                         .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
+                         .collapse = NULL, 
+                         .check = TRUE, .help = NULL, 
+                         .namespace = NULL){
+  
+  set_pblm_hook()
+  txt = smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
+            .delim = .delim, .last = .last, .collapse = .collapse,
+            .check = .check, .help = .help,
+            .namespace = .namespace)
+
+
+  check_character(.end, scalar = TRUE)
+  
+  .width = check_set_width(substitute(.width))
+  if(is.finite(.width)){
+    txt = fit_screen(txt, .width, leader = .leader)
+  }
+  
+  if(length(txt) > 1){
+    txt = paste0(txt, collapse = .sep)
+  }
+  
+  if(nchar(.end) > 0){
+    txt = paste0(txt, .end)
+  }
+
+  message(txt, appendLF = FALSE)
 }
 
 ####
@@ -527,8 +670,21 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
                                     .data = .data, .check = .check,
                                     .user_funs = .user_funs, .valid_operators = .valid_operators)
       }
+      
+      res = unlist(res)
+      
+      if(!is.null(.last)){
+        if(is.function(.last)){
+          res = .last(res)
+        } else {
+          res = apply_simple_operations(res, ".last", .last, .check, .envir, .data,
+                                        group_flag = 1 * grepl("~", .last, fixed = TRUE), 
+                                        .delim, .user_funs = .user_funs, 
+                                        .valid_operators = .valid_operators)
+        }
+      }
 
-      return(unlist(res))
+      return(res)
     }
   }
 

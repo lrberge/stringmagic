@@ -11,6 +11,9 @@ export(smagic, .smagic)
 export(smagic_register_fun, smagic_register_ops)
 export(smagic_alias)
 
+export(cat_magic)
+export(message_magic)
+
 # Methods
 S3method(print, smagic)
 

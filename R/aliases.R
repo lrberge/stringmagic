@@ -78,6 +78,115 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
   res
 }
 
+
+#' @describeIn cat_magic Create an alias of `cat_magic` with custom defaults
+cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "", 
+                           .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
+                           .collapse = NULL, .check = TRUE, .namespace = NULL){
+  
+  # checks
+  check_character(.sep, scalar = TRUE)
+  check_character(.end, scalar = TRUE)
+  check_character(.leader, scalar = TRUE)
+  check_logical(.vectorize, scalar = TRUE)
+  .delim = check_set_delimiters(.delim)
+  check_character(.last, scalar = TRUE, null = TRUE)
+  check_character(.collapse, scalar = TRUE, null = TRUE)
+  check_logical(.check, scalar = TRUE)
+  check_character(.namespace, scalar = TRUE, null = TRUE)
+  
+  # width is special
+  is_call = isTRUE(try(is.call(.width), silent = TRUE))
+  if(!is_call){
+    .width = substitute(.width)
+    if(!".sw" %in% all.vars(.width)){
+      .width = eval(.width, parent.frame())
+    }
+  }
+  
+  sep = .sep
+  end = .end
+  leader = .leader
+  vectorize = .vectorize
+  last = .last
+  collapse = .collapse
+  check = .check
+  namespace = .namespace
+  width = .width
+  delim = .delim
+  
+  res = function(..., .sep = sep, .end = end, .width = width, .leader = leader, 
+                  .envir = parent.frame(), 
+                  .vectorize = vectorize, .delim = delim, .last = last, 
+                  .collapse = collapse, 
+                  .check = check, .help = NULL, 
+                  .namespace = namespace){
+    cat_magic(..., .sep = .sep, .end = .end, .width = .width, .leader = .leader, 
+                  .envir = .envir, 
+                  .vectorize = .vectorize, .delim = .delim, .last = .last, 
+                  .collapse = .collapse, 
+                  .check = .check, .help = .help, 
+                  .namespace = .namespace)
+  }
+  
+  res
+}
+
+#' @describeIn cat_magic Create an alias of `message_magic` with custom defaults
+message_magic_alias = function(.sep = "", .end = "\n", .width = FALSE, .leader = "", 
+                           .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
+                           .collapse = NULL, .check = TRUE, .namespace = NULL){
+  
+  # checks
+  check_character(.sep, scalar = TRUE)
+  check_character(.end, scalar = TRUE)
+  check_character(.leader, scalar = TRUE)
+  check_logical(.vectorize, scalar = TRUE)
+  .delim = check_set_delimiters(.delim)
+  check_character(.last, scalar = TRUE, null = TRUE)
+  check_character(.collapse, scalar = TRUE, null = TRUE)
+  check_logical(.check, scalar = TRUE)
+  check_character(.namespace, scalar = TRUE, null = TRUE)
+  
+  # width is special
+  is_call = isTRUE(try(is.call(.width), silent = TRUE))
+  if(!is_call){
+    .width = substitute(.width)
+    if(!".sw" %in% all.vars(.width)){
+      .width = eval(.width, parent.frame())
+    }
+  }
+  
+  # forcing the eval
+  sep = .sep
+  end = .end
+  leader = .leader
+  vectorize = .vectorize
+  last = .last
+  collapse = .collapse
+  check = .check
+  namespace = .namespace
+  width = .width
+  delim = .delim
+  
+  res = function(..., .sep = sep, .end = end, .width = width, .leader = leader, 
+                  .envir = parent.frame(), 
+                  .vectorize = vectorize, .delim = delim, .last = last, 
+                  .collapse = collapse, 
+                  .check = check, .help = NULL, 
+                  .namespace = namespace){
+
+    message_magic(..., .sep = .sep, .end = .end, .width = .width, .leader = .leader, 
+                  .envir = .envir, 
+                  .vectorize = .vectorize, .delim = .delim, .last = .last, 
+                  .collapse = .collapse, 
+                  .check = .check, .help = .help, 
+                  .namespace = .namespace)
+  }
+  
+  res
+}
+
 #' @describeIn string_ops `string_ops` alias with custom defaults
 string_ops_alias = function(pre_unik = NULL, namespace = NULL){
   #
@@ -86,10 +195,10 @@ string_ops_alias = function(pre_unik = NULL, namespace = NULL){
   check_character(namespace, scalar = TRUE, null = TRUE)  
   
   # forcing evaluations
-  force(pre_unik)
-  force(namespace)
+  .pre_unik = pre_unik
+  .namespace = namespace
   
-  res = function(x, op, pre_unik = pre_unik, namespace = namespace){                  
+  res = function(x, op, pre_unik = .pre_unik, namespace = .namespace){                  
     string_ops(x, op, pre_unik = pre_unik, namespace = namespace)
   }
   
@@ -113,20 +222,21 @@ string_clean_alias = function(replacement = "", pipe = " => ", split = ",[ \n\t]
   check_character(namespace, scalar = TRUE, null = TRUE)
   
   # forcing the evaluations
-  force(replacement)
-  force(pipe)
-  force(split)
-  force(ignore.case)
-  force(fixed)
-  force(word)
-  force(total)
-  force(single)
-  force(namespace)
+  .replacement = replacement
+  .pipe = pipe
+  .split = split
+  .ignore.case = ignore.case
+  .fixed = fixed
+  .word = word
+  .total = total
+  .single = single
+  .namespace = namespace
   
-  res = function(x, ..., replacement = replacement, pipe = pipe, split = split, 
-                     ignore.case = ignore.case, fixed = fixed, word = word, 
-                     total = total, single = single, envir = parent.frame(), 
-                     namespace = namespace){                  
+  res = function(x, ..., replacement = .replacement, pipe = .pipe, split = .split, 
+                     ignore.case = .ignore.case, fixed = .fixed, word = .word, 
+                     total = .total, single = .single, envir = parent.frame(), 
+                     namespace = .namespace){                  
+
     string_clean(x, ..., replacement = replacement, pipe = pipe, split = split, 
                      ignore.case = ignore.case, fixed = fixed, word = word, 
                      total = total, single = single, envir = envir, 
@@ -149,15 +259,16 @@ string_vec_alias = function(.delim = c("{", "}"), .split = TRUE,
   check_character(.namespace, scalar = TRUE, null = TRUE)
   
   # forcing evaluation
-  force(.sep)
-  force(.collapse)
-  force(.split)
-  force(.protect.vars)
-  force(.namespace)
+  sep = .sep
+  collapse = .collapse
+  split = .split
+  protect.vars = .protect.vars
+  namespace = .namespace
   
-  res = function(..., .delim = .delim, .envir = parent.frame(), 
-                   .split = .split, .protect.vars = .protect.vars, .sep = .sep, 
-                   .collapse = .collapse, .namespace = .namespace){
+  res = function(..., .delim = delim, .envir = parent.frame(), 
+                   .split = split, .protect.vars = protect.vars, .sep = sep, 
+                   .collapse = collapse, .namespace = namespace){
+
     string_vec(..., .delim = .delim, .envir = .envir, 
                    .split = .split, .protect.vars = .protect.vars, .sep = .sep, 
                    .collapse = .collapse, .namespace = .namespace)

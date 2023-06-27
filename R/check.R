@@ -459,6 +459,22 @@ check_set_delimiters = function(.delim){
   .delim
 }
 
+check_set_width = function(width_expr){
+  sw = getOption("width") 
+  data = list(.sw = sw)
+  width = eval(width_expr, data, parent.frame(2))
+  
+  if(isFALSE(width)){
+    width = Inf
+  }
+  
+  if(is.null(width)){
+    width = min(120, 0.9 * sw)
+  }
+  
+  width
+}
+
 check_delimiters = function(.delim){
   
   if(!length(.delim) == 2){
@@ -574,9 +590,9 @@ check_set_smagic_parsing = function(x, check, .delim){
       help_suggest = .sma("\nFor more information on the syntax, type `smagic(.help = TRUE)` and go to the section ",
                           "{!Operations: General syntax}")
       
-      x_call_clean = gsub("Error in str2[^:]+: ?", "Error when parsing: ", x_call)
+      x_call_clean = gsub("Error in parse[^:]+: ?", "Error when parsing: ", x_call)
       
-      msg = .sma("PROBLEM: The expression .[bq?x] could not be parsed, see error below:",
+      msg = .sma("PROBLEM: The expression {open}bq?x{close} could not be parsed, see error below:",
                  "\n{x_call_clean}",
                  "\nINFO: Interpolations can be of the form `{open}expr{close}`, ",
                  "`{open}op1, op2?expr{close}`, or", 
@@ -884,7 +900,7 @@ suggest_item = function(x, items, write_msg = TRUE, newline = TRUE, info = "vari
         score = score[s_order]
         items = items[s_order]
         
-        res = items[score > (nx * 3 / 4)]
+        res = items[score > (nx * 0.65)]
       }
     }
   }  
@@ -1127,14 +1143,7 @@ fit_screen = function(msg, width = NULL, leading_ws = TRUE, leader = ""){
   # Note that \t are NOT handled
   
   # eval
-  sw = getOption("width") 
-  width_expr = substitute(width)
-  data = list(.sw = sw)
-  width = eval(width_expr, data, parent.frame())
-  
-  if(is.null(width)){
-    width = min(120, 0.9 * sw)
-  }
+  width = check_set_width(substitute(width))
 
   N_LEAD = nchar(leader)
 
