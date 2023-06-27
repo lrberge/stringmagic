@@ -167,6 +167,8 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL){
 #' Example: if `word = TRUE`, then pattern = "The, mountain" will select strings containing either the word
 #' 'The' or the word 'mountain'.
 #' @param ignore.case Logical scalar, default is `FALSE`. If `TRUE`, then case insensitive search is triggered. 
+#' @param last A function or `NULL` (default). If a function, it will be applied to the vector 
+#' just before returning it.
 #' 
 #' @details
 #' The internal function used to find the patterns is [base::grepl()] with `perl = TRUE`.
@@ -270,7 +272,7 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL){
 #'
 #'
 string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
-                  or = FALSE, pattern = NULL, envir = parent.frame()){
+                  or = FALSE, pattern = NULL, envir = parent.frame(), last = NULL){
 
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
   if(length(x) == 0){
@@ -282,6 +284,7 @@ string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   check_logical(word, scalar = TRUE)
   check_logical(or, scalar = TRUE)
   check_character(pattern, null = TRUE, no_na = TRUE)
+  check_function(last, null = TRUE)
 
   if(missnull(pattern)){
     dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
@@ -369,8 +372,44 @@ string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
       res = logical_op(res, res_current, or)
     }
   }
+  
+  if(!is.null(last)){
+    res = last(res)
+  }
 
   res
+}
+
+#' @describeIn string_is Detects if at least one element of a vector matches a regex pattern
+string_any = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
+                     or = FALSE, pattern = NULL, envir = parent.frame()){
+
+  check_character(pattern, null = TRUE, no_na = TRUE)
+
+  if(missnull(pattern)){
+    dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
+    warn_no_named_dots(dots)
+    pattern = unlist(dots)
+  }
+
+  any(string_is(x, fixed = fixed, ignore.case = ignore.case, word = word, 
+               or = or, pattern = pattern, envir = envir))
+}
+
+#' @describeIn string_is Detects if all elements of a vector match a regex pattern
+string_all = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
+                     or = FALSE, pattern = NULL, envir = parent.frame()){
+
+  check_character(pattern, null = TRUE, no_na = TRUE)
+
+  if(missnull(pattern)){
+    dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
+    warn_no_named_dots(dots)
+    pattern = unlist(dots)
+  }
+
+  all(string_is(x, fixed = fixed, ignore.case = ignore.case, word = word, 
+               or = or, pattern = pattern, envir = envir))
 }
 
 #' @describeIn string_is Returns the indexes of the values in which a pattern is detected
@@ -881,7 +920,7 @@ string_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
 #' @param ... Character scalars representing patterns. A pattern is of the form
 #' "flags/pat1, pat2 => replacement". This means that patterns 'pat1' and 'pat2' will be replaced
 #' with the string 'replacement'. By default patterns are comma separated and the replacement comes 
-#' after a ' => ' (see args `sep` and `pipe` to change this). By default the replacement is the empty string 
+#' after a ' => ' (see args `split` and `pipe` to change this). By default the replacement is the empty string 
 #' (so "pat1, pat2" *removes* the patterns).
 #' 
 #' Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), 

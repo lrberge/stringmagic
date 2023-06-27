@@ -1264,9 +1264,9 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         pipe = " => "
       }
       
-      sep = if(op == "clean") ",[ \t\n]+" else ""
+      split = if(op == "clean") ",[ \t\n]+" else ""
       
-      res = string_clean(x, argument, pipe = pipe, sep = sep, 
+      res = string_clean(x, argument, pipe = pipe, split = split, 
                       ignore.case = is_ignore, fixed = is_fixed, word = is_word, 
                       total = is_total, single = is_single, envir = .envir)
 

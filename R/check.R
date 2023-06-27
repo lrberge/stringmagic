@@ -241,6 +241,19 @@ check_envir = function(x){
 
 }
 
+check_function = function(x, null = FALSE){
+  
+  if(null && is.null(x)){
+    return(NULL)
+  }
+  
+  if(!is.function(x)){
+    x_dp = deparse_short(substitute(x))
+    stop_up("The argument `", x_dp, "` must be a function. ",
+            "PROBLEM: it is not a function, it is of class {enum?class(x)}.")
+  }
+}
+
 
 check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
                           no_na = FALSE, scalar = FALSE, nofun = FALSE){
