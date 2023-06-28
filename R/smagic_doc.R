@@ -421,10 +421,12 @@
 #' "The main characters are Marv and Nancy.".
 #'   Ex.2: `x = c("orange", "milk", "rice"); smagic("Shopping list: {enum.i.q ? x}.")` leads to
 #'  "Shopping list: i) 'orange', ii) 'milk', and iii) 'rice'."
-#' + len: gives the length of the vector. Options "letter", "upper", "format".
+#' + len: gives the length of the vector. Options "letter", "upper", "num".
 #' Option "letter" writes the length in words (up to 100). Option "upper" is the same 
-#' as letter but uppercases the first letter. Option "format" add comma separation for thousands.
-#' Example: `smagic("Size = {len.format ? 1:5000}")` leads to "Size = 5,000".
+#' as letter but uppercases the first letter. 
+#' By default, commas are added to separate thousands. Use uption "num" to preserve
+#' a regular numeric format.
+#' Example: `smagic("Size = {len ? 1:5000}")` leads to "Size = 5,000".
 #' + width: formats the string to fit a given width by cutting at word boundaries. 
 #' Accepts arguments of the form `'n'` or `'n|s'`, with `n` a number and `s` a string. 
 #' An argument of the form `'n|s'` will add `s` at the beginning of each line. Further,

@@ -14,7 +14,8 @@
 ####
 
 
-check_logical = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FALSE, mbt = FALSE){
+check_logical = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FALSE, mbt = FALSE, up = 0){
+  set_up(up + 1)
 
   if(missing(x)){
     if(mbt){
@@ -62,8 +63,10 @@ check_logical = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
 
 }
 
-check_numeric = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FALSE, mbt = FALSE, integer = FALSE){
-
+check_numeric = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FALSE, 
+                         mbt = FALSE, integer = FALSE, complex = FALSE, up = 0){
+  set_up(up + 1)
+  
   if(missing(x)){
     if(mbt){
       x_dp = deparse_short(substitute(x))
@@ -77,11 +80,12 @@ check_numeric = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
     return()
   }
 
-  if(!is.numeric(x)){
+  if((!complex && !is.numeric(x)) || (complex && !is_num_complex(x))){
     x_dp = deparse_short(substitute(x))
     nullable = if(null) "(nullable) " else ""
     vector_type = if(scalar) "scalar" else "vector"
     type = if(integer) "an integer" else "a numeric"
+    if(complex) paste0(type, ", or complex,")
     
     stop_up("The ", nullable, "argument `", x_dp, "` must be ", type, " ", vector_type, ".",
             " PROBLEM: it is not {'^.+ 'r ? type} it is of class {enum?class(x)}.")
@@ -115,12 +119,32 @@ check_numeric = function(x, null = FALSE, scalar = FALSE, l0 = FALSE, no_na = FA
   }
   
   if(integer){
-    if(any(x != round(x))){
-      x_dp = deparse_short(substitute(x))
-      i = which(x != round(x))[1]
-      stop_up("The argument {bq?x_dp} must be an integer {&scalar ; scalar ; vector}.",
-              "\nPROBLEM: {&length(x)==1 ; it is equal to {x} ; the {nth ? i} value is equal to {x[i]}}, not an integer.")
-    }
+    if(complex){
+      for(part in 1:2){
+        z = if(part == 1) Re(x) else Im(x)
+        if(any(z != round(z))){
+          x_dp = deparse_short(substitute(x))
+          i = which(z != round(z))[1]
+          intro = ""
+          if(part == 1 && all(Im(x) == 0)){
+            msg = .sma("is equal to {z}")
+          } else {
+            msg = .sma("has {&i==1;a real;an imaginary} part equal to {z}")
+          }
+          stop_up("The argument {bq?x_dp} must be an integer {&scalar ; scalar ; vector}.",
+                  "\nPROBLEM: {&len(x)==1 ; it ; the {nth ? i} value} ",
+                  "{msg}, not an integer.")
+        }
+      }
+    } else {
+      if(any(x != round(x))){
+        x_dp = deparse_short(substitute(x))
+        i = which(x != round(x))[1]
+        stop_up("The argument {bq?x_dp} must be an integer {&scalar ; scalar ; vector}.",
+                "\nPROBLEM: {&length(x)==1 ; it is equal to {x} ; the {nth ? i} ",
+                "value is equal to {x[i]}}, not an integer.")
+      }
+    }    
   }
 
 }
@@ -475,12 +499,85 @@ check_set_width = function(width_expr){
   width
 }
 
+check_set_split = function(split){
+  if(missing(split)){
+    if(isTRUE(split)){
+      split = ","
+    }
+    return(split)
+  }
+  
+  if(is.logical(split)){
+    check_logical(split, scalar = TRUE, up = 1)
+    if(split){
+      split = ","
+    }
+  } else if(is.character(split)){
+    check_character(split, scalar = TRUE, up = 1)
+    if(nchar(split) != 1){
+      stop_hook("The argument `.split` must be a logical scalar or a single character symbol.",
+              "\nPROBLEM: it is currently a character scalar ({10 Short, Q ? split}) but ",
+              "contains {nchar(split)} characters.")
+    }
+  } else {
+    stop_hook("The argument `.split` must be a logical scalar or a single character symbol.",
+              "\nPROBLEM: instead it is of class {enum.bq ? class(split)}.")
+  }
+  
+  split
+}
+
+is_num_complex = function(x){
+  is.numeric(x) || is.complex(x)
+}
+
+check_set_mat = function(cmat, nmat){
+  res = TRUE
+  
+  if(is.logical(cmat)){
+    check_logical(cmat, scalar = TRUE)
+    if(cmat){
+      attr(res, "auto") = TRUE
+      return(res)
+    }    
+  } else if(is_num_complex(cmat)){
+    check_numeric(cmat, scalar = TRUE, complex = TRUE)
+    attr(res, "row_col") = c(Re(cmat), Im(cmat))
+    return(res)
+  } else {
+    stop_hook("The argument `.cmat` must be a logical scalar, an integer (giving the ",
+              "nber of rows) or an imaginary (ex: `3i`, giving the number of columns).",
+              "\nPROBLEM: instead it is of class {enum.bq ? class(split)}.")
+  }
+  
+  if(is.logical(nmat)){
+    check_logical(nmat, scalar = TRUE)
+    if(nmat){
+      attr(res, "auto") = TRUE
+      attr(res, "num") = TRUE
+      return(res)
+    }    
+  } else if(is_num_complex(nmat)){
+    check_numeric(nmat, scalar = TRUE, complex = TRUE)
+    attr(res, "num") = TRUE
+    attr(res, "row_col") = c(Re(nmat), Im(nmat))
+    return(res)
+  } else {
+    stop_hook("The argument `.cmat` must be a logical scalar, an integer (giving the ",
+              "nber of rows) or an imaginary (ex: `3i`, giving the number of columns).",
+              "\nPROBLEM: instead it is of class {enum.bq ? class(split)}.")
+  }
+  
+  res = FALSE
+  res
+}
+
 check_delimiters = function(.delim){
   
   if(!length(.delim) == 2){
     stop_hook("The argument .`delim` must lead to a character vector of length 2",
               " (after splitting the space if relevant).",
-              "\nPROBLEM: it is of length {len.f?.delim}.")
+              "\nPROBLEM: it is of length {len?.delim}.")
   }
   
   if(any(nchar(.delim) == 0)){

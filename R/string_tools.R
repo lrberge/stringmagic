@@ -992,10 +992,16 @@ string_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
 #' @family tools with aliases
 #' 
 #' @seealso 
-#' A few basic operation: [string_is()], [string_get()], [string_clean()]. Chain basic operations with [string_ops()]. 
+#' String operations: [string_is()], [string_get()], [string_clean()], [string_split2df()]. 
+#' Chain basic operations with [string_ops()]. Clean character vectors efficiently
+#' with [string_clean()].
+#' 
 #' Use [string_vec()] to create simple string vectors.
+#' 
 #' String interpolation combined with operation chaining: [smagic()]. You can change `smagic`
 #' default values with [smagic_alias()] and add custom operations with [smagic_register_fun()].
+#' 
+#' Display messages while benefiting from `smagic` interpolation with [cat_magic()] and [message_magic()].
 #'
 #' @examples
 #'
@@ -1257,9 +1263,13 @@ string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\
 #' length 5 ("x1" to "x5"), while `z = "x{1:5}"` followed by `string_vec(z)` leads 
 #' to a vector of length 1: `"x{1:5}"`. If `FALSE`, comma-splitting and interpolation
 #' is performed on all variables. 
-#' @param .split Logical, default is `TRUE`. Whether to split the vector with 
-#' respect to commas. Ex: by default `string_vec("hi, there")` leads to the 
-#' vector `c("hi", "there")`.
+#' @param .split Logical or a character symbol, default is `TRUE`. If `TRUE`, 
+#' the character vectors are split with respect to commas (default). If `FALSE`, no 
+#' splitting is performed. If a character symbol, the string vector will be split
+#' according to this symbol. Note that any space after the symbol (including tabs and 
+#' newlines) is discarded.
+#' 
+#' Ex: by default `string_vec("hi, there")` leads to the vector `c("hi", "there")`.
 #' @param .sep Character scalar or `NULL` (default). If not `NULL`, the function
 #' [base::paste()] is applied to the resulting vector with `sep = .sep`.
 #' @param .collapse Character scalar or `NULL` (default). If not `NULL`, the function
@@ -1269,14 +1279,30 @@ string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\
 #' It is useful **only** if your package uses 'custom' `smagic` operations, set with 
 #' [smagic_register_fun()] or [smagic_register_ops()].
 #' 
-#' If so pass the name of your package in this argument so that your function can access 
+#' If so, pass the name of your package in this argument so that your function can access 
 #' the new `smagic` operations defined within your package.
+#' @param .cmat Logical scalar (default is `FALSE`), integer or complex with integer values.
+#' If `TRUE`, we try to coerce the result into a **character** matrix. The number of rows and columns
+#' is deduced from the look of the arguments. An integer indicates the number of rows.
+#' If a complex, the imaginary part represents the number of columns. Ex: `5i` means 
+#' 5 columns, `3 + 2i` means 3 rows and 2 columns.
+#' 
+#' The matrix is always filled by row.
+#' @param .nmat Logical scalar (default is `FALSE`), integer or complex with integer values.
+#' If `TRUE`, we try to coerce the result into a **numeric** matrix. The number of rows and columns
+#' is deduced from the look of the arguments. An integer indicates the number of rows.
+#' If a complex, the imaginary part represents the number of columns. Ex: `5i` means 
+#' 5 columns, `3 + 2i` means 3 rows and 2 columns.
+#' 
+#' The matrix is always filled by row. Non numbers are silently turned to NA.
 #' 
 #' @details 
 #' The default of the argument `.protect.vars` is `FALSE` so as to avoid unwanted 
 #' comma-splitting and interpolations. The main use case of this function is
 #' the creation of small string vectors, which can be written directly at
 #' function call. 
+#' 
+#' Customize the default of this function with [string_vec_alias()].
 #' 
 #' @author 
 #' Laurent Berge
@@ -1303,12 +1329,24 @@ string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\
 #' # changing the delimiters for interpolation
 #' pkg = "\\usepackage[usenames,dvipsnames]{xcolor}"
 #' string_vec("\\usepackage{.[S!graphicx, fourier, standalone]}", 
-#'         pkg, .delim = ".[ ]")
+#'            pkg, .delim = ".[ ]")
 #' 
+#' #
+#' # Customization
+#' #
 #' 
+#' # Unhappy about the defaults? Create an alias!
 #' 
-string_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
+#' # we create a "matrix generator"
+#' matgen = string_vec_alias(.nmat = TRUE, .last = "'\n'split")
+#' 
+#' matgen("5, 4, 3
+#'         8, 6, 2")
+#' 
+string_vec = function(..., .cmat = FALSE, .nmat = FALSE, 
+                   .delim = c("{", "}"), .envir = parent.frame(), 
                    .split = TRUE, .protect.vars = TRUE, .sep = NULL, 
+                   .last = NULL,
                    .collapse = NULL, .namespace = NULL){
   
   # checks
@@ -1316,7 +1354,10 @@ string_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(),
   .delim = check_set_delimiters(.delim)
   check_character(.sep, scalar = TRUE, null = TRUE)
   check_character(.collapse, scalar = TRUE, null = TRUE)
-  check_logical(.split, scalar = TRUE)
+  check_character(.last, scalar = TRUE, null = TRUE)
+  .split = check_set_split(.split)
+  do_mat = check_set_mat(.cmat, .nmat)
+  
   check_logical(.protect.vars, scalar = TRUE)
   
   check_envir(.envir)
@@ -1369,10 +1410,10 @@ string_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(),
     }
     if(length(di) == 1 && is_to_split[i]){
       
-      if(.split){
-        di_expanded = cpp_parse_slash(di, .delim)
-      } else {
+      if(isFALSE(.split)){
         di_expanded = di
+      } else {
+        di_expanded = cpp_magic_split(di, .split, .delim)
       }      
       
       is_open = grepl(BOX_OPEN, di_expanded, fixed = TRUE)
@@ -1402,12 +1443,79 @@ string_vec = function(..., .delim = c("{", "}"), .envir = parent.frame(),
   }
   
   if(!is.null(.sep) || !is.null(.collapse)){
+    if(do_mat){
+      stopi("The arguments `.sep` or `.collapse` are incompatible with the arguments ",
+            "`.cmat` or `.nmat`. Please remove some of these arguments.")
+    }
     res_list$.sep = .sep
     res_list$.collapse = .collapse
     res = do.call(base::paste, res_list)
   } else {
     res = do.call(base::c, res_list)
   }
+  
+  if(!is.null(.last)){
+    res = string_ops(res, .last)
+  }
+  
+  #
+  # matrix formatting
+  #
+  
+  if(do_mat){
+    is_auto = isTRUE(attr(do_mat, "auto"))
+    is_num = isTRUE(attr(do_mat, "num"))
+    n_out = length(res)
+    if(is_auto){
+      done = TRUE
+      if(n == 1){
+        d = dots[[1]]
+        nrows = sum(grepl("\n", d)) + 1
+      } else {
+        nrows = n
+      }
+      
+      if((n_out / nrows) %% 1 != 0){
+        done = FALSE
+      }
+      
+      if(!done){
+        nrows = floor(sqrt(n_out))
+        while(nrows >= 1 && (n_out / nrows) %% 1 != 0){
+          nrows = nrows - 1
+        }
+      }
+      
+      ncols = n_out / nrows
+    } else {
+      row_cols = attr(do_mat, "row_col")
+      nrows = row_cols[1]
+      ncols = row_cols[2]
+      if(nrows == 0){
+        nrows = n_out / ncols
+        if(round(nrows) != nrows){
+          stopi("The number of columns in argument `{&is_num;nmat;cmat}` ", 
+                "({ncols}) is not a divisor ",
+                "of the final number of elements: {n?n_out}.")
+        }
+      } 
+      
+      if(ncols == 0){
+        ncols = n_out / nrows
+        if(round(ncols) != ncols){
+          stopi("The number of rows in argument `{&is_num;nmat;cmat}` ", 
+                "({nrows}) is not a divisor ",
+                "of the final number of elements: {n?n_out}.")
+        }
+      }
+    }
+    
+    if(is_num){
+      res = suppressWarnings(as.numeric(res))
+    }
+    
+    res = matrix(res, nrows, ncols, byrow = TRUE)
+  }  
     
   res  
 }
@@ -1598,7 +1706,7 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
         stop_hook("CONTEXT: concerns the pattern {bq?pattern}",
                   "{&len(info_pattern)>1;\n         when evaluating {bq?p}}",
                   "The `magic` flag expands the pattern with `smagic`. It must return a vector of length 1.",
-                  "\nPROBLEM: the vector returned is of length {len.f?p_new}.")
+                  "\nPROBLEM: the vector returned is of length {len?p_new}.")
       }
       
       info_pattern$patterns = p_new

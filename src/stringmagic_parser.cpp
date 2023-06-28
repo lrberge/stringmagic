@@ -1502,10 +1502,19 @@ SEXP cpp_parse_simple_operations(SEXP Rstr, SEXP Rdelimiters){
 }
 
 // [[Rcpp::export]]
-SEXP cpp_parse_slash(SEXP Rstr, SEXP Rdelimiters){
+SEXP cpp_magic_split(SEXP Rstr, SEXP Rsymbol, SEXP Rdelimiters){
 
   const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
-  int n = std::strlen(str);
+  int n = std::strlen(str); 
+  
+  const char *symbol_full = Rf_translateCharUTF8(STRING_ELT(Rsymbol, 0));
+  int n_symbol = std::strlen(symbol_full);
+  
+  if(n_symbol != 1){
+    stop("Internal error: the symbol for splitting the string must be of length 1.");
+  }
+  
+  char symbol = symbol_full[0];
 
   delim delims(Rdelimiters);
   
@@ -1515,11 +1524,11 @@ SEXP cpp_parse_slash(SEXP Rstr, SEXP Rdelimiters){
   int i = 0;
   while(i < n){
     
-    while(i < n && str[i] != ',' && !delims.is_open(str, i, n, true)){
+    while(i < n && !is_non_escaped_symbol(symbol, str, i, n, true) && !delims.is_open(str, i, n, true)){
       string_tmp += str[i++];
     }
     
-    if(i == n || str[i] == ','){
+    if(i == n || str[i] == symbol){
       // we're done
       res.push_back(string_tmp);
       string_tmp = "";

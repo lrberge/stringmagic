@@ -57,8 +57,8 @@ cpp_parse_simple_operations <- function(Rstr, Rdelimiters) {
     .Call(`_stringmagic_cpp_parse_simple_operations`, Rstr, Rdelimiters)
 }
 
-cpp_parse_slash <- function(Rstr, Rdelimiters) {
-    .Call(`_stringmagic_cpp_parse_slash`, Rstr, Rdelimiters)
+cpp_magic_split <- function(Rstr, Rsymbol, Rdelimiters) {
+    .Call(`_stringmagic_cpp_magic_split`, Rstr, Rsymbol, Rdelimiters)
 }
 
 cpp_find_closing_problem <- function(Rstr, Rdelimiters) {

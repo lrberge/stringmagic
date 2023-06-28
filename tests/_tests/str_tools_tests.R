@@ -248,3 +248,32 @@ test(txt, c("x1", "x2", "xx", "y1", "y2", "y3"))
 
 txt = string_vec(x, "y{{1:3}}", .delim = "{{ }}", .protect.vars = FALSE, .split = FALSE)
 test(txt, c("x1, xx", "x2, xx", "y1", "y2", "y3"))
+
+# split
+txt = string_vec("x1,x2\\,x3,   x4")
+test(txt, c("x1", "x2,x3", "x4"))
+
+txt = string_vec("x1;x2\\;x3;   x4", .split = ";")
+test(txt, c("x1", "x2;x3", "x4"))
+
+# matrix
+mat = string_vec("1, 2, 3",
+                 "4, 9, 9", 
+                 "1, 2, 3", 
+                 "7, 7, 9", .nmat = TRUE)
+test(mat, structure(c(1, 4, 1, 7, 2, 9, 2, 7, 3, 9, 3, 9), dim = 4:3))
+
+mat = string_vec("1, 2, 3, \n 4, 9, 9, \n 1, 2, 3", .nmat = TRUE)
+test(mat, structure(c(1, 4, 1, 2, 9, 2, 3, 9, 3), dim = c(3L, 3L)))
+
+mat = string_vec("1, 2, 3, 4, 9, 9, 1, 2, 3", .nmat = 3)
+test(mat, structure(c(1, 4, 1, 2, 9, 2, 3, 9, 3), dim = c(3L, 3L)))
+
+mat = string_vec("1, 2, 3, 4, 9, 9, 1, 2", .nmat = 2i)
+test(mat, structure(c(1, 3, 9, 1, 2, 4, 9, 2), dim = c(4L, 2L)))
+
+mat = string_vec("1, 2, 3 \n 4, 9, 9 \n 1, 2, 3", .nmat = TRUE, .last = "'\n'S")
+test(mat, structure(c(1, 4, 1, 2, 9, 2, 3, 9, 3), dim = c(3L, 3L)))
+
+mat = string_vec("1, 2, 3", .nmat = 2 + 3i, .last = "'\n'S")
+test(mat, structure(c(1, 1, 2, 2, 3, 3), dim = 2:3))

@@ -178,15 +178,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_parse_slash
-SEXP cpp_parse_slash(SEXP Rstr, SEXP Rdelimiters);
-RcppExport SEXP _stringmagic_cpp_parse_slash(SEXP RstrSEXP, SEXP RdelimitersSEXP) {
+// cpp_magic_split
+SEXP cpp_magic_split(SEXP Rstr, SEXP Rsymbol, SEXP Rdelimiters);
+RcppExport SEXP _stringmagic_cpp_magic_split(SEXP RstrSEXP, SEXP RsymbolSEXP, SEXP RdelimitersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type Rsymbol(RsymbolSEXP);
     Rcpp::traits::input_parameter< SEXP >::type Rdelimiters(RdelimitersSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_parse_slash(Rstr, Rdelimiters));
+    rcpp_result_gen = Rcpp::wrap(cpp_magic_split(Rstr, Rsymbol, Rdelimiters));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -252,7 +253,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagic_cpp_parse_operator", (DL_FUNC) &_stringmagic_cpp_parse_operator, 1},
     {"_stringmagic_cpp_extract_pipe", (DL_FUNC) &_stringmagic_cpp_extract_pipe, 2},
     {"_stringmagic_cpp_parse_simple_operations", (DL_FUNC) &_stringmagic_cpp_parse_simple_operations, 2},
-    {"_stringmagic_cpp_parse_slash", (DL_FUNC) &_stringmagic_cpp_parse_slash, 2},
+    {"_stringmagic_cpp_magic_split", (DL_FUNC) &_stringmagic_cpp_magic_split, 3},
     {"_stringmagic_cpp_find_closing_problem", (DL_FUNC) &_stringmagic_cpp_find_closing_problem, 2},
     {"_stringmagic_cpp_to_integer", (DL_FUNC) &_stringmagic_cpp_to_integer, 1},
     {"_stringmagic_cpp_combine_clusters", (DL_FUNC) &_stringmagic_cpp_combine_clusters, 2},

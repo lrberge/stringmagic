@@ -342,11 +342,12 @@ save_user_fun = function(fun, alias, namespace){
 #' `message_magic_alias`.
 #' 
 #' `[Advanced]` A note for package developers who would use these functions **and**
-#' also have created and use custom `smagic` operations created with [smagic_register_fun()] or
+#' also use custom `smagic` operations created with [smagic_register_fun()] or
 #' [smagic_register_ops()]. To ensure forward compatibility the new operations created 
-#' should be defined in the package namespace (see the ad hoc section in [smagic_register_fun()] help).
+#' should be defined in the package namespace (see the *ad hoc* section in [smagic_register_fun()] help).
 #' To access these operators in their specific namespaces, you must use an alias with 
-#' `cat_magic_alias` or `message_magic_alias` with the argument `.namespace = "myPackageName"`.
+#' `cat_magic_alias` or `message_magic_alias` with the argument `.namespace = "myPackageName"` 
+#' (to avoid having to provide the `.namespace` argument repeatedly).
 #' 
 #' 
 #' @family tools with aliases
@@ -597,7 +598,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     
     if(length(x) > 1){
       stop_hook("`smagic` can only be applied to character scalars. ",
-                "\nPROBLEM: the argument is not of length 1, it is of length {len.f ? x}.")
+                "\nPROBLEM: the argument is not of length 1, it is of length {len ? x}.")
     }
 
   } else {
@@ -971,8 +972,8 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
               stop_hook("The if-else operator `&&`, of the form {form} ",
                       "requires that the first variable used in the condition ",
                       "(here {bq?vars[1]}) is of the same length as the condition.",
-                      "\nPROBLEM: the condition is of length {len.f?xi} while the ",
-                      "variable is of length {len.f?xi_val}.",
+                      "\nPROBLEM: the condition is of length {len?xi} while the ",
+                      "variable is of length {len?xi_val}.",
                       "\n{example}")
             }
           }
@@ -2187,7 +2188,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     } else if(op == "n"){
       opt_default = c("letter", "upper", "0", "zero", "roman", "Roman")
     } else if(op == "len"){
-      opt_default = c("letter", "upper", "format")
+      opt_default = c("letter", "upper", "num")
     } else {
       opt_default = c("letter", "upper")
     }
@@ -2267,7 +2268,9 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
       if(is_letter){
         res = n_letter(res)
-      } else if(opt_equal(options, "format")){
+      } else if(opt_equal(options, "num")){
+        # we do nothing => we keep it as numeric
+      } else {
         res = format(res, big.mark = ",")
       }
     }
@@ -2571,7 +2574,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       stop_hook("In {bq?op} operations, the condition (here {bq?cond_raw}) must ",
                 "be either of length 1 (applying to the full string), ",
                 "either of the length of the interpolated value.", 
-                "\nPROBLEM: the condition is of length {len.f?cond} while the ",
+                "\nPROBLEM: the condition is of length {len?cond} while the ",
                 "interpolated value is of length {len?x}.")
     }
     
@@ -2644,7 +2647,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
                    "operations either a) can remove the string completely ",
                    "(e.g. with `nuke`), or b) must not change the length of the element.",
                    "\nPROBLEM: the original vector is of length {n?n_old} while after ",
-                   "the operations it becomes of length {len.f ? xi}")
+                   "the operations it becomes of length {len ? xi}")
         }
       } else {
         # verbatim if
@@ -2980,7 +2983,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
                       "\nThe length of the interpolated value must be equal to 1 or the length ",
                       "of the condition.",
                       "PROBLEM: the length of the condition is {n?n_x} while the length of ",
-                      "`{&i==1;true;false}` is {len.format?log_op_eval}.")
+                      "`{&i==1;true;false}` is {len?log_op_eval}.")
         }
         
         if(i == 1){

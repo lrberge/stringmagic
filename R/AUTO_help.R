@@ -1,4 +1,4 @@
-# 1687898983
+# 1687951645
 # DO NOT EDIT BY HAND: generated with generate_help_extensive() in help.R
 
 setup_help_extensive = function(){
@@ -77,7 +77,7 @@ txt = c("", "# Interpolation and string operations: Principle ----|",
 "  + q, Q, or bq: to quote the elements", "  + or, nor: to finish with an 'or' (or 'nor') instead of an 'and'", 
 "  + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two", 
 "  + a number: to tell the number of items to display Ex.1: `x = c(\"Marv\", \"Nancy\"); smagic(\"The main characters are {enum ? x}.\")` leads to \"The main characters are Marv and Nancy.\". Ex.2: `x = c(\"orange\", \"milk\", \"rice\"); smagic(\"Shopping list: {enum.i.q ? x}.\")` leads to \"Shopping list: i) 'orange', ii) 'milk', and iii) 'rice'.\"", 
-"  + len: gives the length of the vector. Options \"letter\", \"upper\", \"format\". Option \"letter\" writes the length in words (up to 100). Option \"upper\" is the same as letter but uppercases the first letter. Option \"format\" add comma separation for thousands. Example: `smagic(\"Size = {len.format ? 1:5000}\")` leads to \"Size = 5,000\".", 
+"  + len: gives the length of the vector. Options \"letter\", \"upper\", \"num\". Option \"letter\" writes the length in words (up to 100). Option \"upper\" is the same as letter but uppercases the first letter. By default, commas are added to separate thousands. Use uption \"num\" to preserve a regular numeric format. Example: `smagic(\"Size = {len ? 1:5000}\")` leads to \"Size = 5,000\".", 
 "  + width: formats the string to fit a given width by cutting at word boundaries. Accepts arguments of the form `'n'` or `'n|s'`, with `n` a number and `s` a string. An argument of the form `'n|s'` will add `s` at the beginning of each line. Further, by default a trailing white space is added to `s`; to remove this behavior, add an underscore at the end of it. The argument `n` is either an integer giving the target character width (minimum is 15), or it can be a fraction expressing the target size as a fraction of the current screen. Finally it can be an expression that uses the variable `.sw` which will capture the value of the current screen width. Ex.1: `smagic(\"{15 width ! this is a long sentence}\")` leads to \"this is a long\\\\nsentence\". Ex.2: `smagic(\"{15 width.#> ! this is a long sentence}\")` leads to \"#> this is a long\\\\n#> sentence\".", 
 "  + dtime: displays a formatted time difference. Option \"silent\" does not report a warning if the operation fails. It accepts either objects of class `POSIXt` or `difftime`. Example: `x = Sys.time() ; Sys.sleep(0.5) ; smagic(\"Time: {dtime ? x}\")` leads to something like \"Time: 514ms\".", 
 "", "# Group-wise operations ----|", "", "In `smagic`, the splitting operation `s` (or `S`) keeps a memory of the strings that were split. Use the tilde operator, of the form `~(op1, op2)`, to apply operations group-wise, to each of the split strings.", 

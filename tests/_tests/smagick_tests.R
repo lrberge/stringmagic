@@ -656,6 +656,10 @@ x = 1:2
 txt = smagic("x is of length {len ? x}, or {Len ? x}.")
 test(txt, "x is of length 2, or two.")
 
+x = 1:1e5
+txt = smagic("x is of length {len ? x}, or {len.num ? x}.")
+test(txt, "x is of length 100,000, or 100000.")
+
 # conditionaly
 x = c("bonjour les gens", "la pluie", "est drue, je rentre")
 txt = smagic("Number of words: {' 'S, ~(len), C ? x}.")

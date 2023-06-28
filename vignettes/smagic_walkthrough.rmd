@@ -962,13 +962,16 @@ smagic("The problematic variables are {'x'sort.num, enum.3 ? x}.")
 
 ### len, Len
 
-Gives the length of the vector. Options `"letter"`, `"upper"`, `"format"`.
+Gives the length of the vector. Options `"letter"`, `"upper"`, `"num"`.
 Option `"letter"` writes the length in words (up to 100). Option `"upper"` is the same 
-as letter but uppercases the first letter. Option `"format"` add comma separation for thousands.
+as letter but uppercases the first letter. By default, the number is formatted:
+commas are inserted to separate thousands.
 ```{r}
-smagic("Size = {len.format ? 1:5000}")
+smagic("The length of 1:5000:", 
+       " - len     = {len ? 1:5000}", 
+       " - len.num = {len.num ? 1:5000}", .sep = " \n")
 ```
-The upper case command (`Len`) adds the option `"letter"`.
+The upper case command (`Len`) adds the option `"letter"` (only for small numbers).
 ```{r}
 smagic("Its size is {Len ? 1:8}")
 ```
