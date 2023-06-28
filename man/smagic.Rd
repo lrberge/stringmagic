@@ -489,10 +489,12 @@ Ex.1: \verb{x = c("Marv", "Nancy"); smagic("The main characters are \{enum ? x\}
 Ex.2: \verb{x = c("orange", "milk", "rice"); smagic("Shopping list: \{enum.i.q ? x\}.")} leads to
 "Shopping list: i) 'orange', ii) 'milk', and iii) 'rice'."
 }
-\item len: gives the length of the vector. Options "letter", "upper", "format".
+\item len: gives the length of the vector. Options "letter", "upper", "num".
 Option "letter" writes the length in words (up to 100). Option "upper" is the same
-as letter but uppercases the first letter. Option "format" add comma separation for thousands.
-Example: \code{smagic("Size = {len.format ? 1:5000}")} leads to "Size = 5,000".
+as letter but uppercases the first letter.
+By default, commas are added to separate thousands. Use uption "num" to preserve
+a regular numeric format.
+Example: \code{smagic("Size = {len ? 1:5000}")} leads to "Size = 5,000".
 \item width: formats the string to fit a given width by cutting at word boundaries.
 Accepts arguments of the form \code{'n'} or \code{'n|s'}, with \code{n} a number and \code{s} a string.
 An argument of the form \code{'n|s'} will add \code{s} at the beginning of each line. Further,

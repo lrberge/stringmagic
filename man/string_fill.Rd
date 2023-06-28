@@ -64,10 +64,16 @@ string_fill(x, na = "(missing)")
 
 }
 \seealso{
-A few basic operation: \code{\link[=string_is]{string_is()}}, \code{\link[=string_get]{string_get()}}, \code{\link[=string_clean]{string_clean()}}. Chain basic operations with \code{\link[=string_ops]{string_ops()}}.
+String operations: \code{\link[=string_is]{string_is()}}, \code{\link[=string_get]{string_get()}}, \code{\link[=string_clean]{string_clean()}}, \code{\link[=string_split2df]{string_split2df()}}.
+Chain basic operations with \code{\link[=string_ops]{string_ops()}}. Clean character vectors efficiently
+with \code{\link[=string_clean]{string_clean()}}.
+
 Use \code{\link[=string_vec]{string_vec()}} to create simple string vectors.
+
 String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}. You can change \code{smagic}
 default values with \code{\link[=smagic_alias]{smagic_alias()}} and add custom operations with \code{\link[=smagic_register_fun]{smagic_register_fun()}}.
+
+Display messages while benefiting from \code{smagic} interpolation with \code{\link[=cat_magic]{cat_magic()}} and \code{\link[=message_magic]{message_magic()}}.
 
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},

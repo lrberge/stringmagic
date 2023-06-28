@@ -6,6 +6,9 @@
 \title{Efficient creation of string vectors with optional interpolation}
 \usage{
 string_vec_alias(
+  .cmat = FALSE,
+  .nmat = FALSE,
+  .last = NULL,
   .delim = c("{", "}"),
   .split = TRUE,
   .protect.vars = TRUE,
@@ -16,16 +19,40 @@ string_vec_alias(
 
 string_vec(
   ...,
+  .cmat = FALSE,
+  .nmat = FALSE,
   .delim = c("{", "}"),
   .envir = parent.frame(),
   .split = TRUE,
   .protect.vars = TRUE,
   .sep = NULL,
+  .last = NULL,
   .collapse = NULL,
   .namespace = NULL
 )
 }
 \arguments{
+\item{.cmat}{Logical scalar (default is \code{FALSE}), integer or complex with integer values.
+If \code{TRUE}, we try to coerce the result into a \strong{character} matrix. The number of rows and columns
+is deduced from the look of the arguments. An integer indicates the number of rows.
+If a complex, the imaginary part represents the number of columns. Ex: \code{5i} means
+5 columns, \code{3 + 2i} means 3 rows and 2 columns.
+
+The matrix is always filled by row.}
+
+\item{.nmat}{Logical scalar (default is \code{FALSE}), integer or complex with integer values.
+If \code{TRUE}, we try to coerce the result into a \strong{numeric} matrix. The number of rows and columns
+is deduced from the look of the arguments. An integer indicates the number of rows.
+If a complex, the imaginary part represents the number of columns. Ex: \code{5i} means
+5 columns, \code{3 + 2i} means 3 rows and 2 columns.
+
+The matrix is always filled by row. Non numbers are silently turned to NA.}
+
+\item{.last}{Character scalar, a function, or \code{NULL} (default). If provided and character:
+it must be an \code{smagic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
+are applied just before returning the vector. If a function,
+it will be applied to the resulting vector.}
+
 \item{.delim}{Character vector of length 1 or 2. Default is \code{c("{", "}")}. Defines
 the opening and the closing delimiters for interpolation.
 
@@ -36,9 +63,13 @@ The default value is equivalent to \code{"{ }"}.
 [ ]: R:\%20
 [", "]: R:\%22,\%20\%22}
 
-\item{.split}{Logical, default is \code{TRUE}. Whether to split the vector with
-respect to commas. Ex: by default \code{string_vec("hi, there")} leads to the
-vector \code{c("hi", "there")}.}
+\item{.split}{Logical or a character symbol, default is \code{TRUE}. If \code{TRUE},
+the character vectors are split with respect to commas (default). If \code{FALSE}, no
+splitting is performed. If a character symbol, the string vector will be split
+according to this symbol. Note that any space after the symbol (including tabs and
+newlines) is discarded.
+
+Ex: by default \code{string_vec("hi, there")} leads to the vector \code{c("hi", "there")}.}
 
 \item{.protect.vars}{Logical scalar, default is \code{TRUE}. If \code{TRUE}, then only
 arguments equal to a "natural" character scalar are comma-split and interpolated,
@@ -58,7 +89,7 @@ As a regular end-user you shouldn't care! If your package uses \code{smagic}, yo
 It is useful \strong{only} if your package uses 'custom' \code{smagic} operations, set with
 \code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.
 
-If so pass the name of your package in this argument so that your function can access
+If so, pass the name of your package in this argument so that your function can access
 the new \code{smagic} operations defined within your package.}
 
 \item{...}{Character vectors that will be vectorized. If commas are present in the
@@ -90,6 +121,8 @@ The default of the argument \code{.protect.vars} is \code{FALSE} so as to avoid 
 comma-splitting and interpolations. The main use case of this function is
 the creation of small string vectors, which can be written directly at
 function call.
+
+Customize the default of this function with \code{\link[=string_vec_alias]{string_vec_alias()}}.
 }
 \section{Functions}{
 \itemize{
@@ -114,9 +147,19 @@ string_vec("Hi, said Charles.", "Hi, said {girl}.", girl = "Julia", .split = FAL
 # changing the delimiters for interpolation
 pkg = "\\\\usepackage[usenames,dvipsnames]{xcolor}"
 string_vec("\\\\usepackage{.[S!graphicx, fourier, standalone]}", 
-        pkg, .delim = ".[ ]")
+           pkg, .delim = ".[ ]")
 
+#
+# Customization
+#
 
+# Unhappy about the defaults? Create an alias!
+
+# we create a "matrix generator"
+matgen = string_vec_alias(.nmat = TRUE, .last = "'\n'split")
+
+matgen("5, 4, 3
+        8, 6, 2")
 
 }
 \seealso{

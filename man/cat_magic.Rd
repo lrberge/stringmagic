@@ -154,11 +154,12 @@ You can very easily change the default values with the alias generators \code{ca
 \code{message_magic_alias}.
 
 \verb{[Advanced]} A note for package developers who would use these functions \strong{and}
-also have created and use custom \code{smagic} operations created with \code{\link[=smagic_register_fun]{smagic_register_fun()}} or
+also use custom \code{smagic} operations created with \code{\link[=smagic_register_fun]{smagic_register_fun()}} or
 \code{\link[=smagic_register_ops]{smagic_register_ops()}}. To ensure forward compatibility the new operations created
-should be defined in the package namespace (see the ad hoc section in \code{\link[=smagic_register_fun]{smagic_register_fun()}} help).
+should be defined in the package namespace (see the \emph{ad hoc} section in \code{\link[=smagic_register_fun]{smagic_register_fun()}} help).
 To access these operators in their specific namespaces, you must use an alias with
-\code{cat_magic_alias} or \code{message_magic_alias} with the argument \code{.namespace = "myPackageName"}.
+\code{cat_magic_alias} or \code{message_magic_alias} with the argument \code{.namespace = "myPackageName"}
+(to avoid having to provide the \code{.namespace} argument repeatedly).
 }
 \section{Functions}{
 \itemize{
