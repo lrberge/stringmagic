@@ -122,7 +122,7 @@ print.smagic = function(x, ...){
 #' fun_emph = function(x, ...) paste0("*", x, "*")
 #' 
 #' # B) register it
-#' smagic_register(fun_emph, "emph")
+#' smagic_register_fun(fun_emph, "emph")
 #' 
 #' # C) use it
 #' x = string_vec("right, now")
@@ -138,7 +138,7 @@ print.smagic = function(x, ...){
 #'   }
 #' }
 #' 
-#' smagic_register(fun_emph, "emph", "strong")
+#' smagic_register_fun(fun_emph, "emph", "strong")
 #' 
 #' x = string_vec("right, now")
 #' smagic("Take heed, {emph.strong, c? x}.")
@@ -156,10 +156,18 @@ print.smagic = function(x, ...){
 #'   paste0(arg, x, arg)
 #' }
 #' 
-#' smagic_register(fun_emph, "emph", "strong")
+#' smagic_register_fun(fun_emph, "emph", "strong")
 #' 
 #' x = string_vec("right, now")
 #' smagic("Take heed, {'_'emph.s, c? x}.")
+#' 
+#' #
+#' # using smagic_register_ops
+#' #
+#' 
+#' # create a 'header' maker
+#' smagic_register_ops("tws, '# 'paste, ' 'paste.right, '40|-'fill", "h1")
+#' cat_magic("{h1 ! My title}\n my content")
 #' 
 #' 
 #' 
@@ -175,7 +183,7 @@ smagic_register_fun = function(fun, alias, valid_options = NULL, namespace = NUL
 
   if(!is.function(fun)){
     stopi("The argument `fun` must be a function. ",
-              "PROBLEM: it is not a function, instead it is of class {enum.bq?class(fun)}.")
+          "PROBLEM: it is not a function, instead it is of class {enum.bq?class(fun)}.")
   }
 
   check_character(alias, scalar = TRUE, mbt = TRUE)
@@ -197,15 +205,20 @@ smagic_register_fun = function(fun, alias, valid_options = NULL, namespace = NUL
               "\nPROBLEM: the argument{$s, enum.bq, are?arg_pblm} invalid.")
   }
   
-  run = try(fun(x = 1:5), silent = TRUE)
-  if(isError(run)){
-    mc = match.call()
-    fun_dp = if(length(mc$fun) == 1) deparse_short(fun) else ""
-    stopi("The function defined in argument `fun` failed to run for a simple case.",
-          "\n{&nchar(fun_dp)>0 ; {.}(x = 1:5) ; Running it on x = 1:5} leads to an error,",
-          " see below:",
-          "\n{run}")
+  # we only test for simple cases
+  if(!"argument" %in% fun_args){
+    options = head(valid_options, 1)
+    run = try(fun(x = 1:5, options = options, gruop_flag = 0, group_index = rep(1, 5)), silent = TRUE)
+    if(isError(run)){
+      mc = match.call()
+      fun_dp = if(length(mc$fun) == 1) deparse_short(fun) else ""
+      stopi("The function defined in argument `fun` failed to run for a simple case.",
+            "\n{&nchar(fun_dp)>0 ; {.}(x = 1:5) ; Running it on x = 1:5} leads to an error,",
+            " see below:",
+            "\n{run}")
+    }  
   }
+  
   
   #
   # adding attributes

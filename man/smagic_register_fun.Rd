@@ -98,7 +98,7 @@ smagic = stringmagic::smagic_alias(.namespace = "myPackageName", .delim = "\{\{ 
 fun_emph = function(x, ...) paste0("*", x, "*")
 
 # B) register it
-smagic_register(fun_emph, "emph")
+smagic_register_fun(fun_emph, "emph")
 
 # C) use it
 x = string_vec("right, now")
@@ -114,7 +114,7 @@ fun_emph = function(x, options, ...) {
   }
 }
 
-smagic_register(fun_emph, "emph", "strong")
+smagic_register_fun(fun_emph, "emph", "strong")
 
 x = string_vec("right, now")
 smagic("Take heed, {emph.strong, c? x}.")
@@ -132,10 +132,18 @@ fun_emph = function(x, argument, options, ...){
   paste0(arg, x, arg)
 }
 
-smagic_register(fun_emph, "emph", "strong")
+smagic_register_fun(fun_emph, "emph", "strong")
 
 x = string_vec("right, now")
 smagic("Take heed, {'_'emph.s, c? x}.")
+
+#
+# using smagic_register_ops
+#
+
+# create a 'header' maker
+smagic_register_ops("tws, '# 'paste, ' 'paste.right, '40|-'fill", "h1")
+cat_magic("{h1 ! My title}\n my content")
 
 
 

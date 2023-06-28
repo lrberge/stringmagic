@@ -61,8 +61,8 @@
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
 #' nested, operations can be applied group-wise or conditionally and
 #' operators have sensible defaults. 
-#' You can also declare your own operations with [smagic_register()]. They will be 
-#' seamlessly integrated to `smagic`.
+#' You can also declare your own operations with [smagic_register_fun()] or [smagic_register_ops()]. 
+#' They will be seamlessly integrated to `smagic`.
 #' 
 #' The function `.smagic` (prefixed with a dot) is a leaner version of the function `smagic`.
 #' It does the same operations but with the following differences:
@@ -654,14 +654,7 @@
 #' @family `smagic` functions
 #' @family tools with aliases
 #' 
-#' @seealso 
-#' 
-#' To set new operators, see the function [smagic_register()].
-#' 
-#' To modify the default values of smagic, use the function [setSmagic()].
-#' 
-#' If you want to apply a chain of operations on a single vector, see [string_ops()] which 
-#' may be more appropriate.
+#' @inherit str_clean seealso
 #' 
 #'
 #' @examples

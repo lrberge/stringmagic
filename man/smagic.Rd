@@ -105,8 +105,8 @@ basic string operations to the interpolated variables. Advanced support for plur
 There are over 50 basic string operations, it supports pluralization, string operations can be
 nested, operations can be applied group-wise or conditionally and
 operators have sensible defaults.
-You can also declare your own operations with \code{\link[=smagic_register]{smagic_register()}}. They will be
-seamlessly integrated to \code{smagic}.
+You can also declare your own operations with \code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.
+They will be seamlessly integrated to \code{smagic}.
 
 The function \code{.smagic} (prefixed with a dot) is a leaner version of the function \code{smagic}.
 It does the same operations but with the following differences:
@@ -1119,13 +1119,6 @@ smagic("Why do you develop packages? For {`dollar`times.c ! $}?",
 
 }
 \seealso{
-To set new operators, see the function \code{\link[=smagic_register]{smagic_register()}}.
-
-To modify the default values of smagic, use the function \code{\link[=setSmagic]{setSmagic()}}.
-
-If you want to apply a chain of operations on a single vector, see \code{\link[=string_ops]{string_ops()}} which
-may be more appropriate.
-
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
 \code{\link{smagic_alias}()},

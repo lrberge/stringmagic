@@ -1420,7 +1420,7 @@ smagic("{!TRUE} is {?!TRUE}")
 # Creating your own operations {#sec_creation}
 
 You can add any arbitraty operation to `smagic`. You only need to 
-use the function `smagic_register`. 
+use the function `smagic_register_fun` or `smagic_register_ops`. 
 
 First you need to create a function that will be applied to a character vector. 
 That function must have at least the arguments 'x' and '...'. 
@@ -1429,7 +1429,7 @@ Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'group_
 Second, this function must return a vector or a list of two items: `x` and `group`. The latter
 form is only used in functions modifying the length or order of the vector.
 
-Finally, you need to register the function with `smagic_register` and provide it an
+Finally, you need to register the function with `smagic_register_fun` and provide it an
 alias. Optionnally, you can provide a list of valid options. 
 
 Ex.1: a new operation adding markdown emphasis.
@@ -1438,7 +1438,7 @@ Ex.1: a new operation adding markdown emphasis.
 fun_emph = function(x, ...) paste0("*", x, "*")
  
 # B) register it
-smagic_register(fun_emph, "emph")
+smagic_register_fun(fun_emph, "emph")
 
 # C) use it
 x = string_vec("right, now")
@@ -1447,7 +1447,7 @@ smagic("Take heed, {emph, c? x}.")
 
 Above, we have created a simple functon that adds markdown emphasis to words.
 
-More generally, the function taken by `smagic_register` is called internally 
+More generally, the function taken by `smagic_register_fun` is called internally 
 by `smagic` in the form `fun(x, argument, options, group, group_flag)`.
 Here is the meaning of the arguments:
 
@@ -1476,12 +1476,12 @@ fun_emph = function(x, argument, options, ...){
   paste0(arg, x, arg)
 }
 
-smagic_register(fun_emph, "emph", "strong")
+smagic_register_fun(fun_emph, "emph", "strong")
 
 x = string_vec("right, now")
 smagic("Take heed, {'_'emph.s, c? x}.")
 
-# In smagic_register, the valid_option argument is used to validate them.
+# In smagic_register_fun, the valid_option argument is used to validate them.
 try(smagic("Take heed, {'_'emph.aaa, c? x}."))
 ```
 
@@ -1503,7 +1503,7 @@ keep_varnames = function(x, group, group_flag, ...){
   return(res)
 }
 
-smagic_register(keep_varnames, "keepvar")
+smagic_register_fun(keep_varnames, "keepvar")
 
 expr = c("x1 + 52", "73 %% 5 == x", "y[y > .z_5]")
 smagic("All vars: {'[^[:alnum:]_.]+'s, keepvar, unik, bq, C ? expr}.")
