@@ -20,6 +20,7 @@ Use curly brackets to interpolate variables: i.e to insert their value directly 
 library(stringmagic)
 x = "John" ; y = "Mary"
 smagic("Hi {x}! How's {y} doing?")
+#> [1] "Hi John! How's Mary doing?"
 ```
 
 Almost anything `glue` can do, `smagic` can do, and if you're thinking about speed, they're about
@@ -38,6 +39,7 @@ The `operations` are a comma separated sequence of keywords, each keyword being 
 ```{r}
 lovers = c("romeo", "juliet")
 smagic("Famous lovers: {title, enum ? lovers}.")
+#> [1] "Famous lovers: Romeo and Juliet."
 ```
 
 ![example-lovers](vignettes/images/example-simple_operation.png)
@@ -51,6 +53,7 @@ Let's take the example of splitting an email address and keeping the text before
 ```{r}
 email = "John@Doe.com"
 smagic("This message comes from {'@'split, first ? email}.")
+#> [1] "This message comes from John."
 ```
 
 ![example-argument](vignettes/images/example-argument.png)
@@ -66,6 +69,7 @@ We have seen the `enum` operation in an earlier example, let's add a couple of o
 ```{r}
 fields = c("maths", "physics")
 smagic("This position requires a PhD in either: {enum.i.or ? fields}.")
+#> [1] "This position requires a PhD in either: i) maths, or ii) physics."
 ```
 
 ![example-options](vignettes/images/example-options.png)
@@ -133,6 +137,7 @@ As you can notice, `.smagic`, `smagic` without error handling, is about twice fa
 ```{r, eval = TRUE, echo = TRUE}
 x = c("Zeus", "Hades", "Poseidon")
 smagic("The {len?x} brothers: {enum?x}.")
+#> [1] "The 3 brothers: Zeus, Hades and Poseidon."
 ```
 
 Although the interface is different, let's compare `smagic` to `glue` and `paste0`:
