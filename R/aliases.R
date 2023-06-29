@@ -188,18 +188,20 @@ message_magic_alias = function(.sep = "", .end = "\n", .width = FALSE, .leader =
 }
 
 #' @describeIn string_ops `string_ops` alias with custom defaults
-string_ops_alias = function(pre_unik = NULL, namespace = NULL){
+string_ops_alias = function(op = NULL, pre_unik = NULL, namespace = NULL){
   #
   
+  check_character(op, scalar = TRUE, null = TRUE)  
   check_logical(pre_unik, null = TRUE, scalar = TRUE)
   check_character(namespace, scalar = TRUE, null = TRUE)  
   
   # forcing evaluations
+  .op = op
   .pre_unik = pre_unik
   .namespace = namespace
   
-  res = function(x, op, pre_unik = .pre_unik, namespace = .namespace){                  
-    string_ops(x, op, pre_unik = pre_unik, namespace = namespace)
+  res = function(x, op = .op, pre_unik = .pre_unik, namespace = .namespace){                  
+    string_ops(x, op = op, pre_unik = pre_unik, namespace = namespace)
   }
   
   res
