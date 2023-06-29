@@ -16,7 +16,7 @@ a new language tailored to create complex character strings.
 
 `smagic` behaves in a similar way to the well known function [glue](https://glue.tidyverse.org/).
 Use curly brackets to interpolate variables: i.e to insert their value directly in the string:
-```{r}
+```r
 library(stringmagic)
 x = "John" ; y = "Mary"
 smagic("Hi {x}! How's {y} doing?")
@@ -36,7 +36,7 @@ magic is that applying these operations is about as simple as saying them.
 ![operation](vignettes/images/operation-template.png)
 
 The `operations` are a comma separated sequence of keywords, each keyword being bound to a specific function. Here is an example in which we apply two operations:
-```{r}
+```r
 lovers = c("romeo", "juliet")
 smagic("Famous lovers: {title, enum ? lovers}.")
 #> [1] "Famous lovers: Romeo and Juliet."
@@ -50,7 +50,7 @@ just before the operation. The syntax is:
 ![argument](vignettes/images/argument.png)
 
 Let's take the example of splitting an email address and keeping the text before the domain:
-```{r}
+```r
 email = "John@Doe.com"
 smagic("This message comes from {'@'split, first ? email}.")
 #> [1] "This message comes from John."
@@ -66,7 +66,7 @@ Add options using a dot separated sequence of keywords attached to the operation
 
 
 We have seen the `enum` operation in an earlier example, let's add a couple of options to it.
-```{r}
+```r
 fields = c("maths", "physics")
 smagic("This position requires a PhD in either: {enum.i.or ? fields}.")
 #> [1] "This position requires a PhD in either: i) maths, or ii) physics."
@@ -85,8 +85,8 @@ Here is a list of resources:
 
 ### Friendly errors
 
-`smagic` tries to be friendly to the user by providing useful error message:
-```{r, eval = FALSE, echo = TRUE}
+`smagic` tries to be friendly to the user by providing useful error messages:
+```r
 x = c("Zeus", "Hades", "Poseidon")
 smagic("The {len?x} brothers: {anum?x}.")
 #> Error: in smagic("The {len?x} brothers: {anum?x}."): 
@@ -111,7 +111,7 @@ If you're not interested in informative error messages, `.smagic` (note the `"."
 
 **Basic interpolation.** For regular string interpolations, the performance of `smagic` is similar to the performance of `glue`. That is to say, the price to pay for user experience is in the ballpark of 100 micro seconds (on my -- slow -- computer). Let's have a simple benchmark:
 
-```{r, eval = FALSE, echo = TRUE}
+```r
 library(microbenchmark)
 library(glue)
 
@@ -130,11 +130,11 @@ microbenchmark(base    =   paste0(x, " seems to love ", y, "."),
 
 The difference with the base function `base::paste0` looks impressive (it looks 50 times faster), but is in fact not really important. Both `glue` and `smagic` processing time is due to overheads: a fixed cost that does not depend on the size of the vectors in input. Hence for large vectors or operations that run in one millisecond or more, this difference is negligible.
 
-As you can notice, `.smagic`, `smagic` without error handling, is about twice faster than `glue`. But I'm not sure that sacrificing user expericence for 50us overheads is really worth it!
+As you can notice, `.smagic`, `smagic` without error handling, is about twice faster than `glue`. But I'm not sure that sacrificing user expericence for a 50us overhead is really worth it!
 
 **Complex operations** The function `smagic` shines when performing complex string manipulation. The question we ask here is: how much does it cost in terms of perfomance? Let's look at the following operation:
 
-```{r, eval = TRUE, echo = TRUE}
+```r
 x = c("Zeus", "Hades", "Poseidon")
 smagic("The {len?x} brothers: {enum?x}.")
 #> [1] "The 3 brothers: Zeus, Hades and Poseidon."
@@ -142,15 +142,15 @@ smagic("The {len?x} brothers: {enum?x}.")
 
 Although the interface is different, let's compare `smagic` to `glue` and `paste0`:
 
-```{r, eval = FALSE, echo = TRUE}
+```r
 x = c("Zeus", "Hades", "Poseidon")
 microbenchmark(base = paste0("The ", length(x), " brothers: ", 
-                   paste0(paste0(x[1:2], collapse = ", "), " and ", x[3]), "."),
+                        paste0(paste0(x[1:2], collapse = ", "), " and ", x[3]), "."),
                glue = glue("The {length(x)} brothers: {x_enum}.", 
-                     x_enum = paste0(paste0(x[1:2], collapse = ", "), " and ", x[3])),
+                        x_enum = paste0(paste0(x[1:2], collapse = ", "), " and ", x[3])),
                smagic = smagic("The {len?x} brothers: {enum?x}."),
                smagic_bis = smagic("The {length(x)} brothers: {x_enum}.", 
-                     x_enum = paste0(paste0(x[1:2], collapse = ", "), " and ", x[3])))
+                              x_enum = paste0(paste0(x[1:2], collapse = ", "), " and ", x[3])))
 #> Unit: microseconds
 #>        expr   min    lq    mean median     uq   max neval
 #>        base   4.7   5.7   6.555   6.20   7.15  20.8   100
