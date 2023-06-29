@@ -1572,8 +1572,7 @@ SEXP cpp_find_closing_problem(SEXP Rstr, SEXP Rdelimiters){
     i = delims.get_size_open();
   }  
   
-  // we initialize the problem to a delimiter problem
-  std::string res = "delim";
+  std::string res = "";
   std::string tmp;
   
   // square brackets and curly brackets
@@ -1626,6 +1625,8 @@ SEXP cpp_find_closing_problem(SEXP Rstr, SEXP Rdelimiters){
       res = "[";
     } else if(n_par_open > 0){
       res = "(";
+    } else if(!delims.is_close(str, i, n, false)){
+      res = "delim";
     }
   }
 
