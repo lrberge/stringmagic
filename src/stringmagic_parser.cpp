@@ -1561,15 +1561,19 @@ SEXP cpp_magic_split(SEXP Rstr, SEXP Rsymbol, SEXP Rdelimiters){
   
 // [[Rcpp::export]]
 SEXP cpp_find_closing_problem(SEXP Rstr, SEXP Rdelimiters){
+  // the string we get in there is the FULL box parsed as R code and we know it contains an error
   
   const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
-  int n = std::strlen(str);
-  
+  int n = std::strlen(str);  
   
   delim delims(Rdelimiters);
   int i = 0;
+  if(delims.is_open(str, i, n, false)){
+    i = delims.get_size_open();
+  }  
   
-  std::string res;
+  // we initialize the problem to a delimiter problem
+  std::string res = "delim";
   std::string tmp;
   
   // square brackets and curly brackets

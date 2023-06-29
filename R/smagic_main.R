@@ -1347,7 +1347,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       # we don't repeat the processing (otherwise => bugs)
       
       pat_parsed = format_simple_regex_flags(argument, fixed = is_fixed, word = is_word, 
-                                             ignore = is_ignore)
+                                             ignore = is_ignore, magic = TRUE, 
+                                             envir = .envir)
       argument = pat_parsed$pattern
       is_fixed = pat_parsed$fixed
     } 
@@ -3133,7 +3134,7 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
 
     if(.check){
       xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
-                                      group_flag = group_flag, .delim = .delim, 
+                                      group_flag = group_flag, .delim = .delim, .envir = .envir,
                                       .user_funs = .user_funs, .valid_operators = .valid_operators),
                                      "In the operation `{op}()`, the ",
                                      "{&length(op_all) == 1 ; operation ; chain of operations} ",
@@ -3141,7 +3142,7 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
                                      "\nPROBLEM: the operation {opi} failed. Look up the doc?")
     } else {
       xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
-                         group_flag = group_flag, .delim = .delim, 
+                         group_flag = group_flag, .delim = .delim, .envir = .envir,
                          .user_funs = .user_funs, .valid_operators = .valid_operators)
     }
   }

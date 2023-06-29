@@ -857,25 +857,48 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
     }
     
   } else if(error_msg == "no closing bracket"){
-    if(!is_box_close(xi, .delim)){
-      msg = .sma("PROBLEM: the opening bracket ({bq?.delim[1]}) is not ", 
-                 "matched with a closing bracket ({bq?.delim[2]}).",
-                 "\nNOTE: to escape the meaning of the bracket, use a ",
-                 "double backslash: \\\\{.delim[1]}.")
-      suggest = "INFO: see smagic(.help = TRUE) and go to the section 'Escaping and special cases'"
-    } else {
+    
+    # {unik, sort ? iris[['Species']}
+    # we first try on iris[['Species'] only
+    done = FALSE
+    expr_msg = ""
+    if(grepl("?", xi, fixed = TRUE)){
+      xi_expr = gsub(".+[?]", "", xi)
+      pblm = cpp_find_closing_problem(xi_expr, .delim)
+      if(pblm %in% c("", "delim")){
+        # no problem found or delim prblm (we check with the full xi)
+      } else {
+        done = TRUE
+        close = .delim[2]
+        xi_expr_clean = string_ops(xi_expr, "'mf/{close}'s, -1 last, `close`collapse")
+        expr_msg = .sma("in the expression {bq?xi_expr_clean}, ")
+      }
+    }
+    
+    if(!done){
       pblm = cpp_find_closing_problem(xi, .delim)
-      pblm = switch(pblm, 
-                    "'" = "a single quote (') open is not closed.",
-                    "\"" = "a double quote (\") open is not closed.",
-                    "`" = "a backtick (`) open is not closed.",
-                    "(" = "a parenthesis (`(`) open is not closed.",
-                    "{" = "a bracket (`{`) open is not closed.",
-                    "[" = "a bracket (`[`) open is not closed.",
-                    "it seems that something open is not closed."
-                    )
-      msg = .sma("PROBLEM: {pblm}")
     }    
+    
+    if(pblm == "delim"){
+      suggest = "INFO: see smagic(.help = TRUE) and go to the section 'Escaping and special cases'"
+    }
+    
+    delim_msg = if(all(.delim == c("{", "}"))) "bracket" else "delimiter"
+    
+    pblm = switch(pblm, 
+                  "delim" = .sma("the opening {delim_msg} ({bq?.delim[1]}) is not ", 
+                                  "matched with a closing {delim_msg} ({bq?.delim[2]}).",
+                                  "\n\nNOTE: to escape the meaning of the {delim_msg}, use a ",
+                                  "double backslash: \\\\{.delim[1]}."),
+                  "'" = "a single quote (') open is not closed.",
+                  "\"" = "a double quote (\") open is not closed.",
+                  "`" = "a backtick (`) open is not closed.",
+                  "(" = "a parenthesis (`(`) open is not closed.",
+                  "{" = "a bracket (`{`) open is not closed.",
+                  "[" = "a bracket (`[`) open is not closed.",
+                  "it seems that something open is not closed."
+                  )
+    msg = .sma("PROBLEM: {expr_msg}{pblm}")  
     
   } else if(string_x(error_msg, 7) == "if-else"){
     type = if(string_x(xi, 2, 1 + nchar(open)) == "&&") "&&" else "&"

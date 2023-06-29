@@ -67,7 +67,7 @@
 #' # 3 first: keeps only the first three elements
 #' 
 #' 
-string_ops = function(x, op, pre_unik = NULL, namespace = NULL){
+string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.frame()){
 
   if(missing(x)){
     stop("Argument `x` must be provided. PROBLEM: it is currently missing.")
@@ -116,9 +116,8 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL){
       .valid_operators = getOption("smagic_operations_default")
     }
     
-    .envir = parent.frame()
     group_flag = 1 * grepl("~", op, fixed = TRUE)
-    res = apply_simple_operations(x, "string_ops", op, .check = TRUE, .envir = .envir,
+    res = apply_simple_operations(x, "string_ops", op, .check = TRUE, .envir = envir,
                                     .data = list(), group_flag = group_flag, 
                                     .delim = c("{", "}"), .user_funs = .user_funs, 
                                     .valid_operators = .valid_operators)
@@ -702,8 +701,10 @@ string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
 
   # used for the names
   dots = list(...)
+  internal = FALSE
   if("mc" %in% names(dots)){
     mc = dots$mc
+    internal = TRUE
   } else {
     mc = match.call()
   }
@@ -851,7 +852,8 @@ string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
   
   # flags
   pat_parsed = format_simple_regex_flags(split, ignore = ignore.case, 
-                                         fixed = fixed, word = word)
+                                         fixed = fixed, word = word, 
+                                         magic = TRUE, envir = parent.frame(1 + internal))
   split = pat_parsed$pattern
   is_fixed = pat_parsed$fixed
 
@@ -1681,7 +1683,7 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
     info = setdiff(authorized_flags, flags)
     stop_hook("In the pattern {'20||...'k, bq?pattern} the flag {enum.bq?flag_pblm} is not authorized.",
               "\nFYI the authorized flags are: {enum.bq?authorized_flags}.",
-              "\nNOTA: The syntax is \"flag1, flag2/regex\". To remove the parsing of flags, start with a '/'.")
+              "\nNOTA: The syntax is \"flag1, flag2/regex\" or \"flag_initials/regex\". To remove the parsing of flags, start with a '/'.")
   }
 
   if("verbatim" %in% flags){
@@ -1719,9 +1721,15 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
   res
 }
 
-format_simple_regex_flags = function(pattern, ignore = FALSE, word = FALSE, fixed = FALSE){
+format_simple_regex_flags = function(pattern, ignore = FALSE, word = FALSE, fixed = FALSE, 
+                                     magic = FALSE, envir = parent.frame(2)){
   
-  new_regex = parse_regex_pattern(pattern, c("ignore", "word", "fixed"), parse_logical = FALSE)
+  if(magic){
+    new_regex = parse_regex_pattern(pattern, c("ignore", "word", "fixed", "magic"), 
+                                    parse_logical = FALSE, envir = envir)
+  } else {
+    new_regex = parse_regex_pattern(pattern, c("ignore", "word", "fixed"), parse_logical = FALSE)
+  }  
   
   pattern = new_regex$patterns
   is_ignore = "ignore" %in% new_regex$flags || ignore
