@@ -1199,7 +1199,7 @@ sma_char2operator = function(x, .valid_operators){
 
       msg = .sma("{context}",
               "\nPROBLEM: {bq?op} is not a valid operator. ", sugg_txt,
-              "\n\nINFO: Type smagic('--help') for more help or smagic(.help = regex) or smagic(.help = TRUE).",
+              "\n\nINFO: Type smagic('--help') for more help or smagic(.help = \"regex\") or smagic(.help = TRUE).",
               "\nEx. of valid stuff: smagic(\"Letters: \\{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
 
       .stop_hook(msg)

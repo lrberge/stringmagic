@@ -871,7 +871,7 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
       } else {
         done = TRUE
         close = .delim[2]
-        xi_expr_clean = string_ops(xi_expr, "'mf/{close}'s, -1 last, `close`collapse")
+        xi_expr_clean = string_ops(xi_expr, "'mf/{close}'s, -1 last, `close`collapse, tws")
         expr_msg = .sma("in the expression {bq?xi_expr_clean}, ")
       }
     }
