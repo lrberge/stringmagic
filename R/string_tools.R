@@ -142,11 +142,11 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
 #' Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: `'[[:alpha:]] & \\d'` gets strings
 #' containing both letters and numbers). You can negate by adding a `!` first (ex: `"!sepal$"` will 
 #' return `TRUE` for strings that do not end with `"sepal"`).
-#' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
+#' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word' and 'magic'.
 #' Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore'). 
 #' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get `"DT[i = 5]"` (flags 'ignore' + 'fixed').
-#' The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the 
-#' pattern. See the documentation of this argument.
+#' For 'word', it adds word boundaries to the pattern. The `magic` flag first interpolates
+#' values directly into the pattern with "{}".
 #' @param or Logical, default is `FALSE`. In the presence of two or more patterns, 
 #' whether to combine them with a logical "or" (the default is to combine them with a logical "and").
 #' @param pattern (If provided, elements of `...` are ignored.) A character vector representing the 
@@ -154,11 +154,11 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
 #' Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: `'[[:alpha:]] & \\d'` gets strings
 #' containing both letters and numbers). You can negate by adding a `!` first (ex: `"!sepal$"` will 
 #' return `TRUE` for strings that do not end with `"sepal"`).
-#' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
+#' Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word' and 'magic'.
 #' Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore'). 
 #' Shortcut: use the first letters of the flags. Ex: "if/dt[" would get `"DT[i = 5]"` (flags 'ignore' + 'fixed').
-#' The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the 
-#' pattern. See the documentation of this argument.
+#' For 'word', it adds word boundaries to the pattern. The `magic` flag first interpolates
+#' values directly into the pattern with "{}".
 #' @param fixed Logical scalar, default is `FALSE`. Whether to trigger a fixed search instead of a 
 #' regular expression search (default).
 #' @param word Logical scalar, default is `FALSE`. If `TRUE` then a) word boundaries are added to the pattern, 
@@ -217,7 +217,7 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
 #' # NOTA: using `string_get` instead of `string_is` may lead to a faster understanding 
 #' #       of the examples 
 #'
-#' x = smagic("/one, two, one... two, microphone, check")
+#' x = string_vec("One, two, one... two, microphone, check")
 #'
 #' # default is regular expression search
 #' # => 3 character items
@@ -228,12 +228,10 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
 #' # you can just use the first letter
 #' string_is(x, "f/...")
 #'
-#' # to negate, use '!'
-#' string_is(x, "!f/...")
-#' # or directly in the pattern
+#' # to negate, use '!' as the first element of the pattern
 #' string_is(x, "f/!...")
 #'
-#' # you can combine several patterns with "&" or "|"
+#' # you can combine several patterns with " & " or " | "
 #' string_is(x, "one & c")
 #' string_is(x, "one | c")
 #' 
@@ -251,13 +249,24 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
 #' # compare with
 #' string_is(x, "w/one & two")
 #' # remember that you can still negate
-#' string_is(x, "w/one & !two")#' 
+#' string_is(x, "w/one & !two")
 #' 
 #' # you can combine the flags
 #' # compare
-#' string_is(x, "w/ONE")
+#' string_is(x, "w/one")
 #' # with
-#' string_is(x, "wi/ONE")
+#' string_is(x, "wi/one")
+#' 
+#' #
+#' # the `magic` flag
+#' #
+#' 
+#' p = "one"
+#' string_is(x, "m/{p}")
+#' # Explanation:
+#' # - "{p}" is interpolated into "one"
+#' # - we get the equivalent: string_is(x, "one")
+#' 
 #'
 #' #
 #' # string_which
@@ -305,7 +314,6 @@ string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
     is_or = pat_parsed$is_or
     flags = pat_parsed$flags
     all_patterns = pat_parsed$patterns
-    main_negate = pat_parsed$is_not_gnl
     negate_all = pat_parsed$is_not
 
     is_fixed_origin = fixed || "fixed" %in% flags
@@ -361,10 +369,6 @@ string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
       }
     }
 
-    if(main_negate){
-      res_current = !res_current
-    }
-    
     if(is.null(res)){
       res = res_current
     } else {
@@ -1620,8 +1624,51 @@ string_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = F
 #### dedicated utilities ####
 ####
 
+#' `stringmagic`'s regular expression parser
+#' 
+#' Parse regular expression with custom flags and obtain the final pattern
+#' to be parsed as well as the vector of flags
+#' 
+#' @param pattern Character scalar, the regular expression pattern to parse.
+#' @param authorized_flags Character vector representing the flags to be parsed.
+#' Use the empty string if no flags are allowed.
+#' @param parse_flags Logical scalar, default is `TRUE`. Whether to parse the 
+#' optional regex flags.
+#' @param parse_logical Logical scalar, default is `TRUE`. Whether to parse logical 
+#' regex operations, similarly to [string_get()].
+#' @param envir An environment, default is `parent.frame()`. Only used if the flag 
+#' `magic` is present, it is used to find the variables to be interpolated.
+#' 
+#' @details 
+#' This is an internal tool that is exposed in order to facilitate checking what's going on.
+#' 
+#' There is no error handling.
+#' 
+#' @return 
+#' This function always returns a list of 4 elements:
+#' 
+#' + `flags`: the character vector of flags. If no flags were found, this is the empty string.
+#' + `patterns`: the vector of regex patterns.
+#' + `is_or`: logical vector of the same length as `patterns`. Indicates for each
+#' pattern if it should be attached to the previous patterns with a logical OR (`FALSE`
+#' means a logical `AND`).
+#' + `is_not`: logical vector of the same length as `patterns`. Indicates for each pattern
+#' if it should be negated.
+#' 
+#' @author 
+#' Laurent Berge
+#' 
+#' @inherit string_clean seealse
+#' 
+#' @examples 
+#' 
+#' parse_regex_pattern("f/hello", c("fixed", "ignore"))
+#' 
+#' x = "john"
+#' parse_regex_pattern("fm/{x} | Doe", c("fixed", "ignore", "magic"))
+#' 
 parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE, 
-                               parse_logical = TRUE, envir = parent.frame(2)){
+                               parse_logical = TRUE, envir = parent.frame()){
   # in: "fw/hey!, bonjour, a[i]"
   # common authorized_flags: c("fixed", "word", "ignore")
 
@@ -1642,22 +1689,20 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
                         "valid character in position {info_pattern$error_extra} ",
                         "({`info_pattern$error_extra`firstchar, lastchar, bq ? pattern}). ",
                         "Flags must only consist of lower case letters followed by a comma or a slash."),
-                "flag starts with ! and no logical parsing" = 
-                    .sma("You cannot use the '!' before the flags. Only the functions `string_is`, `string_which` and ", 
-                         "`string_get` accept this operation before the flags."), 
+                "flag starts with !" = 
+                    .sma("You cannot use the '!' operator before the flags."), 
                  "flag empty" = 
                     .sma("The {Nth ? info_pattern$error_extra} flag is empty. ", 
                          "Flags must only consist of lower case letters followed by a comma or a slash."))
     
-    note_rm = .sma("\n\nINFO: Regular expression flags must be of the form: 'flag1, flag2/pattern'",
-                    " where a flag must consist of only lower case letters. Ex: 'ignore, fixed/dt[' leads",
-                    " to the flags 'ignore' and 'fixed' and to the pattern '.['.", 
-                    "\n      Alternatively, collate the first letters of the flags:",
-                    " 'if/dt[' leads to the same results.", 
-                    "\n      Start with a slash to remove the meaning of the slash and suppress the parsing",
-                    " of flags. Ex.1: '/hey/': no flag, pattern is 'hey/'.",
-                    " To have a slash as a pattern, double it:  '//': no flag, pattern is '/'.",
-                    "                            or escape it: '\\\\/': no flag, pattern is '/'")
+    note_rm = .sma("\n\nINFO: regex flags write 'flag1, flag2/pattern'",
+                    " where a flag = lower case letters.",
+                    "\n  Ex: 'ignore, fixed/dt[' leads",
+                    " to the flags 'ignore' and 'fixed' for the pattern 'dt['.", 
+                    "\n  Or simply collate the first letters of the flags:",
+                    " 'if/dt['.", 
+                    "\n  To use '/' without flag parsing, escape it.",
+                    "Ex: '\\\\/usr': leads to '/usr' without any flag on.")
     
     full_msg = .sma(main_msg, msg, note_rm)
     
@@ -1683,11 +1728,7 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
     info = setdiff(authorized_flags, flags)
     stop_hook("In the pattern {'20||...'k, bq?pattern} the flag {enum.bq?flag_pblm} is not authorized.",
               "\nFYI the authorized flags are: {enum.bq?authorized_flags}.",
-              "\nNOTA: The syntax is \"flag1, flag2/regex\" or \"flag_initials/regex\". To remove the parsing of flags, start with a '/'.")
-  }
-
-  if("verbatim" %in% flags){
-    info_pattern = cpp_parse_regex_pattern(pattern, FALSE)
+              "\nNOTA: The syntax is \"flag1, flag2/regex\" or \"flag_initials/regex\".")
   }
   
   if("magic" %in% flags){
@@ -1699,7 +1740,7 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
       if(isError(p_new)){
         stop_hook("CONTEXT: concerns the pattern {bq?pattern}",
                   "{&len(info_pattern)>1;\n         when evaluating {bq?p}}",
-                  "\nThe `magic` flag expands the pattern with `smagic`.",
+                  "\nINFO: The `magic` flag expands the pattern with `smagic`.",
                   "\nPROBLEM: the evaluation with `smagic` failed, see error below:",
                   "\n{'^[^\n]+\n'r?p_new}")
       }
@@ -1707,16 +1748,16 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
       if(length(p_new) != 1){
         stop_hook("CONTEXT: concerns the pattern {bq?pattern}",
                   "{&len(info_pattern)>1;\n         when evaluating {bq?p}}",
-                  "The `magic` flag expands the pattern with `smagic`. It must return a vector of length 1.",
+                  "\nINFO: The `magic` flag expands the pattern with `smagic`. It must return a vector of length 1.",
                   "\nPROBLEM: the vector returned is of length {len?p_new}.")
       }
       
-      info_pattern$patterns = p_new
+      info_pattern$patterns[i] = p_new
     }
   }
 
   res = list(flags = flags, patterns = info_pattern$patterns, is_or = info_pattern$is_or,
-             is_not_gnl = info_pattern$is_not_gnl, is_not = info_pattern$is_not)
+             is_not = info_pattern$is_not)
 
   res
 }

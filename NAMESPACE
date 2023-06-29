@@ -6,6 +6,8 @@ export(string_ops, string_is, string_which, string_get, string_clean, string_spl
 
 export(string_ops_alias, string_vec_alias, string_clean_alias)
 
+export(parse_regex_pattern)
+
 # smagic
 export(smagic, .smagic)
 export(smagic_register_fun, smagic_register_ops)

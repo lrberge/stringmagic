@@ -339,24 +339,26 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
   //      -   patterns: "test"
   //      -      is_or: FALSE
   //      -     is_not: FALSE
-  //      - is_not_gnl: FALSE
   //
   //  in: "test & !wordle"
   // out: -      flags: ""
   //      -   patterns: c("test", "wordle")
   //      -      is_or: c(FALSE, FALSE)
   //      -     is_not: c(FALSE, TRUE)
-  //      - is_not_gnl: FALSE
   //
-  //  in: "!fiw/test | wordle"
+  //  in: "fiw/test | wordle"
   // out: -      flags: "fiw"
   //      -   patterns: c("test", "wordle")
   //      -      is_or: c(FALSE, TRUE)
   //      -     is_not: c(FALSE, TRUE)
-  //      - is_not_gnl: TRUE
   //
+  
+  // General behavior:
+  // - whenever there is a slash in the regx: we throw an error if:
+  //   * the flags are invalid or **empty**
+  //   * there is a 'not' before valid flags (this is not allowed either)
 
-   if(Rf_length(Rstr) != 1) stop("Internal error in cpp_parse_regex_pattern: the vector must be of length 1.");
+  if(Rf_length(Rstr) != 1) stop("Internal error in cpp_parse_regex_pattern: the vector must be of length 1.");
 
   const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str);
@@ -371,26 +373,13 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
   // flags
   //
   
-  // Note that the general "not" only works when there are flags
-  // => so we need to bookkeep
-  bool is_not_gnl = false;
-  if(parse_flags && parse_logical && str[0] == '!'){
-    is_not_gnl = true;
-    i = 1;
-  }
-  
-  bool is_empty_flag = parse_flags && str[i] == '/';
   bool is_not = false;
-  bool is_escape = false;
+  bool any_slash_escaped = false;
   std::vector<int> i_skip;
   bool is_slash = false;
   
-  if(is_empty_flag){
-    is_slash = true;
-    i += 1;
-  }
   
-  if(parse_flags && !is_empty_flag){
+  if(parse_flags){
     // parsing the flags
     // since flag parsing can be dangerous, I thoroughly
     // send an error if a pattern contains a '/'
@@ -402,13 +391,12 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
     for(int j=0 ; j<n ; ++j){
       if(str[j] == '/'){
         if(is_non_escaped_symbol('/', str, j, n, false)){
-          if(!is_escape){
+          if(!any_slash_escaped){
             is_slash = true;
-            break;
           }
         } else {
           i_skip.push_back(j - 1);
-          is_escape = true;
+          any_slash_escaped = true;
         }
       }
     }
@@ -417,7 +405,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
       // at the end of this loop, i points at the beginning of the pattern
       
       if(!parse_logical && str[i] == '!'){
-        res["error"] = "flag starts with ! and no logical parsing";
+        res["error"] = "flag starts with !";
         return res;
       }
       
@@ -472,12 +460,6 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
   // saving the flags
   res["flags"] = std_string_to_r_string(flags);
   
-  // is_not_gnl: only works in the presence of flags, even the empty one
-  if(is_not_gnl && !is_slash){
-    is_not_gnl = false;
-    i = 0;
-  }
-  
   //
   // logical operators
   //
@@ -499,7 +481,7 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
     }
     
     while(i < n){
-      if(is_escape && is_inside(i_skip, i)){
+      if(any_slash_escaped && is_inside(i_skip, i)){
         ++i;
         continue;
       }
@@ -544,7 +526,6 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
   res["patterns"] = std_string_to_r_string(patterns);
   res["is_or"] = is_or_all;
   res["is_not"] = is_not_all;
-  res["is_not_gnl"] = is_not_gnl;
 
   return res;
 }

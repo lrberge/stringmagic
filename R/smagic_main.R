@@ -449,7 +449,9 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 
   check_character(.end, scalar = TRUE)
   
-  .width = check_set_width(substitute(.width))
+  is_call = isTRUE(try(is.call(.width), silent = TRUE))
+  .width = if(is_call) .width else substitute(.width)
+  .width = check_set_width(.width)
   if(is.finite(.width)){
     txt = fit_screen(txt, .width, leader = .leader)
   }
