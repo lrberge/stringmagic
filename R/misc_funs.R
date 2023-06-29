@@ -1015,6 +1015,10 @@ extract_pipe = function(x, op, double = FALSE, numeric = FALSE, data = NULL, mbt
   # $extra
   # $is_double
   
+  if(!is.character(x)){
+    x = as.character(x)
+  }
+  
   res = cpp_extract_pipe(x, double)
   
   if(x == "" || res$value == ""){

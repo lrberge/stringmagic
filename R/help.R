@@ -466,11 +466,10 @@ general_help = function(){
   section_choice = choice_fmt
   
   section_id = string_which(x, "^#")
-  
   text = c()
   for(id in section_choice){
     i_start = section_id[id]
-    i_end = if(id == max(section_id)) length(x) else min(section_id[section_id > i_start]) - 1
+    i_end = if(i_start == max(section_id)) length(x) else min(section_id[section_id > i_start]) - 1
     text = c(text, x[i_start:i_end])
   }
 

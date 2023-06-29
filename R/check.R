@@ -860,6 +860,7 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
     
     # {unik, sort ? iris[['Species']}
     # we first try on iris[['Species'] only
+    
     done = FALSE
     expr_msg = ""
     if(grepl("?", xi, fixed = TRUE)){
