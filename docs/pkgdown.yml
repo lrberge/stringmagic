@@ -2,8 +2,8 @@ pandoc: 3.1.3
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  smagick_walkthrough: smagick_walkthrough.html
-  stringmagick_tour: stringmagick_tour.html
+  smagic_walkthrough: smagic_walkthrough.html
+  stringmagic_tour: stringmagic_tour.html
   string_tools: string_tools.html
-last_built: 2023-06-23T13:15Z
+last_built: 2023-06-29T14:01Z
 

@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Character String Operations and Interpolation, Magick Edition • fixest</title>
+<title>Character String Operations and Interpolation, Magic Edition • stringmagic</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Character String Operations and Interpolation, Magick Edition">
+<script src="pkgdown.js"></script><meta property="og:title" content="Character String Operations and Interpolation, Magic Edition">
 <meta property="og:description" content="Performs complex string operations compactly and efficiently. Supports string interpolation jointly with over 50 string operations. Also enhances regular string functions (like `grep` and co).">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -32,7 +32,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="index.html">fixest</a>
+        <a class="navbar-link" href="index.html">stringmagic</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
@@ -50,16 +50,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/stringmagick_tour.html">`stringmagick`: A quick tour</a>
+      <a href="articles/stringmagic_tour.html">`stringmagic`: A quick tour</a>
     </li>
     <li class="divider">
     </li>
 <li class="dropdown-header">Guides</li>
     <li>
-      <a href="articles/smagick_walkthrough.html">`smagick`: Magical string interpolation</a>
+      <a href="articles/smagic_walkthrough.html">`smagic`: Magical string interpolation</a>
     </li>
     <li>
-      <a href="articles/string_tools.html">String tools: Magick edition</a>
+      <a href="articles/string_tools.html">String tools: magic edition</a>
     </li>
   </ul>
 </li>
@@ -69,7 +69,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/lrberge/stringmagick/" class="external-link">
+  <a href="https://github.com/lrberge/stringmagic/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -86,26 +86,96 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-
-<p>The <code>stringmagick</code> package introduces a new language tailored to create complex character strings. Use the function <code>smagick</code> to interpolate a variable inside a character string and to apply, on-the-fly, any arbitrary string operation.</p>
-<p>It supports over 50 basic operations, seamless customization, nesting, pluralization, and much more. Writing complex character strings has never been that easy!</p>
-<p>To get an overview of the package: <a href="https://lrberge.github.io/stringmagick/articles/stringmagick_tour.html" class="external-link">take the tour</a>. To get started with <code>smagick</code>, see <a href="https://lrberge.github.io/stringmagick/articles/smagick_walkthrough.html" class="external-link">the vignette</a>.</p>
-<p>This package also enhances regular string functions (like <code>grep</code> and co) with specialized functions to:</p>
+<div class="section level1">
+<div class="page-header"><h1 id="stringmagic">stringmagic<a class="anchor" aria-label="anchor" href="#stringmagic"></a>
+</h1></div>
+<p>The purpose of <code>stringmagic</code> is to facilitate the manipulation of character strings.</p>
+<p>It introduces various functions to facilitate pattern detections via <a href="LINK">regular expression (regex) logic</a>, or to efficienty <a href="LINK">clean character vectors</a> in a readable way. Consistently across the package, regular expressions gain <a href="LINK">optional flags</a> to monitor how the patterns should behave (fixed search? ignore case? add word boundaries? etc). For more information, see the vignette on <a href="LINK">string tools</a>.</p>
+<p>The main contribution of this package, and flagship function, is <code>smagic</code> which introduces a new language tailored to create complex character strings.</p>
+<div class="section level3">
+<h3 id="getting-started-with-smagic">Getting started with <code>smagic</code>
+<a class="anchor" aria-label="anchor" href="#getting-started-with-smagic"></a>
+</h3>
+<p><code>smagic</code> behaves in a similar way to the well known function <a href="https://glue.tidyverse.org/" class="external-link">glue</a>. Use curly brackets to interpolate variables: i.e to insert their value directly in the string: <code>{r} library(stringmagic) x = "John" ; y = "Mary" smagic("Hi {x}! How's {y} doing?")</code></p>
+<p>Almost anything <code>glue</code> can do, <code>smagic</code> can do, and if you’re thinking about speed, they’re about as fast (see the section <a href="#Performance">Performance</a>).</p>
+<p>The difference, and originality, of <code>smagic</code> is that you can apply any arbitrary operation to the interpolated variables. You want to create an enumeration? Sure. Add quotation marks? Check. Change the case? No problem. Sort on a substring? Of course! There are over 50 built-in operations and the magic is that applying these operations is about as simple as saying them.</p>
+<p><strong>Operations.</strong> The syntax to add operations is as follows:</p>
+<div class="float">
+<img src="articles/images/operation-template.png" alt="operation"><div class="figcaption">operation</div>
+</div>
+<p>The <code>operations</code> are a comma separated sequence of keywords, each keyword being bound to a specific function. Here is an example in which we apply two operations: <code>{r} lovers = c("romeo", "juliet") smagic("Famous lovers: {title, enum ? lovers}.")</code></p>
+<div class="float">
+<img src="articles/images/example-simple_operation.png" alt="example-lovers"><div class="figcaption">example-lovers</div>
+</div>
+<p><strong>Arguments.</strong> Some operations, like <code>split</code>, require arguments. Arguments are passed using quoted text just before the operation. The syntax is:</p>
+<div class="float">
+<img src="articles/images/argument.png" alt="argument"><div class="figcaption">argument</div>
+</div>
+<p>Let’s take the example of splitting an email address and keeping the text before the domain: <code>{r} email = "John@Doe.com" smagic("This message comes from {'@'split, first ? email}.")</code></p>
+<div class="float">
+<img src="articles/images/example-argument.png" alt="example-argument"><div class="figcaption">example-argument</div>
+</div>
+<p><strong>Options.</strong> Many arguments acccept options. These options are keywords working like flags (i.e. things that can be turned on) and change the behavior of the current operation. Add options using a dot separated sequence of keywords attached to the operation:</p>
+<div class="float">
+<img src="articles/images/options.png" alt="options"><div class="figcaption">options</div>
+</div>
+<p>We have seen the <code>enum</code> operation in an earlier example, let’s add a couple of options to it. <code>{r} fields = c("maths", "physics") smagic("This position requires a PhD in either: {enum.i.or ? fields}.")</code></p>
+<div class="float">
+<img src="articles/images/example-options.png" alt="example-options"><div class="figcaption">example-options</div>
+</div>
+<p><strong>Anything else?</strong> So far we have just scratched the surface of <code>smagic</code> possiblities. Other features are: advanced support for pluralization, nesting, conditional operations, grouped operations, compact if-else statements, and unlimited customization. Here is a list of resources:</p>
 <ul>
-<li>detect combinations of regular expressions</li>
-<li>chain basic string operations</li>
-<li>clean character string vectors</li>
+<li><a href="LINK">an introduction to <code>smagic</code></a></li>
+<li><a href="LINK"><code>smagic</code>’s reference</a></li>
+<li><a href="LINK">operations reference</a></li>
 </ul>
-<p>See more in the <a href="https://lrberge.github.io/stringmagick/articles/string_tools.html" class="external-link">dedicated vignette</a>.</p>
+</div>
+<div class="section level3">
+<h3 id="friendly-errors">Friendly errors<a class="anchor" aria-label="anchor" href="#friendly-errors"></a>
+</h3>
+<p><code>smagic</code> tries to be friendly to the user by providing useful error message: ``<code>{r, eval = FALSE, echo = TRUE} x = c("Zeus", "Hades", "Poseidon") smagic("The {len?x} brothers: {anum?x}.") #&gt; Error: in smagic("The {len?x} brothers: {anum?x}."):  #&gt; CONTEXT: Problem found in "The {len?x} brothers: {anum?x}.", #&gt;          when dealing with the interpolation</code>{anum?x}<code>. #&gt; PROBLEM:</code>anum<code>is not a valid operator. Maybe you meant</code>enum<code>? #&gt;  #&gt; INFO: Type smagic('--help') for more help or smagic(.help = "regex") or smagic(.help = TRUE). #&gt; Ex. of valid stuff: smagic("Letters: {10 first,</code>6/2`last, ’’c, ’i =&gt; e’r, upper.first ? letters}!“)</p>
+<p>smagic(“The iris species are: {unik, sort ? iris[[‘Species’]}.”) #&gt; Error: in smagic(“The iris species are: {unik, sort ? iris[…: #&gt; CONTEXT: Problem found in”The iris species are: {unik, sort ? iris[[‘Species’]}.”, #&gt; when dealing with the interpolation <code>{unik, sort ? iris[['Species']}.</code>.<br>
+#&gt; PROBLEM: in the expression <code>iris[['Species']</code>, a bracket (<code>[</code>) open is not closed.</p>
+<pre><code>
+The cost of this feature in terms of computing time is of the order of magnitude of 50 micro seconds (of course it depends on context). 
+If you're not interested in informative error messages, `.smagic` (note the `"."` prefix) is identical to `smagic` but avoids error handling and is then slightly faster.
 
+### Performance
+
+**Basic interpolation.** For regular string interpolations, the performance of `smagic` is similar to the performance of `glue`. That is to say, the price to pay for user experience is in the ballpark of 100 micro seconds (on my -- slow -- computer). Let's have a simple benchmark:
+
+```{r, eval = FALSE, echo = TRUE}
+library(microbenchmark)
+library(glue)
+
+x = "Romeo" ; y = "Juliet"
+microbenchmark(base    =   paste0(x, " seems to love ", y, "."),
+               glue    =     glue("{x} seems to love {y}."),
+               smagic  =   smagic("{x} seems to love {y}."),
+               .smagic =  .smagic("{x} seems to love {y}."))
+#&gt; Unit: microseconds
+#&gt;     expr  min    lq    mean median     uq   max neval
+#&gt;     base  1.2  1.40   1.739   1.55   1.70   5.2   100
+#&gt;     glue 76.8 83.80 105.493  87.80  96.50 295.4   100
+#&gt;   smagic 88.6 92.60 106.779  98.85 105.75 334.0   100
+#&gt;  .smagic 43.8 47.25  56.626  50.30  54.25 191.2   100</code></pre>
+<p>The difference with the base function <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">base::paste0</a></code> looks impressive (it looks 50 times faster), but is in fact not really important. Both <code>glue</code> and <code>smagic</code> processing time is due to overheads: a fixed cost that does not depend on the size of the vectors in input. Hence for large vectors or operations that run in one millisecond or more, this difference is negligible.</p>
+<p>As you can notice, <code>.smagic</code>, <code>smagic</code> without error handling, is about twice faster than <code>glue</code>. But I’m not sure that sacrificing user expericence for 50us overheads is really worth it!</p>
+<p><strong>Complex operations</strong> The function <code>smagic</code> shines when performing complex string manipulation. The question we ask here is: how much does it cost in terms of perfomance? Let’s look at the following operation:</p>
+<p><code>{r, eval = TRUE, echo = TRUE} x = c("Zeus", "Hades", "Poseidon") smagic("The {len?x} brothers: {enum?x}.")</code></p>
+<p>Although the interface is different, let’s compare <code>smagic</code> to <code>glue</code> and <code>paste0</code>:</p>
+<p><code>{r, eval = FALSE, echo = TRUE} x = c("Zeus", "Hades", "Poseidon") microbenchmark(base = paste0("The ", length(x), " brothers: ",                     paste0(paste0(x[1:2], collapse = ", "), " and ", x[3]), "."),                glue = glue("The {length(x)} brothers: {x_enum}.",                       x_enum = paste0(paste0(x[1:2], collapse = ", "), " and ", x[3])),                smagic = smagic("The {len?x} brothers: {enum?x}."),                smagic_bis = smagic("The {length(x)} brothers: {x_enum}.",                       x_enum = paste0(paste0(x[1:2], collapse = ", "), " and ", x[3]))) #&gt; Unit: microseconds #&gt;        expr   min    lq    mean median     uq   max neval #&gt;        base   4.7   5.7   6.555   6.20   7.15  20.8   100 #&gt;        glue  94.9 111.8 122.886 123.85 130.75 172.2   100 #&gt;      smagic 406.1 422.7 444.330 435.00 451.25 643.7   100 #&gt;  smagic_bis 116.2 136.3 144.848 144.05 150.60 285.8   100</code></p>
+<p>As we can see, the processing overhead of <code>smagic</code> specific syntax is a few hundred microseconds. Remember that since regular interpolation can be performed, you can always fall back to <code>glue</code>-like processing (and benefit from the same performance), as is illustrated by the last command of the benchmark.</p>
+</div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/lrberge/stringmagick/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/lrberge/stringmagick/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/lrberge/stringmagic/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/lrberge/stringmagic/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
@@ -122,7 +192,7 @@
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing stringmagick</a></li>
+<li><a href="authors.html#citation">Citing stringmagic</a></li>
 </ul>
 </div>
 
