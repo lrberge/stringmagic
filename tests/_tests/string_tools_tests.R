@@ -24,7 +24,7 @@ val = string_is(x, "...", fixed = TRUE)
 test(val, c(FALSE, FALSE, TRUE, FALSE, FALSE))
 
 
-val = string_is(x, "!f/...")
+val = string_is(x, "f/!...")
 test(val, c(TRUE, TRUE, FALSE, TRUE, TRUE))
 
 val = string_is(x, "!...", fixed = TRUE)
@@ -38,7 +38,7 @@ val = string_is(x, "one", ignore.case = TRUE, word = TRUE)
 test(val, c(TRUE, FALSE, TRUE, FALSE, FALSE))
 
 
-val = string_is(x, "!iw/one")
+val = string_is(x, "iw/!one")
 test(val, c(FALSE, TRUE, FALSE, TRUE, TRUE))
 
 val = string_is(x, "!one", ignore.case = TRUE, word = TRUE)
