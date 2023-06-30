@@ -478,28 +478,28 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                    .check = TRUE, .class = NULL, .help = NULL, 
                    .namespace = NULL){
 
-
   if(.check){
+    set_pblm_hook()
+    
     if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
     if(!missing(.invisible)) check_logical(.invisible, scalar = TRUE)
     if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
     if(!missing(.sep)) check_character(.sep, scalar = TRUE)
     if(!missing(.envir)) check_envir(.envir)
-    if(!missing(.last)){
-      check_last(.last)
+    if(!missing(.last)) check_last(.last)
+    if(!missing(.delim)){
+      .delim = check_set_delimiters(.delim)
     }
   }
     
-  set_pblm_hook()
-  
-  check_character(.delim, no_na = TRUE)
   if(length(.delim) == 1){
     .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
+    if(.check){ 
+      check_delimiters(.delim)
+    }
   }
     
-  if(.check){ 
-    check_delimiters(.delim)
-  }
+  
 
   if(...length() == 0){
     if(missnull(.help)){
@@ -538,9 +538,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 #' @describeIn smagic A simpler version of `smagic` without any error handling to save a few micro seconds
 .smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                     .delim = c("{", "}"), .collapse = NULL, .last = NULL,
-                    .check = FALSE, .namespace = NULL){
-
-  set_pblm_hook()
+                    .namespace = NULL){
   
   if(length(.delim) == 1){
     .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
@@ -550,7 +548,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                       .sep = .sep, .namespace = .namespace,
                       .vectorize = .vectorize, .is_root = TRUE, 
                       .collapse = .collapse,
-                      .check = .check, .last = .last)
+                      .check = FALSE, .last = .last)
 }
 
 # This is an internal alias (not exported)
@@ -722,19 +720,20 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     if(length(x_parsed) == 1 && isTRUE(attr(x_parsed, "error"))){
       report_smagic_parsing_error(x, x_parsed, .delim)
     }
-  }
-  
-  if(.is_root){
-    if(grepl(".now", x, fixed = TRUE)){
-      if(grepl(".now(", x, fixed = TRUE)){
-        .data[[".now"]] = function(x) format(Sys.time(), x)
-      } else {
-        .data[[".now"]] = Sys.time()
-      }
-    }
     
-    if(grepl(".date", x, fixed = TRUE)){
-      .data[[".date"]] = Sys.Date()
+    # we add extra variables
+    if(.is_root){
+      if(grepl(".now", x, fixed = TRUE)){
+        if(grepl(".now(", x, fixed = TRUE)){
+          .data[[".now"]] = function(x) format(Sys.time(), x)
+        } else {
+          .data[[".now"]] = Sys.time()
+        }
+      }
+      
+      if(grepl(".date", x, fixed = TRUE)){
+        .data[[".date"]] = Sys.Date()
+      }
     }
   }
 
