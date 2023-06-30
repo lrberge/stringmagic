@@ -101,7 +101,7 @@ smagic("The iris species are: {unik, sort ? iris[['Species']}.")
 #> Error: in smagic("The iris species are: {unik, sort ? iris[...: 
 #> CONTEXT: Problem found in "The iris species are: {unik, sort ? iris[['Species']}.",
 #>          when dealing with the interpolation `{unik, sort ? iris[['Species']}.`.   
-#> PROBLEM: in the expression ` iris[['Species']`, a bracket (`[`) open is not closed.
+#> PROBLEM: in the expression `iris[['Species']`, a bracket (`[`) open is not closed.
 ```
 
 The cost of this feature in terms of computing time is of the order of magnitude of 50 micro seconds (of course it depends on context). 
@@ -145,12 +145,15 @@ Although the interface is different, let's compare `smagic` to `glue` and `paste
 ```r
 x = c("Zeus", "Hades", "Poseidon")
 microbenchmark(base = paste0("The ", length(x), " brothers: ", 
-                        paste0(paste0(x[1:2], collapse = ", "), " and ", x[3]), "."),
+                        paste0(paste0(x[-length(x)], collapse = ", "), 
+                               " and ", x[length(x)]), "."),
                glue = glue("The {length(x)} brothers: {x_enum}.", 
-                        x_enum = paste0(paste0(x[1:2], collapse = ", "), " and ", x[3])),
+                        x_enum = paste0(paste0(x[-length(x)], collapse = ", "), 
+                                        " and ", x[length(x)])),
                smagic = smagic("The {len?x} brothers: {enum?x}."),
                smagic_bis = smagic("The {length(x)} brothers: {x_enum}.", 
-                              x_enum = paste0(paste0(x[1:2], collapse = ", "), " and ", x[3])))
+                              x_enum = paste0(paste0(x[-length(x)], collapse = ", "), 
+                                        " and ", x[length(x)])))
 #> Unit: microseconds
 #>        expr   min    lq    mean median     uq   max neval
 #>        base   4.7   5.7   6.555   6.20   7.15  20.8   100
