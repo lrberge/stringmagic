@@ -121,11 +121,11 @@ microbenchmark(base    =   paste0(x, " seems to love ", y, "."),
                smagic  =   smagic("{x} seems to love {y}."),
                .smagic =  .smagic("{x} seems to love {y}."))
 #> Unit: microseconds
-#>     expr  min    lq    mean median     uq   max neval
-#>     base  1.2  1.40   1.739   1.55   1.70   5.2   100
-#>     glue 76.8 83.80 105.493  87.80  96.50 295.4   100
-#>   smagic 88.6 92.60 106.779  98.85 105.75 334.0   100
-#>  .smagic 43.8 47.25  56.626  50.30  54.25 191.2   100
+#>     expr   min     lq    mean median     uq   max neval
+#>     base   1.6   2.35   2.587   2.60   2.85   4.5   100
+#>     glue 121.2 133.60 142.583 139.10 145.90 249.4   100
+#>   smagic 108.6 120.15 129.114 125.75 132.50 290.1   100
+#>  .smagic  65.9  72.75  78.987  77.60  84.05 145.0   100
 ```
 
 The difference with the base function `base::paste0` looks impressive (it looks 50 times faster), but is in fact not really important. Both `glue` and `smagic` processing time is due to overheads: a fixed cost that does not depend on the size of the vectors in input. Hence for large vectors or operations that run in one millisecond or more, this difference is negligible.
@@ -147,19 +147,22 @@ x = c("Zeus", "Hades", "Poseidon")
 microbenchmark(base = paste0("The ", length(x), " brothers: ", 
                         paste0(paste0(x[-length(x)], collapse = ", "), 
                                " and ", x[length(x)]), "."),
+                               
                glue = glue("The {length(x)} brothers: {x_enum}.", 
                         x_enum = paste0(paste0(x[-length(x)], collapse = ", "), 
                                         " and ", x[length(x)])),
+                                        
                smagic = smagic("The {len?x} brothers: {enum?x}."),
+               
                smagic_bis = smagic("The {length(x)} brothers: {x_enum}.", 
                               x_enum = paste0(paste0(x[-length(x)], collapse = ", "), 
                                         " and ", x[length(x)])))
 #> Unit: microseconds
-#>        expr   min    lq    mean median     uq   max neval
-#>        base   4.7   5.7   6.555   6.20   7.15  20.8   100
-#>        glue  94.9 111.8 122.886 123.85 130.75 172.2   100
-#>      smagic 406.1 422.7 444.330 435.00 451.25 643.7   100
-#>  smagic_bis 116.2 136.3 144.848 144.05 150.60 285.8   100
+#>        expr   min     lq    mean median    uq   max neval
+#>        base   5.9   8.30   8.870   8.75   9.3  23.0   100
+#>        glue 141.6 155.75 167.266 162.35 172.6 254.3   100
+#>      smagic 498.9 512.85 533.808 520.70 540.2 696.1   100
+#>  smagic_bis 146.3 161.70 171.086 168.75 172.7 283.3   100
 ```
 
 As we can see, the processing overhead of `smagic` specific syntax is a few hundred microseconds. 

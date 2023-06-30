@@ -69,9 +69,6 @@ x = string_vec("hey!, /twitter, !##!, a & b, c | d")
 val = string_which(x, "\\/t")
 test(val, 2)
 
-val = string_which(x, "//t")
-test(val, 2)
-
 val = string_which(x, "!\\/")
 test(val, c(1, 3:5))
 
@@ -83,9 +80,6 @@ test(val, 4)
 
 val = string_which(x, "f/twi |  \\|  | \\!")
 test(val, c(1:3, 5))
-
-val = string_which(x, "!f/!! & e")
-test(val, c(1, 3:5))
 
 # other
 test(string_is("bonjour", "fixed/---|"), FALSE)

@@ -1017,6 +1017,21 @@ sma2 = smagic_alias(.delim = "$[ ]")
 txt = sma2("x$[1:2]", .last = "C")
 test(txt, "x1 and x2")
 
+#
+# .post + .last ####
+#
+
+x = smagic("{1:5}0", .last = "num", .post = sum)
+test(x, 150)
+
+#
+# .default ####
+#
+
+x = smagic("{1:5}0", .default = "'1|1'first, enum")
+test(x, "1 and 50")
+
+
 
 
 

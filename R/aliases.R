@@ -51,7 +51,7 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
   check_logical(.vectorize, scalar = TRUE)
   .delim = check_set_delimiters(.delim)
   check_last(.last)
-  check_function(.post)
+  check_function(.post, null = TRUE)
   check_character(.default, scalar = TRUE, null = TRUE)
   check_logical(.invisible, scalar = TRUE)
   # .local_ops, see below
