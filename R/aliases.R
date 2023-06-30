@@ -41,6 +41,8 @@
 #' 
 smagic_alias = function(.sep = "", .vectorize = FALSE, 
                         .delim = c("{", "}"), .last = NULL, 
+                        .post = NULL, .invisible = FALSE,
+                        .local_ops = NULL,
                         .collapse = NULL,  .check = TRUE, 
                         .class = NULL, .namespace = NULL){
   
@@ -48,29 +50,83 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
   check_character(.sep, scalar = TRUE)
   check_logical(.vectorize, scalar = TRUE)
   check_last(.last)
+  check_function(.post)
   check_character(.collapse, scalar = TRUE, null = TRUE)
   check_logical(.check, scalar = TRUE)
   check_character(.class, no_na = TRUE, null = TRUE)
   check_character(.namespace, scalar = TRUE, null = TRUE)
+  
+  # .local_ops
+  if(!missnull(.local_ops)){
+    info = .sma("\nINFO: names of the list = alias. Content = smagic operations.",
+                "\nEx: .local_ops = list(\"plus\" = \"' + 'collapse\")")
+    
+    if(!is.list(.local_ops)){
+      stopi("The argument `.local_ops` must be a list. ",
+            "Currently it is of class {enum.bq?class(.local_ops)}.", info)
+    }
+    if(length(.local_ops) == 0){
+      stopi("The argument `.local_ops` must be a non-empty list. ",
+            "Currently it is empty.", info)
+    }
+    if(is.null(names(.local_ops))){
+      stopi("In the argument `.local_ops` require names.",
+            "\nPROBLEM: the list has no names.", info)
+    }
+    if(string_any(names(.local_ops), "[^[:lower:]]")){
+      stopi("In the argument `.local_ops`, the aliases must be composed of ",
+            "only lower case letters.",
+            "\nPROBLEM: this is not the case for ",
+            "{'[^[:lower:]]'get, enum.bq ? names(.local_ops)}.", info)
+    }
+    if(!all(sapply(.local_ops, is.character))){
+      i_pblm = which(!sapply(.local_ops, is.character))[1]
+      stopi("In the argument `.local_ops`, each element of the list must ",
+            "be a character scalar.",
+            "\nPROBLEM: the {nth?i_pblm} element is of class ",
+            "{enum.bq?class(.local_ops[i_pblm]}.", info)
+    }
+    if(any(lengths(.local_ops) != 1)){
+      i_pblm = which(lengths(.local_ops) != 1)[1]
+      stopi("In the argument `.local_ops`, each element of the list must ",
+            "be a character scalar.",
+            "\nPROBLEM: the {nth?i_pblm} element is of length {len?.local_ops[i_pblm]}.", 
+            info)
+    }
+    
+    if(is.null(.namespace)){
+      .namespace = tag_gen()
+    }   
+    
+    for(i in seq_along(.local_ops)){
+      alias = names(.local_ops)[[i]]
+      content = .local_ops[[i]]
+      smagic_register_ops(content, alias, .namespace)
+    }    
+  }
+  
   
   # forcing evaluations (INDISPENSABLE)
   sep = .sep
   vectorize = .vectorize
   delim = check_set_delimiters(.delim)
   last = .last
+  post = .post
+  invisible = .invisible
   collapse = .collapse
   check = .check
   class = .class
   namespace = .namespace
   
   res = function(..., .envir = parent.frame(), .sep = sep, .vectorize = vectorize, 
-                   .delim = delim, .last = last, 
+                   .delim = delim, .last = last, .post = post, .invisible = invisible,
                    .collapse = collapse, 
                    .check = check, .class = class, .help = NULL, 
                    .namespace = namespace){
                     
     smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
-            .delim = .delim, .last = .last, .collapse = .collapse,
+            .delim = .delim, .last = .last, .post = .post,
+            .invisible = .invisible, .collapse = .collapse,
             .check = .check, .class = .class, .help = .help,
             .namespace = .namespace)
   }

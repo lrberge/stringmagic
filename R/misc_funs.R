@@ -1068,6 +1068,31 @@ extract_first = function(x, pattern, fixed = FALSE){
   c(x1, x2)
 }
 
+tag_gen = function(){
+  id = getOption("smagic_tag")
+  
+  if(is.null(id)){
+    id = 1
+  }
+    
+  options(smagic_tag = id + 1)
+  
+  items = letters
+  n_shifts = id %% 26
+  n_reshuffle = id %/% 26
+  if(n_reshuffle > 0){
+    for (i in 1:n_reshuffle) {
+      items = sample(items)
+    }
+  }
+  
+  if(n_shifts > 0){
+    items = c(items[-(1:n_shifts)], items[1:n_shifts])
+  }
+  
+  tag = paste0(sample(items, 6, replace = TRUE), collapse = "")
+  return(tag)
+}
 
 setNames = function(x, nm){
   names(x) = nm

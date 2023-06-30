@@ -56,6 +56,12 @@
 #' it must be an `smagic` chain of operations of the form `"'arg1'op1, op2, etc"`. All these operations
 #' are applied just before returning the vector. If a function, 
 #' it will be applied to the resulting vector.
+#' @param .post Function or `NULL` (default). If not `NULL`, this function will be applied 
+#' after all the processing, just before returning the object. This function can have 
+#' extra arguments which will be caught directly in the `...` argument of `smagic`.
+#' For example if `.post = head`, you can directly pass the argument `n = 3` to `smagic`'s arguments.
+#' @param .invisible Logical scalar, default is `FALSE`. Whether the object returned should be 
+#' invisible (i.e. not printed on the console). 
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
@@ -1012,7 +1018,20 @@
 #' smagic("Why do you develop packages? For {`dollar`times.c ! $}?",
 #'     "For money? No... for {upper,''s, c ? reason}!", .sep = "\n")
 #' 
+#' #
+#' # Alias generation
+#' #
+#' 
+#' # Let's create a formula filler
+#' # - we use .local_ops to create the ad hoc operation "add" which adds variables
+#' # - we transform into a formula ex post
+#' 
+#' fml = smagic_alias(.post = as.formula, .local_ops = list(add = "' + 'collapse"))
 #'
+#' # example with mtcars
+#' lhs = "mpg"
+#' rhs = c("hp", "drat")
+#' fml("{lhs} ~ {add?rhs} + am")
 #'    
 #'
 NULL

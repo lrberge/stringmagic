@@ -473,14 +473,15 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 
 #' @describeIn smagic String interpolation with operation chaining
 smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
-                   .delim = c("{", "}"), .last = NULL, 
-                   .collapse = NULL, 
+                   .delim = c("{", "}"), .last = NULL, .post = NULL,
+                   .collapse = NULL, .invisible = FALSE,
                    .check = TRUE, .class = NULL, .help = NULL, 
                    .namespace = NULL){
 
 
   if(.check){
     if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
+    if(!missing(.invisible)) check_logical(.invisible, scalar = TRUE)
     if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
     if(!missing(.sep)) check_character(.sep, scalar = TRUE)
     if(!missing(.envir)) check_envir(.envir)
@@ -516,24 +517,30 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                             .collapse = .collapse, .is_root = TRUE, 
                             .namespace = .namespace,
                             .check = .check, .last = .last)
-
-  if(inherits(res, "help")){
-      return(invisible(NULL))
-  }
-
-  if(!missnull(.class)){
-    class(res) = .class
-  }
   
   if(!is.null(attr(res, "group_index"))){
     # cleaning artifacts
     attr(res, "group_index") = NULL
   }
   
+  if(!missnull(.post)){
+    # .post must be a function
+    # we catch the arguments
+    res = check_set_eval_fun(.post, res, ...)
+  }
+  
+  if(!missnull(.class)){
+    class(res) = c(.class, class(res))
+  }
+  
+  if(.invisible){
+    return(invisible(res))
+  }
+  
   res
 }
 
-#' @describeIn smagic Like `smagic` but without any error handling to save a few micro seconds
+#' @describeIn smagic A simpler version of `smagic` without any error handling to save a few micro seconds
 .smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                     .delim = c("{", "}"), .collapse = NULL, .last = NULL,
                     .check = FALSE, .namespace = NULL){
@@ -688,6 +695,10 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
       }
       
       res = unlist(res)
+      
+      if(!true_character(res)){
+        res = as.characer(res)
+      }
       
       if(!is.null(.last)){
         if(is.function(.last)){
@@ -1095,6 +1106,11 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     }
   }
   
+  if(!true_character(res)){
+    # we always return something in character form
+    res = as.character(res)
+  }  
+  
   if(!is.null(.last)){
     if(is.function(.last)){
       res = .last(res)
@@ -1108,10 +1124,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
 
   if(!is.null(.collapse) && length(res) > 1){
     res = paste0(res, collapse = .collapse)
-  } else if(!true_character(res)){
-    # we always return something in character form
-    res = as.character(res)
-  }  
+  }
 
   return(res)
 }

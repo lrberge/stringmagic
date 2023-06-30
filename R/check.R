@@ -265,14 +265,18 @@ check_envir = function(x){
 
 }
 
-check_function = function(x, null = FALSE){
+check_function = function(x, null = FALSE, up = 0, argname = NULL){
+  set_up(up + 1)
   
   if(null && is.null(x)){
     return(NULL)
   }
   
   if(!is.function(x)){
-    x_dp = deparse_short(substitute(x))
+    if(is.null(argname)){
+      x_dp = deparse_short(substitute(x))
+    }
+    
     stop_up("The argument `", x_dp, "` must be a function. ",
             "PROBLEM: it is not a function, it is of class {enum?class(x)}.")
   }
@@ -962,6 +966,33 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
   
 }
 
+check_set_eval_fun = function(fun__, x__, ...){
+  # we postfix weirdly to avoid common argument names
+  # the .x is pretty common
+  
+  check_function(fun__, up = 1, argname = deparse(substitute(fun__)))
+  
+  # NOTA: formalArgs does not work for primitives, like sum
+  arg_names = names(formals(args(fun__)))
+  dots = list(...)
+  args = list()
+  args[[1]] = x__
+  if(!is.null(arg_names)){
+    arg_ok = intersect(names(dots), arg_names)
+    args[arg_ok] = dots[arg_ok]
+  }
+  
+  res = try(do.call(fun__, args), silent = TRUE)
+  if(isError(res)){
+    fun_arg = deparse(substitute(fun__))
+    stop_hook("The evaluation of the function in argument {bq?fun_arg} ", 
+              "led to an error, see below:",
+              "\n{'^.+do\\.call[^\n]+\n'r?res}")
+  }
+  
+  res
+}
+
 ####
 #### utilities ####
 ####
@@ -1194,16 +1225,20 @@ stop_up = function(..., up = 1, msg = NULL, envir = parent.frame(), verbatim = F
 
 }
 
-warn_no_named_dots = function(dots){
+warn_no_named_dots = function(dots, extra_args = NULL, extra_funName = ""){
   if(!is.null(names(dots))){
+    is_extra = !is.null(extra_args)
     args_fun = names(formals(sys.function(sys.parent())))
+    args_fun = unique(c(args_fun, extra_args))
     args_fun = setdiff(args_fun, "...")
 
     dot_names = names(dots)
     dot_names = dot_names[nchar(dot_names) > 0]
     sugg_txt = suggest_item(dot_names[1], args_fun, info = "argument")
 
-    warn_up("The arguments in `...` shall not have names. The name{$s, enum.bq ? dot_names}",
+    warn_up("The arguments in `...` shall not have names{&is_extra; or may refer to the ",
+                      "arguments of the function in {bq?extra_funName}}. ",
+            "The name{$s, enum.bq ? dot_names}",
             " may refer to {$(an;some)} argument{$s}?", sugg_txt)
 
   }

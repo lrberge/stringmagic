@@ -168,6 +168,8 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
 #' @param ignore.case Logical scalar, default is `FALSE`. If `TRUE`, then case insensitive search is triggered. 
 #' @param last A function or `NULL` (default). If a function, it will be applied to the vector 
 #' just before returning it.
+#' @param envir Environment in which to evaluate the interpolations if the flag `"magic"` is provided.
+#' Default is `parent.frame()`.
 #' 
 #' @details
 #' The internal function used to find the patterns is [base::grepl()] with `perl = TRUE`.
@@ -296,7 +298,23 @@ string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 
   if(missnull(pattern)){
     dots = check_set_dots(..., mbt = TRUE, character = TRUE, scalar = TRUE, no_na = TRUE)
-    warn_no_named_dots(dots)
+    if(!is.null(names(dots))){
+      if(is.null(last)){
+        warn_no_named_dots(dots)
+      } else {
+        # we remove the arguments that go to "last"
+        dot_names = names(dots)
+        args_last = names(formals(args(last)))
+        if(!is.null(args_last)){
+          args_ok = intersect(dot_names, args_last)
+          dots[args_ok] = NULL
+          if(sum(nchar(dot_names) > 0) != length(args_ok)){
+            warn_no_named_dots(dots, extra_args = args_last, extra_funName = "last")
+          }
+        }        
+      }
+    }
+    
     pattern = unlist(dots)
   }
 
@@ -377,7 +395,7 @@ string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   }
   
   if(!is.null(last)){
-    res = last(res)
+    res = check_set_eval_fun(last, res, ...)
   }
 
   res
@@ -1570,7 +1588,8 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE,
 #' cat(paste0(string_fill(x, center = TRUE), ":", c(3, 7), "€"), sep = "\n")
 #' 
 #' # changing the length of the fill and the symbol used for filling
-#' cat(paste0(string_fill(x), ":", string_fill(c(3, 7), 3, "0", right = TRUE), "€"), sep = "\n")
+#' cat(paste0(string_fill(x), ":", 
+#'            string_fill(c(3, 7), 3, "0", right = TRUE), "€"), sep = "\n")
 #' 
 #' # na behavior: default/NA/other
 #' x = c("hello", NA) 
@@ -1677,7 +1696,7 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
   if(!is.null(info_pattern$error)){
     main_msg = .sma("Problem found in the regex pattern {'50|..'k, Q ? pattern}.",
                     "\nPROBLEM: ")
-    
+    extra = info_pattern$error_extra
     msg = switch(info_pattern$error,
                  "flag starting with space" = "flags cannot start with a space.", 
                  "flags list is too long" = 
@@ -1686,14 +1705,16 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
                          "with a double backslash."), 
                  "non valid character at position" = 
                     .sma("the flag list contains a non ",
-                        "valid character in position {info_pattern$error_extra} ",
-                        "({`info_pattern$error_extra`firstchar, lastchar, bq ? pattern}). ",
+                        "valid character in position {extra} ",
+                        "({`extra`firstchar, lastchar, bq ? pattern}). ",
                         "Flags must only consist of lower case letters followed by a comma or a slash."),
                 "flag starts with !" = 
                     .sma("You cannot use the '!' operator before the flags."), 
                  "flag empty" = 
-                    .sma("The {Nth ? info_pattern$error_extra} flag is empty. ", 
-                         "Flags must only consist of lower case letters followed by a comma or a slash."))
+                    .sma("The {Nth ? extra} flag is empty. ", 
+                         "{&extra==1;To use a regular slash, escape it with a double backslah.;",
+                         "Flags must only consist of lower case letters followed by ",
+                         "a comma or a slash.}"))
     
     note_rm = .sma("\n\nINFO: regex flags write 'flag1, flag2/pattern'",
                     " where a flag = lower case letters.",
