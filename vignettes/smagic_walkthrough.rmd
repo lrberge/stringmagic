@@ -49,7 +49,8 @@ library(stringmagic)
 Before moving on, we set the global option `.smagic.class` to `TRUE` such that 
 the character vectors produced by `smagic` are displayed nicely in this vignette.
 ```{r}
-setSmagic(.class = TRUE)
+library(stringmagic)
+smagic = smagic_alias(.class = "smagic")
 ```
 
 # Motivating examples and advice for reading
@@ -57,7 +58,6 @@ setSmagic(.class = TRUE)
 Here's a few things the algorithm can do (don't worry if it looks like gibberish when first
 discovering it: it will make sense later!):
 ```{r}
-library(stringmagic)
 name = "john doe"
 smagic("Hi {title ? name}.")
 
