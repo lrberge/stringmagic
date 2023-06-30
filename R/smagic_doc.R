@@ -69,7 +69,9 @@
 #' @param .default Character scalar or `NULL` (default). If provided, it must be 
 #' a sequence of `smagic` operations. It will be applied as a default to any interpolation.
 #' Ex: if `x = 1:2`, then `smagic("x = {x}", .default = "enum")` leads to "x = 1 and 2", 
-#' and is equivalent to `smagic("x = {enum?x}")`.
+#' and is equivalent to `smagic("x = {enum?x}")`. Note that this default operations does 
+#' not apply to nested expressions. That is `smagic("{!x{1:2}}", .default = "enum")` leads 
+#' to `c("x1", "x2")` and NOT `"x1 and 2"`.
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 

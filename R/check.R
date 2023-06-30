@@ -693,7 +693,7 @@ check_set_smagic_parsing = function(x, check, .delim){
       
       x_call_clean = gsub("Error in parse[^:]+: ?", "Error when parsing: ", x_call)
       
-      msg = .sma("PROBLEM: The expression {open}bq?x{close} could not be parsed, see error below:",
+      msg = .sma("PROBLEM: The expression {bq?x} could not be parsed, see error below:",
                  "\n{x_call_clean}",
                  "\nINFO: Interpolations can be of the form `{open}expr{close}`, ",
                  "`{open}op1, op2?expr{close}`, or", 

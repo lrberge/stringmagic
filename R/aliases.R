@@ -41,16 +41,20 @@
 #' 
 smagic_alias = function(.sep = "", .vectorize = FALSE, 
                         .delim = c("{", "}"), .last = NULL, 
-                        .post = NULL, .invisible = FALSE,
-                        .local_ops = NULL,
+                        .post = NULL, .default = NULL, 
+                        .invisible = FALSE, .local_ops = NULL,
                         .collapse = NULL,  .check = TRUE, 
                         .class = NULL, .namespace = NULL){
   
   # checks
   check_character(.sep, scalar = TRUE)
   check_logical(.vectorize, scalar = TRUE)
+  .delim = check_set_delimiters(.delim)
   check_last(.last)
   check_function(.post)
+  check_character(.default, scalar = TRUE, null = TRUE)
+  check_logical(.invisible, scalar = TRUE)
+  # .local_ops, see below
   check_character(.collapse, scalar = TRUE, null = TRUE)
   check_logical(.check, scalar = TRUE)
   check_character(.class, no_na = TRUE, null = TRUE)
@@ -109,9 +113,10 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
   # forcing evaluations (INDISPENSABLE)
   sep = .sep
   vectorize = .vectorize
-  delim = check_set_delimiters(.delim)
+  delim = .delim
   last = .last
   post = .post
+  default = .default
   invisible = .invisible
   collapse = .collapse
   check = .check
@@ -119,13 +124,13 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
   namespace = .namespace
   
   res = function(..., .envir = parent.frame(), .sep = sep, .vectorize = vectorize, 
-                   .delim = delim, .last = last, .post = post, .invisible = invisible,
-                   .collapse = collapse, 
+                   .delim = delim, .last = last, .post = post, .default = default,
+                   .invisible = invisible, .collapse = collapse, 
                    .check = check, .class = class, .help = NULL, 
                    .namespace = namespace){
                     
     smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
-            .delim = .delim, .last = .last, .post = .post,
+            .delim = .delim, .last = .last, .post = .post, .default = .default,
             .invisible = .invisible, .collapse = .collapse,
             .check = .check, .class = .class, .help = .help,
             .namespace = .namespace)
