@@ -100,6 +100,9 @@ with comma separation ("word, total/pat") or use only their initials ("wt/pat").
 
 Starting with an '@' leads to operations in \code{\link[=string_ops]{string_ops()}}. Ex: "@ascii, lower, ws" turns
 the string into ASCII, lowers the case and normalizes white spaces (see help of \code{\link[=string_ops]{string_ops()}}).}
+
+\item{envir}{Environment in which to evaluate the interpolations if the flag \code{"magic"} is provided.
+Default is \code{parent.frame()}.}
 }
 \value{
 The main usage returns a character vector of the same length as the vector in input.

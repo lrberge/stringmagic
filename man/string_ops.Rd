@@ -5,11 +5,15 @@
 \alias{string_ops}
 \title{Chains basic operations to character vectors}
 \usage{
-string_ops_alias(pre_unik = NULL, namespace = NULL)
+string_ops_alias(op = NULL, pre_unik = NULL, namespace = NULL)
 
-string_ops(x, op, pre_unik = NULL, namespace = NULL)
+string_ops(x, op, pre_unik = NULL, namespace = NULL, envir = parent.frame())
 }
 \arguments{
+\item{op}{Character \strong{scalar}. Character scalar containing the comma separated values
+of operations to perform to the vector. The 50+ operations are detailed in the help
+page of \code{\link[=smagic]{smagic()}}.}
+
 \item{pre_unik}{Logical scalar, default is \code{NULL}. Whether to first unique the vector
 before applying the possibly costly string operations, and merging back the result.
 For very large vectors with repeated values the time gained can be substantial. By
@@ -26,9 +30,8 @@ the new \code{smagic} operations defined within your package.}
 \item{x}{A character vector. If not a character vector but atomistic (i.e. not a list),
 it will be converted to a character vector.}
 
-\item{op}{Character \strong{scalar}. Character scalar containing the comma separated values
-of operations to perform to the vector. The 50+ operations are detailed in the help
-page of \code{\link[=smagic]{smagic()}}.}
+\item{envir}{Environment in which to evaluate the interpolations if the flag \code{"magic"} is provided.
+Default is \code{parent.frame()}.}
 }
 \value{
 In general it returns a character vector. It may be of a length different from the original

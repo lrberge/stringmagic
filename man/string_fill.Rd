@@ -53,7 +53,8 @@ cat(paste0(string_fill(x), ":", c(3, 7), "€"), sep = "\n")
 cat(paste0(string_fill(x, center = TRUE), ":", c(3, 7), "€"), sep = "\n")
 
 # changing the length of the fill and the symbol used for filling
-cat(paste0(string_fill(x), ":", string_fill(c(3, 7), 3, "0", right = TRUE), "€"), sep = "\n")
+cat(paste0(string_fill(x), ":", 
+           string_fill(c(3, 7), 3, "0", right = TRUE), "€"), sep = "\n")
 
 # na behavior: default/NA/other
 x = c("hello", NA) 

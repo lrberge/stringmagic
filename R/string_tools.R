@@ -266,7 +266,7 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
 #' p = "one"
 #' string_is(x, "m/{p}")
 #' # Explanation:
-#' # - "{p}" is interpolated into "one"
+#' # - "p" is interpolated into "one"
 #' # - we get the equivalent: string_is(x, "one")
 #' 
 #'
@@ -1677,7 +1677,7 @@ string_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = F
 #' @author 
 #' Laurent Berge
 #' 
-#' @inherit string_clean seealse
+#' @inherit string_clean seealso
 #' 
 #' @examples 
 #' 

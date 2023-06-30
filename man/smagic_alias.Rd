@@ -9,6 +9,10 @@ smagic_alias(
   .vectorize = FALSE,
   .delim = c("{", "}"),
   .last = NULL,
+  .post = NULL,
+  .default = NULL,
+  .invisible = FALSE,
+  .local_ops = NULL,
   .collapse = NULL,
   .check = TRUE,
   .class = NULL,
@@ -36,6 +40,21 @@ The default value is equivalent to \code{"{ }"}.
 it must be an \code{smagic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
 are applied just before returning the vector. If a function,
 it will be applied to the resulting vector.}
+
+\item{.post}{Function or \code{NULL} (default). If not \code{NULL}, this function will be applied
+after all the processing, just before returning the object. This function can have
+extra arguments which will be caught directly in the \code{...} argument of \code{smagic}.
+For example if \code{.post = head}, you can directly pass the argument \code{n = 3} to \code{smagic}'s arguments.}
+
+\item{.default}{Character scalar or \code{NULL} (default). If provided, it must be
+a sequence of \code{smagic} operations. It will be applied as a default to any interpolation.
+Ex: if \code{x = 1:2}, then \code{smagic("x = {x}", .default = "enum")} leads to "x = 1 and 2",
+and is equivalent to \code{smagic("x = {enum?x}")}. Note that this default operations does
+not apply to nested expressions. That is \code{smagic("{!x{1:2}}", .default = "enum")} leads
+to \code{c("x1", "x2")} and NOT \code{"x1 and 2"}.}
+
+\item{.invisible}{Logical scalar, default is \code{FALSE}. Whether the object returned should be
+invisible (i.e. not printed on the console).}
 
 \item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
 that should be returned is collapsed with the value of this argument. This leads

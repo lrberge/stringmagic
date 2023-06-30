@@ -12,7 +12,10 @@ smagic(
   .vectorize = FALSE,
   .delim = c("{", "}"),
   .last = NULL,
+  .post = NULL,
   .collapse = NULL,
+  .invisible = FALSE,
+  .default = NULL,
   .check = TRUE,
   .class = NULL,
   .help = NULL,
@@ -27,7 +30,6 @@ smagic(
   .delim = c("{", "}"),
   .collapse = NULL,
   .last = NULL,
-  .check = FALSE,
   .namespace = NULL
 )
 }
@@ -42,8 +44,12 @@ You can add string operations in each \code{"{}"} instance with the syntax \code
 (resp. the verbatim of \code{x}). Otherwise, what to say? Ah, nesting is enabled, and since
 there's over 50 operators, it's a bit complicated to sort you out in this small space.
 
-But type \code{smagic("--help")} to prompt a compact help, or use the argument \code{.help = "keyword"}
-(or \code{.help = TRUE}) to obtain a selective help from the main documentation.}
+Use the argument \code{.help = "keyword"} (or \code{.help = TRUE}) to obtain a selective help
+from the main documentation.
+
+Note that in interpolations you have access to the special variables: \code{.now} and \code{.date}
+to get the current time; and the special function \code{.now("format")} to
+format the time. Ex: \code{.now('\%Y-\%m \%H:\%m')}.}
 
 \item{.envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
 evaluated using the environment from where the function is called or using the named
@@ -70,9 +76,24 @@ it must be an \code{smagic} chain of operations of the form \code{"'arg1'op1, op
 are applied just before returning the vector. If a function,
 it will be applied to the resulting vector.}
 
+\item{.post}{Function or \code{NULL} (default). If not \code{NULL}, this function will be applied
+after all the processing, just before returning the object. This function can have
+extra arguments which will be caught directly in the \code{...} argument of \code{smagic}.
+For example if \code{.post = head}, you can directly pass the argument \code{n = 3} to \code{smagic}'s arguments.}
+
 \item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
 that should be returned is collapsed with the value of this argument. This leads
 to return a string of length 1.}
+
+\item{.invisible}{Logical scalar, default is \code{FALSE}. Whether the object returned should be
+invisible (i.e. not printed on the console).}
+
+\item{.default}{Character scalar or \code{NULL} (default). If provided, it must be
+a sequence of \code{smagic} operations. It will be applied as a default to any interpolation.
+Ex: if \code{x = 1:2}, then \code{smagic("x = {x}", .default = "enum")} leads to "x = 1 and 2",
+and is equivalent to \code{smagic("x = {enum?x}")}. Note that this default operations does
+not apply to nested expressions. That is \code{smagic("{!x{1:2}}", .default = "enum")} leads
+to \code{c("x1", "x2")} and NOT \code{"x1 and 2"}.}
 
 \item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling (i.e.
 human readable error messages).
@@ -89,10 +110,6 @@ topic to read from the main documentation, with the possibility to search for ke
 navigate the help pages. If a character scalar, then a regex search is perfomed on the main
 documentation and any section containining a match is displayed. The user can easily
 navigate across matches.}
-
-\item{.default}{Logical scalar, default is \code{TRUE}. Whether to use the global defaults
-set with the function \code{\link[=setSmagic]{setSmagic()}}. If \code{FALSE}, then the default value of the arguments
-is guaranteed to be ones of the function definition.}
 }
 \value{
 It returns a character vector whose length depends on the elements and operations in the interpolations.
@@ -121,14 +138,14 @@ This leads to a faster processing time (of about 50 microseconds) at the cost of
 If you want to change the default values of \code{smagic} (like changing the delimiter), use
 the function \code{\link[=smagic_alias]{smagic_alias()}}.
 
-Access a compact help on the console with \code{smagic("--help")} or use the argument \code{.help} to which
+Use the argument \code{.help} to which
 you can pass keywords or regular expressions and fecth select pieces from the main documentation.
 }
 \section{Functions}{
 \itemize{
 \item \code{smagic()}: String interpolation with operation chaining
 
-\item \code{.smagic()}: Like \code{smagic} but without any error handling to save a few micro seconds
+\item \code{.smagic()}: A simpler version of \code{smagic} without any error handling to save a few micro seconds
 
 }}
 \section{Interpolation and string operations}{
@@ -1114,7 +1131,20 @@ reason = "glory"
 smagic("Why do you develop packages? For {`dollar`times.c ! $}?",
     "For money? No... for {upper,''s, c ? reason}!", .sep = "\n")
 
+#
+# Alias generation
+#
 
+# Let's create a formula filler
+# - we use .local_ops to create the ad hoc operation "add" which adds variables
+# - we transform into a formula ex post
+
+fml = smagic_alias(.post = as.formula, .local_ops = list(add = "' + 'collapse"))
+
+# example with mtcars
+lhs = "mpg"
+rhs = c("hp", "drat")
+fml("{lhs} ~ {add?rhs} + am")
    
 
 }

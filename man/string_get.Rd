@@ -24,11 +24,11 @@ string_get(
 Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: \code{'[[:alpha:]] & \\\\d'} gets strings
 containing both letters and numbers). You can negate by adding a \code{!} first (ex: \code{"!sepal$"} will
 return \code{TRUE} for strings that do not end with \code{"sepal"}).
-Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
+Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word' and 'magic'.
 Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore').
 Shortcut: use the first letters of the flags. Ex: "if/dt[" would get \code{"DT[i = 5]"} (flags 'ignore' + 'fixed').
-The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the
-pattern. See the documentation of this argument.}
+For 'word', it adds word boundaries to the pattern. The \code{magic} flag first interpolates
+values directly into the pattern with "{}".}
 
 \item{fixed}{Logical scalar, default is \code{FALSE}. Whether to trigger a fixed search instead of a
 regular expression search (default).}
@@ -57,11 +57,14 @@ patterns to be found. By default a (perl) regular-expression search is triggered
 Use ' & ' or ' | ' to chain patterns and combine their result logically (ex: \code{'[[:alpha:]] & \\\\d'} gets strings
 containing both letters and numbers). You can negate by adding a \code{!} first (ex: \code{"!sepal$"} will
 return \code{TRUE} for strings that do not end with \code{"sepal"}).
-Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word', 'verbatim'.
+Add flags with the syntax 'flag1, flag2/pattern'. Available flags are: 'fixed', 'ignore', 'word' and 'magic'.
 Ex: "ignore/sepal" would get "Sepal.Length" (wouldn't be the case w/t 'ignore').
 Shortcut: use the first letters of the flags. Ex: "if/dt[" would get \code{"DT[i = 5]"} (flags 'ignore' + 'fixed').
-The flag 'verbatim' does not parse logical operations. For 'word', it adds word boundaries to the
-pattern. See the documentation of this argument.}
+For 'word', it adds word boundaries to the pattern. The \code{magic} flag first interpolates
+values directly into the pattern with "{}".}
+
+\item{envir}{Environment in which to evaluate the interpolations if the flag \code{"magic"} is provided.
+Default is \code{parent.frame()}.}
 }
 \value{
 It always return a character vector.

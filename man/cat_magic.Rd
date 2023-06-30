@@ -126,8 +126,12 @@ You can add string operations in each \code{"{}"} instance with the syntax \code
 (resp. the verbatim of \code{x}). Otherwise, what to say? Ah, nesting is enabled, and since
 there's over 50 operators, it's a bit complicated to sort you out in this small space.
 
-But type \code{smagic("--help")} to prompt a compact help, or use the argument \code{.help = "keyword"}
-(or \code{.help = TRUE}) to obtain a selective help from the main documentation.}
+Use the argument \code{.help = "keyword"} (or \code{.help = TRUE}) to obtain a selective help
+from the main documentation.
+
+Note that in interpolations you have access to the special variables: \code{.now} and \code{.date}
+to get the current time; and the special function \code{.now("format")} to
+format the time. Ex: \code{.now('\%Y-\%m \%H:\%m')}.}
 
 \item{.envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
 evaluated using the environment from where the function is called or using the named

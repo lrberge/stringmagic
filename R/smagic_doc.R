@@ -18,12 +18,12 @@
 #'  (resp. the verbatim of `x`). Otherwise, what to say? Ah, nesting is enabled, and since 
 #' there's over 50 operators, it's a bit complicated to sort you out in this small space. 
 #' 
+#' Use the argument `.help = "keyword"` (or `.help = TRUE`) to obtain a selective help 
+#' from the main documentation.
+#'
 #' Note that in interpolations you have access to the special variables: `.now` and `.date`
 #' to get the current time; and the special function `.now("format")` to 
-#' format the time. Ex: `{.now('%Y-%m %H:%m')}`.
-#' 
-#' Use the argument `.help = "keyword"`
-#' (or `.help = TRUE`) to obtain a selective help from the main documentation.
+#' format the time. Ex: `.now('%Y-%m %H:%m')`.
 #' @param .envir An environment used to evaluate the variables in `"{}"`. By default the variables are
 #' evaluated using the environment from where the function is called or using the named 
 #' arguments passed to the function.
