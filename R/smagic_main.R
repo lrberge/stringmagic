@@ -505,13 +505,8 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
     if(missnull(.help)){
       return("")
     }
-  } else if(identical(..1, "--help")){
-    sc = sys.call()
-    if(identical(sc[[2]], "--help")){
-      .help = "_COMPACT_" # means full help
-    }
-  }
-
+  } 
+  
   res = smagic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
                             .vectorize = .vectorize, .help = .help, 
                             .collapse = .collapse, .is_root = TRUE, 
@@ -523,13 +518,13 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
     attr(res, "group_index") = NULL
   }
   
-  if(!missnull(.post)){
+  if(!is.null(.post)){
     # .post must be a function
     # we catch the arguments
     res = check_set_eval_fun(.post, res, ...)
   }
   
-  if(!missnull(.class)){
+  if(!is.null(.class)){
     class(res) = c(.class, class(res))
   }
   
@@ -577,17 +572,8 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
   is_smagic_internal = TRUE
 
   if(!is.null(.help)){
-    if(identical(.help, "_COMPACT_")){
-      msg = getOption("smagic_help_compact")
-      
-      msg = paste(msg, collapse = "\n")
-      stop_up("Help requested.", msg = msg)
-    } else {
-      
-      on.exit(smagic_dynamic_help(.help))
-      
-      stop_up("smagic: Help requested.")
-    }    
+    on.exit(smagic_dynamic_help(.help))
+    stop_up("smagic: Help requested.")  
   }
   
   if(...length() == 0){
@@ -601,6 +587,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     user_ops_all = getOption("smagic_user_ops")
     # beware the sneaky assignment!
     if(!is.null(user_ops_all) && !is.null(user_info <- user_ops_all[[.namespace]])){
+      #                                             ^^ sneaky!
       .user_funs = user_info$funs
       .valid_operators = user_info$operators          
     } else {
@@ -632,14 +619,17 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     }
     
     # we check if some variables were passed in the arguments
-    dot_names = names(dots)
-    if(!is.null(dot_names)){
-      is_var = dot_names != ""
-      for(i in which(is_var)){
-        .data[[dot_names[i]]] = dots[[i]]
+    if(.is_root){
+      # ONLY HAPPENS IN THE ROOT CALL
+      dot_names = names(dots)
+      if(!is.null(dot_names)){
+        is_var = dot_names != ""
+        for(i in which(is_var)){
+          .data[[dot_names[i]]] = dots[[i]]
+        }
+        dots[is_var] = NULL      
       }
-      dots[is_var] = NULL      
-    }
+    }    
     
     if(length(dots) == 0){
       stop_hook("`smagic` requires at least one character scalar to work.",
@@ -721,8 +711,12 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
 
   BOX_OPEN = .delim[1]
   
-  if(!grepl(BOX_OPEN, x, fixed = TRUE) && is.null(.last)){
-    return(x)
+  if(!grepl(BOX_OPEN, x, fixed = TRUE)){
+    if(is.null(.last)){
+      return(x)
+    } else {
+      x_parsed = list(x)
+    }    
   } else {
     x_parsed = cpp_smagic_parser(x, .delim)
     if(length(x_parsed) == 1 && isTRUE(attr(x_parsed, "error"))){
@@ -1050,38 +1044,6 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
             }
           }
         }
-
-        extra = attr(xi, "extra")
-        if(length(extra) > 0){
-
-          if(length(extra$element_add_first) > 0){
-            if(length(extra$element_add_last) > 0){
-              xi = c(extra$element_add_first, xi, extra$element_add_last)
-            } else {
-              xi = c(extra$element_add_first, xi)
-            }
-          } else if(length(extra$element_add_last) > 0){
-            xi = c(xi, extra$element_add_last)
-          }
-
-          if(length(extra$string_add_first) > 0){
-            if(length(xi) > 0){
-              xi[1] = paste0(extra$string_add_first, xi[1])
-            } else {
-              xi = extra$string_add_first
-            }
-          }
-
-          if(length(extra$string_add_last) > 0){
-            if(length(xi) > 0){
-              xi[length(xi)] = paste0(xi[length(xi)], extra$string_add_last)
-            } else {
-              xi = extra$string_add_last
-            }
-          }
-
-          attr(xi, "extra") = NULL
-        }
       }
       
       if(i == 1){
@@ -1234,7 +1196,6 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
   #                    1 keep track of conditional things
   #                    2 apply conditional
 
-  extra = attr(x, "extra")
   group_index = attr(x, "group_index")
   
   # beware the sneaky assignment!!!!!
@@ -2083,38 +2044,6 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         res = c(x, right)
       }
 
-    } else if(op %in% "Append"){
-      # THIS IS DEPRECATED:
-      # I give it just in case
-      # appends **implicitly** at the beginning of the first/last string
-
-      res = x
-
-      if(any(grepl(":(?:n|N):", c(left, right)))){
-        n = length(x)
-        n_letter = ""
-        if(any(grepl(":N:", c(left, right), fixed = TRUE))){
-          n_letter = n_letter(n)
-          left = gsub(":N:", n_letter, left)
-          right = gsub(":N:", n_letter, right)
-        }
-
-        left = gsub(":n:", n, left)
-        right = gsub(":n:", n, right)
-      }
-
-      if(is.null(extra)){
-        extra = list()
-      }
-
-      if(nchar(left) > 0){
-        extra$string_add_first = paste0(extra$string_add_first, left)
-      }
-
-      if(nchar(right) > 0){
-        extra$string_add_last = paste0(extra$string_add_last, right)
-      }
-
     }
 
     # END: paste/insert
@@ -2731,33 +2660,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         res[!cond] = x_false
       }
     } else {
-      
       res = if(cond) x_true else x_false
-
-      # we can add extra stuff, if needed
-
-      extra_if = attr(res, "extra")
-      if(length(extra_if) > 0){
-        if(is.null(extra)){
-          extra = list()
-        }
-
-        if(length(extra_if$element_add_first) > 0){
-          extra$element_add_first = c(extra$element_add_first, extra_if$element_add_first)
-        }
-
-        if(length(extra_if$element_add_last) > 0){
-          extra$element_add_last = c(extra$element_add_last, extra_if$element_add_last)
-        }
-
-        if(length(extra_if$string_add_first) > 0){
-          extra$string_add_first = paste0(extra$string_add_first, extra_if$string_add_first)
-        }
-
-        if(length(extra_if$string_add_last) > 0){
-          extra$string_add_last = paste0(extra$string_add_last, extra_if$string_add_last)
-        }
-      }
     }
 
   } else if(op == "~"){
@@ -2772,10 +2675,6 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     msg = paste0("In `smagic`: the operator `", op, "` is not recognized. ",
                 "Internal error: this problem should have been spotted beforehand.")
     .stop_hook(msg)
-  }
-
-  if(length(extra) > 0){
-    attr(res, "extra") = extra
   }
 
   if(length(group_index) > 0){
