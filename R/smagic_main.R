@@ -9,37 +9,6 @@
 #### User-level ####
 ####
 
-#' Simple print function for objects of class `smagic`
-#' 
-#' Print `smagic` character vectors in a nice way.
-#' 
-#' @method print smagic
-#' 
-#' @param x A `smagic` object, obtained from the function `smagic`.
-#' @param ... Not currently used.
-#' 
-#' @author 
-#' Laurent Berge
-#' 
-#' @inherit string_clean seealso 
-#' 
-#' @examples 
-#' 
-#' cars = row.names(mtcars)
-#' 
-#' print(cars)
-#' 
-#' string_vec("The first cars are:, {6 first ? cars}")
-#' 
-#' 
-print.smagic = function(x, ...){
-  if(length(x) == 0){
-    print(character(0))
-  } else {
-    cat(x, sep = "\n")
-  }
-}
-
 #' Register custom operations to apply them in smagic
 #' 
 #' Extends the capabilities of [smagic()] by adding any custom operation
@@ -474,22 +443,23 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 #' @describeIn smagic String interpolation with operation chaining
 smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
                    .delim = c("{", "}"), .last = NULL, .post = NULL,
-                   .collapse = NULL, .invisible = FALSE,
+                   .collapse = NULL, .invisible = FALSE, .default = NULL,
                    .check = TRUE, .class = NULL, .help = NULL, 
                    .namespace = NULL){
 
   if(.check){
     set_pblm_hook()
     
-    if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
-    if(!missing(.invisible)) check_logical(.invisible, scalar = TRUE)
-    if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
-    if(!missing(.sep)) check_character(.sep, scalar = TRUE)
     if(!missing(.envir)) check_envir(.envir)
-    if(!missing(.last)) check_last(.last)
+    if(!missing(.sep)) check_character(.sep, scalar = TRUE)
+    if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
     if(!missing(.delim)){
       .delim = check_set_delimiters(.delim)
     }
+    if(!missing(.last)) check_last(.last)
+    if(!missing(.collapse)) check_character(.collapse, null = TRUE, scalar = TRUE)
+    if(!missing(.invisible)) check_logical(.invisible, scalar = TRUE)
+    if(!missing(.default)) check_character(.default, null = TRUE, scalar = TRUE)
   }
     
   if(length(.delim) == 1){
@@ -497,9 +467,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
     if(.check){ 
       check_delimiters(.delim)
     }
-  }
-    
-  
+  }  
 
   if(...length() == 0){
     if(missnull(.help)){
@@ -510,7 +478,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   res = smagic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
                             .vectorize = .vectorize, .help = .help, 
                             .collapse = .collapse, .is_root = TRUE, 
-                            .namespace = .namespace,
+                            .namespace = .namespace, .default = .default,
                             .check = .check, .last = .last)
   
   if(!is.null(attr(res, "group_index"))){
@@ -563,7 +531,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
                                .collapse = NULL, .last = NULL,  
                                .help = NULL, .is_root = FALSE, 
                                .namespace = NULL, .user_funs = NULL,
-                               .valid_operators = NULL,
+                               .valid_operators = NULL, .default = NULL,
                                .check = FALSE, .plural_value = NULL){
   
   # flag useful to easily identify this environment (used in error messages)
@@ -807,6 +775,14 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
         if(ANY_PLURAL){
           # we save
           x_values_all[[i]] = xi
+        }
+        
+        if(!is.null(.default)){
+          # We apply the default operations
+          xi = apply_simple_operations(xi, ".default", .default, .check, .envir, .data,
+                                    group_flag = 1 * grepl("~", .default, fixed = TRUE), 
+                                    .delim, .user_funs = .user_funs, 
+                                    .valid_operators = .valid_operators)
         }
 
       } else {
@@ -1175,7 +1151,7 @@ sma_char2operator = function(x, .valid_operators){
 
       msg = .sma("{context}",
               "\nPROBLEM: {bq?op} is not a valid operator. ", sugg_txt,
-              "\n\nINFO: Type smagic('--help') for more help or smagic(.help = \"regex\") or smagic(.help = TRUE).",
+              "\n\nINFO: Type smagic(.help = \"regex\") or smagic(.help = TRUE) for help.",
               "\nEx. of valid stuff: smagic(\"Letters: \\{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
 
       .stop_hook(msg)

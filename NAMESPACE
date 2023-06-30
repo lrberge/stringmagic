@@ -16,9 +16,6 @@ export(smagic_alias)
 export(cat_magic, cat_magic_alias)
 export(message_magic, message_magic_alias)
 
-# Methods
-S3method(print, smagic)
-
 #
 # imports
 #

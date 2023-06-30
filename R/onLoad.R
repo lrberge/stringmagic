@@ -11,7 +11,6 @@
   generate_help_extensive()
 
   # help
-  setup_help_compact()
   setup_help_extensive()
 
   invisible()

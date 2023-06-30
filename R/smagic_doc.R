@@ -18,7 +18,11 @@
 #'  (resp. the verbatim of `x`). Otherwise, what to say? Ah, nesting is enabled, and since 
 #' there's over 50 operators, it's a bit complicated to sort you out in this small space. 
 #' 
-#' But type `smagic("--help")` to prompt a compact help, or use the argument `.help = "keyword"`
+#' Note that in interpolations you have access to the special variables: `.now` and `.date`
+#' to get the current time; and the special function `.now("format")` to 
+#' format the time. Ex: `{.now('%Y-%m %H:%m')}`.
+#' 
+#' Use the argument `.help = "keyword"`
 #' (or `.help = TRUE`) to obtain a selective help from the main documentation.
 #' @param .envir An environment used to evaluate the variables in `"{}"`. By default the variables are
 #' evaluated using the environment from where the function is called or using the named 
@@ -62,6 +66,10 @@
 #' For example if `.post = head`, you can directly pass the argument `n = 3` to `smagic`'s arguments.
 #' @param .invisible Logical scalar, default is `FALSE`. Whether the object returned should be 
 #' invisible (i.e. not printed on the console). 
+#' @param .default Character scalar or `NULL` (default). If provided, it must be 
+#' a sequence of `smagic` operations. It will be applied as a default to any interpolation.
+#' Ex: if `x = 1:2`, then `smagic("x = {x}", .default = "enum")` leads to "x = 1 and 2", 
+#' and is equivalent to `smagic("x = {enum?x}")`.
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 
@@ -82,7 +90,7 @@
 #' If you want to change the default values of `smagic` (like changing the delimiter), use
 #' the function [smagic_alias()].
 #'
-#' Access a compact help on the console with `smagic("--help")` or use the argument `.help` to which
+#' Use the argument `.help` to which
 #' you can pass keywords or regular expressions and fecth select pieces from the main documentation.
 #' 
 #' 
