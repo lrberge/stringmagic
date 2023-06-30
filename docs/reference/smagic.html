@@ -32,16 +32,30 @@ basic string operations to the interpolated variables. Advanced support for plur
      
     <span class="caret"></span>
   </a>
-  <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/stringmagic_tour.html">`stringmagic`: A quick tour</a>
-    </li>
-    <li class="divider">
+  <ul class="dropdown-menu" role="menu"><li class="divider">
     <li class="dropdown-header">Guides</li>
     <li>
-      <a href="../articles/smagic_walkthrough.html">`smagic`: Magical string interpolation</a>
+      <a href="../articles/guide_smagic.html">`stringmagic`: A quick tour</a>
     </li>
     <li>
-      <a href="../articles/string_tools.html">String tools: magic edition</a>
+      <a href="../articles/guide_string_tools.html">String tools: magic edition</a>
+    </li>
+    <li>
+      <a href="../articles/guide_customization.html">Tailor-made functions and operations</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">References</li>
+    <li>
+      <a href="../articles/ref_smagic.html">`smagic`: Magical string interpolation</a>
+    </li>
+    <li>
+      <a href="../articles/ref_operations.html">`smagic`'s operations: The reference</a>
+    </li>
+    <li>
+      <a href="../articles/ref_regex_flags.html">Regular expression flags</a>
+    </li>
+    <li>
+      <a href="../articles/ref_regex_logic.html">Regular expression logic</a>
     </li>
   </ul></li>
 <li>
@@ -73,7 +87,22 @@ basic string operations to the interpolated variables. Advanced support for plur
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="va">smagic</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">smagic</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  .envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  .sep <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  .vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .delim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"{"</span>, <span class="st">"}"</span><span class="op">)</span>,</span>
+<span>  .last <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .post <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .collapse <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .invisible <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .default <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .check <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  .class <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .help <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .namespace <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.smagic</span><span class="op">(</span></span>
 <span>  <span class="va">...</span>,</span>
@@ -82,15 +111,11 @@ basic string operations to the interpolated variables. Advanced support for plur
 <span>  .vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  .delim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"{"</span>, <span class="st">"}"</span><span class="op">)</span>,</span>
 <span>  .collapse <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  .check <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  .data.table <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  .last <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .namespace <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
-    <div id="format">
-    <h2>Format</h2>
-    <p>An object of class <code>function</code> of length 1.</p>
-    </div>
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>...</dt>
@@ -102,8 +127,11 @@ You can add string operations in each <code>"{}"</code> instance with the syntax
 (resp. <code>"'arg'op ! x"</code>) to apply the operation <code>'op'</code> with the argument <code>'arg'</code> to <code>x</code>
 (resp. the verbatim of <code>x</code>). Otherwise, what to say? Ah, nesting is enabled, and since
 there's over 50 operators, it's a bit complicated to sort you out in this small space.</p>
-<p>But type <code>smagic("--help")</code> to prompt a compact help, or use the argument <code>.help = "keyword"</code>
-(or <code>.help = TRUE</code>) to obtain a selective help from the main documentation.</p></dd>
+<p>Use the argument <code>.help = "keyword"</code> (or <code>.help = TRUE</code>) to obtain a selective help
+from the main documentation.</p>
+<p>Note that in interpolations you have access to the special variables: <code>.now</code> and <code>.date</code>
+to get the current time; and the special function <code>.now("format")</code> to
+format the time. Ex: <code>.now('%Y-%m %H:%m')</code>.</p></dd>
 
 
 <dt>.envir</dt>
@@ -132,22 +160,51 @@ The default value is equivalent to <code>"{ }"</code>.</p>
 [", "]: R:%22,%20%22</p></dd>
 
 
+<dt>.last</dt>
+<dd><p>Character scalar, a function, or <code>NULL</code> (default). If provided and character:
+it must be an <code>smagic</code> chain of operations of the form <code>"'arg1'op1, op2, etc"</code>. All these operations
+are applied just before returning the vector. If a function,
+it will be applied to the resulting vector.</p></dd>
+
+
+<dt>.post</dt>
+<dd><p>Function or <code>NULL</code> (default). If not <code>NULL</code>, this function will be applied
+after all the processing, just before returning the object. This function can have
+extra arguments which will be caught directly in the <code>...</code> argument of <code>smagic</code>.
+For example if <code>.post = head</code>, you can directly pass the argument <code>n = 3</code> to <code>smagic</code>'s arguments.</p></dd>
+
+
 <dt>.collapse</dt>
 <dd><p>Character scalar, default is <code>NULL</code>. If provided, the character vector
 that should be returned is collapsed with the value of this argument. This leads
 to return a string of length 1.</p></dd>
 
 
+<dt>.invisible</dt>
+<dd><p>Logical scalar, default is <code>FALSE</code>. Whether the object returned should be
+invisible (i.e. not printed on the console).</p></dd>
+
+
+<dt>.default</dt>
+<dd><p>Character scalar or <code>NULL</code> (default). If provided, it must be
+a sequence of <code>smagic</code> operations. It will be applied as a default to any interpolation.
+Ex: if <code>x = 1:2</code>, then <code>smagic("x = {x}", .default = "enum")</code> leads to "x = 1 and 2",
+and is equivalent to <code>smagic("x = {enum?x}")</code>. Note that this default operations does
+not apply to nested expressions. That is <code>smagic("{!x{1:2}}", .default = "enum")</code> leads
+to <code>c("x1", "x2")</code> and NOT <code>"x1 and 2"</code>.</p></dd>
+
+
 <dt>.check</dt>
-<dd><p>Logical scalar, default is <code>TRUE</code>. Whether to enable error-handling.
-Without errorhandling you can save something of the order of 40us. Useful only
+<dd><p>Logical scalar, default is <code>TRUE</code>. Whether to enable error-handling (i.e.
+human readable error messages).
+Without error-handling you can save something of the order of 40us. Useful only
 in long loops.</p></dd>
 
 
-<dt>.data.table</dt>
-<dd><p>Logical, default is <code>TRUE</code>. If you use <code>smagic</code> in a <code>data.table</code> call
-and interpolate variables within the <code>data.table</code>, you want this argument to be <code>TRUE</code>.
-It only incurs a small overhead.</p></dd>
+<dt>.class</dt>
+<dd><p>Character vector representing the class to give to the object returned.
+By default it is <code>NULL</code>. Note that the class <code>smagic</code> has a specific <code>print</code> method, usually
+nicer for small vectors (it <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">base::cat()</a></code>s the elements).</p></dd>
 
 
 <dt>.help</dt>
@@ -157,18 +214,6 @@ topic to read from the main documentation, with the possibility to search for ke
 navigate the help pages. If a character scalar, then a regex search is perfomed on the main
 documentation and any section containining a match is displayed. The user can easily
 navigate across matches.</p></dd>
-
-
-<dt>.default</dt>
-<dd><p>Logical scalar, default is <code>TRUE</code>. Whether to use the global defaults
-set with the function <code><a href="setSmagic.html">setSmagic()</a></code>. If <code>FALSE</code>, then the default value of the arguments
-is guaranteed to be ones of the function definition.</p></dd>
-
-
-<dt>.smagic.class</dt>
-<dd><p>Logical scalar, default is <code>FALSE</code>. If <code>TRUE</code>, the vector
-returned will be of class <code>smagic</code>. This class has a simple <code>print</code> method which is
-useful to display small vectors.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -182,21 +227,23 @@ useful to display small vectors.</p></dd>
     <p>There are over 50 basic string operations, it supports pluralization, string operations can be
 nested, operations can be applied group-wise or conditionally and
 operators have sensible defaults.
-(it may be the most powerful feature)
-You can also declare your own operations with <code><a href="smagic_register.html">smagic_register()</a></code>. They will be
-seamlessly integrated to <code>smagic</code>.</p>
-<p>Access a compact help on the console with <code>smagic("--help")</code> or use the argument <code>.help</code> to which
+You can also declare your own operations with <code><a href="smagic_register_fun.html">smagic_register_fun()</a></code> or <code><a href="smagic_register_fun.html">smagic_register_ops()</a></code>.
+They will be seamlessly integrated to <code>smagic</code>.</p>
+<p>The function <code>.smagic</code> (prefixed with a dot) is a leaner version of the function <code>smagic</code>.
+It does the same operations but with the following differences:</p><ul><li><p>there is no error handling: meaning that the error messages, if any, will be poor and
+hard to understand</p></li>
+<li><p>default options are not applied: hence the user must always explicitly provide the arguments</p></li>
+</ul><p>This leads to a faster processing time (of about 50 microseconds) at the cost of user experience.</p>
+<p>If you want to change the default values of <code>smagic</code> (like changing the delimiter), use
+the function <code><a href="smagic_alias.html">smagic_alias()</a></code>.</p>
+<p>Use the argument <code>.help</code> to which
 you can pass keywords or regular expressions and fecth select pieces from the main documentation.</p>
-<p>This function is compatible with calls within a <code>data.table</code> without named arguments.
-Note that it shouldn't work (try <a href="https://glue.tidyverse.org/index.html" class="external-link">glue</a> for instance)!
-To make it work, we made use of how <code>data.table</code> works internally and, since we used stuff
-not exposed in its API, it is by construction unstable. <code>smagic</code> has been tested, and works, on
-<code>data.table</code> version 1.14.2 (2021-09-27) and version 1.14.8 (2023-02-17).</p>
     </div>
     <div id="functions">
     <h2>Functions</h2>
     
-<ul><li><p><code>.smagic()</code>: Like <code>smagic</code> but without any error handling to save a few micro seconds</p></li>
+<ul><li><p><code>smagic()</code>: String interpolation with operation chaining</p></li>
+<li><p><code>.smagic()</code>: A simpler version of <code>smagic</code> without any error handling to save a few micro seconds</p></li>
 </ul></div>
     <div id="interpolation-and-string-operations">
     <h2>Interpolation and string operations</h2>
@@ -281,8 +328,9 @@ specific to each operation.</p>
 
 <p>This section describes some of the most common string operations: extracting, replacing, collapsing, splitting, etc.
 These functions accept generic flags ("ignore", "fixed", "word") in their patterns (syntax: "flags/pattern").
-Please see the dedicated section for more information on flags.</p><ul><li><p>s, S: splits the string according to a pattern. The two operations have different defaults: <code>' '</code>
-for <code>s</code> and <code>',[ \t\n}*'</code> for <code>S</code> (i.e. comma separation).
+Please see the dedicated section for more information on flags.</p><ul><li><p>s, split, S, Split: splits the string according to a pattern.
+The operations have different defaults: <code>' '</code>
+for <code>s</code> and 'split', and <code>',[ \t\n]*'</code> for <code>S</code> and 'Split' (i.e. comma separation).
 Ex.1: <code>smagic("{S ! romeo, juliet}")</code> leads to the vector c("romeo", "juliet").
 Ex.2: <code>smagic("{'f/+'s, '-'c ! 5 + 2} = 3")</code> leads to "5 - 2 = 3" (note the flag "fixed" in <code>s</code>'s pattern).</p></li>
 <li><p>c, C: to concatenate multiple strings into a single one. The two operations are
@@ -308,11 +356,11 @@ Ex.1: <code>smagic("{'e'r ! Where is the letter e?}")</code> leads to "Whr is th
 Ex.2: <code>smagic("{'(?&lt;!\\b)e =&gt; a'R ! Where is the letter e?}")</code> leads to "Whara is tha lattar e?".
 Ex.3: <code>smagic("{'t/e =&gt; here'r ! Where is the letter e?}")</code> leads to "here".</p></li>
 <li><p>clean: replacement with a string. Similar to the operation <code>r</code>, except that here the comma is
-a pattern separator, see detailed explanations in <code><a href="str_clean.html">str_clean()</a></code>. Ex: <code>smagic("{'f/[, ]'clean ! x[a]}")</code>
+a pattern separator, see detailed explanations in <code><a href="string_clean.html">string_clean()</a></code>. Ex: <code>smagic("{'f/[, ]'clean ! x[a]}")</code>
 leads to "xa".</p></li>
 <li><p>get: restricts the string only to values respecting a pattern. This operation has no default.
 Accepts the options "equal" and "in".
-By default it uses the same syntax as <code><a href="str_get.html">str_get()</a></code> so that you can use regex flags and
+By default it uses the same syntax as <code><a href="string_get.html">string_get()</a></code> so that you can use regex flags and
 include logical operations with <code>' &amp; '</code> and <code>' | '</code> to detect patterns.
 If the option "equal" is used, a simple string equality with the argument is tested (hence
 no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
@@ -321,21 +369,21 @@ Example: <code>x = row.names(mtcars) ; smagic("Mercedes models: {'Merc &amp; [[:
 leads to "Mercedes models: 240D, 280C, 450SE, 450SL and 450SLC".</p></li>
 <li><p>is: detects if a pattern is present in a string, returns a logical vector. This operation has no default.
 Accepts the options "equal" and "in".
-By default it uses the same syntax as <code><a href="str_is.html">str_is()</a></code> so that you can use regex flags and
+By default it uses the same syntax as <code><a href="string_is.html">string_is()</a></code> so that you can use regex flags and
 include logical operations with <code>' &amp; '</code> and <code>' | '</code> to detect patterns.
 If the option "equal" is used, a simple string equality with the argument is tested (hence
 no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
 and then set inclusion is tested.
-Mostly useful as the final operation in a <code><a href="str_ops.html">str_ops()</a></code> call.
+Mostly useful as the final operation in a <code><a href="string_ops.html">string_ops()</a></code> call.
 Example: <code>x = c("Mark", "Lucas") ; smagic("Mark? {'i/mark'is, C ? x}")</code> leads to "Mark? TRUE and FALSE".</p></li>
 <li><p>which: returns the index of string containing a specified pattern. With no default, can be applied
 to a logical vector directly.
-By default it uses the same syntax as str_which() so that you can use regex flags and
+By default it uses the same syntax as string_which() so that you can use regex flags and
 include logical operations with <code>' &amp; '</code> and <code>' | '</code> to detect patterns.
 If the option "equal" is used, a simple string equality with the argument is tested (hence
 no flags are accepted). If the option "in" is used, the argument is first split with respect to commas
 and then set inclusion is tested.
-Mostly useful as the final operation in a <code><a href="str_ops.html">str_ops()</a></code> call.
+Mostly useful as the final operation in a <code><a href="string_ops.html">string_ops()</a></code> call.
 Ex.1: <code>x = c("Mark", "Lucas") ; smagic("Mark is number {'i/mark'which ? x}.")</code> leads to
 "Mark is number 1.".</p></li>
 </ul></div>
@@ -363,7 +411,7 @@ last <code>n</code> values.</p></li>
 <li><p>sort: sorts the vector in increasing order. Accepts optional arguments and the option "num".
 Example: <code>x = c("sort", "me") ; smagic("{sort, c ? x}")</code> leads to "me sort".
 If an argument is provided, it must be a regex pattern that will be applied to
-the vector using <code><a href="str_clean.html">str_clean()</a></code>. The sorting will be applied to the modified version of the vector
+the vector using <code><a href="string_clean.html">string_clean()</a></code>. The sorting will be applied to the modified version of the vector
 and the original vector will be ordered according to this sorting.
 Ex: <code>x = c("Jon Snow", "Khal Drogo")</code>; <code>smagic("{'.+ 'sort, C?x}")</code> leads to
 "Khal Drogo and Jon Snow". The option "num" sorts over a numeric version
@@ -484,7 +532,7 @@ Accepts arguments of the form <code>'n'</code> or <code>'n|s'</code>, with <code
 Default is left-alignment of the strings.
 Option "right" right aligns and "center" centers the strings. When using <code>'n|s'</code>, the symbol <code>s</code>
 is used for the filling. By default if no argument is provided, the
-maximum size of the character string is used. See help for <code><a href="str_fill.html">str_fill()</a></code> for more information.
+maximum size of the character string is used. See help for <code><a href="string_fill.html">string_fill()</a></code> for more information.
 Ex.1: <code>smagic("Numbers: {'5|0'fill.right, C ? c(1, 55)}")</code> leads to "Numbers: 00001 and 00055".</p></li>
 <li><p>paste: pastes some character to all elements of the string. This operation has no default.
 Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
@@ -492,6 +540,13 @@ Option "right" pastes on the right and "both" pastes on both sides. Option "fron
 pastes on the first element while option "back" only pastes on the last element. Option "delete"
 first replaces all elements with the empty string.
 Example: <code>smagic("6 = {'|'paste.both, ' + 'c ? -3:-1}")</code> leads to "6 = |-3| + |-2| + |-1|".</p></li>
+<li><p>join: joins lines ending with a double backslash. Ex: <code>x = "the sun \\\n is shining"</code>;
+<code>smagic("{join ? x}")</code> leads to "the sun is shining".</p></li>
+<li><p>escape: adds backslashes in front of specific characters. Options <code>"nl"</code>, <code>"tab"</code>.
+Option <code>"nl"</code> escapes the newlines (<code>\n</code>), leading them to be displayed as <code>"\\\\n"</code>.
+Option <code>"tab"</code> does the same for tabs (<code>"\t"</code>). This is useful to make the value free
+of space formatters.
+The default behavior is to escape both newlines and tabs.</p></li>
 </ul></div>
     <div id="other-operations">
     <h2>Other operations</h2>
@@ -520,10 +575,12 @@ Ex.1: <code>x = c("Marv", "Nancy"); smagic("The main characters are {enum ? x}."
 Ex.2: <code>x = c("orange", "milk", "rice"); smagic("Shopping list: {enum.i.q ? x}.")</code> leads to
 "Shopping list: i) 'orange', ii) 'milk', and iii) 'rice'."</p></li>
 </ul></li>
-<li><p>len: gives the length of the vector. Options "letter", "upper", "format".
+<li><p>len: gives the length of the vector. Options "letter", "upper", "num".
 Option "letter" writes the length in words (up to 100). Option "upper" is the same
-as letter but uppercases the first letter. Option "format" add comma separation for thousands.
-Example: <code>smagic("Size = {len.format ? 1:5000}")</code> leads to "Size = 5,000".</p></li>
+as letter but uppercases the first letter.
+By default, commas are added to separate thousands. Use uption "num" to preserve
+a regular numeric format.
+Example: <code>smagic("Size = {len ? 1:5000}")</code> leads to "Size = 5,000".</p></li>
 <li><p>width: formats the string to fit a given width by cutting at word boundaries.
 Accepts arguments of the form <code>'n'</code> or <code>'n|s'</code>, with <code>n</code> a number and <code>s</code> a string.
 An argument of the form <code>'n|s'</code> will add <code>s</code> at the beginning of each line. Further,
@@ -717,9 +774,9 @@ taken verbatim while the second is evaluated.</p>
 The flags are useful to quickly give extra instructions, similarly to <em>usual</em>
 <a href="https://javascript.info/regexp-introduction" class="external-link">regular expression flags</a>.</p>
 <p>Here the syntax is "flag1, flag2/pattern". That is: flags are a comma separated list of flag-names
-separated from the pattern with a slash (<code>/</code>). Example: <code>str_which(c("hello...", "world"), "fixed/.")</code> returns <code>1</code>.
+separated from the pattern with a slash (<code>/</code>). Example: <code>string_which(c("hello...", "world"), "fixed/.")</code> returns <code>1</code>.
 Here the flag "fixed" removes the regular expression meaning of "." which would have otherwise meant <em>"any character"</em>.
-The no-flag verion <code>str_which(c("hello...", "world"), ".")</code> returns <code>1:2</code>.</p>
+The no-flag verion <code>string_which(c("hello...", "world"), ".")</code> returns <code>1:2</code>.</p>
 <p>Alternatively, and this is recommended, you can collate the initials of the flags instead of using a
 comma separated list. For example: "if/dt[" will apply the flags "ignore" and "fixed" to the pattern "dt[".</p>
 <p>The four flags always available are: "ignore", "fixed", "word" and "magic".</p><ul><li><p>"ignore" instructs to ignore the case. Technically, it adds the perl-flag "(?i)"
@@ -728,17 +785,19 @@ at the beginning of the pattern.</p></li>
 (among others) lose their special meaning and are treated for what they are: simple characters.</p></li>
 <li><p>"word" adds word boundaries (<code>"\\b"</code> in regex language) to the pattern. Further, the comma (<code>","</code>)
 becomes a word separator. Technically, "word/one, two" is treated as "\b(one|two)\b". Example:
-<code>str_clean("Am I ambushed?", "wi/am")</code> leads to " I ambushed?" thanks to the flags "ignore" and "word".</p></li>
+<code>string_clean("Am I ambushed?", "wi/am")</code> leads to " I ambushed?" thanks to the flags "ignore" and "word".</p></li>
 <li><p>"magic" allows to interpolate variables inside the pattern before regex interpretation.
-For example if <code>letters = "aiou"</code> then <code>str_clean("My great goose!", "magic/[{letters}] =&gt; e")</code>
+For example if <code>letters = "aiou"</code> then <code>string_clean("My great goose!", "magic/[{letters}] =&gt; e")</code>
 leads to <code>"My greet geese!"</code></p></li>
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>To set new operators, see the function <code><a href="smagic_register.html">smagic_register()</a></code>.</p>
-<p>To modify the default values of smagic, use the function <code><a href="setSmagic.html">setSmagic()</a></code>.</p>
-<p>If you want to apply a chain of operations on a single vector, see <code><a href="str_ops.html">str_ops()</a></code> which
-may be more appropriate.</p></div>
+    <div class="dont-index"><p>Other tools with aliases: 
+<code><a href="cat_magic.html">cat_magic_alias</a>()</code>,
+<code><a href="smagic_alias.html">smagic_alias</a>()</code>,
+<code><a href="string_clean.html">string_clean_alias</a>()</code>,
+<code><a href="string_ops.html">string_ops_alias</a>()</code>,
+<code><a href="string_vec.html">string_vec_alias</a>()</code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -752,21 +811,21 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># {x} inserts x</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Hello {x}!"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Hello Romeo!"  "Hello Juliet!"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># elements in ... are collapsed with "" (default)</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Hello {x[1]}, "</span>,</span></span>
 <span class="r-in"><span>    <span class="st">"how is {x[2]} doing?"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Hello Romeo, how is Juliet doing?"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Splitting a comma separated string</span></span></span>
 <span class="r-in"><span><span class="co"># The mechanism is explained later</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"J. Mills, David, Agnes, Dr Strong"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "J. Mills"  "David"     "Agnes"     "Dr Strong"</span>
+<span class="r-in"><span><span class="fu"><a href="string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"J. Mills, David, Agnes, Dr Strong"</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("J. Mills, David, Agnes, Dr Strong"):</span> could not find function "string_vec"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Nota: this is equivalent to (explained later)</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{', *'S ! J. Mills, David, Agnes, Dr Strong}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "J. Mills"  "David"     "Agnes"     "Dr Strong"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Applying low level operations to strings</span></span></span>
@@ -791,11 +850,11 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co"># Example: splitting</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"hello dear"</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{' 's ? x}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hello" "dear" </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="co"># x is split by ' '</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{' 's ! hello dear}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hello" "dear" </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="co"># 'hello dear' is split by ' '</span></span></span>
 <span class="r-in"><span><span class="co"># had we used ?, there would have been an error</span></span></span>
 <span class="r-in"><span></span></span>
@@ -807,7 +866,7 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example: default of 's' is ' ' + chaining with collapse</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{s, ' my 'c ! hello dear}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hello my dear"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Nesting</span></span></span>
@@ -819,11 +878,11 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#              \-&gt; nesting requires verbatim evaluation: '!'</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"The variables are: {C ! x{1:4}}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The variables are: x1, x2, x3 and x4."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># This one is ugly but it shows triple nesting</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"The variables are: {ws, C ! {2 times ! x{1:4}}{','s, 4 each !  ,_sq}}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The variables are: x1, x2, x3, x4, x1_sq, x2_sq, x3_sq and x4_sq."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Splitting</span></span></span>
@@ -831,19 +890,19 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># s: split with fixed pattern, default is ' '</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{s ! a b c}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "b" "c"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{' b 's !a b c}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "c"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># S: same as 's' but default is ',[ \t\n]*'</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{S !a, b, c}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "b" "c"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'[[:punct:] ]+'S ! a! b; c}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "b" "c"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># add regex flags: e.g. fixed search</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'f/.'s ! hi.there}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hi"    "there"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
@@ -857,14 +916,14 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># c: default is ' '</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{c ? 1:3}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1 2 3"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># C: default is ', | and '</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{C ? 1:3}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1, 2 and 3"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{', | or 'c ? 1:4}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1, 2, 3 or 4"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Extraction</span></span></span>
@@ -878,12 +937,12 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"This years is... 2020"</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{x ? x}"</span><span class="op">)</span> <span class="co"># similar to smagic("{extract.first ? x}")</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{X ? x}"</span><span class="op">)</span> <span class="co"># similar to smagic("{extract ? x}")</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This"  "years" "is"    "2020" </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'\\d+'x ? x}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2020"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># STRING FORMATTING ####</span></span></span>
@@ -894,29 +953,29 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># upper case the first letter</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{upper.first ! julia mills}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Julia mills"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># title case</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{title ! julia mills}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Julia Mills"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># upper all letters</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{upper ! julia mills}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "JULIA MILLS"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># lower case</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{lower ! JULIA MILLS}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "julia mills"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># q, Q, bq: single, double, back quote</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{S, q, C ! Julia, David, Wilkins}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "'Julia', 'David' and 'Wilkins'"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{S, Q, C ! Julia, David, Wilkins}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "\"Julia\", \"David\" and \"Wilkins\""</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{S, bq, C ! Julia, David, Wilkins}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "`Julia`, `David` and `Wilkins`"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># format, Format: formats the string to fit the same length</span></span></span>
@@ -927,15 +986,15 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="va">score</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">2050</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">nm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wilkins"</span>, <span class="st">"David"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Monopoly scores:\n{'\n'c ! - {format ? nm}: {Format ? score} US$}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Monopoly scores:\n- Wilkins:   -10 US$\n-   David: 2,050 US$"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># OK that example may have been a bit too complex,</span></span></span>
 <span class="r-in"><span><span class="co"># let's make it simple:</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Scores: {format ? score}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Scores: -10  " "Scores: 2,050"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Names: {Format ? nm}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Names: Wilkins" "Names:   David"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># ws: white space normalization</span></span></span>
@@ -947,32 +1006,32 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co"># - isolated: remove isolated characters</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{ws ! The   white  spaces are now clean.  }"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The white spaces are now clean."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{ws.punct ! I, really -- truly; love punctuation!!!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "I really truly love punctuation"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{ws.digit ! 1, 2, 12, a microphone check!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] ", , , a microphone check!"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{ws.i ! 1, 2, 12, a microphone check!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1, 2, 12, microphone check!"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{ws.d.i ! 1, 2, 12, a microphone check!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "microphone check!"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{ws.p.d.i ! 1, 2, 12, a microphone check!}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "microphone check"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># %: applies sprintf formatting</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span> <span class="co"># add the formatting as a regular argument</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"pi = {'.2f'% ? pi}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pi = 3.14"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="co"># or right after the %</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"pi = {%.2f ? pi}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pi = 3.14"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># paste: appends text on each element</span></span></span>
@@ -981,17 +1040,18 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># adding '|' on both sides</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'|'paste.both, ' + 'c ! x{1:4}}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "|x1| + |x2| + |x3| + |x4|"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Enumerations</span></span></span>
-<span class="r-in"><span><span class="va">acad</span> <span class="op">=</span> <span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"you like admin, you enjoy working on weekends, you really love emails"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">acad</span> <span class="op">=</span> <span class="fu"><a href="string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"you like admin, you enjoy working on weekends, you really love emails"</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("you like admin, you enjoy working on weekends, you really love emails"):</span> could not find function "string_vec"</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Main reasons to pursue an academic career:\n {':i:) 'paste, C ? acad}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Main reasons to pursue an academic career:\n i) you like admin, ii) you enjoy working on weekends and iii) you really love emails."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># You can also use the enum command</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Main reasons to pursue an academic career:\n {enum.i ? acad}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Main reasons to pursue an academic career:\n i) you like admin, ii) you enjoy working on weekends, and iii) you really love emails."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># stopwords: removes basic English stopwords</span></span></span>
@@ -999,7 +1059,7 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#  http://snowball.tartarus.org/algorithms/english/stop.txt</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{stop, ws ! It is a tale told by an idiot, full of sound and fury, signifying nothing.}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "tale told idiot, full sound fury, signifying nothing."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># k: keeps the first n characters</span></span></span>
@@ -1007,15 +1067,16 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#         'n|s'k: same + adds 's' at the end of shortened strings</span></span></span>
 <span class="r-in"><span><span class="co">#         'n||s'k: same but 's' counts in the n characters kept</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">words</span> <span class="op">=</span> <span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"short, constitutional"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">words</span> <span class="op">=</span> <span class="fu"><a href="string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"short, constitutional"</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("short, constitutional"):</span> could not find function "string_vec"</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{5k ? words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "short" "const"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'5|..'k ? words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "short"   "const.."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'5||..'k ? words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "short" "con.."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># K: keeps the first n elements</span></span></span>
@@ -1025,18 +1086,19 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Special values :rest: and :REST:, give the number of items dropped</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">bx</span> <span class="op">=</span> <span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">bx</span> <span class="op">=</span> <span class="fu"><a href="string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac"</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("Pessac Leognan, Saint Emilion, Marguaux, Saint Julien, Pauillac"):</span> could not find function "string_vec"</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {3K, ', 'C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {'3|etc..'K, ', 'C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux, etc..."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {'3||etc..'K, ', 'C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, etc..."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {'3|and at least :REST: others'K, ', 'C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux, and at least two others."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Ko, KO: special operator which keeps the first n elements and adds "others"</span></span></span>
@@ -1044,7 +1106,7 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co"># KO gives the rest in letters</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Bordeaux wines I like: {4KO, C ? bx}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bordeaux wines I like: Pessac Leognan, Saint Emilion, Marguaux and two others."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># r, R: string replacement </span></span></span>
@@ -1052,40 +1114,40 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co">#         's1 =&gt; s2'R replaces s1 into s2</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'e'r, ws ! The letter e is deleted}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Th lttr is dltd"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># adding a perl look-behind</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'(?&lt;! )e'r !The letter e is deleted}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Th lttr e is dltd"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'e =&gt; a'r !The letter e becomes a}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Tha lattar a bacomas a"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'([[:alpha:]]{3})[[:alpha:]]+ =&gt; \\1.'r ! Trimming the words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Tri. the wor."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternative way with simple operations: split, shorten, collapse</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{s, '3|.'k, c ! Trimming the words}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Tri. the wor."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># times, each</span></span></span>
 <span class="r-in"><span><span class="co"># They accept the option c to collapse with the empty string</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"N{10 times.c ! o}!"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Noooooooooo!"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{3 times.c ? 1:3}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "123123123"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{3 each.c ? 1:3}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "111222333"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># erase: replaces the items by the empty string</span></span></span>
 <span class="r-in"><span><span class="co"># -&gt; useful in conditions</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{erase ! I am going to be annihilated}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] ""</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># ELEMENT MANIPULATION ####</span></span></span>
@@ -1098,16 +1160,17 @@ may be more appropriate.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Destroy"</span>, <span class="st">"All"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{'A'rm ? x}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Destroy"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{rm.all ? x}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="str_vec.html">str_vec</a></span><span class="op">(</span><span class="st">"1, 12, 123, 1234, 123456, 1234567"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"1, 12, 123, 1234, 123456, 1234567"</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("1, 12, 123, 1234, 123456, 1234567"):</span> could not find function "string_vec"</span>
 <span class="r-in"><span><span class="co"># we delete elements whose number of characters is lower or equal to 3</span></span></span>
 <span class="r-in"><span><span class="co"># =&gt; see later section CONDITIONS</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"{if(.nchar &gt; 3 ; nuke) ? x}"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1"   "12"  "123"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># PLURALIZATION ####</span></span></span>
@@ -1121,12 +1184,12 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Eschyle"</span>, <span class="st">"Sophocle"</span>, <span class="st">"Euripide"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">37</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"The author{$s, enum, have ? x} written {#N ? n} play{#s}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The authors Eschyle, Sophocle and Euripide have written thirty-seven plays."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"Laurent Berge"</span></span></span>
 <span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">0</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"The author{$s, enum, have ? x} written {#N ? n} play{#s}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The author Laurent Berge has written zero play."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># How does it work?</span></span></span>
 <span class="r-in"><span><span class="co"># First is {$s, enum, have ? x}.</span></span></span>
@@ -1146,7 +1209,7 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="co"># Another similar example illustrating that we need not express the object several times:</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Eschyle"</span>, <span class="st">"Sophocle"</span>, <span class="st">"Euripide"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"The {Len ? x} classic author{$s, are, enum}."</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The three classic authors are Eschyle, Sophocle and Euripide."</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
@@ -1161,27 +1224,24 @@ may be more appropriate.</p></div>
 <span class="r-in"><span><span class="va">reason</span> <span class="op">=</span> <span class="st">"glory"</span></span></span>
 <span class="r-in"><span><span class="fu">smagic</span><span class="op">(</span><span class="st">"Why do you develop packages? For {`dollar`times.c ! $}?"</span>,</span></span>
 <span class="r-in"><span>    <span class="st">"For money? No... for {upper,''s, c ? reason}!"</span>, .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Why do you develop packages? For $$$$$$?\nFor money? No... for G L O R Y!"</span>
-<span class="r-in"><span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
-<span class="r-in"><span><span class="co"># COMPATIBILITY WITH data.table ####</span></span></span>
-<span class="r-in"><span><span class="co"># </span></span></span>
+<span class="r-in"><span><span class="co"># Alias generation</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># smagic is compatible with data.table (tested on version 1.14.2)</span></span></span>
+<span class="r-in"><span><span class="co"># Let's create a formula filler</span></span></span>
+<span class="r-in"><span><span class="co"># - we use .local_ops to create the ad hoc operation "add" which adds variables</span></span></span>
+<span class="r-in"><span><span class="co"># - we transform into a formula ex post</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"data.table"</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">dt_iris</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">dt_small</span> <span class="op">=</span> <span class="va">dt_iris</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>species_PL <span class="op">=</span> <span class="fu">smagic</span><span class="op">(</span><span class="st">"{first, 10 fill.c ? Species}: {%.1f ? mean(Petal.Length)}"</span><span class="op">)</span><span class="op">)</span>, </span></span>
-<span class="r-in"><span>                     by <span class="op">=</span> <span class="va">Species</span><span class="op">]</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">dt_small</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required namespace: data.table</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> data.table 1.14.8 using 6 threads (see ?getDTthreads).  Latest news: r-datatable.com</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(dt_name, parent.frame(i + 1)):</span> object 'dt_iris' not found</span>
+<span class="r-in"><span><span class="va">fml</span> <span class="op">=</span> <span class="fu"><a href="smagic_alias.html">smagic_alias</a></span><span class="op">(</span>.post <span class="op">=</span> <span class="va">as.formula</span>, .local_ops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>add <span class="op">=</span> <span class="st">"' + 'collapse"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in smagic_alias(.post = as.formula, .local_ops = list(add = "' + 'collapse")):</span> unused arguments (.post = as.formula, .local_ops = list(add = "' + 'collapse"))</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># example with mtcars</span></span></span>
+<span class="r-in"><span><span class="va">lhs</span> <span class="op">=</span> <span class="st">"mpg"</span></span></span>
+<span class="r-in"><span><span class="va">rhs</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hp"</span>, <span class="st">"drat"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">fml</span><span class="op">(</span><span class="st">"{lhs} ~ {add?rhs} + am"</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in fml("{lhs} ~ {add?rhs} + am"):</span> could not find function "fml"</span>
 <span class="r-in"><span>   </span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

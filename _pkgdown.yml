@@ -3,15 +3,19 @@
 title: stringmagic
 
 articles:
-  - title: Get started
-    navbar: ~
-    contents:
-    - stringmagic_tour
   - title: Guides
     navbar: Guides
     contents:
-    - smagic_walkthrough
-    - string_tools
+    - guide_smagic
+    - guide_string_tools
+    - guide_customization
+  - title: References
+    navbar: References
+    contents:
+    - ref_smagic
+    - ref_operations
+    - ref_regex_flags
+    - ref_regex_logic
     
 reference:
   - title: String interpolation and operations
@@ -19,10 +23,15 @@ reference:
     contents:
       - smagic
       - matches("sma")
-      - setSmagic
   - title: Other string operations
     desc: Pattern detection, operations chaining, string cleaning and more
     contents:
       - matches("^string_")
+      - parse_regex_pattern
       - _index_
+  - title: Functions builders
+    desc: Alias generators to create tailor made functions
+    contents:
+      - matches("alias")
+      
 

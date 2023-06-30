@@ -31,16 +31,30 @@
      
     <span class="caret"></span>
   </a>
-  <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/stringmagic_tour.html">`stringmagic`: A quick tour</a>
-    </li>
-    <li class="divider">
+  <ul class="dropdown-menu" role="menu"><li class="divider">
     <li class="dropdown-header">Guides</li>
     <li>
-      <a href="../articles/smagic_walkthrough.html">`smagic`: Magical string interpolation</a>
+      <a href="../articles/guide_smagic.html">`stringmagic`: A quick tour</a>
     </li>
     <li>
-      <a href="../articles/string_tools.html">String tools: magic edition</a>
+      <a href="../articles/guide_string_tools.html">String tools: magic edition</a>
+    </li>
+    <li>
+      <a href="../articles/guide_customization.html">Tailor-made functions and operations</a>
+    </li>
+    <li class="divider">
+    <li class="dropdown-header">References</li>
+    <li>
+      <a href="../articles/ref_smagic.html">`smagic`: Magical string interpolation</a>
+    </li>
+    <li>
+      <a href="../articles/ref_operations.html">`smagic`'s operations: The reference</a>
+    </li>
+    <li>
+      <a href="../articles/ref_regex_flags.html">Regular expression flags</a>
+    </li>
+    <li>
+      <a href="../articles/ref_regex_logic.html">Regular expression logic</a>
     </li>
   </ul></li>
 <li>
@@ -69,57 +83,81 @@
           <p class="section-desc"></p><p>Tools for string interpolation.</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="smagic.html">smagic</a></code> <code><a href="smagic.html">.smagic()</a></code> </p>
+          <p><code><a href="smagic.html">smagic()</a></code> <code><a href="smagic.html">.smagic()</a></code> </p>
         </td>
         <td><p>String interpolation with operation chaining</p></td>
       </tr><tr><td>
-          <p><code><a href="print.smagic.html">print(<i>&lt;smagic&gt;</i>)</a></code> </p>
+          <p><code><a href="smagic_alias.html">smagic_alias()</a></code> </p>
         </td>
-        <td><p>Simple print function for objects of class <code>smagic</code></p></td>
+        <td><p>Create <code>smagic</code> aliases with custom defaults</p></td>
       </tr><tr><td>
-          <p><code><a href="smagic_register.html">smagic_register()</a></code> </p>
+          <p><code><a href="smagic_register_fun.html">smagic_register_fun()</a></code> <code><a href="smagic_register_fun.html">smagic_register_ops()</a></code> </p>
         </td>
         <td><p>Register custom operations to apply them in smagic</p></td>
-      </tr><tr><td>
-          <p><code><a href="setSmagic.html">setSmagic()</a></code> </p>
-        </td>
-        <td><p>Set defaults for smagic</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="other-string-operations">Other string operations <a href="#other-string-operations" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Pattern detection, operations chaining, string cleaning and more</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="str_clean.html">str_clean()</a></code> </p>
+          <p><code><a href="string_clean.html">string_clean_alias()</a></code> <code><a href="string_clean.html">string_clean()</a></code> </p>
         </td>
         <td><p>Cleans a character vector from multiple patterns</p></td>
       </tr><tr><td>
-          <p><code><a href="str_fill.html">str_fill()</a></code> </p>
+          <p><code><a href="string_fill.html">string_fill()</a></code> </p>
         </td>
         <td><p>Fills a character string up to a size</p></td>
       </tr><tr><td>
-          <p><code><a href="str_get.html">str_get()</a></code> </p>
+          <p><code><a href="string_get.html">string_get()</a></code> </p>
         </td>
         <td><p>Gets elements of a character vector</p></td>
       </tr><tr><td>
-          <p><code><a href="str_is.html">str_is()</a></code> <code><a href="str_is.html">str_which()</a></code> </p>
+          <p><code><a href="string_is.html">string_is()</a></code> <code><a href="string_is.html">string_any()</a></code> <code><a href="string_is.html">string_all()</a></code> <code><a href="string_is.html">string_which()</a></code> </p>
         </td>
         <td><p>Detects whether a pattern is in a character string</p></td>
       </tr><tr><td>
-          <p><code><a href="str_ops.html">str_ops()</a></code> </p>
+          <p><code><a href="string_ops.html">string_ops_alias()</a></code> <code><a href="string_ops.html">string_ops()</a></code> </p>
         </td>
         <td><p>Chains basic operations to character vectors</p></td>
       </tr><tr><td>
-          <p><code><a href="str_split2df.html">str_split2df()</a></code> <code><a href="str_split2df.html">str_split2dt()</a></code> </p>
+          <p><code><a href="string_split2df.html">string_split2df()</a></code> <code><a href="string_split2df.html">string_split2dt()</a></code> </p>
         </td>
         <td><p>Splits a character vector into a data frame</p></td>
       </tr><tr><td>
-          <p><code><a href="str_vec.html">str_vec()</a></code> </p>
+          <p><code><a href="string_vec.html">string_vec_alias()</a></code> <code><a href="string_vec.html">string_vec()</a></code> </p>
         </td>
         <td><p>Efficient creation of string vectors with optional interpolation</p></td>
+      </tr><tr><td>
+          <p><code><a href="parse_regex_pattern.html">parse_regex_pattern()</a></code> </p>
+        </td>
+        <td><p><code>stringmagic</code>'s regular expression parser</p></td>
       </tr><tr><td>
           <p><code><a href="stringmagic.html">_index_</a></code> <code><a href="stringmagic.html">stringmagic</a></code> <code><a href="stringmagic.html">stringmagic-package</a></code> </p>
         </td>
         <td><p>String operations and interpolation: magic edition</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="functions-builders">Functions builders <a href="#functions-builders" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Alias generators to create tailor made functions</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="cat_magic.html">cat_magic_alias()</a></code> <code><a href="cat_magic.html">message_magic_alias()</a></code> <code><a href="cat_magic.html">cat_magic()</a></code> <code><a href="cat_magic.html">message_magic()</a></code> </p>
+        </td>
+        <td><p>Display messages using interpolated strings</p></td>
+      </tr><tr><td>
+          <p><code><a href="smagic_alias.html">smagic_alias()</a></code> </p>
+        </td>
+        <td><p>Create <code>smagic</code> aliases with custom defaults</p></td>
+      </tr><tr><td>
+          <p><code><a href="string_clean.html">string_clean_alias()</a></code> <code><a href="string_clean.html">string_clean()</a></code> </p>
+        </td>
+        <td><p>Cleans a character vector from multiple patterns</p></td>
+      </tr><tr><td>
+          <p><code><a href="string_ops.html">string_ops_alias()</a></code> <code><a href="string_ops.html">string_ops()</a></code> </p>
+        </td>
+        <td><p>Chains basic operations to character vectors</p></td>
+      </tr><tr><td>
+          <p><code><a href="string_vec.html">string_vec_alias()</a></code> <code><a href="string_vec.html">string_vec()</a></code> </p>
+        </td>
+        <td><p>Efficient creation of string vectors with optional interpolation</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
