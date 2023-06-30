@@ -33,7 +33,7 @@ magic is that applying these operations is about as simple as saying them.
 
 **Operations.** The syntax to add operations is as follows:
 
-![operation](vignettes/images/operation-template.png)
+![operation](man/figures/operation-template.png)
 
 The `operations` are a comma separated sequence of keywords, each keyword being bound to a specific function. Here is an example in which we apply two operations:
 ```r
@@ -42,12 +42,12 @@ smagic("Famous lovers: {title, enum ? lovers}.")
 #> [1] "Famous lovers: Romeo and Juliet."
 ```
 
-![example-lovers](vignettes/images/example-simple_operation.png)
+![example-lovers](man/figures/example-simple_operation.png)
 
 **Arguments.** Some operations, like `split`, require arguments. Arguments are passed using quoted text
 just before the operation. The syntax is:
 
-![argument](vignettes/images/argument.png)
+![argument](man/figures/argument.png)
 
 Let's take the example of splitting an email address and keeping the text before the domain:
 ```r
@@ -56,13 +56,13 @@ smagic("This message comes from {'@'split, first ? email}.")
 #> [1] "This message comes from John."
 ```
 
-![example-argument](vignettes/images/example-argument.png)
+![example-argument](man/figures/example-argument.png)
 
 **Options.** Many arguments acccept options. These options are keywords working like flags (i.e. things
 that can be turned on) and change the behavior of the current operation. 
 Add options using a dot separated sequence of keywords attached to the operation:
 
-![options](vignettes/images/options.png)
+![options](man/figures/options.png)
 
 
 We have seen the `enum` operation in an earlier example, let's add a couple of options to it.
@@ -72,7 +72,7 @@ smagic("This position requires a PhD in either: {enum.i.or ? fields}.")
 #> [1] "This position requires a PhD in either: i) maths, or ii) physics."
 ```
 
-![example-options](vignettes/images/example-options.png)
+![example-options](man/figures/example-options.png)
 
 **Anything else?** So far we have just scratched the surface of `smagic` possiblities.
 Other features are: advanced support for pluralization, nesting, conditional operations,
@@ -94,7 +94,7 @@ smagic("The {len?x} brothers: {anum?x}.")
 #>          when dealing with the interpolation `{anum?x}`.
 #> PROBLEM: `anum` is not a valid operator. Maybe you meant `enum`?
 #> 
-#> INFO: Type smagic('--help') for more help or smagic(.help = "regex") or smagic(.help = TRUE).
+#> INFO: Type smagic(.help = "regex") or smagic(.help = TRUE) for help.
 #> Ex. of valid stuff: smagic("Letters: {10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!")
 
 smagic("The iris species are: {unik, sort ? iris[['Species']}.")
