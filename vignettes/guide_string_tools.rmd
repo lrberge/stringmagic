@@ -261,7 +261,7 @@ Ex: let's invert the numerator and denominator of a division.
 ```{r}
 eq = "5/x = 3/2"
 # a) escaping with empty flags
-string_clean(eq, "/(\\d)/(\\w) => \\2/\\1")
+#string_clean(eq, "/(\\d)/(\\w) => \\2/\\1")
 
 # b) escaping with backslashes
 string_clean(eq, "(\\d)\\/(\\w) => \\2/\\1")
@@ -339,12 +339,6 @@ When you add flags to a pattern, these apply to *all* regex sub-patterns.
 This means that `"f/( | )"` treats the two parentheses as "fixed". 
 *You cannot add flags specific to a single sub-pattern.*
 
-The functions `string_is`, `string_which` and `string_get` accept a negation before the 
-flags (they're the only ones).   
-In that case, the result of all the sub-patterns is negated. You can add the
-empty flag to make this work without flags. For example `"!/a & b & c"` means `x` does not contain
-(`a` AND `b` AND `c`). 
-
 ## Pattern detection with `string_is`, `string_which` and `string_get` {#detect_funs}
 
 Use `string_is`, `string_which` and `string_get` to detect patterns in character vectors and obtain either 
@@ -364,10 +358,6 @@ string_get(cars, "a & e & i & o")
 
 # cars with no 'e' and at least one digit
 string_get(cars, "!e & \\d")
-
-# we use the empty flag trick to negate the full pattern
-# NOT(cars with an 'e' AND one digit)
-string_get(cars, "!/e & \\d")
 
 # flags apply to all
 # contains the 'words' 2, 9 or l

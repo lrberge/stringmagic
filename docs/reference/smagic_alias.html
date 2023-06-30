@@ -222,11 +222,15 @@ defaults if you wish. You can even override the <code>smagic</code> function:</p
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">person</span> <span class="op">=</span> <span class="st">"john doe"</span></span></span>
 <span class="r-in"><span><span class="fu">sma2</span><span class="op">(</span><span class="st">"Hello"</span>, <span class="st">".[title ? person]"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Hello John Doe"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "smagic"    "character"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># you can use the arguments whose default has been changed</span></span></span>
 <span class="r-in"><span><span class="fu">sma2</span><span class="op">(</span><span class="st">"Hello"</span>, <span class="st">".[title ? person]"</span>, .sep <span class="op">=</span> <span class="st">": "</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Hello: John Doe"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "smagic"    "character"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

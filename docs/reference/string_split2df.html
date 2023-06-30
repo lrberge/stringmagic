@@ -214,11 +214,43 @@ default values with <code><a href="smagic_alias.html">smagic_alias()</a></code> 
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># we split at each word</span></span></span>
 <span class="r-in"><span><span class="fu">string_split2df</span><span class="op">(</span><span class="va">x</span>, <span class="st">"[[:punct:] ]+"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_split2df(x, "[[:punct:] ]+"):</span> could not find function "string_split2df"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    obs           x</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1         Nor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    1        rain</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    1        wind</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    1     thunder</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    1        fire</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    1         are</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    1          my</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8    1   daughters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    2        When</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   2          my</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   2 information</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12   2     changes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13   2           I</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   2       alter</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15   2          my</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16   2 conclusions</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># we add the 'id'</span></span></span>
 <span class="r-in"><span><span class="fu">string_split2df</span><span class="op">(</span><span class="va">x</span>, <span class="st">"[[:punct:] ]+"</span>, id <span class="op">=</span> <span class="va">id</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_split2df(x, "[[:punct:] ]+", id = id):</span> could not find function "string_split2df"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    obs           x  id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1         Nor  ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    1        rain  ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    1        wind  ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    1     thunder  ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    1        fire  ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    1         are  ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    1          my  ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8    1   daughters  ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    2        When jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   2          my jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   2 information jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12   2     changes jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13   2           I jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   2       alter jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15   2          my jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16   2 conclusions jmk</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># TO NOTE:</span></span></span>
 <span class="r-in"><span><span class="co"># - the second argument is `data`</span></span></span>
@@ -230,7 +262,23 @@ default values with <code><a href="smagic_alias.html">smagic_alias()</a></code> 
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>text <span class="op">=</span> <span class="va">x</span>, my_id <span class="op">=</span> <span class="va">id</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">string_split2df</span><span class="op">(</span><span class="va">text</span> <span class="op">~</span> <span class="va">my_id</span>, <span class="va">base</span>, <span class="st">"[[:punct:] ]+"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_split2df(text ~ my_id, base, "[[:punct:] ]+"):</span> could not find function "string_split2df"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    obs        text my_id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1         Nor    ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    1        rain    ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    1        wind    ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    1     thunder    ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    1        fire    ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    1         are    ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    1          my    ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8    1   daughters    ws</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    2        When   jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   2          my   jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   2 information   jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12   2     changes   jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13   2           I   jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   2       alter   jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15   2          my   jmk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16   2 conclusions   jmk</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># with 2+ identifiers</span></span></span>
@@ -239,11 +287,144 @@ default values with <code><a href="smagic_alias.html">smagic_alias()</a></code> 
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># we have a message because the identifiers are not unique</span></span></span>
 <span class="r-in"><span><span class="fu">string_split2df</span><span class="op">(</span><span class="va">carname</span> <span class="op">~</span> <span class="va">am</span> <span class="op">+</span> <span class="va">gear</span> <span class="op">+</span> <span class="va">carb</span>, <span class="va">base</span>, <span class="st">" +"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_split2df(carname ~ am + gear + carb, base, " +"):</span> could not find function "string_split2df"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The identifiers are not unique, you will not be able to reconstruct the data using only them.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    obs     carname am gear carb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1       Mazda  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    1         RX4  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    2       Mazda  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    2         RX4  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    2         Wag  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    3      Datsun  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    3         710  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8    4      Hornet  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    4           4  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   4       Drive  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   5      Hornet  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12   5  Sportabout  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13   6     Valiant  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   7      Duster  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15   7         360  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16   8        Merc  0    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17   8        240D  0    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18   9        Merc  0    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19   9         230  0    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20  10        Merc  0    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21  10         280  0    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22  11        Merc  0    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23  11        280C  0    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24  12        Merc  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25  12       450SE  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26  13        Merc  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27  13       450SL  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28  14        Merc  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29  14      450SLC  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30  15    Cadillac  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31  15   Fleetwood  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32  16     Lincoln  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33  16 Continental  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34  17    Chrysler  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35  17    Imperial  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36  18        Fiat  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37  18         128  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38  19       Honda  1    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39  19       Civic  1    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40  20      Toyota  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41  20     Corolla  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42  21      Toyota  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43  21      Corona  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44  22       Dodge  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45  22  Challenger  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46  23         AMC  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47  23     Javelin  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48  24      Camaro  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49  24         Z28  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50  25     Pontiac  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51  25    Firebird  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52  26        Fiat  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53  26        X1-9  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54  27     Porsche  1    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55  27       914-2  1    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56  28       Lotus  1    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57  28      Europa  1    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58  29        Ford  1    5    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59  29     Pantera  1    5    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60  29           L  1    5    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61  30     Ferrari  1    5    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62  30        Dino  1    5    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63  31    Maserati  1    5    8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64  31        Bora  1    5    8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65  32       Volvo  1    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66  32        142E  1    4    2</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># adding the position of the words &amp; removing the message</span></span></span>
 <span class="r-in"><span><span class="fu">string_split2df</span><span class="op">(</span><span class="va">carname</span> <span class="op">~</span> <span class="va">am</span> <span class="op">+</span> <span class="va">gear</span> <span class="op">+</span> <span class="va">carb</span>, <span class="va">base</span>, <span class="st">" +"</span>, id_unik <span class="op">=</span> <span class="cn">FALSE</span>, add.pos <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_split2df(carname ~ am + gear + carb, base, " +", id_unik = FALSE,     add.pos = TRUE):</span> could not find function "string_split2df"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    obs pos     carname am gear carb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1   1       Mazda  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    1   2         RX4  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    2   1       Mazda  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    2   2         RX4  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    2   3         Wag  1    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    3   1      Datsun  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    3   2         710  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8    4   1      Hornet  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    4   2           4  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   4   3       Drive  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   5   1      Hornet  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12   5   2  Sportabout  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13   6   1     Valiant  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   7   1      Duster  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15   7   2         360  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16   8   1        Merc  0    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17   8   2        240D  0    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18   9   1        Merc  0    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19   9   2         230  0    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20  10   1        Merc  0    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21  10   2         280  0    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22  11   1        Merc  0    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23  11   2        280C  0    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24  12   1        Merc  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25  12   2       450SE  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26  13   1        Merc  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27  13   2       450SL  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28  14   1        Merc  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29  14   2      450SLC  0    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30  15   1    Cadillac  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31  15   2   Fleetwood  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32  16   1     Lincoln  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33  16   2 Continental  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34  17   1    Chrysler  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35  17   2    Imperial  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36  18   1        Fiat  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37  18   2         128  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38  19   1       Honda  1    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39  19   2       Civic  1    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40  20   1      Toyota  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41  20   2     Corolla  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42  21   1      Toyota  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43  21   2      Corona  0    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44  22   1       Dodge  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45  22   2  Challenger  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46  23   1         AMC  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47  23   2     Javelin  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48  24   1      Camaro  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49  24   2         Z28  0    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50  25   1     Pontiac  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51  25   2    Firebird  0    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52  26   1        Fiat  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53  26   2        X1-9  1    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54  27   1     Porsche  1    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55  27   2       914-2  1    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56  28   1       Lotus  1    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57  28   2      Europa  1    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58  29   1        Ford  1    5    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59  29   2     Pantera  1    5    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60  29   3           L  1    5    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61  30   1     Ferrari  1    5    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62  30   2        Dino  1    5    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63  31   1    Maserati  1    5    8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64  31   2        Bora  1    5    8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65  32   1       Volvo  1    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66  32   2        142E  1    4    2</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

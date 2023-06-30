@@ -188,9 +188,8 @@ defaults if you wish. You can even override the <code>smagic</code> function:</p
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># C) use it</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"right, now"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("right, now"):</span> could not find function "string_vec"</span>
 <span class="r-in"><span><span class="fu"><a href="smagic.html">smagic</a></span><span class="op">(</span><span class="st">"Take heed, {emph, c? x}."</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Take heed, *right* *now*."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># now let's add the option "strong"</span></span></span>
@@ -203,18 +202,10 @@ defaults if you wish. You can even override the <code>smagic</code> function:</p
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic_register_fun</span><span class="op">(</span><span class="va">fun_emph</span>, <span class="st">"emph"</span>, <span class="st">"strong"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error in "strong" %in% options : </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   argument "options" is missing, with no default</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> in smagic_register_fun(fun_emph, "emph", "strong"): </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> The function defined in argument `fun` failed to run for a simple case.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> Running it on x = 1:5 leads to an error, see below:</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> Error in "strong" %in% options : </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>   argument "options" is missing, with no default</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"right, now"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("right, now"):</span> could not find function "string_vec"</span>
 <span class="r-in"><span><span class="fu"><a href="smagic.html">smagic</a></span><span class="op">(</span><span class="st">"Take heed, {emph.strong, c? x}."</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Take heed, ***right*** ***now***."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># now let's add an argument</span></span></span>
@@ -230,16 +221,10 @@ defaults if you wish. You can even override the <code>smagic</code> function:</p
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">smagic_register_fun</span><span class="op">(</span><span class="va">fun_emph</span>, <span class="st">"emph"</span>, <span class="st">"strong"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error in fun(x = 1:5) : argument "argument" is missing, with no default</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> in smagic_register_fun(fun_emph, "emph", "strong"): </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> The function defined in argument `fun` failed to run for a simple case.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> Running it on x = 1:5 leads to an error, see below:</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> Error in fun(x = 1:5) : argument "argument" is missing, with no default</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"right, now"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("right, now"):</span> could not find function "string_vec"</span>
 <span class="r-in"><span><span class="fu"><a href="smagic.html">smagic</a></span><span class="op">(</span><span class="st">"Take heed, {'_'emph.s, c? x}."</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in missing(.default):</span> 'missing' can only be used for arguments</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Take heed, ___right___ ___now___."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># using smagic_register_ops</span></span></span>
@@ -247,14 +232,9 @@ defaults if you wish. You can even override the <code>smagic</code> function:</p
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># create a 'header' maker</span></span></span>
 <span class="r-in"><span><span class="fu">smagic_register_ops</span><span class="op">(</span><span class="st">"tws, '# 'paste, ' 'paste.right, '40|-'fill"</span>, <span class="st">"h1"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error in missing(.default) : 'missing' can only be used for arguments</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> in smagic_register_ops("tws, '# 'paste, ' 'paste.rig...: </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> The argument `ops` must refer to valid `smagic` operations.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> PROBLEM: running `smagic("x{1:5}", .last = "tws, '# 'paste, '</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> 'paste.right, '40|-'fill")` leads to an error, see below:</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> Error in missing(.default) : 'missing' can only be used for arguments</span>
 <span class="r-in"><span><span class="fu"><a href="cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"{h1 ! My title}\n my content"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in cat_magic("{h1 ! My title}\n my content"):</span> could not find function "cat_magic"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # My title -----------------------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  my content</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

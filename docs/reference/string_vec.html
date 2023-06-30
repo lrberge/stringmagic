@@ -246,26 +246,29 @@ function call.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># illustrating comma-splitting and interpolation</span></span></span>
 <span class="r-in"><span><span class="fu">string_vec</span><span class="op">(</span><span class="st">"x1, y2, z{4:5}"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("x1, y2, z{4:5}"):</span> could not find function "string_vec"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "x1" "y2" "z4" "z5"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># variable protection</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"x{1:5}"</span></span></span>
 <span class="r-in"><span><span class="fu">string_vec</span><span class="op">(</span><span class="va">x</span>, <span class="st">"y{1:2}"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec(x, "y{1:2}"):</span> could not find function "string_vec"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "x{1:5}" "y1"     "y2"    </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># without protection =&gt; interpolation takes place</span></span></span>
 <span class="r-in"><span><span class="fu">string_vec</span><span class="op">(</span><span class="va">x</span>, <span class="st">"y{1:2}"</span>, .protect.vars <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec(x, "y{1:2}", .protect.vars = FALSE):</span> could not find function "string_vec"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "x1" "x2" "x3" "x4" "x5" "y1" "y2"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># removing comma splitting</span></span></span>
 <span class="r-in"><span><span class="fu">string_vec</span><span class="op">(</span><span class="st">"Hi, said Charles."</span>, <span class="st">"Hi, said {girl}."</span>, girl <span class="op">=</span> <span class="st">"Julia"</span>, .split <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("Hi, said Charles.", "Hi, said {girl}.", girl = "Julia",     .split = FALSE):</span> could not find function "string_vec"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Hi, said Charles." "Hi, said Julia."  </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># changing the delimiters for interpolation</span></span></span>
 <span class="r-in"><span><span class="va">pkg</span> <span class="op">=</span> <span class="st">"\\usepackage[usenames,dvipsnames]{xcolor}"</span></span></span>
 <span class="r-in"><span><span class="fu">string_vec</span><span class="op">(</span><span class="st">"\\usepackage{.[S!graphicx, fourier, standalone]}"</span>, </span></span>
 <span class="r-in"><span>           <span class="va">pkg</span>, .delim <span class="op">=</span> <span class="st">".[ ]"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("\\usepackage{.[S!graphicx, fourier, standalone]}",     pkg, .delim = ".[ ]"):</span> could not find function "string_vec"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "\\usepackage{graphicx}"                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "\\usepackage{fourier}"                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "\\usepackage{standalone}"                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4] "\\usepackage[usenames,dvipsnames]{xcolor}"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Customization</span></span></span>
@@ -275,11 +278,12 @@ function call.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># we create a "matrix generator"</span></span></span>
 <span class="r-in"><span><span class="va">matgen</span> <span class="op">=</span> <span class="fu">string_vec_alias</span><span class="op">(</span>.nmat <span class="op">=</span> <span class="cn">TRUE</span>, .last <span class="op">=</span> <span class="st">"'\n'split"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec_alias(.nmat = TRUE, .last = "'\n'split"):</span> could not find function "string_vec_alias"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">matgen</span><span class="op">(</span><span class="st">"5, 4, 3</span></span></span>
 <span class="r-in"><span><span class="st">        8, 6, 2"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in matgen("5, 4, 3\n        8, 6, 2"):</span> could not find function "matgen"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    5    4    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]    8    6    2</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

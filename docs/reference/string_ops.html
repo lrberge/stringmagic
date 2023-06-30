@@ -163,7 +163,7 @@ is equivalent to <code>smagic("{op1, op2 ? x}")</code>.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># let's get the brands starting with an "m"</span></span></span>
 <span class="r-in"><span><span class="fu">string_ops</span><span class="op">(</span><span class="va">cars</span>, <span class="st">"'i/^m'get, x, unik"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_ops(cars, "'i/^m'get, x, unik"):</span> could not find function "string_ops"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Mazda"    "Merc"     "Maserati"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Explainer:</span></span></span>
 <span class="r-in"><span><span class="co"># 'i/^m'get: keeps only the elements starting with an m,</span></span></span>
@@ -177,7 +177,7 @@ is equivalent to <code>smagic("{op1, op2 ? x}")</code>.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># let's get the 3 largest numbers appearing in the car models</span></span></span>
 <span class="r-in"><span><span class="fu">string_ops</span><span class="op">(</span><span class="va">cars</span>, <span class="st">"'\\d+'x, rm, unik, num, dsort, 3 first"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first"):</span> could not find function "string_ops"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 914 710 450</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Explainer:</span></span></span>
 <span class="r-in"><span><span class="co"># '\d+'x: extracts the first pattern, the pattern meaning "a succession"</span></span></span>

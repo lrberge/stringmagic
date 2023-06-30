@@ -4,13 +4,40 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/articles/guide_customization.html</loc>
+  </url>
+  <url>
+    <loc>/articles/guide_smagic.html</loc>
+  </url>
+  <url>
+    <loc>/articles/guide_string_tools.html</loc>
+  </url>
+  <url>
     <loc>/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>/articles/ref_operations.html</loc>
+  </url>
+  <url>
+    <loc>/articles/ref_regex_flags.html</loc>
+  </url>
+  <url>
+    <loc>/articles/ref_regex_logic.html</loc>
+  </url>
+  <url>
+    <loc>/articles/ref_smagic.html</loc>
   </url>
   <url>
     <loc>/articles/smagick_walkthrough.html</loc>
   </url>
   <url>
+    <loc>/articles/smagic_walkthrough.html</loc>
+  </url>
+  <url>
     <loc>/articles/stringmagick_tour.html</loc>
+  </url>
+  <url>
+    <loc>/articles/stringmagic_tour.html</loc>
   </url>
   <url>
     <loc>/articles/string_tools.html</loc>
@@ -22,10 +49,34 @@
     <loc>/index.html</loc>
   </url>
   <url>
+    <loc>/LICENSE-text.html</loc>
+  </url>
+  <url>
     <loc>/news/index.html</loc>
   </url>
   <url>
+    <loc>/reference/cat_magic.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/parse_regex_pattern.html</loc>
+  </url>
+  <url>
+    <loc>/reference/print.smagic.html</loc>
+  </url>
+  <url>
+    <loc>/reference/print.smagick.html</loc>
+  </url>
+  <url>
+    <loc>/reference/setSmagic.html</loc>
+  </url>
+  <url>
+    <loc>/reference/setSmagick.html</loc>
+  </url>
+  <url>
+    <loc>/reference/smagic.html</loc>
   </url>
   <url>
     <loc>/reference/smagick.html</loc>
@@ -34,7 +85,40 @@
     <loc>/reference/smagick_register.html</loc>
   </url>
   <url>
+    <loc>/reference/smagic_alias.html</loc>
+  </url>
+  <url>
+    <loc>/reference/smagic_register.html</loc>
+  </url>
+  <url>
+    <loc>/reference/smagic_register_fun.html</loc>
+  </url>
+  <url>
+    <loc>/reference/stringmagic.html</loc>
+  </url>
+  <url>
     <loc>/reference/stringmagick.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_clean.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_fill.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_get.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_is.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_ops.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_split2df.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_vec.html</loc>
   </url>
   <url>
     <loc>/reference/str_clean.html</loc>
@@ -53,5 +137,8 @@
   </url>
   <url>
     <loc>/reference/str_split2df.html</loc>
+  </url>
+  <url>
+    <loc>/reference/str_vec.html</loc>
   </url>
 </urlset>

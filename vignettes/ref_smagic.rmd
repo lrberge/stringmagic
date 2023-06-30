@@ -467,7 +467,7 @@ smagic("First 3 mpg values: {3 first, C ? mtcars$mpg}.")
 smagic("First 3 mpg values: {C ? head(mtcars$mpg, 3)}.")
 
 # ...but not in the middle of an operations chain
-smagic("First 3 integer mpg values: {'!f/.'get, 3 first, C ? mtcars$mpg}.")
+smagic("First 3 integer mpg values: {'f/!.'get, 3 first, C ? mtcars$mpg}.")
 ```
 
 Negative numbers as argument remove the 

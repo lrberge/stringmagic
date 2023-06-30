@@ -270,29 +270,28 @@ default values with <code><a href="smagic_alias.html">smagic_alias()</a></code> 
 <span class="r-in"><span><span class="co">#       of the examples </span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"One, two, one... two, microphone, check"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_vec("One, two, one... two, microphone, check"):</span> could not find function "string_vec"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># default is regular expression search</span></span></span>
 <span class="r-in"><span><span class="co"># =&gt; 3 character items</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"^...$"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "^...$"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE  TRUE FALSE FALSE FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># to trigger fixed search use the flag 'fixed'</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"fixed/..."</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "fixed/..."):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE FALSE FALSE</span>
 <span class="r-in"><span><span class="co"># you can just use the first letter</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"f/..."</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "f/..."):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE FALSE FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># to negate, use '!' as the first element of the pattern</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"f/!..."</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "f/!..."):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE  TRUE FALSE  TRUE  TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># you can combine several patterns with " &amp; " or " | "</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"one &amp; c"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "one &amp; c"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE FALSE  TRUE FALSE</span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"one | c"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "one | c"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE  TRUE  TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># word: adds word boundaries</span></span></span>
@@ -300,28 +299,28 @@ default values with <code><a href="smagic_alias.html">smagic_alias()</a></code> 
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># compare</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"one"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "one"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE  TRUE FALSE</span>
 <span class="r-in"><span><span class="co"># with</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/one"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "w/one"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE FALSE FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># words can be chained with commas (it is like an OR logical operation)</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/one, two"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "w/one, two"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE  TRUE  TRUE FALSE FALSE</span>
 <span class="r-in"><span><span class="co"># compare with</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/one &amp; two"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "w/one &amp; two"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE FALSE FALSE</span>
 <span class="r-in"><span><span class="co"># remember that you can still negate</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/one &amp; !two"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "w/one &amp; !two"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE FALSE FALSE FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># you can combine the flags</span></span></span>
 <span class="r-in"><span><span class="co"># compare</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"w/one"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "w/one"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE FALSE FALSE</span>
 <span class="r-in"><span><span class="co"># with</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"wi/one"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "wi/one"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE  TRUE FALSE FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># the `magic` flag</span></span></span>
@@ -329,7 +328,7 @@ default values with <code><a href="smagic_alias.html">smagic_alias()</a></code> 
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">p</span> <span class="op">=</span> <span class="st">"one"</span></span></span>
 <span class="r-in"><span><span class="fu">string_is</span><span class="op">(</span><span class="va">x</span>, <span class="st">"m/{p}"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_is(x, "m/{p}"):</span> could not find function "string_is"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE  TRUE FALSE</span>
 <span class="r-in"><span><span class="co"># Explanation:</span></span></span>
 <span class="r-in"><span><span class="co"># - "p" is interpolated into "one"</span></span></span>
 <span class="r-in"><span><span class="co"># - we get the equivalent: string_is(x, "one")</span></span></span>
@@ -342,10 +341,10 @@ default values with <code><a href="smagic_alias.html">smagic_alias()</a></code> 
 <span class="r-in"><span><span class="co"># it works exactly the same way as string_is</span></span></span>
 <span class="r-in"><span><span class="co"># Which are the items containing an 'e' and an 'o'?</span></span></span>
 <span class="r-in"><span><span class="fu">string_which</span><span class="op">(</span><span class="va">x</span>, <span class="st">"e"</span>, <span class="st">"o"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_which(x, "e", "o"):</span> could not find function "string_which"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 4</span>
 <span class="r-in"><span><span class="co"># equivalently</span></span></span>
 <span class="r-in"><span><span class="fu">string_which</span><span class="op">(</span><span class="va">x</span>, <span class="st">"e &amp; o"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_which(x, "e &amp; o"):</span> could not find function "string_which"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 4</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

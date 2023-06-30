@@ -177,7 +177,7 @@ smagic_register_fun = function(fun, alias, valid_options = NULL, namespace = NUL
   # we only test for simple cases
   if(!"argument" %in% fun_args){
     options = head(valid_options, 1)
-    run = try(fun(x = 1:5, options = options, gruop_flag = 0, group_index = rep(1, 5)), silent = TRUE)
+    run = try(fun(x = 1:5, options = options, group_flag = 0, group = rep(1, 5)), silent = TRUE)
     if(isError(run)){
       mc = match.call()
       fun_dp = if(length(mc$fun) == 1) deparse_short(fun) else ""

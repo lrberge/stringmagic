@@ -279,23 +279,29 @@ To access these operators in their specific namespaces, you must use an alias wi
 <span class="r-in"><span><span class="va">start</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.05</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">message_magic</span><span class="op">(</span><span class="st">"This example has run in {dtime ? start}."</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in message_magic("This example has run in {dtime ? start}."):</span> could not find function "message_magic"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> This example has run in 62ms.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">cat_magic</span><span class="op">(</span><span class="st">"Let's write a very long message to illustrate how .width work."</span>, </span></span>
 <span class="r-in"><span>          .width <span class="op">=</span> <span class="fl">40</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in cat_magic("Let's write a very long message to illustrate how .width work.",     .width = 40):</span> could not find function "cat_magic"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Let's write a very long message to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> illustrate how .width work.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Let's add a leader</span></span></span>
 <span class="r-in"><span><span class="fu">cat_magic</span><span class="op">(</span><span class="st">"Let's write a very long message to illustrate how `.width` work."</span>, </span></span>
 <span class="r-in"><span>          <span class="st">"And now we add `.leader`."</span>, .width <span class="op">=</span> <span class="fl">40</span>, .leader <span class="op">=</span> <span class="st">"#&gt; "</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in cat_magic("Let's write a very long message to illustrate how `.width` work.",     "And now we add `.leader`.", .width = 40, .leader = "#&gt; "):</span> could not find function "cat_magic"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #&gt; Let's write a very long message to</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #&gt; illustrate how `.width` work.And now</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #&gt; we add `.leader`.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># newlines respect the introductory spaces</span></span></span>
 <span class="r-in"><span><span class="fu">cat_magic</span><span class="op">(</span><span class="st">"Here's a list:"</span>, </span></span>
 <span class="r-in"><span>          <span class="st">"    + short item"</span>, </span></span>
 <span class="r-in"><span>          <span class="st">"    + this is a very long item that likely overflows"</span>, </span></span>
 <span class="r-in"><span>         .width <span class="op">=</span> <span class="fl">30</span>, .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in cat_magic("Here's a list:", "    + short item", "    + this is a very long item that likely overflows",     .width = 30, .sep = "\n"):</span> could not find function "cat_magic"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Here's a list:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     + short item</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     + this is a very long item</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     that likely overflows</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># define custom defaults</span></span></span>
@@ -306,10 +312,11 @@ To access these operators in their specific namespaces, you must use an alias wi
 <span class="r-in"><span><span class="co"># Here we change the defaults to mimic the printing of a column</span></span></span>
 <span class="r-in"><span><span class="va">cat_column</span> <span class="op">=</span> <span class="fu">cat_magic_alias</span><span class="op">(</span>.sep <span class="op">=</span> <span class="st">"\n"</span>, .end <span class="op">=</span> <span class="st">"\n"</span>, .vectorize <span class="op">=</span> <span class="cn">TRUE</span>, </span></span>
 <span class="r-in"><span>                            .last <span class="op">=</span> <span class="st">"fill.center, ' + 'paste.both"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in cat_magic_alias(.sep = "\n", .end = "\n", .vectorize = TRUE,     .last = "fill.center, ' + 'paste.both"):</span> could not find function "cat_magic_alias"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">cat_column</span><span class="op">(</span><span class="st">"code smagic"</span>, <span class="st">"write the docs"</span>, <span class="st">"write the vignettes"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in cat_column("code smagic", "write the docs", "write the vignettes"):</span> could not find function "cat_column"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  +     code smagic     + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  +   write the docs    + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  + write the vignettes + </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

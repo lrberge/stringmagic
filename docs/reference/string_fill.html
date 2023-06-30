@@ -163,25 +163,28 @@ default values with <code><a href="smagic_alias.html">smagic_alias()</a></code> 
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># simple fill with blank</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">string_fill</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="st">":"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span>, <span class="st">"€"</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_fill(x):</span> could not find function "string_fill"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> apple    :3€</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pineapple:7€</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># center fill</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">string_fill</span><span class="op">(</span><span class="va">x</span>, center <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">":"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span>, <span class="st">"€"</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_fill(x, center = TRUE):</span> could not find function "string_fill"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   apple  :3€</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pineapple:7€</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># changing the length of the fill and the symbol used for filling</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu">string_fill</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="st">":"</span>, </span></span>
 <span class="r-in"><span>           <span class="fu">string_fill</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span>, <span class="fl">3</span>, <span class="st">"0"</span>, right <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"€"</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_fill(x):</span> could not find function "string_fill"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> apple    :003€</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pineapple:007€</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># na behavior: default/NA/other</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hello"</span>, <span class="cn">NA</span><span class="op">)</span> </span></span>
 <span class="r-in"><span><span class="fu">string_fill</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_fill(x):</span> could not find function "string_fill"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hello" "NA   "</span>
 <span class="r-in"><span><span class="fu">string_fill</span><span class="op">(</span><span class="va">x</span>, na <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_fill(x, na = NA):</span> could not find function "string_fill"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hello" NA     </span>
 <span class="r-in"><span><span class="fu">string_fill</span><span class="op">(</span><span class="va">x</span>, na <span class="op">=</span> <span class="st">"(missing)"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in string_fill(x, na = "(missing)"):</span> could not find function "string_fill"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hello    " "(missing)"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

@@ -1,8 +1,9 @@
 useDynLib(stringmagic, .registration = TRUE)
 
 # string_*
-export(string_ops, string_is, string_which, string_get, string_clean, string_split2df,
-       string_split2dt, string_fill, string_vec)
+export(string_ops, string_is, string_any, string_all, string_which, string_get, 
+       string_clean, string_split2df, string_split2dt, string_fill, string_vec)
+       
 
 export(string_ops_alias, string_vec_alias, string_clean_alias)
 
