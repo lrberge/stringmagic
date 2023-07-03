@@ -21,7 +21,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r setup, include = FALSE}
+library(stringmagic)
+```
 
 All functions in `stringmagic` accept optional regular expressions (regex) flags when regular expressions
 are expected. The idea is similar to 
