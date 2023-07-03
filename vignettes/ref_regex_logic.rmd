@@ -20,3 +20,82 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r setup, include = FALSE}
+library(stringmagic)
+```
+
+In `stringmagic`, any time you use a regular expression (regex) to *detect a pattern* in
+a character string, you can use regex logic. The syntax to logically combine
+regular expressions is intuitive: simply use regular logical operators and it will work!
+
+The functions for whcih regex logic is available are: a) pattern detection functions 
+(`string_is`, `string_get`, etc), and b) string replacement functions (`string_clean`, 
+`string_replace`) with the `total` flag (see the [vignette on regex flags](LINK)).
+
+
+# Logically combining regex patterns {#detect_logic}
+
+Assume `"pat1"` and `"pat2"` are two regular expression patterns and we want 
+to test whether the string `x` contains a combination of these patterns. 
+Then:
+
+- `"pat1 & pat2"` = `x` contains `pat1` AND `x` contains `pat2`
+- `"pat1 | pat2"` = `x` contains `pat1` OR `x` contains `pat2`
+- `"!pat1"` = `x` does not contain `pat1`
+- `"!pat1 & pat2"` = `x` does not contain `pat1` AND `x` contains `pat2`
+
+Hence the three logial operators are:
+
+- `" & "`: logical AND, it **must** be a space + an ampersand + a space 
+(just the `&` *does not work*)
+- `" | "`: logical OR, it **must** be a space + a pipe + a space 
+(just the `|` *does not work*)
+- `"!"`: logical NOT, it works only when it is the first character of the pattern.
+Note that anything after it (including spaces and other `!`) *is part of the regular expression*
+
+The parsing of the logical elements is done before any regex interpretation. 
+The logical evaluations are done from left to right and are sequentially combined. 
+
+Ex: selecting cars.
+```{r}
+cars = row.names(mtcars)
+print(cars)
+
+# which one...
+# ... contains all letters 'a', 'e', 'i' AND 'o'?
+string_get(cars, "a & e & i & o")
+
+# ... does NOT contain any digit?
+string_get(cars, "!\\d")
+```
+
+You **cannot** combine logical statements with parentheses. 
+
+For example: `"hello | (world & my lady)"` leads to: `x` contains `"hello"` or contains `"(world"`, 
+and contains `"my lady)"`. The two latter are invalid regexes but can make sense if you
+have the flag "fixed" turned on. To escape the meaning of the logical operators, 
+see the [dedicated section](#logical_escape).
+
+The logical `"not"` always apply to a single pattern and **not** to the full pattern.
+
+### Escaping the meaning of the logical operators {#logical_escape}
+
+To escape the meaning of the logical operators, there are two solutions to 
+escape them:
+
+- use two backslashes just before the operator: `"a \\& b"` means `x`
+contains `"a & b"`
+- use a regex hack: the previous example is equivalent to `"a [&] b"` in regex parlance
+and won't be parsed as a logical AND
+
+The two solutions work for the three operators: `" & "`, `" | "` and `"!"`.
+
+### How do regex flags work with logically combined regexes? {#logical_flags}
+
+All `stringmagic` regexes accept optional flags. Please see the [associated vignette](LINK).
+
+When you add flags to a pattern, these apply to *all* regex sub-patterns. 
+This means that `"f/( | )"` treats the two parentheses as "fixed". 
+*You cannot add flags specific to a single sub-pattern.*
+
