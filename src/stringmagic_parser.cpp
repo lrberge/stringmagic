@@ -840,10 +840,13 @@ void parse_box(delim &delims, bool &is_pblm, const char * str, int &i, int n,
       }
 
       // pluralization: op1, op2, (sing;plural)
-
+      
       if(str[i] == ' '){
-        // we strip white spaces
+        // let's skip WS
         ++i;
+      } else if(is_quote(str, i)){
+        // we extract the quoted argument
+        extract_quote(str, i, n, operator_tmp);
       } else if(str[i] == '('){
 
         if(in_operator){

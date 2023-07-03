@@ -2714,6 +2714,10 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check,
     op = op_parsed$operator
     options = op_parsed$options
     argument = op_parsed$argument
+    if(op_parsed$eval){
+      argument_call = check_set_oparg_parse(argument, op, .check)
+      argument = check_set_oparg_eval(argument_call, .data, .envir, opi, .check)
+    }
 
     if(op %in% c("es", "s", "y", "ies")){
       zero_case = opt_equal(options, c("zero", "0"))
@@ -2735,14 +2739,16 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check,
       }
 
     } else if(op %in% c("n", "N", "len", "Len")){
+      
+      options = check_set_options(options, c("letter", "upper", "no", "No"))
 
-      is_letter = opt_equal(options, c("letter", "upper")) || substr(op, 1, 1) %in% c("N", "L")
-      is_upper = opt_equal(options, "upper")
+      is_letter = any(options %in% c("letter", "upper")) || substr(op, 1, 1) %in% c("N", "L")
+      is_upper = "upper" %in% options
       
       if(IS_ZERO && nchar(argument) > 0){
         res[i] = argument
-      } else if(opt_equal(options, "no") && IS_ZERO){
-        if(is_upper){
+      } else if(IS_ZERO && any(options %in% c("no", "No"))){
+        if(is_upper || "No" %in% options){
           res[i] = "No"
         } else {
           res[i] = "no"
