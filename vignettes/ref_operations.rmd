@@ -74,7 +74,7 @@ prince_talk = c("O that this too too solid flesh would melt",
                 "Thaw, and resolve itself into a dew!",
                 "Or that the Everlasting had not fix'd",
                 "His canon 'gainst self-slaughter!")
-smagic("Order matters:\n{split, ~(sort, collapse), fill.center, lower, upper.sentence,
+smagic("Order matters:\n{split, ~(sort, collapse), align.center, lower, upper.sentence,
                           Q, '\n'collapse ? prince_talk}")
 ```
 
@@ -621,10 +621,10 @@ smagic("v0: {x}",
         "v4: {4 shorten.dots ? x}", .sep = "\n")
 ```
 
-## Fill character strings: fill
+## Fill character strings: fill, align
 
-Fills the character strings up to a size. Options: `"right"` or `"center"`. 
-Default is left-alignment of the strings. 
+Fills the character strings up to a size. `align` is an alias to `fill`. 
+Options: `"right"` or `"center"`. Default is left-alignment of the strings. 
 
 The argument is optional and can be of the form `'n'` or `'n|s'`. By default if no argument
 is provided, of if `n=0`,`n` is equal to the maximum character length of the vector. The optional
