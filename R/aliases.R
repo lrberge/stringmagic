@@ -11,6 +11,13 @@
 #' 
 #' @inheritParams smagic
 #' 
+#' @param .local_ops Named list or `NULL` (default). If provided, it must be a list 
+#' of the form `list(alias1 = ops1, alias2 = ops2)` where alias is the name of the newly defined 
+#' operator an `ops` is a character scalar representing the associated smagic operations.
+#' Ex: `list(add = "' + 'collapse")` creates the operation `add` which collapses the 
+#' string with pluses. All operations created here are only available to the
+#' generated function.h
+#' 
 #' @details 
 #' 
 #' Use this function if you want to change `smagic` default values. For example,

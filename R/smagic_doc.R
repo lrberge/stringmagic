@@ -76,11 +76,7 @@
 #' As a regular end-user you shouldn't care! If your package uses `smagic`, you should care. 
 #' It is useful **only** if your package uses 'custom' `smagic` operations, set with 
 #' [smagic_register_fun()] or [smagic_register_ops()].
-#' @param .local_ops Named list or `NULL` (default). If provided, it must be a list 
-#' of the form `list(alias1 = ops1, alias2 = ops2)` where alias is the name of the newly defined 
-#' operator an `ops` is a character scalar representing the associated smagic operations.
-#' Ex: `list(add = "' + 'collapse")` creates the operation `add` which collapses the 
-#' string with pluses.
+#' 
 #'
 #' @details 
 #' There are over 50 basic string operations, it supports pluralization, string operations can be 

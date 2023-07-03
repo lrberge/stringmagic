@@ -60,7 +60,8 @@ invisible (i.e. not printed on the console).}
 of the form \code{list(alias1 = ops1, alias2 = ops2)} where alias is the name of the newly defined
 operator an \code{ops} is a character scalar representing the associated smagic operations.
 Ex: \code{list(add = "' + 'collapse")} creates the operation \code{add} which collapses the
-string with pluses.}
+string with pluses. All operations created here are only available to the
+generated function.h}
 
 \item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
 that should be returned is collapsed with the value of this argument. This leads
