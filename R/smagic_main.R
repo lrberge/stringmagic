@@ -2738,8 +2738,10 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check,
 
       is_letter = opt_equal(options, c("letter", "upper")) || substr(op, 1, 1) %in% c("N", "L")
       is_upper = opt_equal(options, "upper")
-
-      if(opt_equal(options, "no") && IS_ZERO){
+      
+      if(IS_ZERO && nchar(argument) > 0){
+        res[i] = argument
+      } else if(opt_equal(options, "no") && IS_ZERO){
         if(is_upper){
           res[i] = "No"
         } else {
