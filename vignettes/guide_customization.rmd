@@ -20,3 +20,103 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+
+
+
+# Creating your own operations {#sec_creation}
+
+You can add any arbitraty operation to `smagic`. You only need to 
+use the function `smagic_register_fun` or `smagic_register_ops`. 
+
+First you need to create a function that will be applied to a character vector. 
+That function must have at least the arguments 'x' and '...'. 
+Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'group_flag'.
+
+Second, this function must return a vector or a list of two items: `x` and `group`. The latter
+form is only used in functions modifying the length or order of the vector.
+
+Finally, you need to register the function with `smagic_register_fun` and provide it an
+alias. Optionnally, you can provide a list of valid options. 
+
+Ex.1: a new operation adding markdown emphasis.
+```{r}
+library(stringmagic)
+# A) define the function
+fun_emph = function(x, ...) paste0("*", x, "*")
+ 
+# B) register it
+smagic_register_fun(fun_emph, "emph")
+
+# C) use it
+x = string_vec("right, now")
+smagic("Take heed, {emph, c? x}.")
+```
+
+Above, we have created a simple functon that adds markdown emphasis to words.
+
+More generally, the function taken by `smagic_register_fun` is called internally 
+by `smagic` in the form `fun(x, argument, options, group, group_flag)`.
+Here is the meaning of the arguments:
+
+- `x`: the value to which the operation applies. 
+- `argument`: the quoted `smagic` argument (always character). 
+- `options`: a character vector of `smagic` options. 
+- `group`: an index of the group to which belongs each observation (integer). 
+- `group_flag`: value between 0 and 2; 0: no grouping operation requested; 
+1: keep track of groups; 2: apply grouping.
+
+The two last arguments, `group` and `group_flag`, are of use
+only in group-wise operations only if `fun` changes the length or the order of vectors. 
+
+Let's add an argument and an option to the `"emph"` operation that we defined in Ex.1.
+
+Ex.2: new operation with argument and option.
+```{r}
+fun_emph = function(x, argument, options, ...){
+  arg = argument
+  if(nchar(arg) == 0) arg = "*"
+  
+  if("strong" %in% options){
+    arg = paste0(rep(arg, 3), collapse = "")
+  }
+  
+  paste0(arg, x, arg)
+}
+
+smagic_register_fun(fun_emph, "emph", "strong")
+
+x = string_vec("right, now")
+smagic("Take heed, {'_'emph.s, c? x}.")
+
+# In smagic_register_fun, the valid_option argument is used to validate them.
+try(smagic("Take heed, {'_'emph.aaa, c? x}."))
+```
+
+Finally let's illustrate an example with group-wise axareness. 
+
+Ex.3: we create a function that only keeps variable names (ex: x5, is_num, etc).
+```{r}
+
+keep_varnames = function(x, group, group_flag, ...){
+  is_ok = grepl("^[[:alpha:].][[:alnum:]._]*$", x)
+  
+  if(group_flag != 0){
+    group = group[is_ok]
+    group = stringmagic:::cpp_recreate_index(group)
+  } 
+  
+  res = list(x = x[is_ok], group = group)
+  
+  return(res)
+}
+
+smagic_register_fun(keep_varnames, "keepvar")
+
+expr = c("x1 + 52", "73 %% 5 == x", "y[y > .z_5]")
+smagic("All vars: {'[^[:alnum:]_.]+'s, keepvar, unik, bq, C ? expr}.")
+
+# thanks to the group flag, we can apply group-wise operations
+smagic("Vars in each expr:\n",
+        "{'\n'c ! - {1:3}) {'[^[:alnum:]_.]+'s, keepvar, bq, ~(unik, C) ? expr}}")
+```

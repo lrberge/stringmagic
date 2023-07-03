@@ -27,7 +27,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-# we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
+# we preload it to avoid ugly (was compiled with R.x.x) warnings in the doc
 library(stringmagic)
 
 options("smagic_string_get_forced_caching" = TRUE)

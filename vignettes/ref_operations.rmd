@@ -36,7 +36,7 @@ The operations are divided into four groups:
 - [other operations](#sec_other)
 
 By default the function `smagic` returns a plain character vector. This may not render
-nicely in this vignette. Hence we create an alias to smagic which applies `base::cat`
+nicely in this vignette. Hence we create an alias to `smagic` which applies `base::cat`
 just before leaving the function.
 ```{r}
 library(stringmagic)
