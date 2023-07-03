@@ -56,6 +56,12 @@ to \code{c("x1", "x2")} and NOT \code{"x1 and 2"}.}
 \item{.invisible}{Logical scalar, default is \code{FALSE}. Whether the object returned should be
 invisible (i.e. not printed on the console).}
 
+\item{.local_ops}{Named list or \code{NULL} (default). If provided, it must be a list
+of the form \code{list(alias1 = ops1, alias2 = ops2)} where alias is the name of the newly defined
+operator an \code{ops} is a character scalar representing the associated smagic operations.
+Ex: \code{list(add = "' + 'collapse")} creates the operation \code{add} which collapses the
+string with pluses.}
+
 \item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
 that should be returned is collapsed with the value of this argument. This leads
 to return a string of length 1.}
@@ -68,6 +74,11 @@ in long loops.}
 \item{.class}{Character vector representing the class to give to the object returned.
 By default it is \code{NULL}. Note that the class \code{smagic} has a specific \code{print} method, usually
 nicer for small vectors (it \code{\link[base:cat]{base::cat()}}s the elements).}
+
+\item{.namespace}{Character scalar or \code{NULL} (default). \strong{Only useful for package developers.}
+As a regular end-user you shouldn't care! If your package uses \code{smagic}, you should care.
+It is useful \strong{only} if your package uses 'custom' \code{smagic} operations, set with
+\code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.}
 }
 \description{
 Utility to easily create \code{smagic} aliases with custom default

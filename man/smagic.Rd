@@ -110,6 +110,17 @@ topic to read from the main documentation, with the possibility to search for ke
 navigate the help pages. If a character scalar, then a regex search is perfomed on the main
 documentation and any section containining a match is displayed. The user can easily
 navigate across matches.}
+
+\item{.namespace}{Character scalar or \code{NULL} (default). \strong{Only useful for package developers.}
+As a regular end-user you shouldn't care! If your package uses \code{smagic}, you should care.
+It is useful \strong{only} if your package uses 'custom' \code{smagic} operations, set with
+\code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.}
+
+\item{.local_ops}{Named list or \code{NULL} (default). If provided, it must be a list
+of the form \code{list(alias1 = ops1, alias2 = ops2)} where alias is the name of the newly defined
+operator an \code{ops} is a character scalar representing the associated smagic operations.
+Ex: \code{list(add = "' + 'collapse")} creates the operation \code{add} which collapses the
+string with pluses.}
 }
 \value{
 It returns a character vector whose length depends on the elements and operations in the interpolations.

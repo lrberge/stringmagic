@@ -10,7 +10,7 @@
 
 chunk("smagic")
 
-dsb = function(...) smagic(..., .delim = ".[ ]")
+dsb = smagic_alias(.delim = ".[ ]")
 
 #
 # collapse ####
@@ -761,8 +761,8 @@ test(txt, "57-26, 32-7, 29-8 and 55")
 #
 # ascii ####
 #
-
-test(dsb("laurent .[ascii.utf8 ! bergé]"), "laurent berge")
+# No ascii tests bc result will depend on file encoding
+# test(dsb("laurent .[ascii.utf8 ! bergé]"), "laurent berge")
 
 #
 # stop ####

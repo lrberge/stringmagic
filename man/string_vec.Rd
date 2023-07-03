@@ -82,15 +82,15 @@ is performed on all variables.}
 \code{\link[base:paste]{base::paste()}} is applied to the resulting vector with \code{sep = .sep}.}
 
 \item{.collapse}{Character scalar or \code{NULL} (default). If not \code{NULL}, the function
-\code{\link[base:paste]{base::paste()}} is applied to the resulting vector with \code{collapse = .collapse}.}
+\code{\link[base:paste]{base::paste()}} is applied to the resulting vector with \code{collapse = .collapse}.
+
+If so, pass the name of your package in this argument so that your function can access
+the new \code{smagic} operations defined within your package.}
 
 \item{.namespace}{Character scalar or \code{NULL} (default). \strong{Only useful for package developers.}
 As a regular end-user you shouldn't care! If your package uses \code{smagic}, you should care.
 It is useful \strong{only} if your package uses 'custom' \code{smagic} operations, set with
-\code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.
-
-If so, pass the name of your package in this argument so that your function can access
-the new \code{smagic} operations defined within your package.}
+\code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.}
 
 \item{...}{Character vectors that will be vectorized. If commas are present in the
 character vector, it will be split with respect to commas and following blanks.

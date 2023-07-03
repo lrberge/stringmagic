@@ -116,6 +116,11 @@ human readable error messages).
 Without error-handling you can save something of the order of 40us. Useful only
 in long loops.}
 
+\item{.namespace}{Character scalar or \code{NULL} (default). \strong{Only useful for package developers.}
+As a regular end-user you shouldn't care! If your package uses \code{smagic}, you should care.
+It is useful \strong{only} if your package uses 'custom' \code{smagic} operations, set with
+\code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.}
+
 \item{...}{Character scalars that will be collapsed with the argument \code{sep}. Note that
 named arguments are used for substitution.
 

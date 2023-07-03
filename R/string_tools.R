@@ -1298,10 +1298,6 @@ string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\
 #' [base::paste()] is applied to the resulting vector with `sep = .sep`.
 #' @param .collapse Character scalar or `NULL` (default). If not `NULL`, the function
 #' [base::paste()] is applied to the resulting vector with `collapse = .collapse`.
-#' @param .namespace Character scalar or `NULL` (default). **Only useful for package developers.**
-#' As a regular end-user you shouldn't care! If your package uses `smagic`, you should care. 
-#' It is useful **only** if your package uses 'custom' `smagic` operations, set with 
-#' [smagic_register_fun()] or [smagic_register_ops()].
 #' 
 #' If so, pass the name of your package in this argument so that your function can access 
 #' the new `smagic` operations defined within your package.

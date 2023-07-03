@@ -7,7 +7,7 @@
 
 chunk("plural")
 
-dsb = function(...) smagic(..., .delim = ".[ ]")
+dsb = smagic_alias(.delim = ".[ ]")
 
 #
 # numbers ####

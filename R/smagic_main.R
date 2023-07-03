@@ -653,7 +653,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
       res = unlist(res)
       
       if(!true_character(res)){
-        res = as.characer(res)
+        res = as.character(res)
       }
       
       if(!is.null(.last)){
