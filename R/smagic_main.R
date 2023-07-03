@@ -2023,8 +2023,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     # END: paste/insert
 
-  } else if(op == "fill"){
-    # fill ####
+  } else if(op %in% c("fill", "align")){
+    # fill, align ####
     
     valid_options = c("right", "center")
     options = check_set_options(options, valid_options, op = op)
@@ -3043,7 +3043,7 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
 setup_operations = function(){
   OPERATORS = c("s", "S", "split", "Split", "x", "X", "extract", 
                 "c", "C", "collapse", "Collapse", "r", "R", "replace", "clean",
-                "times", "each", "fill", "join", "escape",
+                "times", "each", "align", "fill", "join", "escape",
                 "~", "if", "vif",
                 "upper", "lower", "q", "Q", "bq", 
                 "format", "Format", "%",
@@ -3058,4 +3058,5 @@ setup_operations = function(){
                 
   options("smagic_operations_v1.0.0" = sort(OPERATORS))
   options("smagic_operations_default" = sort(OPERATORS))
+  options("smagic_user_ops" = NULL)
 }
