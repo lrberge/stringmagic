@@ -20,3 +20,248 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+
+
+All functions in `stringmagic` accept optional regular expressions (regex) flags when regular expressions
+are expected. The idea is similar to 
+[regular regex flags](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#advanced_searching_with_flags),
+but the flags are different in name and effect.
+
+# Regex flags: Syntax
+
+Use `"flag1, flag2/regex"` to add the flags `flag1` and `flag2` to the regular expression `regex`.
+For example `"ignore, fixed/dt["` will add the flags `ignore` and `fixed` to the regex `dt[`.
+
+Alternatively, use only the initials of the flags. Hence, `"if/dt["` would also add the 
+flags `ignore` and `fixed`.
+
+If the regex does not contain a slash (`/`), no flags are added. If your regex should 
+contain a slash, see the [section on escaping](#flag_escaping).
+
+Ex: let's find lines containing `"dt["`:
+```{r}
+code = c("DT = as.data.table(iris)", 
+         "DT[, .(pl_sl = smagic('PL/SL = {Petal.Length / Sepal.Length}')]")
+
+string_get(code, "if/dt[")
+```
+
+# Regex flags: Reference
+
+There are 6 flags:
+
+- [ignore](#flag_ignore): always available
+- [fixed](#flag_fixed): always available
+- [word](#flag_word): always available
+- [magic](#flag_magic): always available
+- [total](#flag_total): only available in functions performing a replacement
+- [single](#flag_single): only available in functions performing a replacement
+
+### ignore {#flag_ignore}
+
+The flag `"ignore"` leads to a case-insensitive search. 
+
+Ex: let's extract words starting with the last letters of the alphabet.
+```{r}
+unhappy = "Rumble thy bellyful! Spit, fire! spout, rain!
+Nor rain, wind, thunder, fire are my daughters.
+I tax not you, you elements, with unkindness.
+I never gave you kingdom, call'd you children,
+You owe me no subscription. Then let fall
+Your horrible pleasure. Here I stand your slave,
+A poor, infirm, weak, and despis'd old man."
+
+# the ignore flag allows to retain words starting with the
+# upper cased letters
+# ex: getting words starting with the letter 'r' to 'z'
+cat_magic("{'ignore/\\b[r-z]\\w+'extract, c, 60 width ? unhappy}")
+```
+
+*Technically*, the [perl](https://www.pcre.org/) expression `"(?i)"` is added at the 
+beginning of the pattern.
+
+### fixed {#flag_fixed}
+
+The flag `"fixed"` removes any special regular expression meaning from the pattern, 
+and treats it as verbatim.
+
+Ex: let's fix the equation by changing the operators. 
+```{r}
+x = "50 + 5 * 5 = 40"
+string_clean(x, "f/+", "f/*", replacement = "-")
+
+# Without the fixed flag, we would have gotten an error since '+' or '*'
+# have a special meaning in regular expressions (it is a quantifier)
+# and expects something before
+
+# Here's the error
+try(string_clean(x, "+", "*", replacement = "-"))
+```
+
+*Technically*, if `"fixed"` is the only flag, then the functions `base::grepl` or `base::gsub`
+are run with the argument `fixed = TRUE`. If there are also the flags `"ignore"` or `"word"`, 
+the pattern is nested into the perl boundaries `\\Q` and `\\E` which strip any special meaning
+from the pattern.
+
+### word {#flag_word}
+
+The flag `"word"`:
+
+- adds word boundaries to the pattern
+- accepts comma-separated enumerations of words which are concatenated with a logical 'or'
+
+The logic of accepting comma-separated enumerations is to increase readability.
+For example, with the flag `"word"`, `"is, are, were"` is equivalent to `"\\b(is|are|were)\\b"`.
+
+Ex: we hide a few words from Alfred de Vigny's poem.
+```{r}
+le_mont_des_oliviers = "S'il est vrai qu'au Jardin sacré des Écritures,
+Le Fils de l'homme ai dit ce qu'on voit rapporté ;
+Muet, aveugle et sourd au cri des créatures,
+Si le Ciel nous laissa comme un monde avorté,
+Alors le Juste opposera le dédain à l'absence
+Et ne répondra plus que par un froid silence
+Au silence éternel de la Divinité."
+
+# we hide a few words from this poem
+smagic("{'wi/et, le, il, au, des?, ce => _'replace ? le_mont_des_oliviers}")
+```
+
+*Technically*, first the pattern is split with respect to `",[ \t\n]+"`, then all elements
+are collapsed with `"|"`. If the flag `"fixed"` was also present, each element is first wrapped 
+into `"\\Q"` and `"\\E"`. Finally, we add parentheses (to enable capture) and word 
+boundaries (`"\\b"`) on both sides.
+
+### magic {#flag_magic}
+
+Use the `"magic"` flag to interpolate variables inside the regular expression
+before the regex is evaluated.
+
+Ex: interpolating variables inside regular expressions.
+```{r}
+vowels ="aeiouy"
+# let's keep only the vowels
+# we want the pattern: "[^aeiouy]"
+lmb = "'Tis safer to be that which we destroy
+Than by destruction dwell in doubtful joy."
+string_replace(lmb, "magic/[^{vowels}]", "_")
+
+#
+# Illustration of `smagic` operations before regex application
+
+cars = row.names(mtcars)
+# Which of these models contain a digit?
+models = c("Toyota", "Hornet", "Porsche")
+# we want the pattern "(Toyota|Hornet|"Porsche).+\\d"
+# we collapse the models with a pipe using '|'c
+string_get(cars, "m/({'|'c ? models}).+\\d")
+
+# alternative: same as above but we first comma-split the vector
+models_comma = "Toyota, Hornet, Porsche"
+string_get(cars, "m/({S, '|'c ? models_comma}).+\\d")
+
+#
+# Interpolation does not apply to regex-specific curly brackets
+
+# We delete only successions of 2+ vowels
+# {2,} has a rexex meaning and is not interpolated:
+string_replace(lmb, "magic/[{vowels}]{2,}", "_")
+```
+
+*Technically*, the algorithm does not interpolate curly brackets having a 
+regular expression meaning. The expression of the form `"{a, b}"` with `"a"` and `"b"`
+digits means a repetition of the previous symbol of at least `"a"` times and at most `"b"` times.
+The variables are fetched in the calling environment. To fetch them from a different location,
+you can use the argument `envir`.
+
+### total {#flag_total}
+
+The flag `"total"` is only available to functions performing a replacement. 
+In that case, if a pattern is detected, *the full character string* is replaced 
+(instead of just the pattern). 
+
+Ex: let's replace a few car models.
+```{r}
+cars_small = head(row.names(mtcars))
+print(cars_small)
+
+string_replace(cars_small, "ti/mazda", "Mazda: sold out!")
+```
+
+On top of this, the `"total"` flag allows to perform logical operations across
+several regex patterns. You have more information on this in the [dedicated vignette](LINK).
+In a nutshell, you can write `"pat1 & !pat2 | pat3"` with `"patx"` regular 
+expresion patterns. This means: contains `pat1` and does not contain `pat2`,
+or contains `pat3`.
+
+Ex: detect car brands with a digit and no 'e'.
+```{r}
+cars_small = head(row.names(mtcars))
+print(cars_small)
+
+string_replace(cars_small, "total, ignore/\\d & !e", "I don't like that brand!")
+```
+
+*Technically*, instead of using `gsub` to replace the pattern, [`string_is`](LINK) is used
+to detect which element contains the pattern. Each element with the pattern
+is then substituted with the replacement.
+
+### single {#flag_single}
+
+The flag `"single"` is only available to functions performing a replacement.
+It allows only a single substitution to take place. Said differently, only the 
+first replacement is performed.
+
+Ex: single substitutions.
+```{r}
+encounter = string_vec("Hi Cyclops., Hi you. What's your name?, Odysseus is my name.")
+# we only remove the first word
+string_replace(encounter, "single/\\w+", "...")
+```
+
+*Technically*, the function `base::sub` is used instead of `base::gsub`.
+
+## Escaping flags: How to, and a word of caution with paths {#flag_escaping}
+
+If your regular expression contains a slash (`"/"`), this will come in conflict
+with the parsing of the optional flags. 
+At the moment a `/` is present in a pattern, the algorithm will throw an error
+if the expected flags are not written correctly.
+
+To use a slash in the regex without adding flags there is only one solutions:
+
+- escape the first `"/"` with a double backslash
+
+Ex: let's invert the numerator and denominator of a division.
+```{r}
+eq = "5/x = 3/2"
+# escaping with backslashes
+string_replace(eq, "(\\w)\\/(\\w)", "\\2/\\1")
+```
+
+**Warning:** when applying regular expressions on file paths, to avoid unexpected behavior,
+the flags algorithm is very strict. Everytime a pattern contains a slash that is not 
+associated with valid flags, an error will be thrown unless that slash is escaped.
+
+```{r}
+path = "my/path/to/the/file.tex"
+# we keep the directory only
+
+# first try: an error bc flags are expected before the first '/'
+try(string_replace(path, "/[^/]+$"))
+
+# after escaping: works (only the first slash requires escaping)
+string_replace(path, "\\/[^/]+$")
+
+# if we did add a flag, we would need to double the slash
+# compare...
+string_replace(path, "i//[^/]+$")
+# to...
+string_replace(path, "i/[^/]+$")
+```
+
+Hence if you need to write path related regexes, you very likely need to escape the first slash.
+
+
+
