@@ -947,7 +947,7 @@ string_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
 #' after a ' => ' (see args `split` and `pipe` to change this). By default the replacement is the empty string 
 #' (so "pat1, pat2" *removes* the patterns).
 #' 
-#' Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), 
+#' Available regex flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), 
 #' 'total', 'single' and 'magic'. 
 #' The flag `total` leads to a *total replacement* of the string if the pattern is found. 
 #' The flag 'magic' allows to interpolate variables within the pattern.  Use flags
@@ -990,6 +990,16 @@ string_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
 #' 
 #' If so pass the name of your package in this argument so that your function can access 
 #' the new `smagic` operations defined within your package.
+#' @param pattern A character scalar containing a regular expression pattern to be replaced.
+#' You can write the replacement directly in the string after a pipe: ' => ' (see arg. `pipe` to change this). 
+#' By default the replacement is the empty string (so "pat1" *removes* the pattern).
+#' 
+#' Available regex flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex), 
+#' 'total', 'single' and 'magic'. 
+#' The flag `total` leads to a *total replacement* of the string if the pattern is found. 
+#' The flag 'magic' allows to interpolate variables within the pattern.  Use flags
+#' with comma separation ("word, total/pat") or use only their initials ("wt/pat").
+#' 
 #' 
 #'
 #' @return
@@ -1256,6 +1266,20 @@ string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\
   }
 
   res
+}
+
+#' @describeIn string_clean Simplified version of `string_clean`
+string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.case = FALSE, 
+                          fixed = FALSE, word = FALSE, 
+                          total = FALSE, single = FALSE, envir = parent.frame()){
+  # this is a simplified version of string_clean
+  # I think it's still useful bc of the flags, the pipe and the absence of splitting
+  
+  set_pblm_hook()
+  
+  string_clean(x, pattern, replacement = replacement, pipe = pipe, ignore.case = ignore.case,
+            fixed = fixed, word = word, total = total, single = single, envir = envir, split = "")
+  
 }
 
 #' Efficient creation of string vectors with optional interpolation
@@ -1718,7 +1742,7 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
                     " to the flags 'ignore' and 'fixed' for the pattern 'dt['.", 
                     "\n  Or simply collate the first letters of the flags:",
                     " 'if/dt['.", 
-                    "\n  To use '/' without flag parsing, escape it.",
+                    "\n  To use '/' without flag parsing, escape it. ",
                     "Ex: '\\\\/usr': leads to '/usr' without any flag on.")
     
     full_msg = .sma(main_msg, msg, note_rm)

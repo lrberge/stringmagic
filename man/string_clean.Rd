@@ -3,6 +3,7 @@
 \name{string_clean_alias}
 \alias{string_clean_alias}
 \alias{string_clean}
+\alias{string_replace}
 \title{Cleans a character vector from multiple patterns}
 \usage{
 string_clean_alias(
@@ -30,6 +31,19 @@ string_clean(
   single = FALSE,
   envir = parent.frame(),
   namespace = NULL
+)
+
+string_replace(
+  x,
+  pattern,
+  replacement = "",
+  pipe = " => ",
+  ignore.case = FALSE,
+  fixed = FALSE,
+  word = FALSE,
+  total = FALSE,
+  single = FALSE,
+  envir = parent.frame()
 )
 }
 \arguments{
@@ -92,7 +106,7 @@ with the string 'replacement'. By default patterns are comma separated and the r
 after a ' => ' (see args \code{split} and \code{pipe} to change this). By default the replacement is the empty string
 (so "pat1, pat2" \emph{removes} the patterns).
 
-Available flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex),
+Available regex flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex),
 'total', 'single' and 'magic'.
 The flag \code{total} leads to a \emph{total replacement} of the string if the pattern is found.
 The flag 'magic' allows to interpolate variables within the pattern.  Use flags
@@ -103,6 +117,16 @@ the string into ASCII, lowers the case and normalizes white spaces (see help of 
 
 \item{envir}{Environment in which to evaluate the interpolations if the flag \code{"magic"} is provided.
 Default is \code{parent.frame()}.}
+
+\item{pattern}{A character scalar containing a regular expression pattern to be replaced.
+You can write the replacement directly in the string after a pipe: ' => ' (see arg. \code{pipe} to change this).
+By default the replacement is the empty string (so "pat1" \emph{removes} the pattern).
+
+Available regex flags are: 'word' (add word boundaries), 'ignore' (the case), 'fixed' (no regex),
+'total', 'single' and 'magic'.
+The flag \code{total} leads to a \emph{total replacement} of the string if the pattern is found.
+The flag 'magic' allows to interpolate variables within the pattern.  Use flags
+with comma separation ("word, total/pat") or use only their initials ("wt/pat").}
 }
 \value{
 The main usage returns a character vector of the same length as the vector in input.
@@ -117,6 +141,8 @@ You can also apply all sorts of cleaning operations by summoning \code{\link[=st
 \section{Functions}{
 \itemize{
 \item \code{string_clean_alias()}: Create a \code{string_clean} alias with custom defaults
+
+\item \code{string_replace()}: Simplified version of \code{string_clean}
 
 }}
 \section{Regular expression flags specific to replacement}{
