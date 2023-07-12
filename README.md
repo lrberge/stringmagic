@@ -58,7 +58,7 @@ smagic("This message comes from {'@'split, first ? email}.")
 
 ![example-argument](man/figures/example-argument.png)
 
-**Options.** Many arguments acccept options. These options are keywords working like flags (i.e. things
+**Options.** Many operations accept options. These options are keywords working like flags (i.e. things
 that can be turned on) and change the behavior of the current operation. 
 Add options using a dot separated sequence of keywords attached to the operation:
 
