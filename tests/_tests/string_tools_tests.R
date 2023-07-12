@@ -271,3 +271,34 @@ test(mat, structure(c(1, 4, 1, 2, 9, 2, 3, 9, 3), dim = c(3L, 3L)))
 
 mat = string_vec("1, 2, 3", .nmat = 2 + 3i, .last = "'\n'S")
 test(mat, structure(c(1, 1, 2, 2, 3, 3), dim = 2:3))
+
+mat = string_vec("1, john,\n 3, marie,\n 5, harry", .cmat = TRUE)
+test(mat, structure(c("1", "3", "5", "john", "marie", "harry"), dim = 3:2))
+
+df = string_vec("1, john,\n 3, marie,\n 5, harry", .df = TRUE)
+test(df, data.frame(V1 = c(1, 3, 5), V2 = c("john", "marie", "harry")))
+
+df = string_vec("1, john,\n 3, marie,\n 5, harry", .df = "id, name")
+test(df, data.frame(id = c(1, 3, 5), name = c("john", "marie", "harry")))
+test(names(df), c("id", "name"))
+
+df = string_vec("1, john,\n 3, marie,\n 5, harry", .df = c("id", "name"))
+test(names(df), c("id", "name"))
+
+#
+# paste_conditional ####
+#
+
+id = rep(1:2, each = 13)
+x = paste_conditional(letters, id, "", names = FALSE)
+test(x, c("abcdefghijklm", "nopqrstuvwxyz"))
+
+x = paste_conditional(letters, 3 - id, "", names = FALSE)
+test(x, c("nopqrstuvwxyz", "abcdefghijklm"))
+
+base_cars = within(mtcars, carname <- row.names(mtcars))
+base_cars = head(base_cars)
+cars = paste_conditional(carname ~ gear + carb, base_cars, sep = ", ")
+test(cars, c("Hornet 4 Drive, Valiant", "Hornet Sportabout", "Datsun 710", "Mazda RX4, Mazda RX4 Wag"))
+
+test(names(cars), c("gear: 3, carb: 1", "gear: 3, carb: 2", "gear: 4, carb: 1", "gear: 4, carb: 4"))

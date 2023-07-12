@@ -8,6 +8,7 @@
 string_vec_alias(
   .cmat = FALSE,
   .nmat = FALSE,
+  .df = FALSE,
   .last = NULL,
   .delim = c("{", "}"),
   .split = TRUE,
@@ -21,6 +22,7 @@ string_vec(
   ...,
   .cmat = FALSE,
   .nmat = FALSE,
+  .df = FALSE,
   .delim = c("{", "}"),
   .envir = parent.frame(),
   .split = TRUE,
@@ -47,6 +49,20 @@ If a complex, the imaginary part represents the number of columns. Ex: \code{5i}
 5 columns, \code{3 + 2i} means 3 rows and 2 columns.
 
 The matrix is always filled by row. Non numbers are silently turned to NA.}
+
+\item{.df}{Logical scalar (default is \code{FALSE}), integer, complex with integer values, or
+character vector.
+If \code{TRUE}, we try to coerce the result into a \code{data.frame}. The number of rows and columns
+is deduced from the look of the arguments. An integer indicates the number of rows.
+If a complex, the imaginary part represents the number of columns. Ex: \code{5i} means
+5 columns, \code{3 + 2i} means 3 rows and 2 columns.
+
+If a character vector: it should give the column names. Note that if the vector
+is of length 1, its values are comma separated (i.e. the value \code{"id, name"} is
+identical to \code{c("id", "name")}).
+
+Note that the columns that can be converted to numeric are converted to numeric.
+The other columns are in string form.}
 
 \item{.last}{Character scalar, a function, or \code{NULL} (default). If provided and character:
 it must be an \code{smagic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations

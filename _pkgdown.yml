@@ -12,22 +12,24 @@ articles:
   - title: References
     navbar: References
     contents:
-    - ref_smagic
     - ref_operations
+    - ref_smagic_special_operations
     - ref_regex_flags
     - ref_regex_logic
     
 reference:
   - title: String interpolation and operations
-    desc: Tools for string interpolation. 
+    desc: Tools for string interpolation
     contents:
       - smagic
+      - matches("_magic")
       - matches("sma")
   - title: Other string operations
     desc: Pattern detection, operations chaining, string cleaning and more
     contents:
       - matches("^string_")
       - parse_regex_pattern
+      - paste_conditional
       - _index_
   - title: Functions builders
     desc: Alias generators to create tailor made functions

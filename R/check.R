@@ -535,7 +535,7 @@ is_num_complex = function(x){
   is.numeric(x) || is.complex(x)
 }
 
-check_set_mat = function(cmat, nmat){
+check_set_mat = function(cmat, nmat, df){
   res = TRUE
   
   if(is.logical(cmat)){
@@ -569,6 +569,36 @@ check_set_mat = function(cmat, nmat){
   } else {
     stop_hook("The argument `.cmat` must be a logical scalar, an integer (giving the ",
               "nber of rows) or an imaginary (ex: `3i`, giving the number of columns).",
+              "\nPROBLEM: instead it is of class {enum.bq ? class(split)}.")
+  }
+  
+  if(is.logical(df)){
+    check_logical(df, scalar = TRUE)
+    if(df){
+      attr(res, "auto") = TRUE
+      attr(res, "df") = TRUE
+      return(res)
+    }    
+  } else if(is_num_complex(df)){
+    check_numeric(df, scalar = TRUE, complex = TRUE)
+    attr(res, "df") = TRUE
+    attr(res, "row_col") = c(Re(df), Im(df))
+    return(res)
+  } else if(is.character(df)){
+    if(length(df) == 1){
+      colnames = strsplit(df, ",[ \t\n]*")[[1]]
+    } else {
+      colnames = df
+    }
+    
+    attr(res, "df") = TRUE
+    attr(res, "colnames") = colnames
+    attr(res, "row_col") = c(0, length(colnames))
+    return(res)
+  } else {
+    stop_hook("The argument `.df` must be a logical scalar, an integer (giving the ",
+              "nber of rows), an imaginary (ex: `3i`, giving the number of columns), ",
+              "or a character scalar giving the (comma separated) column names.",
               "\nPROBLEM: instead it is of class {enum.bq ? class(split)}.")
   }
   

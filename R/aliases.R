@@ -317,7 +317,7 @@ string_clean_alias = function(replacement = "", pipe = " => ", split = ",[ \n\t]
 }
 
 #' @describeIn string_vec Create `string_vec` aliases with custom defaults
-string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .last = NULL,
+string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .df = FALSE, .last = NULL,
                             .delim = c("{", "}"), .split = TRUE, 
                             .protect.vars = TRUE, .sep = NULL, 
                             .collapse = NULL, .namespace = NULL){
@@ -329,11 +329,12 @@ string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .last = NULL,
   check_logical(.protect.vars, scalar = TRUE)
   check_character(.namespace, scalar = TRUE, null = TRUE)
   .split = check_set_split(.split)
-  check_set_mat(.cmat, .nmat)
+  check_set_mat(.cmat, .nmat, .df)
   
   # forcing evaluation
   nmat = .nmat
   cmat = .cmat
+  df = .df
   last = .last
   delim = .delim
   split = .split
@@ -342,11 +343,13 @@ string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .last = NULL,
   collapse = .collapse
   namespace = .namespace  
   
-  res = function(..., .cmat = cmat, .nmat = nmat, .last = last, .delim = delim, .envir = parent.frame(), 
+  res = function(..., .cmat = cmat, .nmat = nmat, .df = df, .last = last, 
+                   .delim = delim, .envir = parent.frame(), 
                    .split = split, .protect.vars = protect.vars, .sep = sep, 
                    .collapse = collapse, .namespace = namespace){
 
-    string_vec(..., .cmat = .cmat, .nmat = .nmat, .last = last, .delim = .delim, .envir = .envir, 
+    string_vec(..., .cmat = .cmat, .nmat = .nmat, .df = .df, 
+                   .last = last, .delim = .delim, .envir = .envir, 
                    .split = .split, .protect.vars = .protect.vars, .sep = .sep, 
                    .collapse = .collapse, .namespace = .namespace)
   }

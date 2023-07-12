@@ -931,6 +931,161 @@ string_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
                id_unik = id_unik, fixed = fixed, mc = mc, dt = TRUE)
 }
 
+#' Paste string vector conditionally 
+#' 
+#' Easily reconstruct a string vector that has been split with [string_split2df()].
+#' 
+#' @param x A character vector or a formula. If a vector: it represents the 
+#' values to be pasted together.
+#' If a formula, it must be of the form
+#' `my_string ~ id1 + id2` with on the left the character vector and on the right
+#' the (possibly many) identifiers. If a formula, the argument `id` must be a 
+#' data frame.
+#' @param id A vector of identifiers, a list of identifiers (can be a data frame),
+#' or a `data.frame`. The identifiers can be a vector or a list of vectors. They represent
+#' which elements of `x` are to be pasted together. 
+#' 
+#' When `x` is a formula, then `id` must be a data.frame containing the variables in 
+#' the formula.
+#' @param sep A character scalar, default is `" "`. The value used to paste together 
+#' the elements of `x`.
+#' @param names Logical scalar, default is `TRUE`. Whether to add, as names, the values of 
+#' the identifiers.
+#' @param sort Logical scalar, default is `TRUE`. Whether to sort the results according to 
+#' the identifiers.
+#' 
+#' @return 
+#' Returns a character vector. If the argument `names` is `TRUE` (default), the vector will have
+#' names equal to the values of the identifiers.
+#' 
+#' @examples 
+#' 
+#' #
+#' # let's paste together the letters of the alphabet
+#' 
+#' # first we create the identifier
+#' id = rep(1:2, each = 13)
+#' setNames(id, letters)
+#' 
+#' # now we conditionally paste together the letters
+#' paste_conditional(letters, id, "")
+#' 
+#' #
+#' # using a formula
+#' 
+#' # we create a small data set based on mtcars
+#' base_cars = within(mtcars, carname <- row.names(mtcars))
+#' base_cars = head(base_cars, 10)
+#' 
+#' # we use two identifiers
+#' paste_conditional(carname ~ gear + carb, base_cars, sep = ", ")
+#' 
+#' 
+#' 
+paste_conditional = function(x, id, sep = " ", names = TRUE, sort = TRUE){
+  
+  check_logical(names, scalar = TRUE)
+  check_logical(sort, scalar = TRUE)
+  
+  check_character(sep, scalar = TRUE)
+  if(missing(x)) stop("The argument `x` must be provided. Problem: it is missing.")
+  if(missing(id)) stop("The argument `id` must be provided. Problem: it is missing.")
+  
+  if(is.character(x)){
+    n_x = length(x)
+    # we expect id to be a vector or a list 
+    if(is.atomic(id)){
+      if(length(id) != n_x){
+        stopi("The argument `id` must be of the same length as `x`.",
+              "\nPROBLEM: `x` is {len?x} vs `id` is {len?id}.")
+      }
+    } else if(is.list(id)){
+      n_id_all = lengths(id)
+      if(any(n_id_all != n_x)){
+        i_pblm = which(n_id_all != n_x)[1]
+        stopi("The argument `id` must be of the same length as `x`.",
+              "\nPROBLEM: `x` is {len?x} vs `id[[{i_pblm}]]` is {n?n_id_all[i_pblm]}.")
+      }
+    } else {
+      stopi("When `x` is a vector, `id` must be i) a vector or ii) a list of vectors.",
+            "\nPROBLEM: instead `id` is of class {enum.bs?class(id)}.")
+    }
+    
+  } else if(inherits(x, "formula")){
+    if(!is.data.frame(id)){
+      stopi("When `x` is a vector, `id` must be a `data.frame`.",
+            "\nPROBLEM: instead `id` is of class {enum.bs?class(id)}.")
+    }
+    
+    fml = x
+    df = id
+    x = check_expr(eval(fml[[2]], df), "The left-hand-side of the formula, equal to `", 
+                   deparse(fml[[2]]), 
+                   "` could not be evaluated. See error below:")
+    x = as.character(x)
+    
+    term_to_eval = attr(terms(fml), "term.labels")
+    n_id = length(term_to_eval)
+    id = vector("list", n_id)
+    for(i in 1:n_id){
+      term = term_to_eval[i]
+      val = check_expr(eval(str2lang(term), df), "The right-hand-side of the formula, equal to `", 
+                       term, "` could not be evaluated. See error below:")
+      id[[i]] = val
+    }
+    names(id) = term_to_eval
+    
+  } else {
+    stopi("The argument `x` must be a character vector or a formula.",
+          "\nPROBLEM: instead it is of class {enum.bq?class(x)}.")
+  }
+  
+  id_raw = id
+  id = to_integer(id, sort)
+  
+  # obs_first: used in names
+  obs_first = which(!duplicated(id))
+  obs_first_order = order(id[obs_first])
+  obs_first = obs_first[obs_first_order]  
+  
+  # we need to order before applying the cpp function
+  id_order = order(id)
+  id = id[id_order]
+  x = x[id_order]
+  
+  res = cpp_paste_conditional(x, id, sep = sep, sep_last = sep)
+  
+  # adding names
+  if(is.atomic(id_raw) || (is.null(names(id_raw)) && length(id_raw) == 1)){
+    if(!is.atomic(id_raw)){
+      id_raw = id_raw[[1]]
+    }
+    nm = id_raw[obs_first]
+  } else {
+    id_raw = unclass(id_raw)
+    id_names = names(id_raw)
+    is_names = !is.null(id_names)
+    
+    for(i in 1:length(id_raw)){
+      val = id_raw[[i]][obs_first]
+      if(is_names){
+        val = paste0(id_names[i], ": ", val) 
+      }
+      id_raw[[i]] = val
+    }
+    
+    names(id_raw) = NULL
+    id_raw$sep = ", "
+    
+    nm = do.call(paste, id_raw)
+  }
+  names(res) = nm
+  
+  res  
+}
+
+
+
 
 #' Cleans a character vector from multiple patterns
 #'
@@ -1339,6 +1494,19 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' 5 columns, `3 + 2i` means 3 rows and 2 columns.
 #' 
 #' The matrix is always filled by row. Non numbers are silently turned to NA.
+#' @param .df Logical scalar (default is `FALSE`), integer, complex with integer values, or
+#' character vector.
+#' If `TRUE`, we try to coerce the result into a `data.frame`. The number of rows and columns
+#' is deduced from the look of the arguments. An integer indicates the number of rows.
+#' If a complex, the imaginary part represents the number of columns. Ex: `5i` means 
+#' 5 columns, `3 + 2i` means 3 rows and 2 columns. 
+#' 
+#' If a character vector: it should give the column names. Note that if the vector
+#' is of length 1, its values are comma separated (i.e. the value `"id, name"` is
+#' identical to `c("id", "name")`).
+#' 
+#' Note that the columns that can be converted to numeric are converted to numeric.
+#' The other columns are in string form.
 #' 
 #' @details 
 #' The default of the argument `.protect.vars` is `FALSE` so as to avoid unwanted 
@@ -1387,7 +1555,7 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' matgen("5, 4, 3
 #'         8, 6, 2")
 #' 
-string_vec = function(..., .cmat = FALSE, .nmat = FALSE, 
+string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
                    .delim = c("{", "}"), .envir = parent.frame(), 
                    .split = TRUE, .protect.vars = TRUE, .sep = NULL, 
                    .last = NULL,
@@ -1400,7 +1568,7 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE,
   check_character(.collapse, scalar = TRUE, null = TRUE)
   check_character(.last, scalar = TRUE, null = TRUE)
   .split = check_set_split(.split)
-  do_mat = check_set_mat(.cmat, .nmat)
+  do_mat = check_set_mat(.cmat, .nmat, .df)
   
   check_logical(.protect.vars, scalar = TRUE)
   
@@ -1509,12 +1677,13 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE,
   if(do_mat){
     is_auto = isTRUE(attr(do_mat, "auto"))
     is_num = isTRUE(attr(do_mat, "num"))
+    is_df = isTRUE(attr(do_mat, "df"))
     n_out = length(res)
     if(is_auto){
       done = TRUE
       if(n == 1){
         d = dots[[1]]
-        nrows = sum(grepl("\n", d)) + 1
+        nrows = length(strsplit(d, "\n")[[1]])
       } else {
         nrows = n
       }
@@ -1538,7 +1707,8 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE,
       if(nrows == 0){
         nrows = n_out / ncols
         if(round(nrows) != nrows){
-          stopi("The number of columns in argument `{&is_num;nmat;cmat}` ", 
+          arg = if(is_num) ".nmat" else if(is_df) ".df" else ".cmat"
+          stopi("The number of columns in argument `{arg}` ", 
                 "({ncols}) is not a divisor ",
                 "of the final number of elements: {n?n_out}.")
         }
@@ -1547,7 +1717,8 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE,
       if(ncols == 0){
         ncols = n_out / nrows
         if(round(ncols) != ncols){
-          stopi("The number of rows in argument `{&is_num;nmat;cmat}` ", 
+          arg = if(is_num) ".nmat" else if(is_df) ".df" else ".cmat"
+          stopi("The number of rows in argument `{arg}` ", 
                 "({nrows}) is not a divisor ",
                 "of the final number of elements: {n?n_out}.")
         }
@@ -1559,6 +1730,20 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE,
     }
     
     res = matrix(res, nrows, ncols, byrow = TRUE)
+    
+    if(is_df){
+      res = as.data.frame(res)
+      colnames = attr(do_mat, "colnames")
+      if(!is.null(colnames)){
+        names(res) = colnames
+      }
+      # conversion of the columns to numeric
+      for(i in 1:ncol(res)){
+        if(is_numeric_in_char(res[[i]])){
+          res[[i]] = as.numeric(res[[i]])
+        }
+      }
+    }
   }  
     
   res  
@@ -1851,7 +2036,7 @@ format_pattern = function(pattern, fixed, word, ignore){
   pattern
 }
 
-to_integer = function(x){
+to_integer = function(x, sort = FALSE){
   # x: vector or a list of vectors
 
   if(!is.list(x) && !is.atomic(x)){
@@ -1893,6 +2078,29 @@ to_integer = function(x){
       id = cpp_to_integer(index)
 
     }
+  }
+  
+  if(sort){
+    # example:
+    # x = c(5, 5, 8, 8, 1, 4)
+    # x_first = c(5, 8, 1, 4)
+    # id_first = c(1, 2, 3, 4)
+    # id_all = c(1, 1, 2, 2, 3, 4) 
+    
+    obs_first = which(!duplicated(id))
+    
+    if(is.atomic(x)){
+      x_list = list(x[obs_first])
+    } else {
+      x_list = unclass(x)
+      for(i in 1:length(x)){
+        x_list[[i]] = x_list[[i]][obs_first]
+      }
+    }
+    
+    new_order = do.call(base::order, x_list)
+    order_new_order = order(new_order)
+    id = order_new_order[id]
   }
 
   return(id)
