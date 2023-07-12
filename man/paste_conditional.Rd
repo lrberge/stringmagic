@@ -2,7 +2,7 @@
 % Please edit documentation in R/string_tools.R
 \name{paste_conditional}
 \alias{paste_conditional}
-\title{Paste string vector conditionally}
+\title{Paste a string vector conditionally}
 \usage{
 paste_conditional(x, id, sep = " ", names = TRUE, sort = TRUE)
 }

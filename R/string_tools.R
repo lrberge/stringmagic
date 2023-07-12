@@ -931,7 +931,7 @@ string_split2dt = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
                id_unik = id_unik, fixed = fixed, mc = mc, dt = TRUE)
 }
 
-#' Paste string vector conditionally 
+#' Paste a string vector conditionally 
 #' 
 #' Easily reconstruct a string vector that has been split with [string_split2df()].
 #' 
