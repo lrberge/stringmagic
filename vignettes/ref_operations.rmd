@@ -642,9 +642,9 @@ string_magic("{'[ ,]+'split, upper.first, fill.center, q, '\n'collapse ? life}")
 string_magic("{'5|0'fill.right, enum ? c(1, 55)}")
 ```
 
-## Append text: paste
+## Append text: paste and append
 
-Pastes a custom character string to all elements of the string. 
+Pastes a custom character string to all elements of the string. The operations `paste` and `append` are equivalent.
 This operation has no default. 
 Options: `"both"`, `"right"`, `"front"`, `"back"`, `"delete"`. By default, a string is pasted on the left.
 Option `"right"` pastes on the right and `"both"` pastes on both sides. Option `"front"` only 

@@ -1894,10 +1894,14 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       
     }
 
-  } else if(op %in% c("paste", "insert")){
-    # paste, insert ####
+  } else if(op %in% c("paste", "append", "insert")){
+    # paste, append, insert ####
     # paste: at the beginning/end of all strings
     # insert: element at the beginning/end of the vector 
+    
+    if(op == "append"){
+      op = "paste"
+    }
     
     valid_options = c("both", "right")
     if(op == "paste"){
@@ -3061,7 +3065,7 @@ setup_operations = function(){
                 "~", "if", "vif",
                 "upper", "lower", "q", "Q", "bq", 
                 "format", "Format", "%",
-                "erase", "rm", "nuke", "paste", "insert", 
+                "erase", "rm", "nuke", "append", "paste", "insert", 
                 "k", "shorten", "Shorten", 
                 "K", "head", "last", "first",
                 "firstchar", "lastchar", "unik", "num", "enum",

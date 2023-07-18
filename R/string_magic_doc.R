@@ -401,7 +401,7 @@
 #' is used for the filling. By default if no argument is provided, the
 #' maximum size of the character string is used. See help for [string_fill()] for more information.
 #' Ex.1: `string_magic("Numbers: {'5|0'fill.right, C ? c(1, 55)}")` leads to "Numbers: 00001 and 00055".
-#' + paste: pastes some character to all elements of the string. This operation has no default.
+#' + paste, append: pastes some character to all elements of the string. This operation has no default.
 #' Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
 #' Option "right" pastes on the right and "both" pastes on both sides. Option "front" only 
 #' pastes on the first element while option "back" only pastes on the last element. Option "delete"
