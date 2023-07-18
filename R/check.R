@@ -318,7 +318,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       mc_dots = mc[["..."]]
       value = deparse_short(mc_dots[[i]])
 
-      nm = smagic(" ({if(.C<4 ; erase) ! {nm} = }{value})")
+      nm = string_magic(" ({if(.C<4 ; erase) ! {nm} = }{value})")
       
       if(isError(elem)){
         if(grepl("try(...", elem, fixed = TRUE)){
@@ -360,7 +360,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       mc_dots = mc[["..."]]
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
-      info_call = .smagic("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
+      info_call = .string_magic("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up("In the argument `...`, all elements must be scalars (i.e. of length 1).\nPROBLEM: ",
               "{'\n'c ! The {nth ? i_pblm} element ({info_call}) is ",
@@ -387,9 +387,9 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       mc_dots = mc[["..."]]
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
-      info_call = smagic("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
+      info_call = string_magic("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
-      cls_pblm = sapply(dots[i_pblm], function(x) smagic("{bq ! {enum ? class(x)}}"))
+      cls_pblm = sapply(dots[i_pblm], function(x) string_magic("{bq ! {enum ? class(x)}}"))
       stop_up("In the argument `...`, all elements must be atomic (i.e. convertible to a character string).",
               "\nPROBLEM: {'\n         'c ! The {Nth ? i_pblm} element ({info_call}) is not character",
               " (instead it is of class: {cls_pblm}).}")
@@ -420,7 +420,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
       mc_dots = mc[["..."]]
       value_all = sapply(i_pblm, function(i) deparse_short(mc_dots[[i]]))
 
-      info_call = smagic("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
+      info_call = string_magic("`{if(.C<4 ; erase) ! {nm_pblm} = }{value_all}`")
 
       stop_up("In the argument `...`, all elements must be without NA.\nPROBLEM: ",
               "The {nth, enum ? i_pblm} element{$s} ({C ? info_call})",
@@ -467,7 +467,7 @@ check_last = function(.last){
   if(is.null(.last) || is.function(.last)){
     # ok, no check
   } else if(!is.character(.last)){
-    stop_hook("Argument `.last` mut be equal to an `smagic` operations chain", 
+    stop_hook("Argument `.last` mut be equal to an `string_magic` operations chain", 
               " or a function.",
               "\nPROBLEM: instead it is of class {enum.bq?class(.last)}.")
   } else {
@@ -625,18 +625,18 @@ check_delimiters = function(.delim){
   if(any(grepl(forbid_regex, .delim))){
     i = which(grepl(forbid_regex, .delim))[1]
     pblm = string_ops(.delim[i], paste0("'", forbid_regex, "'X"))
-    info = smagic("{&i == 1;opening;closing} delimiter (equal to {bq?.delim[i]})")
+    info = string_magic("{&i == 1;opening;closing} delimiter (equal to {bq?.delim[i]})")
     stop_hook("Argument `.delim` cannot contain the following, reserved, ",
               "characters: {''s, bq, C?forbid}.",
               "\nPROBLEM: the {info} contains the forbidden character{$s ? pblm}: {$enum.bq}.")
   }
 }
 
-get_smagic_context = function(){
-  # this is specific to functions running within smagic_internal
+get_string_magic_context = function(){
+  # this is specific to functions running within string_magic_internal
   
   up = 1
-  while(!get0("is_smagic_internal", parent.frame(up), inherits = FALSE, ifnotfound = FALSE)){
+  while(!get0("is_string_magic_internal", parent.frame(up), inherits = FALSE, ifnotfound = FALSE)){
     up = up + 1
     if(identical(parent.frame(up), .GlobalEnv)){
       return("")
@@ -650,7 +650,7 @@ get_smagic_context = function(){
   n = get("n", parent.frame(up))
   
   # we reparse
-  x_parsed = cpp_smagic_parser(x, .delim, TRUE)
+  x_parsed = cpp_string_magic_parser(x, .delim, TRUE)
   context_specific = x_parsed[[i]]
   
   # normalizing newlines or very confusing
@@ -673,7 +673,7 @@ get_smagic_context = function(){
   res    
 }
 
-check_set_smagic_parsing = function(x, check, .delim){
+check_set_string_magic_parsing = function(x, check, .delim){
   # x is a character string to be turned into an R expression
   
   if(check){
@@ -688,19 +688,19 @@ check_set_smagic_parsing = function(x, check, .delim){
     open = .delim[1]
     close = .delim[2]
     
-    context = get_smagic_context()
+    context = get_string_magic_context()
     first_char = substr(x, 1, 1)
     
     if(first_char %in% c("#", "$")){
-      msg = smagic("PROBLEM: there is a syntax error in the pluralization (the ", 
+      msg = string_magic("PROBLEM: there is a syntax error in the pluralization (the ", 
                   "interpolation starting with {bq?first_char}).",
-                  "\nFor more information on the syntax, type `smagic(.help = TRUE)` and go to the section ",
+                  "\nFor more information on the syntax, type `string_magic(.help = TRUE)` and go to the section ",
                   "{Q!Interpolation and string operations: Principle}")
       
     } else if(first_char == "&"){
-      msg = smagic("PROBLEM: there is a syntax error in the if-else (the ", 
+      msg = string_magic("PROBLEM: there is a syntax error in the if-else (the ", 
                   "interpolation starting with {'^&+'x, bq?x}).",
-                  "\nFor more information on the syntax, type `smagic(.help = TRUE)` and go to the section ",
+                  "\nFor more information on the syntax, type `string_magic(.help = TRUE)` and go to the section ",
                   "{Q!Special interpolation: if-else}")
     } else {
       if(grepl("[!?]", x)){
@@ -711,14 +711,14 @@ check_set_smagic_parsing = function(x, check, .delim){
           type = paste0("3 (`", open, "ops ! verbatim", close, "`)")
         }
         
-        extra = smagic("\nCurrently the interpolation has been parsed as the first case: ",
+        extra = string_magic("\nCurrently the interpolation has been parsed as the first case: ",
                      "`{open}expr{close}`.",
                      "\nMaybe there is a syntax mistake preventing it to be interpreted as case {type}?")
       } else {
         extra = "\nCurrently it seems that the expression to be interpolated is not a valid R expression."
       }
       
-      help_suggest = .sma("\nFor more information on the syntax, type `smagic(.help = TRUE)` and go to the section ",
+      help_suggest = .sma("\nFor more information on the syntax, type `string_magic(.help = TRUE)` and go to the section ",
                           "{!Operations: General syntax}")
       
       x_call_clean = gsub("Error in parse[^:]+: ?", "Error when parsing: ", x_call)
@@ -739,7 +739,7 @@ check_set_smagic_parsing = function(x, check, .delim){
   x_call
 }
 
-check_set_smagic_eval = function(call, data, envir, check){
+check_set_string_magic_eval = function(call, data, envir, check){
   # we need to eval the call
   
   is_dt = "dt_data" %in% names(attributes(envir))
@@ -761,7 +761,7 @@ check_set_smagic_eval = function(call, data, envir, check){
     }
     
     if(inherits(x, "try-error")){
-      context = get_smagic_context()
+      context = get_string_magic_context()
       call_dp = deparse_short(call)
       if(grep("^expression\\(", call_dp)){
         call_dp = gsub("^expression\\(|\\)", "", call_dp)
@@ -776,7 +776,7 @@ check_set_smagic_eval = function(call, data, envir, check){
   }  
   
   if(is.function(x)){
-    context = get_smagic_context()
+    context = get_string_magic_context()
     call_dp = deparse_short(call)
     msg = .sma("EXPECTATION: interpolated variables should be coercible to character strings.",
                "\nPROBLEM: the expression {bq?call_dp} is a **function**. Please provide a character string.")
@@ -799,7 +799,7 @@ check_set_oparg_parse = function(argument, operator, check){
   
   
   if(inherits(call, "try-error")){
-    context = get_smagic_context()
+    context = get_string_magic_context()
     msg = .sma("EXPECTATION: In operation \"{bq?argument}{operator}\" the argument ",
                "in backticks is evaluated from the calling environment.",
                "\nPROBLEM: {bq?argument} is not a valid R-expression, see parsing error below:",
@@ -820,7 +820,7 @@ check_set_oparg_eval = function(call, data, envir, operator, check){
   }
   
   if(inherits(x, "try-error")){
-    context = get_smagic_context()
+    context = get_string_magic_context()
     msg = .sma("EXPECTATION: In operation {bq?operator} the argument ",
                "in backticks is evaluated from the calling environment.",
                "\nPROBLEM: {bq?deparse_short(call)} could not be evaluated, see error below:",
@@ -831,7 +831,7 @@ check_set_oparg_eval = function(call, data, envir, operator, check){
   x
 }
 
-report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
+report_string_magic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
   
   x_parsed = x_parsed[[1]]
   error_msg = x_parsed[1]
@@ -867,7 +867,7 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
                  "\nNOTE: to escape the meaning of the delimiter, use a ",
                  "double backslash: \\\\{.delim[1]}")
       
-      suggest= "INFO: see smagic(.help = TRUE) and go to the section 'Escaping and special cases'"
+      suggest= "INFO: see string_magic(.help = TRUE) and go to the section 'Escaping and special cases'"
     } else {
       # we diagnose the substring
       if(is_box_open(xi, .delim)){
@@ -876,15 +876,15 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
         xi_small = string_trim(xi, nchar(open), nchar(close))
       }
       
-      xi_small_parsed = cpp_smagic_parser(xi_small, .delim)
+      xi_small_parsed = cpp_string_magic_parser(xi_small, .delim)
       
       if(length(xi_small_parsed) == 1 && isTRUE(attr(xi_small_parsed, "error"))){
-        msg = report_smagic_parsing_error(xi_small_parsed, xi_small, .delim, FALSE)
+        msg = report_string_magic_parsing_error(xi_small_parsed, xi_small, .delim, FALSE)
         msg = gsub("^CONTEXT:", "         ", msg)
       } else {
         # here I don't knwo what the error can be
         # in theory, we should not be here
-        stop("Internal error: uncaught parsing error, could you report your smagic() call?")
+        stop("Internal error: uncaught parsing error, could you report your string_magic() call?")
       }
       
       # We don't add a suggestion since it should be in the 'msg'
@@ -915,7 +915,7 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
     }    
     
     if(pblm == "delim"){
-      suggest = "INFO: see smagic(.help = TRUE) and go to the section 'Escaping and special cases'"
+      suggest = "INFO: see string_magic(.help = TRUE) and go to the section 'Escaping and special cases'"
     }
     
     delim_msg = if(all(.delim == c("{", "}"))) "bracket" else "delimiter"
@@ -953,12 +953,12 @@ report_smagic_parsing_error = function(x, x_parsed, .delim, error = TRUE){
       msg = .sma("{intro}\nPROBLEM: no closing bracket was found to delimit `verb_false`.")
     }
     
-    suggest = "INFO: see smagic(.help = TRUE) and go to the section 'Special interpolation: if-else'"
+    suggest = "INFO: see string_magic(.help = TRUE) and go to the section 'Special interpolation: if-else'"
     
   } else {
     # pluralization
     
-    suggest = "INFO: see smagic(.help = TRUE) and go to the section 'Special interpolation: Pluralization'"
+    suggest = "INFO: see string_magic(.help = TRUE) and go to the section 'Special interpolation: Pluralization'"
     type = string_x(xi, 1, 1 + nchar(open))
     syntax = .sma("{open}{type}op1, op2{close} or {open}{type}op1, op2 ? variable{close}")
     
@@ -1090,12 +1090,12 @@ suggest_item = function(x, items, write_msg = TRUE, newline = TRUE, info = "vari
   if(write_msg){
     if(length(res) == 0){
       if(length(items) <= 5){
-        res = smagic("FYI the {info}{$s, are, enum.bq ? items_origin}.")
+        res = string_magic("FYI the {info}{$s, are, enum.bq ? items_origin}.")
       } else {
-        res = smagic("\nFYI the {info}s are: {sort, ', 'c ? items_origin}.")
+        res = string_magic("\nFYI the {info}s are: {sort, ', 'c ? items_origin}.")
       }
     } else {
-      res = smagic("Maybe you meant {enum.bq.or ? res}?")
+      res = string_magic("Maybe you meant {enum.bq.or ? res}?")
     }
 
     if(newline){
@@ -1156,7 +1156,7 @@ set_up = function(.up = 1){
 }
 
 set_pblm_hook = function(){
-  assign("Smagic_HOOK", 1, parent.frame())
+  assign("string_magic_HOOK", 1, parent.frame())
 }
 
 get_up_hook = function(){
@@ -1164,7 +1164,7 @@ get_up_hook = function(){
   f = parent.frame()
   up = 1
   while(!identical(f, .GlobalEnv)){
-    if(exists("Smagic_HOOK", f)){
+    if(exists("string_magic_HOOK", f)){
       break
     }
     up = up + 1
@@ -1173,7 +1173,7 @@ get_up_hook = function(){
   
   # we accept direct nestedness
   f_up = parent.frame(up + 2)
-  while(!identical(f_up, .GlobalEnv) && exists("Smagic_HOOK", f_up)){
+  while(!identical(f_up, .GlobalEnv) && exists("string_magic_HOOK", f_up)){
     up = up + 1
     f = f_up
     f_up = parent.frame(up + 2)
@@ -1208,7 +1208,7 @@ stop_up = function(..., up = 1, msg = NULL, envir = parent.frame(), verbatim = F
   if(verbatim){
     main_msg = paste0(...)
   } else {
-    main_msg = .smagic(..., .envir = envir)
+    main_msg = .string_magic(..., .envir = envir)
   }
 
   # up with set_up
@@ -1227,7 +1227,7 @@ stop_up = function(..., up = 1, msg = NULL, envir = parent.frame(), verbatim = F
   if(show_full_stack){
     # The user requests the full stack
     my_call = sapply(sc, function(x) deparse(x, width.cutoff = 200L, nlines = 1))
-    my_call = smagic("{'\n'c ! [{format.0 ? 1:length(my_call)}] {'100|...'k ? my_call}}")
+    my_call = string_magic("{'\n'c ! [{format.0 ? 1:length(my_call)}] {'100|...'k ? my_call}}")
 
     intro = paste0("the full stack is shown (set this off with setDreamerr_show_stack(FALSE))\n", my_call)
 
@@ -1295,7 +1295,7 @@ warn_up = function (..., up = 1, immediate. = FALSE, envir = parent.frame(), ver
   if(verbatim){
     message = paste0(...)
   } else {
-    message = .smagic(..., .envir = envir)
+    message = .string_magic(..., .envir = envir)
   }
   
   mc = match.call()
@@ -1410,7 +1410,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
       f = parent.frame()
       up = 1
       while(!identical(f, .GlobalEnv)){
-        if(exists("Smagic_HOOK", f)){
+        if(exists("string_magic_HOOK", f)){
           break
         }
         up = up + 1
@@ -1427,7 +1427,7 @@ check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
     if(verbatim){
       msg = paste0(..., collapse = "")
     } else {
-      msg = .smagic(..., .envir = parent.frame())
+      msg = .string_magic(..., .envir = parent.frame())
     }
     
     if(nchar(msg) == 0){

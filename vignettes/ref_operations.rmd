@@ -1,5 +1,5 @@
 ---
-title: "`smagic`'s operations: The reference"
+title: "`string_magic`'s operations: The reference"
 author: "Laurent R. Bergé"
 date: "`r Sys.Date()`"
 output:
@@ -25,8 +25,8 @@ vignette: >
 library(stringmagic)
 ```
 
-This document references all regular `smagic` operations. They can be used within 
-`smagic` or can be accessed from `string_ops` or `string_clean`. 
+This document references all regular `string_magic` operations. They can be used within 
+`string_magic` or can be accessed from `string_ops` or `string_clean`. 
 
 The operations are divided into four groups:
 
@@ -35,12 +35,12 @@ The operations are divided into four groups:
 - [formatting operations](#sec_format)
 - [other operations](#sec_other)
 
-By default the function `smagic` returns a plain character vector. This may not render
-nicely in this vignette. Hence we create an alias to `smagic` which applies `base::cat`
+By default the function `string_magic` returns a plain character vector. To have a nicer
+display within this vignette we create an alias to `string_magic` which applies `base::cat`
 just before leaving the function.
 ```{r}
 library(stringmagic)
-smagic = smagic_alias(.post = base::cat)
+string_magic = string_magic_alias(.post = base::cat)
 ```
 
 # Basic string operations {#sec_basic}
@@ -60,21 +60,21 @@ When character strings are split, their identity is kept in memory
 so that group-wise operations can be applied. See the [section on group-wise operations](LINK).
 ```{r}
 # 'Split' with its default (comma separation)
-smagic("{Split ! romeo, juliet}")
+string_magic("{Split ! romeo, juliet}")
 
 # result with 's' is different
-smagic("{split ! romeo, juliet}")
+string_magic("{split ! romeo, juliet}")
 
 # with argument: 's' and 'S' are identical
 # note the flag 'fixed' (`f/`) to remove regex interpretation
-smagic("{'f/+'split, '-'collapse ! 5 + 2} = 3")
+string_magic("{'f/+'split, '-'collapse ! 5 + 2} = 3")
 
 # group wise operations (here `~(sort, collapse)`, see dedicated section)
 prince_talk = c("O that this too too solid flesh would melt",
                 "Thaw, and resolve itself into a dew!",
                 "Or that the Everlasting had not fix'd",
                 "His canon 'gainst self-slaughter!")
-smagic("Order matters:\n{split, ~(sort, collapse), align.center, lower, upper.sentence,
+string_magic("Order matters:\n{split, ~(sort, collapse), align.center, lower, upper.sentence,
                           Q, '\n'collapse ? prince_talk}")
 ```
 
@@ -90,17 +90,17 @@ used to concatenate the last two elements.
 ```{r}
 # regular way
 x = 1:4
-smagic("And {' and 'collapse ? x}!")
+string_magic("And {' and 'collapse ? x}!")
 
 # with s2
-smagic("Choose: {', | or 'collapse ? 2:4}?")
+string_magic("Choose: {', | or 'collapse ? 2:4}?")
 
 # default of Collapse: enumeration (similar to operation enum)
 wines = c("Saint-Estephe", "Margaux")
-smagic("I like {Collapse ? wines}.")
+string_magic("I like {Collapse ? wines}.")
 
 # default of collapse: space concatenation
-smagic("{split, '.{5,}'get, collapse ! I don't like short words}")
+string_magic("{split, '.{5,}'get, collapse ! I don't like short words}")
 ```
 
 ## Extract patterns: extract, x, X
@@ -114,20 +114,20 @@ When patterns are extracted, the identity of each original character string is k
 so that group-wise operations can be applied. See the [section on group-wise operations](LINK).
 ```{r}
 x = c("margo: 32, 1m75", "luke doe: 27, 1m71")
-smagic("{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}")
+string_magic("{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}")
 
 # illustrating multiple extractions
 # group-wise operation (~()) is detailed in its own section
 x = c("Combien de marins, combien de capitaines.",
       "Qui sont partis joyeux pour des courses lointaines,",
       "Dans ce morne horizon se sont évanouis !")
-smagic("Endings with i: {'i\\w*'extract, ~(', 'collapse), enum.1 ? x}.")
+string_magic("Endings with i: {'i\\w*'extract, ~(', 'collapse), enum.1 ? x}.")
 
 x = c("6 feet under", "mahogany")
 # single extraction
-smagic("{'\\w{3}'x ? x}")
+string_magic("{'\\w{3}'x ? x}")
 # multiple extraction
-smagic("{'\\w{3}'X ? x}")
+string_magic("{'\\w{3}'X ? x}")
 ```
 
 ## Replace patterns: r, R, replace
@@ -143,17 +143,17 @@ The flag `"single"` leads to only a single substitution per string (the first pa
 That is, the function `base::sub` is used instead of `base::gsub`.
 ```{r}
 # regex without replacement (ie removing)
-smagic("{'e'replace ! Where is the letter e?}")
+string_magic("{'e'replace ! Where is the letter e?}")
 
 # regex with replacement
-smagic("{'(?<!\\b)e => a'replace ! Where is the letter e?}")
+string_magic("{'(?<!\\b)e => a'replace ! Where is the letter e?}")
 
 # with option "single"
-smagic("{'single/(?<!\\b)e => a'replace ! Where is the letter e?}")
+string_magic("{'single/(?<!\\b)e => a'replace ! Where is the letter e?}")
 
 # we replace the full string with the flag total (`t/`)
 x = c("Where is the letter e?", "Not this way!")
-smagic("{'total/e => here!'r ? x}")
+string_magic("{'total/e => here!'r ? x}")
 ```
 
 ## Clean string patterns: clean {#op_clean}
@@ -164,7 +164,7 @@ See detailed explanations in [`string_clean()`](https://lrberge.github.io/string
 
 ```{r}
 # we use the fixed pattern to remove the regex meaning
-smagic("{'f/[, ]'clean ! x[a]}")
+string_magic("{'f/[, ]'clean ! x[a]}")
 ```
 
 ## Get selected strings: get
@@ -181,11 +181,11 @@ and then set inclusion is tested.
 ```{r}
 x = row.names(mtcars)
 #  we only keep models containing "Merc" and ending with a letter ([[:alpha:]]$)
-smagic("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, enum ? x}.")
+string_magic("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, enum ? x}.")
 
 models = c("Merc 230", "Merc 450SE", "Merc 480")
 # we only ekep the ones in the set
-smagic("Mercedes models: {`models`get.in, enum ? x}.")
+string_magic("Mercedes models: {`models`get.in, enum ? x}.")
 ```
 
 ## Detect patterns in strings: is
@@ -201,7 +201,7 @@ and then set inclusion is tested.
 ```{r}
 x = c("Mark", "Lucas")
 # note that we use the flag `i/` to ignore the case
-smagic("Mark? {'i/mark'is, enum ? x}")
+string_magic("Mark? {'i/mark'is, enum ? x}")
 ```
 
 ## Get the index of the strings containing a pattern: which
@@ -218,7 +218,7 @@ Mostly useful as the final operation in a [`string_ops()`](https://lrberge.githu
 ```{r}
 x = c("Mark", "Lucas", "Markus")
 # note that we use the flag `i` to ignore the case and `w` to add word boundaries
-smagic("Mark is number {'iw/mark'which ? x}.")
+string_magic("Mark is number {'iw/mark'which ? x}.")
 ```
 
 # Operations changing the length or the order {#sec_op_length}
@@ -228,13 +228,13 @@ smagic("Mark is number {'iw/mark'which ? x}.")
 Keeps only the first `n` elements. 
 
 ```{r}
-smagic("First 3 mpg values: {3 first, enum ? mtcars$mpg}.")
+string_magic("First 3 mpg values: {3 first, enum ? mtcars$mpg}.")
 
 # you could have done the same with regular R in the expression...
-smagic("First 3 mpg values: {enum ? head(mtcars$mpg, 3)}.")
+string_magic("First 3 mpg values: {enum ? head(mtcars$mpg, 3)}.")
 
 # ...but not in the middle of an operations chain
-smagic("First 3 integer mpg values: {'f/!.'get, 3 first, enum ? mtcars$mpg}.")
+string_magic("First 3 integer mpg values: {'f/!.'get, 3 first, enum ? mtcars$mpg}.")
 ```
 
 Negative numbers as argument remove the enum
@@ -242,11 +242,11 @@ first `n` values. You can add a second argument in the form `'n1|n2'first` in wh
 `n2` values are kept; `n1` and `n2` must be positive numbers.
 
 ```{r}
-smagic("Letters in the middle: {13 first, 5 last, enum ? letters}.")
+string_magic("Letters in the middle: {13 first, 5 last, enum ? letters}.")
 
-smagic("First and last letters: {'3|3'first, enum ? letters}.")
+string_magic("First and last letters: {'3|3'first, enum ? letters}.")
 
-smagic("Last letters: {-21 first, enum ? letters}.")
+string_magic("Last letters: {-21 first, enum ? letters}.")
 ```
 
 ## Keep only the first elements (alternative): K
@@ -261,10 +261,10 @@ The string `s` accepts specials values:
 
 ```{r}
 # basic use
-smagic("First 3 letters: {'3'K, q, enum ? letters}.")
+string_magic("First 3 letters: {'3'K, q, enum ? letters}.")
 
 # advanced use: using the extra argument
-smagic("The letters are: {q, '3|:rest: others'K, enum ? letters}.")
+string_magic("The letters are: {q, '3|:rest: others'K, enum ? letters}.")
 ```
 
 ## Keep only the last elements: last
@@ -272,9 +272,9 @@ smagic("The letters are: {q, '3|:rest: others'K, enum ? letters}.")
 Keeps only the last `n` elements. Negative numbers as argument remove the 
 last `n` values.
 ```{r}
-smagic("Last 3 mpg values: {3 last, enum ? mtcars$mpg}.")
+string_magic("Last 3 mpg values: {3 last, enum ? mtcars$mpg}.")
 
-smagic("Removing the 3 last elements leads to {-3 last, enum ! x{1:5}}.")
+string_magic("Removing the 3 last elements leads to {-3 last, enum ! x{1:5}}.")
 ```
 
 ## Sort the vector: sort
@@ -283,7 +283,7 @@ Sorts the vector in increasing order. Accepts an optional argument and the optio
 ```{r}
 x = c("sort", "me")
 # basic use
-smagic("{sort, collapse ? x}")
+string_magic("{sort, collapse ? x}")
 ```
 If an argument is provided, it must be a regex pattern that will be applied to
 the vector using [`string_clean()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_clean). 
@@ -293,7 +293,7 @@ and the original vector will be ordered according to this sorting.
 # first modifying the string before sorting
 # here the regex first removes the first word, meaning that we sort on the last names
 x = c("Jon Snow", "Khal Drogo")
-smagic("{'.+ 'sort, enum?x}")
+string_magic("{'.+ 'sort, enum?x}")
 ```
 
 The option `"num"` sorts over a numeric version 
@@ -302,10 +302,10 @@ Values which could not be converted are last.
 ```{r}
 x = "Mark is 34, Bianca is 55, Odette is 101, Julie is 21 and Frank is 5"
 # sort on the "character string" number
-smagic("{', | and 'split, '\\D'sort, enum ? x}")
+string_magic("{', | and 'split, '\\D'sort, enum ? x}")
 
 # we extract the numbers, then convert to numeric, then sort
-smagic("{', | and 'split, '\\D'sort.num, enum ? x}")
+string_magic("{', | and 'split, '\\D'sort.num, enum ? x}")
 ```
 **Important note**: the sorting operation is applied before any character conversion.
 If previous operations were applied, it is likely that numeric data were transformed to character.
@@ -313,9 +313,9 @@ If previous operations were applied, it is likely that numeric data were transfo
 # note the difference
 x = c(20, 100, 10)
 # sorting on numeric
-smagic("{sort, ' + 'collapse ? x}")
+string_magic("{sort, ' + 'collapse ? x}")
 # sorting on character since 'n' operation transformed the vector to character
-smagic("{n, sort, ' + 'collapse ? x}")
+string_magic("{n, sort, ' + 'collapse ? x}")
 ```
 
 ## Sort the vector in decreasing order: dsort
@@ -323,21 +323,21 @@ smagic("{n, sort, ' + 'collapse ? x}")
 Sorts the vector in decreasing order. It accepts an optional argument and 
 the option `"num"`. See the operation `"sort"` for a description of the argument and the option.
 ```{r}
-smagic("5 = {dsort, ' + 'collapse ? 2:3}")
+string_magic("5 = {dsort, ' + 'collapse ? 2:3}")
 ```
 
 ## Reverse the vector: rev
 
 Reverses the vector.
 ```{r}
-smagic("{rev, ''collapse ? 1:3}")
+string_magic("{rev, ''collapse ? 1:3}")
 ```
 
 ## Keep only unique elements: unik
 
 Makes the string vector unique. 
 ```{r}
-smagic("Iris species: {unik, upper.first, enum ? iris$Species}.")
+string_magic("Iris species: {unik, upper.first, enum ? iris$Species}.")
 ```
 
 ## Repeat each elements of the vector: each
@@ -346,10 +346,10 @@ Repeats each element of the vector `n` times. Option `"c"` then collapses the fu
 with the empty string as a separator. 
 ```{r}
 # note: operation `S` splits splits wrt to commas (default behavior)
-smagic("{S!x, y}{2 each ? 1:2}")
+string_magic("{S!x, y}{2 each ? 1:2}")
 
 # illustrating collapsing
-smagic("Large number: 1{5 each.c ! 0}")
+string_magic("Large number: 1{5 each.c ! 0}")
 ```
 
 ## Repeats the vector: times
@@ -357,7 +357,7 @@ smagic("Large number: 1{5 each.c ! 0}")
 Repeats the vector sequence `n` times. Option `"c"` then collapses the full vector 
 with the empty string as a separator. 
 ```{r}
-smagic("What{6 times.c ! ?}")
+string_magic("What{6 times.c ! ?}")
 ```
 
 ## Remove specific values: rm
@@ -366,7 +366,7 @@ Removes elements from the vector. Options: `"empty"`, `"blank"`, `"noalpha"`, `"
 The *optional* argument represents the pattern used to detect strings to be deleted. 
 ```{r}
 x = c("Luke", "Charles")
-smagic("{'i/lu'rm ? x}")
+string_magic("{'i/lu'rm ? x}")
 ```
 
 By default it removes empty strings. 
@@ -377,7 +377,7 @@ the dedicated section). If an argument is provided, only the options `"empty"` a
 
 ```{r}
 x = c("I want to enter.", "Age?", "21.")
-smagic("Nightclub conversation: {rm.noalpha, c ! - {x}}")
+string_magic("Nightclub conversation: {rm.noalpha, c ! - {x}}")
 ```
 
 ## Remove all value: nuke
@@ -387,7 +387,7 @@ Useful in conditions, see the dedicated section.
 ```{r}
 x = c(5, 7, 453, 647)
 # here we use a condition: see the dedicated section for more information
-smagic("Small numbers only: {if(.>20 ; nuke), enum ? x}.")
+string_magic("Small numbers only: {if(.>20 ; nuke), enum ? x}.")
 ```
 
 ## Insert a character string: insert
@@ -396,7 +396,7 @@ Inserts a new element to the vector. Options: `"right"` and `"both"`. Option `"r
 the new element to the right. Option `"both"` inserts the new element on the two sides of the vector.
 
 ```{r}
-smagic("{'3'insert.right, ' + 'collapse ? 1:2}")
+string_magic("{'3'insert.right, ' + 'collapse ? 1:2}")
 ```
 
 # Formatting operations {#sec_format}
@@ -406,7 +406,7 @@ smagic("{'3'insert.right, ' + 'collapse ? 1:2}")
 Lower cases the full string.
 ```{r}
 x = "MesSeD uP CaSe"
-smagic("from a {x} to {lower?x}")
+string_magic("from a {x} to {lower?x}")
 ```
 
 ## Change the case: upper
@@ -417,7 +417,7 @@ upper cases the first letter after punctuation.
 
 ```{r}
 x = "hi. how are you? fine."
-smagic("{upper.sentence ? x}")
+string_magic("{upper.sentence ? x}")
 ```
 
 ## Change the case: title
@@ -430,13 +430,13 @@ Option `"ignore"` ignores a few small prepositions ("a", "the", "of", etc).
 x = "bryan is in the KITCHEN"
 
 # default: respects upper cases
-smagic("{title ? x}")
+string_magic("{title ? x}")
 
 # force: force to title case
-smagic("{title.force ? x}")
+string_magic("{title.force ? x}")
 
 # ignore: ignores small prepositions
-smagic("{title.force.ignore ? x}")
+string_magic("{title.force.ignore ? x}")
 ```
 
 ## Normalize white spaces: ws
@@ -446,11 +446,11 @@ of whitespaces into a single one. Can also be used to further clean the string w
 Options: `"punct"`, `"digit"`, `"isolated"`. Option `"punct"` cleans the punctuation. Option `"digit"` cleans digits.
 Option `"isolated"` cleans isolated letters. WS normalization always come after any of these options.
 **Important note:** punctuation (or digits) are replaced with WS and **not** 
-the empty string. This means that `smagic("ws.punct ! Meg's car")` will become `"Meg s car"`.
+the empty string. This means that `string_magic("ws.punct ! Meg's car")` will become `"Meg s car"`.
 
 ```{r}
 x = "   I    should? review 85 4 this text!!"
-smagic("v0: {x}", 
+string_magic("v0: {x}", 
         "v1: {ws ? x}",
         "v2: {ws.punct ? x}",
         "v3: {ws.punct.digit ? x}",
@@ -462,7 +462,7 @@ smagic("v0: {x}",
 Trims the white spaces on both ends of the strings.
 ```{r}
 x = "  too much space \t\n"
-smagic("With trim: {tws, Q ? x}")
+string_magic("With trim: {tws, Q ? x}")
 ```
 
 ## Add various type of quotes: q, Q, bq
@@ -471,7 +471,7 @@ To add quotes to the strings. q: single quotes, Q: double quotes, bq:
 back quotes.
 ```{r}
 x = c("Mark", "Pam")
-smagic("Hello {q, enum ? x}!")
+string_magic("Hello {q, enum ? x}!")
 ```
 
 ## Format the values with `base::format`: format, Format
@@ -483,7 +483,7 @@ Options `"0"` or `"zero"` fills the blanks with 0s: useful to format numbers. Op
 and `"center"` centers the strings.
 ```{r}
 x = c(1, 12345) 
-smagic("left:   {format, q, enum ? x}", 
+string_magic("left:   {format, q, enum ? x}", 
         "right:  {Format, q, enum ? x}",
         "center: {format.center, q, enum ? x}",
         "zero:   {format.0, q, enum ? x}", .sep = "\n")
@@ -494,7 +494,7 @@ smagic("left:   {format, q, enum ? x}",
 Applies `base::sprintf()` formatting. The syntax is `'arg'%` with arg an sprintf formatting,
 or directly the sprint formatting.
 ```{r}
-smagic("pi = {%.3f ? pi}")
+string_magic("pi = {%.3f ? pi}")
 ```
 
 ## Remove stop words: stopwords
@@ -504,7 +504,7 @@ The stopwords are replaced with an empty space but the left and right WS are
 untouched. So WS normalization may be needed (see operation `ws`).
 ```{r}
 x = c("He is tall", "He isn't young")
-smagic("Is he {stop, ws, enum ? x}?")
+string_magic("Is he {stop, ws, enum ? x}?")
 ```
 
 ## Turn the string to ASCII: ascii
@@ -516,7 +516,7 @@ is done with `base::iconv()`, option `"utf8"` indicates that the source endocing
 in some cases.
 ```{r}
 author = "Laurent Bergé"
-smagic("This package has been developped by {ascii ? author}.")
+string_magic("This package has been developped by {ascii ? author}.")
 ```
 
 ## Formatting integers: n, N
@@ -530,21 +530,21 @@ with `utils::as.roman`. The lower case version writes them in lower case.
 The upper case command (`N`) adds the option `"letter"`.
 ```{r}
 x = c(5, 12, 52123)
-smagic("She owes {n, '$'paste, enum ? x}.")
+string_magic("She owes {n, '$'paste, enum ? x}.")
 
 # option 0: all same width, no ',' for thousands
-smagic("|---|\n{n.0, '\n'collapse ? x}")
+string_magic("|---|\n{n.0, '\n'collapse ? x}")
 
 # option "upper"
 n = 5
-smagic("{n.upper ? n} is my favourite number.")
+string_magic("{n.upper ? n} is my favourite number.")
 
 # N: like "n.letter"
 x = 5
-smagic("He's {N ? x} years old.")
+string_magic("He's {N ? x} years old.")
 
 # roman
-smagic("What's nicer? {collapse?11:13}, {n.roman, c?11:13} or {n.Roman, c?11:13}?")
+string_magic("What's nicer? {collapse?11:13}, {n.roman, c?11:13} or {n.Roman, c?11:13}?")
 ```
 
 ## Numbered position: nth, Nth
@@ -553,18 +553,18 @@ When applied to a number, this operator writes them as a rank. Options: `"letter
 `"upper"`, `"compact"`. 
 ```{r}
 n = c(3, 7)
-smagic("They finished {nth, enum ? n}!")
+string_magic("They finished {nth, enum ? n}!")
 ```
 Option `"letter"` tries to write the numbers in letters, but note that it stops at 20. Option `"upper"`
 is the same as `"letter"` but uppercases the first letter. Option `"compact"` aggregates
 consecutive sequences in the form `"start_n_th to end_n_th"`. 
 ```{r}
-smagic("They arrived {nth.compact ? 5:20}.")
+string_magic("They arrived {nth.compact ? 5:20}.")
 ```
 The upper case command (`Nth`) adds the option `"letter"`.
 ```{r}
 n = c(3, 7)
-smagic("They finished {Nth, enum ? n}!")
+string_magic("They finished {Nth, enum ? n}!")
 ```
 
 ## Number of times: ntimes, Ntimes
@@ -573,12 +573,12 @@ Write numbers in the form `n` times. Options: `"letter"`, `"upper"`. Option
 `"letter"` writes the number in letters (up to 100). Option `"upper"` does the same as `"letter"` 
 and uppercases the first letter. 
 ```{r}
-smagic("They lost {enum ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}.")
+string_magic("They lost {enum ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}.")
 ```
 The upper case command (`Ntimes`) adds the option `"letter"`.
 ```{r}
 x = 5
-smagic("This paper was rejected {Ntimes ? x}...")
+string_magic("This paper was rejected {Ntimes ? x}...")
 ```
 
 ## Keep only the first, last characters: firstchar, lastchar
@@ -586,9 +586,9 @@ smagic("This paper was rejected {Ntimes ? x}...")
 To select the first/last characters of each element. 
 Negative numbers remove the first/last characters.
 ```{r}
-smagic("{19 firstchar, 9 lastchar ! This is a very long sentence}")
+string_magic("{19 firstchar, 9 lastchar ! This is a very long sentence}")
 
-smagic("delete 3 = {-3 firstchar ! delete 3}")
+string_magic("delete 3 = {-3 firstchar ! delete 3}")
 ```
 
 ## Shortens character strings: k, shorten, Shorten
@@ -614,7 +614,7 @@ for the argument `s`, like in `'n||s'`.
 
 ```{r}
 x = "long sentence"
-smagic("v0: {x}", 
+string_magic("v0: {x}", 
         "v1: {4 shorten ? x}", 
         "v2: {'4|..'shorten ? x}", 
         "v3: {'4|..'shorten.include ? x}", 
@@ -636,10 +636,10 @@ See help for [`string_fill()`](https://lrberge.github.io/stringmagic/reference/s
 for more information.
 ```{r}
 life = "full of sound and fury, Signifying nothing"
-smagic("{'[ ,]+'split, upper.first, fill.center, q, '\n'collapse ? life}")
+string_magic("{'[ ,]+'split, upper.first, fill.center, q, '\n'collapse ? life}")
 
 # fixing the length and filling with 0s
-smagic("{'5|0'fill.right, enum ? c(1, 55)}")
+string_magic("{'5|0'fill.right, enum ? c(1, 55)}")
 ```
 
 ## Append text: paste
@@ -651,7 +651,7 @@ Option `"right"` pastes on the right and `"both"` pastes on both sides. Option `
 pastes on the first element while option `"back"` only pastes on the last element. Option `"delete"`
 first replaces all elements with the empty string.
 ```{r}
-smagic("6 = {'|'paste.both, ' + 'collapse ? -3:-1}")
+string_magic("6 = {'|'paste.both, ' + 'collapse ? -3:-1}")
 ```
 
 ## Join lines: join
@@ -661,7 +661,7 @@ Joins lines ending with a double backslash.
 ```{r}
 sun = "The sun \\
 is shining."
-smagic("How is the sun? {join ? sun}")
+string_magic("How is the sun? {join ? sun}")
 ```
 
 ## Escape special characters: escape
@@ -674,7 +674,7 @@ The default behavior is to escape both newlines and tabs.
 
 ```{r}
 input = "yes \n\n no"
-msg = smagic("Your input, equal to {escape, bq ? input} is incorrect.")
+msg = string_magic("Your input, equal to {escape, bq ? input} is incorrect.")
 cat(msg, "\n")
 ```
 
@@ -692,7 +692,7 @@ Option `"rm"` converts and removes the elements that could not be converted.
 Option `"clear"` turns failed conversions into the empty string, and hence lead to a character vector.
 ```{r}
 x = c(5, "six")
-smagic("   origin: {enum, q ? x}", 
+string_magic("   origin: {enum, q ? x}", 
         "      num: {num, enum, q ? x}", 
         "   num.rm: {num.rm, enum, q ? x}", 
         " num.soft: {num.soft, enum, q ? x}", 
@@ -706,7 +706,7 @@ separated list of elements.
 If there are more than 7 elements, only the first 6 are shown and the number of
 items left is written.
 ```{r}
-smagic("{enum ? 1:5}")
+string_magic("{enum ? 1:5}")
 ```
 You can add the following options:
 
@@ -716,18 +716,18 @@ You can add the following options:
   + a number: to tell the number of items to display
 ```{r}
 x = c("Marv", "Nancy")
-smagic("The murderer must be {enum.or ? x}.")
+string_magic("The murderer must be {enum.or ? x}.")
 
 x = c("oranges", "milk", "rice")
-smagic("Shopping list: {enum.i.q ? x}.")
+string_magic("Shopping list: {enum.i.q ? x}.")
 
 # enum is made for display: when vectors are too long, they are truncated
 # default is at 7
-x = smagic("x{sample(100, 30)}")
-smagic("The problematic variables are {'x'sort.num, enum ? x}.")
+x = string_magic("x{sample(100, 30)}")
+string_magic("The problematic variables are {'x'sort.num, enum ? x}.")
 
 # you can augment or reduce the numbers to display with an option
-smagic("The problematic variables are {'x'sort.num, enum.3 ? x}.")
+string_magic("The problematic variables are {'x'sort.num, enum.3 ? x}.")
 ```
 
 
@@ -738,13 +738,13 @@ Option `"letter"` writes the length in words (up to 100). Option `"upper"` is th
 as letter but uppercases the first letter. By default, the number is formatted:
 commas are inserted to separate thousands.
 ```{r}
-smagic("The length of 1:5000:", 
+string_magic("The length of 1:5000:", 
        " - len     = {len ? 1:5000}", 
        " - len.num = {len.num ? 1:5000}", .sep = " \n")
 ```
 The upper case command (`Len`) adds the option `"letter"` (only for small numbers).
 ```{r}
-smagic("Its size is {Len ? 1:8}")
+string_magic("Its size is {Len ? 1:8}")
 ```
 
 ## Add newlines to force the string to fit a given width: width
@@ -760,7 +760,7 @@ target size as a fraction of the current screen. Finally it can be an expression
 uses the variable `.sw` which will capture the value of the current screen width.
 ```{r}
 x = "this is a long sentence"
-smagic("------ version 0 ------\n{x}", 
+string_magic("------ version 0 ------\n{x}", 
         "------ version 1 ------\n{15 width ? x}", 
         "------ version 2 ------\n{'15|#>'width ? x}",
         "------ version 3 ------\n{'15|#>_'width ? x}", .sep = "\n")
@@ -773,7 +773,7 @@ operation fails. It accepts either objects of class `POSIXt` or `difftime`.
 ```{r}
 x = Sys.time()
 Sys.sleep(0.15) 
-smagic("Time: {dtime ? x}")
+string_magic("Time: {dtime ? x}")
 ```
 
 

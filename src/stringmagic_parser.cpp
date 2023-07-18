@@ -1090,7 +1090,7 @@ void parse_box(delim &delims, bool &is_pblm, const char * str, int &i, int n,
 }
 
 // [[Rcpp::export]]
-List cpp_smagic_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_section = false){
+List cpp_string_magic_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_section = false){
   // Rstr: string from R of length 1
 
   List res;

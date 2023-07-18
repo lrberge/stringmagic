@@ -9,21 +9,21 @@
 #### User-level ####
 ####
 
-#' Register custom operations to apply them in smagic
+#' Register custom operations to apply them in string_magic
 #' 
-#' Extends the capabilities of [smagic()] by adding any custom operation
+#' Extends the capabilities of [string_magic()] by adding any custom operation
 #' 
 #' @param fun A function which must have at least the arguments 'x' and '...'. 
 #' Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'group_flag'.
 #' This function must return a vector.
-#' This function will be internally called by `smagic` in the form 
+#' This function will be internally called by `string_magic` in the form 
 #' `fun(x, argument, options, group, group_flag)`.`x`: the value to which the 
-#' operation applies. `argument`: the quoted `smagic` argument (always character). 
-#' `options`: a character vector of `smagic` options. The two last arguments are of use
+#' operation applies. `argument`: the quoted `string_magic` argument (always character). 
+#' `options`: a character vector of `string_magic` options. The two last arguments are of use
 #' only in group-wise operations if `fun` changes the lengths of vectors. `group`: an index of
 #' the group to which belongs each observation (integer). `group_flag`: value between 0
 #' and 2; 0: no grouping operation requested; 1: keep track of groups; 2: apply grouping.
-#' @param ops Character scalar representing a valid chain of `smagic` operations. It should
+#' @param ops Character scalar representing a valid chain of `string_magic` operations. It should
 #' be of the form `"op1, 'arg'op2, etc"`. For example `"'80|-'fill"` fills the line
 #' with dashes up to 80 characters. 
 #' @param alias Character scalar, the name of the operation.
@@ -31,8 +31,8 @@
 #' valid options for the operation. This is used: a) to enable auto-completion,
 #' b) for error-handling purposes.
 #' @param namespace Character scalar or `NULL` (default). **Only useful for package developers.**
-#' As a regular end-user you shouldn't care! If your package uses `smagic`, you should care. 
-#' If the function `smagic_register_*` is located in the `onLoad` function (see `help("onLoad")`), 
+#' As a regular end-user you shouldn't care! If your package uses `string_magic`, you should care. 
+#' If the function `string_magic_register_*` is located in the `onLoad` function (see `help("onLoad")`), 
 #' there is nothing to do. Otherwise, pass the name of your package in this argument to 
 #' make all the new operation definitions scoped (i.e. only your package can access it and 
 #' it can't be messed up by end users).
@@ -46,39 +46,39 @@
 #' 
 #' If you pass a function, note that it should work for non-character arguments in `x`.
 #' 
-#' @section Writing a package using `smagic`:
+#' @section Writing a package using `string_magic`:
 #' 
-#' If you want to use `smagic` in your package and want to make use of custom operations:
+#' If you want to use `string_magic` in your package and want to make use of custom operations:
 #' 
-#' - place any `smagic_register_fun` and `smagic_register_ops` in your `.onLoad` function
+#' - place any `string_magic_register_fun` and `string_magic_register_ops` in your `.onLoad` function
 #' (see `help("onLoad")`). The .onLoad function is run whenever the package is loaded 
 #' for the first time. It's a function that you can place anywhere in your `R/*` files 
 #' and which looks like this:
 #' ```{r}
 #' .onLoad = function(libname, pkgname){
-#'   # smagic custom operations
-#'   smagic_register_ops("'80|-'fill", "h1")
+#'   # string_magic custom operations
+#'   string_magic_register_ops("'80|-'fill", "h1")
 #' 
 #'   invisible()
 #' }
 #' ```
-#' - if you don't want to place the `smagic_register_*` functions in the .onLoad function, 
+#' - if you don't want to place the `string_magic_register_*` functions in the .onLoad function, 
 #' you can, but then you **must** provide the argument `namespace`:
 #' ```{r}
-#' smagic_register_ops("'80|-'fill", "h1", namespace = "myPackageName")
+#' string_magic_register_ops("'80|-'fill", "h1", namespace = "myPackageName")
 #' ```
-#' - you must create an [smagic_alias()] to create an alias to [smagic()] and use the 
+#' - you must create an [string_magic_alias()] to create an alias to [string_magic()] and use the 
 #' argument `.namespace = "myPackageName"`. Use this opportunity to change the 
-#' defaults if you wish. You can even override the `smagic` function:
+#' defaults if you wish. You can even override the `string_magic` function:
 #'  ```{r}
 #' # creating an alias with the same name + changing the delimiter
-#' smagic = stringmagic::smagic_alias(.namespace = "myPackageName", .delim = "{{ }}")
+#' string_magic = stringmagic::string_magic_alias(.namespace = "myPackageName", .delim = "{{ }}")
 #' ```
 #' 
 #' @author 
 #' Laurent R. Berge
 #' 
-#' @family related to `smagic`
+#' @family related to `string_magic`
 #' 
 #' @inherit string_clean seealso
 #' 
@@ -91,11 +91,11 @@
 #' fun_emph = function(x, ...) paste0("*", x, "*")
 #' 
 #' # B) register it
-#' smagic_register_fun(fun_emph, "emph")
+#' string_magic_register_fun(fun_emph, "emph")
 #' 
 #' # C) use it
 #' x = string_vec("right, now")
-#' smagic("Take heed, {emph, c? x}.")
+#' string_magic("Take heed, {emph, c? x}.")
 #' 
 #' #
 #' # now let's add the option "strong"
@@ -107,10 +107,10 @@
 #'   }
 #' }
 #' 
-#' smagic_register_fun(fun_emph, "emph", "strong")
+#' string_magic_register_fun(fun_emph, "emph", "strong")
 #' 
 #' x = string_vec("right, now")
-#' smagic("Take heed, {emph.strong, c? x}.")
+#' string_magic("Take heed, {emph.strong, c? x}.")
 #' 
 #' #
 #' # now let's add an argument
@@ -125,23 +125,23 @@
 #'   paste0(arg, x, arg)
 #' }
 #' 
-#' smagic_register_fun(fun_emph, "emph", "strong")
+#' string_magic_register_fun(fun_emph, "emph", "strong")
 #' 
 #' x = string_vec("right, now")
-#' smagic("Take heed, {'_'emph.s, c? x}.")
+#' string_magic("Take heed, {'_'emph.s, c? x}.")
 #' 
 #' #
-#' # using smagic_register_ops
+#' # using string_magic_register_ops
 #' #
 #' 
 #' # create a 'header' maker
-#' smagic_register_ops("tws, '# 'paste, ' 'paste.right, '40|-'fill", "h1")
+#' string_magic_register_ops("tws, '# 'paste, ' 'paste.right, '40|-'fill", "h1")
 #' cat_magic("{h1 ! My title}\n my content")
 #' 
 #' 
 #' 
 #' 
-smagic_register_fun = function(fun, alias, valid_options = NULL, namespace = NULL){
+string_magic_register_fun = function(fun, alias, valid_options = NULL, namespace = NULL){
   # fun: must be a function with x and ... as arguments
   # the argument names must be in:
   # x, argument, options, group, conditonnal_flag
@@ -212,8 +212,8 @@ smagic_register_fun = function(fun, alias, valid_options = NULL, namespace = NUL
   save_user_fun(fun, alias, namespace)
 }
 
-#' @describeIn smagic_register_fun Create new combinations of `smagic` operations
-smagic_register_ops = function(ops, alias, namespace = NULL){
+#' @describeIn string_magic_register_fun Create new combinations of `string_magic` operations
+string_magic_register_ops = function(ops, alias, namespace = NULL){
   
   #
   # checking
@@ -222,11 +222,11 @@ smagic_register_ops = function(ops, alias, namespace = NULL){
   check_character(ops, scalar = TRUE, mbt = TRUE)
   check_character(alias, scalar = TRUE, mbt = TRUE)
   
-  run = try(smagic("x{1:5}", .last = ops), silent = TRUE)
+  run = try(string_magic("x{1:5}", .last = ops), silent = TRUE)
   
   if(isError(run)){
-    stopi("The argument `ops` must refer to valid `smagic` operations.", 
-          "\nPROBLEM: running `smagic(\"x\\{1:5}\", .last = {Q?ops})` leads ",
+    stopi("The argument `ops` must refer to valid `string_magic` operations.", 
+          "\nPROBLEM: running `string_magic(\"x\\{1:5}\", .last = {Q?ops})` leads ",
           "to an error, see below:",
           "\n{run}")
   }
@@ -260,13 +260,13 @@ save_user_fun = function(fun, alias, namespace){
   # We forbid the redefinition of internal operations
   # => only for V1, so that later versions don't break code
   #    if user did defined operations with the same name of the new ones
-  OPERATORS_v1.0.0 = getOption("smagic_operations_v1.0.0")
+  OPERATORS_v1.0.0 = getOption("string_magic_operations_v1.0.0")
   if(alias %in% OPERATORS_v1.0.0){
     stopi("The argument `alias` must not be equal to an existing internal argument.",
               "\nPROBLEM: the operation {bq?alias} is already an internal operation.")
   }
   
-  user_ops_all = getOption("smagic_user_ops")
+  user_ops_all = getOption("string_magic_user_ops")
   if(is.null(user_ops_all) || !is.list(user_ops_all)){
     user_ops_all = list()
   }
@@ -275,7 +275,7 @@ save_user_fun = function(fun, alias, namespace){
   if(is.null(user_info)){
     funs = list()
     funs[[alias]] = fun
-    operators_default = getOption("smagic_operations_default")
+    operators_default = getOption("string_magic_operations_default")
     operators = c(operators_default, alias)
   } else {
     funs = user_info$funs
@@ -287,14 +287,14 @@ save_user_fun = function(fun, alias, namespace){
   user_info = list(funs = funs, operators = operators)
   user_ops_all[[namespace]] = user_info
 
-  options("smagic_user_ops" = user_ops_all)
+  options("string_magic_user_ops" = user_ops_all)
 }
 
 #' Display messages using interpolated strings
 #' 
-#' Utilities to display messages using `smagic` interpolation and operations to generate the message.
+#' Utilities to display messages using `string_magic` interpolation and operations to generate the message.
 #' 
-#' @inheritParams smagic
+#' @inheritParams string_magic
 #' 
 #' @param .end Character scalar, default is `""` (the empty string). This string 
 #' will be collated at the end of the message (a common alternative is `"\n"`).
@@ -314,7 +314,7 @@ save_user_fun = function(fun, alias, namespace){
 #' Whether to add a leading character string right after the extra new lines.
 #' 
 #' @details 
-#' These functions are [base::cat()]/[message()] wrappers aroung [smagic()]. There is one notable difference
+#' These functions are [base::cat()]/[message()] wrappers aroung [string_magic()]. There is one notable difference
 #' with respect to `cat`/`message`. It's the ability to add newlines after words for 
 #' the message to fit a target width. This is controlled with the argument `.width`. This is 
 #' active by default for `message_magic` (default is `.width = NULL` which leads to the 
@@ -324,9 +324,9 @@ save_user_fun = function(fun, alias, namespace){
 #' `message_magic_alias`.
 #' 
 #' `[Advanced]` A note for package developers who would use these functions **and**
-#' also use custom `smagic` operations created with [smagic_register_fun()] or
-#' [smagic_register_ops()]. To ensure forward compatibility the new operations created 
-#' should be defined in the package namespace (see the *ad hoc* section in [smagic_register_fun()] help).
+#' also use custom `string_magic` operations created with [string_magic_register_fun()] or
+#' [string_magic_register_ops()]. To ensure forward compatibility the new operations created 
+#' should be defined in the package namespace (see the *ad hoc* section in [string_magic_register_fun()] help).
 #' To access these operators in their specific namespaces, you must use an alias with 
 #' `cat_magic_alias` or `message_magic_alias` with the argument `.namespace = "myPackageName"` 
 #' (to avoid having to provide the `.namespace` argument repeatedly).
@@ -365,7 +365,7 @@ save_user_fun = function(fun, alias, namespace){
 #' cat_column = cat_magic_alias(.sep = "\n", .end = "\n", .vectorize = TRUE, 
 #'                             .last = "fill.center, ' + 'paste.both")
 #'
-#' cat_column("code smagic", "write the docs", "write the vignettes")
+#' cat_column("code string_magic", "write the docs", "write the vignettes")
 #' 
 cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "", 
                          .envir = parent.frame(), 
@@ -375,7 +375,7 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
                          .namespace = NULL){
   
   set_pblm_hook()
-  txt = smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
+  txt = string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
             .delim = .delim, .last = .last, .collapse = .collapse,
             .check = .check, .help = .help,
             .namespace = .namespace)
@@ -410,7 +410,7 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
                          .namespace = NULL){
   
   set_pblm_hook()
-  txt = smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
+  txt = string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
             .delim = .delim, .last = .last, .collapse = .collapse,
             .check = .check, .help = .help,
             .namespace = .namespace)
@@ -437,11 +437,11 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 }
 
 ####
-#### ... smagic ####
+#### ... string_magic ####
 ####
 
-#' @describeIn smagic String interpolation with operation chaining
-smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
+#' @describeIn string_magic String interpolation with operation chaining
+string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
                    .delim = c("{", "}"), .last = NULL, .post = NULL,
                    .collapse = NULL, .invisible = FALSE, .default = NULL,
                    .check = TRUE, .class = NULL, .help = NULL, 
@@ -475,7 +475,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
     }
   } 
   
-  res = smagic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
+  res = string_magic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
                             .vectorize = .vectorize, .help = .help, 
                             .collapse = .collapse, .is_root = TRUE, 
                             .namespace = .namespace, .default = .default,
@@ -503,8 +503,8 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
   res
 }
 
-#' @describeIn smagic A simpler version of `smagic` without any error handling to save a few micro seconds
-.smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
+#' @describeIn string_magic A simpler version of `string_magic` without any error handling to save a few micro seconds
+.string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                     .delim = c("{", "}"), .collapse = NULL, .last = NULL,
                     .namespace = NULL){
   
@@ -512,7 +512,7 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
     .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
   }
 
-  smagic_internal(..., .delim = .delim, .envir = .envir, 
+  string_magic_internal(..., .delim = .delim, .envir = .envir, 
                       .sep = .sep, .namespace = .namespace,
                       .vectorize = .vectorize, .is_root = TRUE, 
                       .collapse = .collapse,
@@ -520,13 +520,13 @@ smagic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
 }
 
 # This is an internal alias (not exported)
-.sma = .smagic
+.sma = .string_magic
 
 ####
 #### Internal ####
 ####
 
-smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .data = list(),
+string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .data = list(),
                                .sep = "", .vectorize = FALSE,
                                .collapse = NULL, .last = NULL,  
                                .help = NULL, .is_root = FALSE, 
@@ -535,11 +535,11 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
                                .check = FALSE, .plural_value = NULL){
   
   # flag useful to easily identify this environment (used in error messages)
-  is_smagic_internal = TRUE
+  is_string_magic_internal = TRUE
 
   if(!is.null(.help)){
-    on.exit(smagic_dynamic_help(.help))
-    stop_up("smagic: Help requested.")  
+    on.exit(string_magic_dynamic_help(.help))
+    stop_up("string_magic: Help requested.")  
   }
   
   if(...length() == 0){
@@ -550,21 +550,21 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     if(is.null(.namespace)){
       .namespace = "R_GlobalEnv"
     }
-    user_ops_all = getOption("smagic_user_ops")
+    user_ops_all = getOption("string_magic_user_ops")
     # beware the sneaky assignment!
     if(!is.null(user_ops_all) && !is.null(user_info <- user_ops_all[[.namespace]])){
       #                                             ^^ sneaky!
       .user_funs = user_info$funs
       .valid_operators = user_info$operators          
     } else {
-      .valid_operators = getOption("smagic_operations_default")
+      .valid_operators = getOption("string_magic_operations_default")
     }
   }
 
   if(...length() == 1){
     
     if(!is.null(...names())){
-      stop_hook("`smagic` requires at least one character scalar to work.",
+      stop_hook("`string_magic` requires at least one character scalar to work.",
                 "\nNamed arguments are only used as variables on which to apply interpolation.",
                 "\nFIX: please provide at least one non-named argument.")
     }
@@ -572,14 +572,14 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     x = as.character(..1)
     
     if(length(x) > 1){
-      stop_hook("`smagic` can only be applied to character scalars. ",
+      stop_hook("`string_magic` can only be applied to character scalars. ",
                 "\nPROBLEM: the argument is not of length 1, it is of length {len ? x}.")
     }
 
   } else {
 
     if(.check){
-      dots = check_expr(list(...), "In `smagic`, one element of ... could not be evaluated.")
+      dots = check_expr(list(...), "In `string_magic`, one element of ... could not be evaluated.")
     } else {
       dots = list(...)
     }
@@ -598,7 +598,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     }    
     
     if(length(dots) == 0){
-      stop_hook("`smagic` requires at least one character scalar to work.",
+      stop_hook("`string_magic` requires at least one character scalar to work.",
                 "\nNamed arguments are only used as variables on which to apply interpolation.",
                 "\nPROBLEM: all arguments are named.",
                 "\nFIX: please provide at least one non-named argument.")
@@ -606,7 +606,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
     
     if(any(lengths(dots) > 1)){
       qui = which(lengths(dots) > 1)[1]
-      stop_hook("`smagic` can only be applied to character scalars.",
+      stop_hook("`string_magic` can only be applied to character scalars.",
                 "\nPROBLEM: The ", n_th(qui),
                 " elment in ... is of length ", length(dots[[qui]]), ".")
     }
@@ -645,7 +645,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
           }
         }
         
-        res[[i]] = smagic_internal(dots[[i]], .delim = .delim, .envir = .envir, 
+        res[[i]] = string_magic_internal(dots[[i]], .delim = .delim, .envir = .envir, 
                                     .data = .data, .check = .check,
                                     .user_funs = .user_funs, .valid_operators = .valid_operators)
       }
@@ -684,9 +684,9 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
       x_parsed = list(x)
     }    
   } else {
-    x_parsed = cpp_smagic_parser(x, .delim)
+    x_parsed = cpp_string_magic_parser(x, .delim)
     if(length(x_parsed) == 1 && isTRUE(attr(x_parsed, "error"))){
-      report_smagic_parsing_error(x, x_parsed, .delim)
+      report_string_magic_parsing_error(x, x_parsed, .delim)
     }
     
     # we add extra variables
@@ -764,12 +764,12 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
       if(length(operators) == 0){
 
         # we need to evaluate xi
-        xi_call = check_set_smagic_parsing(xi, .check, .delim)
+        xi_call = check_set_string_magic_parsing(xi, .check, .delim)
 
         if(is.character(xi_call)){
           xi = xi_call
         } else {
-          xi = check_set_smagic_eval(xi_call, .data, .envir, .check)
+          xi = check_set_string_magic_eval(xi_call, .data, .envir, .check)
         }
 
         if(ANY_PLURAL){
@@ -829,8 +829,8 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
 
               } else {
                 if(length(operators) == 1){
-                  example = 'Example: x = c("Mark", "Sarah"); smagic("{$enum, is ? x} away.")'
-                  .stop_hook("In `smagic`, the pluralization operator (`", operators[1], 
+                  example = 'Example: x = c("Mark", "Sarah"); string_magic("{$enum, is ? x} away.")'
+                  .stop_hook("In `string_magic`, the pluralization operator (`", operators[1], 
                              "`) must contain operations. ", '\n', example)
                 }
 
@@ -850,9 +850,9 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
 
                   if(!ok){
                     pblm = paste0(operators[1], paste0(operators[-1], collapse = ", "))
-                    example = 'Example: x = c("Mark", "Sarah"); smagic("{$enum, is ? x} away.")'
+                    example = 'Example: x = c("Mark", "Sarah"); string_magic("{$enum, is ? x} away.")'
 
-                    .stop_hook("In `smagic`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
+                    .stop_hook("In `string_magic`, the pluralization (`", pblm, "`) did not find any value to pluralize on. ",
                             "Please provide one by adding it after a question mark.\n", example)
                   }
 
@@ -902,14 +902,14 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
         if(!is_xi_done){
           if(verbatim){
             if(grepl(BOX_OPEN, xi, fixed = TRUE)){
-              xi = smagic_internal(xi, .delim = .delim, .envir = .envir, .data = .data, 
+              xi = string_magic_internal(xi, .delim = .delim, .envir = .envir, .data = .data, 
                                    .vectorize = concat_nested, .check = .check, 
                                    .user_funs = .user_funs, .valid_operators = .valid_operators)
             }
           } else if(!verbatim){
             # evaluation
-            xi_call = check_set_smagic_parsing(xi, .check, .delim)
-            xi = check_set_smagic_eval(xi_call, .data, .envir, .check)
+            xi_call = check_set_string_magic_parsing(xi, .check, .delim)
+            xi = check_set_string_magic_eval(xi_call, .data, .envir, .check)
           }
         }
 
@@ -939,7 +939,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
             if(operators[1] == "&&"){
               # ERROR
               form = "{&& cond ; true}"
-              example = '\nEXAMPLE: x = c(5, 700); smagic("Value: {&&x > 20 ; > 20}")'
+              example = '\nEXAMPLE: x = c(5, 700); string_magic("Value: {&&x > 20 ; > 20}")'
 
               .stop_hook("The if-else operator `&&`, of the form ", form,
                       ", requires at least one variable to be evaluated in the condition.",
@@ -957,12 +957,12 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
             
             if(do_eval){
               xi_call = str2lang(vars[1])
-              xi_val = check_set_smagic_eval(xi_call, .data, .envir, .check)
+              xi_val = check_set_string_magic_eval(xi_call, .data, .envir, .check)
             }
             
             if(operators[1] == "&&" && length(xi) != length(xi_val)){
               form = "{&& cond ; true}"
-              example = 'EXAMPLE: x = c(5, 700); smagic("Value: {&&x > 20 ; > 20}")'
+              example = 'EXAMPLE: x = c(5, 700); string_magic("Value: {&&x > 20 ; > 20}")'
 
               stop_hook("The if-else operator `&&`, of the form {form} ",
                       "requires that the first variable used in the condition ",
@@ -1008,7 +1008,7 @@ smagic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .
                                               group_flag = group_flag,
                                               .delim = .delim, .user_funs = .user_funs, 
                                               .valid_operators = .valid_operators),
-                                get_smagic_context(), " See error below:",
+                                get_string_magic_context(), " See error below:",
                                 verbatim = TRUE, up = 1)
             } else {
               xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
@@ -1075,7 +1075,7 @@ sma_char2operator = function(x, .valid_operators){
   op = op_parsed$operator
 
   if(nchar(op) == 0){
-    .stop_hook("In `smagic`, if a quoted value is present, the operators must ",
+    .stop_hook("In `string_magic`, if a quoted value is present, the operators must ",
               "be of the form 'value'op, ",
               "with 'op' an operator. ",
               "\nPROBLEM: In `", escape_newline(x), "` the operator is missing.")
@@ -1110,17 +1110,17 @@ sma_char2operator = function(x, .valid_operators){
     op_parsed$argument = argument
 
     if(op %in% c("R", "r", "%", "k", "K", "paste", "get", "is")){
-      ex = c("R" = 'x = "She loves me."; smagic("{\'s\\b => d\'R ? x}")',
-            "r" = 'x = "Amour"; smagic("{\'ou => e\'r ? x}...")',
-            "replace" = 'x = "Amour"; smagic("{\'ou => e\'r ? x}...")',
-            "%" = 'smagic("pi is: {%.03f ? pi}")',
-            "k" = 'smagic("The first 8 letters of the longuest word are: {8k, q ! the longuest word}.")',
-            "shorten" = 'smagic("The first 8 letters of the longuest word are: {8 shorten, q ! the longuest word}.")',
-            "Shorten" = 'smagic("The first 8 letters of the longuest word are: {8 Shorten, q ! the longuest word}.")',
-            "K" = 'x = 5:9; smagic("The first 2 elements of `x` are: {2K, C ? x}.")',
-            "get" = 'x = row.names(mtcars) ; smagic("My fav. cars are {\'toy\'get.ignore, \'the \'app, enum ? x}.")',
-            "is" = 'x = c("Bob", "Pam") ; smagic("{\'am\'is ? x}")',
-            "paste" = 'x = "those, words"; smagic("Let\'s emphasize {S, \'**\'paste.both, c ? x}.")')
+      ex = c("R" = 'x = "She loves me."; string_magic("{\'s\\b => d\'R ? x}")',
+            "r" = 'x = "Amour"; string_magic("{\'ou => e\'r ? x}...")',
+            "replace" = 'x = "Amour"; string_magic("{\'ou => e\'r ? x}...")',
+            "%" = 'string_magic("pi is: {%.03f ? pi}")',
+            "k" = 'string_magic("The first 8 letters of the longuest word are: {8k, q ! the longuest word}.")',
+            "shorten" = 'string_magic("The first 8 letters of the longuest word are: {8 shorten, q ! the longuest word}.")',
+            "Shorten" = 'string_magic("The first 8 letters of the longuest word are: {8 Shorten, q ! the longuest word}.")',
+            "K" = 'x = 5:9; string_magic("The first 2 elements of `x` are: {2K, C ? x}.")',
+            "get" = 'x = row.names(mtcars) ; string_magic("My fav. cars are {\'toy\'get.ignore, \'the \'app, enum ? x}.")',
+            "is" = 'x = c("Bob", "Pam") ; string_magic("{\'am\'is ? x}")',
+            "paste" = 'x = "those, words"; string_magic("Let\'s emphasize {S, \'**\'paste.both, c ? x}.")')
 
       .stop_hook("The operator `", op, "` has no default value, you must provide values explicitly.", 
                  " EXAMPLE: ", ex)
@@ -1142,7 +1142,7 @@ sma_char2operator = function(x, .valid_operators){
     
     if(!op %in% .valid_operators){
       
-      context = get_smagic_context()
+      context = get_string_magic_context()
 
       sugg_txt = suggest_item(op, .valid_operators, newline = FALSE, info = "operator")
       
@@ -1151,8 +1151,8 @@ sma_char2operator = function(x, .valid_operators){
 
       msg = .sma("{context}",
               "\nPROBLEM: {bq?op} is not a valid operator. ", sugg_txt,
-              "\n\nINFO: Type smagic(.help = \"regex\") or smagic(.help = TRUE) for help.",
-              "\nEx. of valid stuff: smagic(\"Letters: \\{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
+              "\n\nINFO: Type string_magic(.help = \"regex\") or string_magic(.help = TRUE) for help.",
+              "\nEx. of valid stuff: string_magic(\"Letters: \\{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
 
       .stop_hook(msg)
     }
@@ -1430,13 +1430,13 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     # times/each ####
 
     if(!is_numeric_in_char(argument)){
-      msg = paste0("In `smagic`: the operator `", op, "` must have numeric arguments, `",
+      msg = paste0("In `string_magic`: the operator `", op, "` must have numeric arguments, `",
                    argument, "` is not numeric.")
       .stop_hook(msg)
     }
     
     if(length(argument) != 1){
-      msg = paste0("In `smagic`: the operator `", op, "` must have an argument of length 1.",
+      msg = paste0("In `string_magic`: the operator `", op, "` must have an argument of length 1.",
                    "\nPROBLEM: the argument is of length ", length(argument), ".")
       .stop_hook(msg)
     }
@@ -1574,7 +1574,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     nb = argument
     if(!is_numeric_in_char(nb)){
-      msg = paste0("In `smagic`: the operator `", op, "` must first contain a numeric argument. PROBLEM: `",
+      msg = paste0("In `string_magic`: the operator `", op, "` must first contain a numeric argument. PROBLEM: `",
                    argument, "` is not numeric.")
       .stop_hook(msg)
     }
@@ -1720,7 +1720,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       nb_extra = arg_split[2]
       
       if(!is.null(nb_extra) && !is_numeric_in_char(nb_extra)){
-        msg = paste0("In `smagic`: in the operator `", op, "` the argument can be of the form ",
+        msg = paste0("In `string_magic`: in the operator `", op, "` the argument can be of the form ",
                      "'n1|n2' with `n1` and `n2` numbers. ",
                      "\nPROBLEM: the second element `", nb_extra, "` is not numeric.")
         .stop_hook(msg)
@@ -1730,7 +1730,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     }
     
     if(!is_numeric_in_char(nb)){
-      msg = paste0("In `smagic`: the operator `", op, "` must have a numeric argument. ",
+      msg = paste0("In `string_magic`: the operator `", op, "` must have a numeric argument. ",
                    "\nPROBLEM: `", argument, "` is not numeric.")
       .stop_hook(msg)
     }    
@@ -1793,7 +1793,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
           if(nb < 0){
             
             if(!is.null(nb_extra)){
-              msg = paste0("In `smagic`: in the operator `", op, "` the argument can be of the form ",
+              msg = paste0("In `string_magic`: in the operator `", op, "` the argument can be of the form ",
                           "'n1|n2' with `n1` and `n2` positive numbers. ",
                           "\nPROBLEM: the first element `", nb, "` is negative.")
               .stop_hook(msg)
@@ -1810,7 +1810,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
             
             if(!is.null(nb_extra)){
               if(nb_extra < 0){
-                msg = paste0("In `smagic`: in the operator `", op, "` the argument can be of the form ",
+                msg = paste0("In `string_magic`: in the operator `", op, "` the argument can be of the form ",
                             "'n1|n2' with `n1` and `n2` positive numbers. ",
                             "\nPROBLEM: the second element `", nb_extra, "` is negative.")
                 .stop_hook(msg)
@@ -2588,7 +2588,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
           .data[["."]] = xi
         }
         
-        xi = smagic_internal(instruction, .delim = .delim, .envir = .envir, 
+        xi = string_magic_internal(instruction, .delim = .delim, .envir = .envir, 
                              .data = .data, .check = .check, 
                              .user_funs = .user_funs, .valid_operators = .valid_operators)
       }
@@ -2647,7 +2647,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     group_index = attr(res, "group_index")
 
   } else {
-    msg = paste0("In `smagic`: the operator `", op, "` is not recognized. ",
+    msg = paste0("In `string_magic`: the operator `", op, "` is not recognized. ",
                 "Internal error: this problem should have been spotted beforehand.")
     .stop_hook(msg)
   }
@@ -2680,7 +2680,7 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check,
     }
 
     if(is_pblm){
-      example = 'Example: x = 5; smagic("There {#is, N ? x} cat{#s} in the room.")'
+      example = 'Example: x = 5; string_magic("There {#is, N ? x} cat{#s} in the room.")'
 
       extra = ""
       reason = NULL
@@ -2783,7 +2783,7 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check,
          (op == "singular" && !IS_PLURAL && !(any(grepl("zero$", operators)) && IS_ZERO)) || 
          (op == "plural" && IS_PLURAL)){
           
-          value = smagic_internal(argument, .delim = .delim, .envir = .envir, .data = .data,
+          value = string_magic_internal(argument, .delim = .delim, .envir = .envir, .data = .data,
                                   .check = .check, .plural_value = xi, 
                                   .user_funs = .user_funs, .valid_operators = .valid_operators)
         if(value != ""){
@@ -2798,7 +2798,7 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check,
       # The verb is always last
 
       if(nchar(op) < 2){
-        example = 'Example: x = c("Charles", "Alice"); smagic("{$Is, enum ? x} crazy? Yes {$(he:they), are}.")'
+        example = 'Example: x = c("Charles", "Alice"); string_magic("{$Is, enum ? x} crazy? Yes {$(he:they), are}.")'
         .stop_hook("In pluralization, `", op, "` is expected to be a verb ",
                    "and verbs must always be composed of at least two letters.\n", example)
       }
@@ -2827,7 +2827,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
   if(!is.logical(xi)){
     form = "{&cond ; true ; false}"
     if(is_double_amp) form = "{&&cond ; true}"
-    example = '\nEXAMPLE: x = Sys.time(); smagic("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
+    example = '\nEXAMPLE: x = Sys.time(); string_magic("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
 
     .stop_hook("The if-else operator `", amp, "`, of the form ", form,
             ", accepts only logical values in the condition. ",
@@ -2838,7 +2838,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
   if(anyNA(xi)){
     form = "{&cond ; true ; false}"
     if(is_double_amp) form = "{&&cond ; true}"
-    example = '\nEXAMPLE: x = Sys.time(); smagic("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
+    example = '\nEXAMPLE: x = Sys.time(); string_magic("Hello {&format(x, \'%H\') < 20 ; Sun ; Moon}!")'
 
     .stop_hook("The if-else operator `", amp, "`, of the form ", form,
               ", accepts only non-NA logical values.\n",
@@ -2855,9 +2855,9 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
                "be filled with the value of the variable in the condition). ",
               "\nFIX: remove the false statement or use the if-else operator `&` (single ampersand).",
               "\nEXAMPLE: x = 1:5",
-              "           compare smagic(\"{x} = {&x %% 2;odd;even}\")",
-              "\n              to smagic(\"{x} = {&x %% 2;odd}\")",
-              "\n              to smagic(\"{x} = {&&x %% 2;odd}\")")
+              "           compare string_magic(\"{x} = {&x %% 2;odd;even}\")",
+              "\n              to string_magic(\"{x} = {&x %% 2;odd}\")",
+              "\n              to string_magic(\"{x} = {&&x %% 2;odd}\")")
   }
   
   if(is.na(false)) false = ""
@@ -2881,7 +2881,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
           .data[[".len"]] = length(xi_val)
         }
         
-        log_op_eval = smagic_internal(log_op, .delim = .delim, .envir = .envir, .data = .data,
+        log_op_eval = string_magic_internal(log_op, .delim = .delim, .envir = .envir, .data = .data,
                                       .check = .check, .plural_value = xi_val, 
                                       .user_funs = .user_funs, .valid_operators = .valid_operators)
         
@@ -2951,7 +2951,7 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
         .data[[".N"]] = length(xi_val)
         .data[[".len"]] = length(xi_val)
       }
-    res = smagic_internal(res, .delim = .delim, .envir = .envir, .data = .data,
+    res = string_magic_internal(res, .delim = .delim, .envir = .envir, .data = .data,
                            .check = .check, .plural_value = xi_val, 
                            .user_funs = .user_funs, .valid_operators = .valid_operators)
   }
@@ -2978,15 +2978,15 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
     last = gsub("_;;;_", ";", tail(op_all, 1))
     extra = ""
     if(last %in% c("!", "?")){
-      extra = smagic("The character {bq?last} is forbidden in operations.")
+      extra = string_magic("The character {bq?last} is forbidden in operations.")
     } else if(last != "_ERROR_"){
-      extra = smagic("Operations must be of the form `'arg'operator.option` but",
+      extra = string_magic("Operations must be of the form `'arg'operator.option` but",
                      " the value {bq?last} is ill formed.")
     } else {
-      extra = smagic("The value {bq?operations_string} could not be parsed.")
+      extra = string_magic("The value {bq?operations_string} could not be parsed.")
     }
       
-    msg = smagic("The operator {bq?op} expects a suite of valid operations (format: {bq?op_msg}). ",
+    msg = string_magic("The operator {bq?op} expects a suite of valid operations (format: {bq?op_msg}). ",
                "\nPROBLEM: the operations were not formatted correctly. ", extra)
     
     .stop_hook(msg)
@@ -3064,7 +3064,7 @@ setup_operations = function(){
                 "n", "N", "len", "Len", "width", "dtime",
                 "stopwords", "nth", "Nth", "ntimes", "Ntimes")
                 
-  options("smagic_operations_v1.0.0" = sort(OPERATORS))
-  options("smagic_operations_default" = sort(OPERATORS))
-  options("smagic_user_ops" = NULL)
+  options("string_magic_operations_v1.0.0" = sort(OPERATORS))
+  options("string_magic_operations_default" = sort(OPERATORS))
+  options("string_magic_user_ops" = NULL)
 }

@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------#
 # Author: Laurent R. Bergé
 # Created: 2023-06-02
-# ~: smagic help setup
+# ~: string_magic help setup
 #------------------------------------------------------------------------------#
   
 
@@ -9,14 +9,14 @@
 
 generate_help_extensive = function(){
   
-  if(!is_smagic_root()) return(NULL)
+  if(!is_string_magic_root()) return(NULL)
   
   if(!identical(parent.frame(), .GlobalEnv) && 
          !identical(deparse(sys.calls()[[1]]), "devtools::load_all()")){
     return(NULL)
   }
   
-  mtime_origin = floor(as.numeric(file.info("R/smagic_doc.R")["mtime"]))
+  mtime_origin = floor(as.numeric(file.info("R/string_magic_doc.R")["mtime"]))
   mtime_destination = readLines("R/AUTO_help.R", n = 1)
   mtime_destination = as.numeric(string_trim(mtime_destination, 2))
     
@@ -37,10 +37,10 @@ generate_help_extensive = function(){
   
   message("Help rewritten.")
   
-  smagic_txt = readLines("R/smagic_doc.R")
+  string_magic_txt = readLines("R/string_magic_doc.R")
   
-  i_smagic = string_which(smagic_txt, "^NULL")
-  doc = smagic_txt[1:(i_smagic - 1)]
+  i_string_magic = string_which(string_magic_txt, "^NULL")
+  doc = string_magic_txt[1:(i_string_magic - 1)]
   i_start_doc = max(string_which(doc, "!^#'")) + 1
   
   doc = doc[i_start_doc:length(doc)]
@@ -79,7 +79,7 @@ generate_help_extensive = function(){
               "setup_help_extensive = function(){",
               text_dp,
               "",
-              "  options(smagic_help_extensive = txt)",
+              "  options(string_magic_help_extensive = txt)",
               "}")
   
   writeLines(fun_txt, "./R/AUTO_help.R")
@@ -90,7 +90,7 @@ format_help = function(pattern = NULL, x = NULL){
   # pattern = "replace"
   
   if(is.null(x)){
-    x = getOption("smagic_help_extensive")
+    x = getOption("string_magic_help_extensive")
   }
   
   select = logical(length(x))
@@ -216,7 +216,7 @@ format_help = function(pattern = NULL, x = NULL){
     return(invisible(NULL))
   }
   
-  message(.sma("Welcome to smagic dynamic help:\n", 
+  message(.sma("Welcome to string_magic dynamic help:\n", 
                "enter = continue ; p = next paragraph ; n = next match ; N = next section ; q or Q = quit"))
   
   msg(text, 1, 5)
@@ -294,9 +294,9 @@ format_help = function(pattern = NULL, x = NULL){
 
 general_help = function(){
   
-  message("Welcome to smagic help. Please choose which sections to read.")
+  message("Welcome to string_magic help. Please choose which sections to read.")
   
-  x = getOption("smagic_help_extensive")
+  x = getOption("string_magic_help_extensive")
   
   #
   # showing the titles
@@ -463,7 +463,7 @@ general_help = function(){
   
 }
 
-smagic_dynamic_help = function(help){
+string_magic_dynamic_help = function(help){
   if(isTRUE(help)){
     general_help()
   } else {

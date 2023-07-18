@@ -119,16 +119,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_smagic_parser
-List cpp_smagic_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_section);
-RcppExport SEXP _stringmagic_cpp_smagic_parser(SEXP RstrSEXP, SEXP RdelimitersSEXP, SEXP only_last_parsed_sectionSEXP) {
+// cpp_string_magic_parser
+List cpp_string_magic_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_section);
+RcppExport SEXP _stringmagic_cpp_string_magic_parser(SEXP RstrSEXP, SEXP RdelimitersSEXP, SEXP only_last_parsed_sectionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
     Rcpp::traits::input_parameter< SEXP >::type Rdelimiters(RdelimitersSEXP);
     Rcpp::traits::input_parameter< bool >::type only_last_parsed_section(only_last_parsed_sectionSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_smagic_parser(Rstr, Rdelimiters, only_last_parsed_section));
+    rcpp_result_gen = Rcpp::wrap(cpp_string_magic_parser(Rstr, Rdelimiters, only_last_parsed_section));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -248,7 +248,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagic_cpp_group_rev_index", (DL_FUNC) &_stringmagic_cpp_group_rev_index, 1},
     {"_stringmagic_cpp_recreate_index", (DL_FUNC) &_stringmagic_cpp_recreate_index, 1},
     {"_stringmagic_cpp_parse_regex_pattern", (DL_FUNC) &_stringmagic_cpp_parse_regex_pattern, 3},
-    {"_stringmagic_cpp_smagic_parser", (DL_FUNC) &_stringmagic_cpp_smagic_parser, 3},
+    {"_stringmagic_cpp_string_magic_parser", (DL_FUNC) &_stringmagic_cpp_string_magic_parser, 3},
     {"_stringmagic_cpp_extract_quote_from_op", (DL_FUNC) &_stringmagic_cpp_extract_quote_from_op, 1},
     {"_stringmagic_cpp_parse_operator", (DL_FUNC) &_stringmagic_cpp_parse_operator, 1},
     {"_stringmagic_cpp_extract_pipe", (DL_FUNC) &_stringmagic_cpp_extract_pipe, 2},

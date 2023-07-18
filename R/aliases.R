@@ -5,38 +5,38 @@
 #------------------------------------------------------------------------------#
 
 
-#' Create `smagic` aliases with custom defaults
+#' Create `string_magic` aliases with custom defaults
 #' 
-#' Utility to easily create `smagic` aliases with custom default
+#' Utility to easily create `string_magic` aliases with custom default
 #' 
-#' @inheritParams smagic
+#' @inheritParams string_magic
 #' 
 #' @param .local_ops Named list or `NULL` (default). If provided, it must be a list 
 #' of the form `list(alias1 = ops1, alias2 = ops2)` where alias is the name of the newly defined 
-#' operator an `ops` is a character scalar representing the associated smagic operations.
+#' operator an `ops` is a character scalar representing the associated string_magic operations.
 #' Ex: `list(add = "' + 'collapse")` creates the operation `add` which collapses the 
 #' string with pluses. All operations created here are only available to the
 #' generated function.h
 #' 
 #' @details 
 #' 
-#' Use this function if you want to change `smagic` default values. For example,
+#' Use this function if you want to change `string_magic` default values. For example,
 #' if you want the interpolation to be done with "{{}}" (instead of `{}`) or if you want the 
 #' default separation to be the space (instead of the empty string). See the example.
 #' 
 #' 
-#' @inheritSection smagic_register_fun Writing a package using `smagic`
+#' @inheritSection string_magic_register_fun Writing a package using `string_magic`
 #' 
 #' @author 
 #' Laurent Berge
 #' 
-#' @family related to `smagic`
+#' @family related to `string_magic`
 #' @family tools with aliases
 #' 
 #' @examples 
 #' 
 #' # we create the function sma2 with different defaults
-#' sma2 = smagic_alias(.delim = ".[ ]", .sep = " ", .class = "smagic")
+#' sma2 = string_magic_alias(.delim = ".[ ]", .sep = " ", .class = "string_magic")
 #' 
 #' person = "john doe"
 #' sma2("Hello", ".[title ? person]")
@@ -46,7 +46,7 @@
 #' 
 #' 
 #' 
-smagic_alias = function(.sep = "", .vectorize = FALSE, 
+string_magic_alias = function(.sep = "", .vectorize = FALSE, 
                         .delim = c("{", "}"), .last = NULL, 
                         .post = NULL, .default = NULL, 
                         .invisible = FALSE, .local_ops = NULL,
@@ -69,7 +69,7 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
   
   # .local_ops
   if(!missnull(.local_ops)){
-    info = .sma("\nINFO: names of the list = alias. Content = smagic operations.",
+    info = .sma("\nINFO: names of the list = alias. Content = string_magic operations.",
                 "\nEx: .local_ops = list(\"plus\" = \"' + 'collapse\")")
     
     if(!is.list(.local_ops)){
@@ -112,7 +112,7 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
     for(i in seq_along(.local_ops)){
       alias = names(.local_ops)[[i]]
       content = .local_ops[[i]]
-      smagic_register_ops(content, alias, .namespace)
+      string_magic_register_ops(content, alias, .namespace)
     }    
   }
   
@@ -136,7 +136,7 @@ smagic_alias = function(.sep = "", .vectorize = FALSE,
                    .check = check, .class = class, .help = NULL, 
                    .namespace = namespace){
                     
-    smagic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
+    string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
             .delim = .delim, .last = .last, .post = .post, .default = .default,
             .invisible = .invisible, .collapse = .collapse,
             .check = .check, .class = .class, .help = .help,

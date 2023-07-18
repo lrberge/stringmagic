@@ -15,15 +15,15 @@
 #' it will be converted to a character vector.
 #' @param op Character **scalar**. Character scalar containing the comma separated values 
 #' of operations to perform to the vector. The 50+ operations are detailed in the help
-#' page of [smagic()].
+#' page of [string_magic()].
 #' @param pre_unik Logical scalar, default is `NULL`. Whether to first unique the vector 
 #' before applying the possibly costly string operations, and merging back the result. 
 #' For very large vectors with repeated values the time gained can be substantial. By 
 #' default, this is `TRUE` for vector of length 1M or more.
 #' 
 #' @details 
-#' This function is a simple wrapper around smagic. Formally, `string_ops(x, "op1, op2")`
-#' is equivalent to `smagic("{op1, op2 ? x}")`.
+#' This function is a simple wrapper around string_magic. Formally, `string_ops(x, "op1, op2")`
+#' is equivalent to `string_magic("{op1, op2 ? x}")`.
 #'
 #' @return
 #' In general it returns a character vector. It may be of a length different from the original
@@ -51,7 +51,7 @@
 #' # x: extracts the first pattern. The default pattern is "[[:alnum:]]+"
 #' #    which means an alpha-numeric word
 #' # unik: applies unique() to the vector
-#' # => see help in ?smagic for more details on the operations
+#' # => see help in ?string_magic for more details on the operations
 #' 
 #' 
 #' # let's get the 3 largest numbers appearing in the car models
@@ -106,14 +106,14 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
       namespace = "R_GlobalEnv"
     }
     
-    user_ops_all = getOption("smagic_user_ops")
+    user_ops_all = getOption("string_magic_user_ops")
     # beware the sneaky assignment!
     if(!is.null(user_ops_all) && !is.null(user_info <- user_ops_all[[namespace]])){
       .user_funs = user_info$funs
       .valid_operators = user_info$operators          
     } else {
       .user_funs = NULL
-      .valid_operators = getOption("smagic_operations_default")
+      .valid_operators = getOption("string_magic_operations_default")
     }
     
     group_flag = 1 * grepl("~", op, fixed = TRUE)
@@ -525,7 +525,7 @@ string_which = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE
 #' #
 #' 
 #' # you can combine the flags
-#' x = smagic("/One, two, one... Two!, Microphone, check")
+#' x = string_magic("/One, two, one... Two!, Microphone, check")
 #' # regular
 #' string_get(x, "one")
 #' # ignore case
@@ -567,7 +567,7 @@ string_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   
   # data caching in interactive mode
   is_caching = FALSE
-  is_forced_caching = isTRUE(getOption("smagic_string_get_forced_caching"))
+  is_forced_caching = isTRUE(getOption("string_magic_string_get_forced_caching"))
   if(is_forced_caching || (interactive() && identical(parent.frame(), .GlobalEnv))){
     mc = match.call()
     if(is.character(mc$x) && !is.null(getOption("stringmagic_string_get_cache"))){
@@ -758,7 +758,7 @@ string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
         var_pblm = setdiff(vars, names(data))
         if(length(var_pblm) > 0){
           stop("The evaluation of the left side of `x` raised an error:\n",
-               smagic("PROBLEM: the variable{$s, enum.bq, is ? var_pblm} not in the data set (`"),
+               string_magic("PROBLEM: the variable{$s, enum.bq, is ? var_pblm} not in the data set (`"),
                deparse_short(mc$data), "`).")
         }
       }
@@ -788,14 +788,14 @@ string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
       if(inherits(val, "try-error") || !is.atomic(val)){
         vars = all.vars(term)
 
-        intro = smagic("The evaluation of the right side of `x` raised an error.\n",
+        intro = string_magic("The evaluation of the right side of `x` raised an error.\n",
                     "VALUE TO EVAL: {bq ? id_name}\n")
 
         if(!is.null(names(data))){
           var_pblm = setdiff(vars, names(data))
           if(length(var_pblm) > 0){
             stop(intro,
-                 smagic("PROBLEM: the variable{$s, enum.bq, is ? var_pblm} not in the data set (`"),
+                 string_magic("PROBLEM: the variable{$s, enum.bq, is ? var_pblm} not in the data set (`"),
                  deparse_short(mc$data), "`).")
           }
         }
@@ -827,7 +827,7 @@ string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
       n_id = unique(lengths(id))
       if(length(n_id) != 1 || max(n_id) != n){
         extra = ""
-        if(max(n_id) != n) extra = smagic("\nPROBELM: len x: {#n ? n} len id: {#n ? max(n_id)}.")
+        if(max(n_id) != n) extra = string_magic("\nPROBELM: len x: {#n ? n} len id: {#n ? max(n_id)}.")
         stop("The argument `id` must be either a vector of identifiers or a data.frame ",
              "of identifiers of the same length as `x`.", extra)
       }
@@ -1139,12 +1139,12 @@ paste_conditional = function(x, id, sep = " ", names = TRUE, sort = TRUE){
 #' the first match found. Ex: `string_clean("abc", "[[:alpha:]] => _", single = TRUE)` leads 
 #' to `"_bc"`, while `string_clean("abc", "[[:alpha:]] => _")` leads to `"___"`.
 #' @param namespace Character scalar or `NULL` (default). **Only useful for package developers.**
-#' As a regular end-user you shouldn't care! If your package uses `smagic`, you should care. 
-#' It is useful **only** if your package uses 'custom' `smagic` operations, set with 
-#' [smagic_register_fun()] or [smagic_register_ops()].
+#' As a regular end-user you shouldn't care! If your package uses `string_magic`, you should care. 
+#' It is useful **only** if your package uses 'custom' `string_magic` operations, set with 
+#' [string_magic_register_fun()] or [string_magic_register_ops()].
 #' 
 #' If so pass the name of your package in this argument so that your function can access 
-#' the new `smagic` operations defined within your package.
+#' the new `string_magic` operations defined within your package.
 #' @param pattern A character scalar containing a regular expression pattern to be replaced.
 #' You can write the replacement directly in the string after a pipe: ' => ' (see arg. `pipe` to change this). 
 #' By default the replacement is the empty string (so "pat1" *removes* the pattern).
@@ -1187,10 +1187,10 @@ paste_conditional = function(x, id, sep = " ", names = TRUE, sort = TRUE){
 #' 
 #' Use [string_vec()] to create simple string vectors.
 #' 
-#' String interpolation combined with operation chaining: [smagic()]. You can change `smagic`
-#' default values with [smagic_alias()] and add custom operations with [smagic_register_fun()].
+#' String interpolation combined with operation chaining: [string_magic()]. You can change `string_magic`
+#' default values with [string_magic_alias()] and add custom operations with [string_magic_register_fun()].
 #' 
-#' Display messages while benefiting from `smagic` interpolation with [cat_magic()] and [message_magic()].
+#' Display messages while benefiting from `string_magic` interpolation with [cat_magic()] and [message_magic()].
 #'
 #' @examples
 #'
@@ -1443,15 +1443,15 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' or 2) write a character string that will be broken with respect to commas 
 #' (`"hi, there"` becomes `c("hi", "there")`), or 3) interpolate variables in 
 #' character strings (`"x{1:2}"` becomes `c("x1", "x2")`) with full access to 
-#' [smagic()] operations, or any combination of the three.
+#' [string_magic()] operations, or any combination of the three.
 #' 
-#' @inheritParams smagic
+#' @inheritParams string_magic
 #' @inheritParams string_clean
 #' 
 #' @param ... Character vectors that will be vectorized. If commas are present in the 
 #' character vector, it will be split with respect to commas and following blanks. 
 #' The vectors can contain any interpolation in the form `"{var}"` and 
-#' any [smagic()] operation can be applied. To change the delimiters for interpolation,
+#' any [string_magic()] operation can be applied. To change the delimiters for interpolation,
 #' see `.delim`. Named arguments are used in priority for variable substitution,
 #' otherwise the value of the variables to be interpolated are fetched in the calling environment 
 #' (see argument `.envir`).
@@ -1479,7 +1479,7 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' [base::paste()] is applied to the resulting vector with `collapse = .collapse`.
 #' 
 #' If so, pass the name of your package in this argument so that your function can access 
-#' the new `smagic` operations defined within your package.
+#' the new `string_magic` operations defined within your package.
 #' @param .cmat Logical scalar (default is `FALSE`), integer or complex with integer values.
 #' If `TRUE`, we try to coerce the result into a **character** matrix. The number of rows and columns
 #' is deduced from the look of the arguments. An integer indicates the number of rows.
@@ -1642,7 +1642,7 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
         
         for(j in 1:n_di_xpd){
           if(is_open[j]){
-            all_elements[[j]] = smagic_internal(di_expanded[j], .delim = .delim, 
+            all_elements[[j]] = string_magic_internal(di_expanded[j], .delim = .delim, 
                                                   .envir = .envir, .is_root = TRUE,
                                                   .data = .data, .check = TRUE, 
                                                   .namespace = .namespace)  
@@ -1971,19 +1971,19 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
       p = info_pattern$patterns[i]
       p_escaped = gsub("(\\{( *\\d| *,))", "\\\\\\1", p)
       # we try the magic evaluation
-      p_new = try(smagic(p_escaped, .envir = envir), silent = TRUE)
+      p_new = try(string_magic(p_escaped, .envir = envir), silent = TRUE)
       if(isError(p_new)){
         stop_hook("CONTEXT: concerns the pattern {bq?pattern}",
                   "{&len(info_pattern)>1;\n         when evaluating {bq?p}}",
-                  "\nINFO: The `magic` flag expands the pattern with `smagic`.",
-                  "\nPROBLEM: the evaluation with `smagic` failed, see error below:",
+                  "\nINFO: The `magic` flag expands the pattern with `string_magic`.",
+                  "\nPROBLEM: the evaluation with `string_magic` failed, see error below:",
                   "\n{'^[^\n]+\n'r?p_new}")
       }
       
       if(length(p_new) != 1){
         stop_hook("CONTEXT: concerns the pattern {bq?pattern}",
                   "{&len(info_pattern)>1;\n         when evaluating {bq?p}}",
-                  "\nINFO: The `magic` flag expands the pattern with `smagic`. It must return a vector of length 1.",
+                  "\nINFO: The `magic` flag expands the pattern with `string_magic`. It must return a vector of length 1.",
                   "\nPROBLEM: the vector returned is of length {len?p_new}.")
       }
       

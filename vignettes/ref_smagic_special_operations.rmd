@@ -1,5 +1,5 @@
 ---
-title: "`smagic`'s sepcial operations"
+title: "`string_magic`'s sepcial operations"
 author: "Laurent R. Berge"
 date: "`r Sys.Date()`"
 output:
@@ -16,29 +16,29 @@ output:
     toc: yes
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{ref_smagic_special_ops}
+  %\VignetteIndexEntry{ref_string_magic_special_ops}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-This vingette presents advanced operations included in `smagic`. There are four parts:
+This vingette presents advanced operations included in `string_magic`. There are four parts:
 
 - [group-wise operations](#sec_group_wise)
 - [conditional operations](#sec_conditional)
 - [compact if-else operator](#sec_ifelse)
 - [pluralization](#sec_pluralization)
 
-By default the function `smagic` returns a plain character vector. This may not render
-nicely in this vignette. Hence we create an alias to `smagic` which applies `base::cat`
+By default the function `string_magic` returns a plain character vector. This may not render
+nicely in this vignette. Hence we create an alias to `string_magic` which applies `base::cat`
 just before leaving the function.
 ```{r}
 library(stringmagic)
-smagic = smagic_alias(.post = base::cat)
+string_magic = string_magic_alias(.post = base::cat)
 ```
 
 # Group-wise operations {#sec_group_wise}
 
-In `smagic`, the operations `split` and `extract` keep a memory of the strings 
+In `string_magic`, the operations `split` and `extract` keep a memory of the strings 
 that were split (i.e. they provide multiple results for each initial string element). 
 
 Use the tilde operator, of the form `~(op1, op2)`, to apply operations
@@ -46,7 +46,7 @@ group-wise, to each of the split strings. Better with an example.
 
 ```{r}
 x = c("Oreste, Hermione", "Hermione, Pyrrhus", "Pyrrhus, Andromaque")
-smagic("Troubles ahead: {', 'split, ~(' loves 'c), C ? x}.")
+string_magic("Troubles ahead: {', 'split, ~(' loves 'c), C ? x}.")
 ```
 
 Almost all operations can be applied group-wise (although only operations changing the order or 
@@ -74,7 +74,7 @@ Ex.1: Let's take a sentence, delete words of less than 4 characters, and trim
 words of 7+ characters. 
 ```{r}
 x = "Songe Céphise à cette nuit cruelle qui fut pour tout un peuple une nuit éternelle"
-smagic("{' 'split, if(.nchar<=4 ; nuke ; '7|..'k), c ? x}")
+string_magic("{' 'split, if(.nchar<=4 ; nuke ; '7|..'k), c ? x}")
 ```
 
 Let's break it down. First the sentence is split w.r.t. spaces (command `' 'split`), leading to a vector
@@ -97,18 +97,18 @@ Ex.2: we write the sum of several elements, if the vector is longer than 4, we r
 remaining elements with an ellispsis.
 ```{r}
 # same expression for two values of x give different results
-x_short = smagic("x{1:4}")
+x_short = string_magic("x{1:4}")
 # the false statement is missing: it means that nothing is done is .N<=4
-smagic("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x_short}")
+string_magic("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x_short}")
 
-x_long = smagic("x{1:10}")
-smagic("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x_long}")
+x_long = string_magic("x{1:10}")
+string_magic("y = {if(.N>4 ; 3 first, '...'insert.right), ' + 'c ? x_long}")
 ```
 
 In this example, the operations applied are:
 
-- short vector: `smagic("y = {' + 'c ? x_short}")`
-- long vector: `smagic("y = {3 first, '...'insert.right, ' + 'c ? x_long}")`
+- short vector: `string_magic("y = {' + 'c ? x_short}")`
+- long vector: `string_magic("y = {3 first, '...'insert.right, ' + 'c ? x_long}")`
 
 ## *Verbatim if* statement
 
@@ -125,7 +125,7 @@ Ex.3: we want to replace all values lower than 10 by the the string "<10", and t
 create an enumeration.
 ```{r}
 pval = c(1e-20, 0.15, 0.5)
-smagic("pvalues: {vif(.<1e-16 ; <1e-16 ; {%05f?.}), fill.right ? pval}", .collapse = "\n")
+string_magic("pvalues: {vif(.<1e-16 ; <1e-16 ; {%05f?.}), fill.right ? pval}", .collapse = "\n")
 ```
 
 In this example, the condition is of the same length as the vector, so an element-wise 
@@ -138,8 +138,8 @@ And `sprintf` formatting is applied (`%05f`). After this, we right align the res
 Conditions of length 1 apply the replacement 
 to the full vector. Knowing this, let's redo Ex.2 differently:
 ```{r}
-x = smagic("x{1:10}")
-smagic("y = {vif(.N>4 ; {first?x} + ... + {last?x} ; {' + 'c?x}) ? x}")
+x = string_magic("x{1:10}")
+string_magic("y = {vif(.N>4 ; {first?x} + ... + {last?x} ; {' + 'c?x}) ? x}")
 ```
 
 Let's break it down. If the length of the vector is greater than 4 (here it's 10), then
@@ -174,13 +174,13 @@ lower than 10 then we write the message `"x is short"`, otherwise we write `"x i
 and insert `"very"` depending on the number of digits.
 ```{r}
 x = 1:5
-smagic("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
+string_magic("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
 
 x = 1:50
-smagic("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
+string_magic("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
 
 x = 1:5000
-smagic("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
+string_magic("x is {&len(x)<10 ; short ; {`log10(.N)-1`times, ''c ! very }long}")
 ```
 
 If a condition leads to a result of length 1, the full string is replaced by the verbatim 
@@ -201,7 +201,7 @@ Ex.2: illustration of element-wise replacements.
 ```{r}
 x = 1:4
 y = letters[1:4]
-smagic("{&x %% 2 ; odd ; {y}}")
+string_magic("{&x %% 2 ; odd ; {y}}")
 ```
 
 In that example, when x is odd, it is replaced with `"odd"`, and when even it is
@@ -216,10 +216,10 @@ default for `verb_false` is the variable used in the condition itself. So the sy
 Ex.3: let's write the integer `i` in letters when equal to 3 only.
 ```{r}
 i = 3 
-smagic("i = {&&i == 3 ; three}")
+string_magic("i = {&&i == 3 ; three}")
 
 i = 5
-smagic("i = {&&i == 3 ; three}")
+string_magic("i = {&&i == 3 ; three}")
 ```
 
 When the condition is of length 1: the full vector is replaced. When the condition is 
@@ -241,10 +241,10 @@ use as first character:
 Ex.1: we add an ending 's' based on a number.
 ```{r}
 x = 5
-smagic("I bought {N?x} book{#s}.")
+string_magic("I bought {N?x} book{#s}.")
 
 x = 1
-smagic("I bought {N?x} book{#s}.")
+string_magic("I bought {N?x} book{#s}.")
 ```
 
 The syntax is `{#plural_ops ? variable}` or `{#plural_ops}` where `plural_ops` are
@@ -262,10 +262,10 @@ at all, an error is thrown.
 Ex.2: we add an ending 's' and conjugate the verb 'be' based on the length of a vector.
 ```{r}
 x = c("J.", "M.")
-smagic("My BFF{$s, are} {enum?x}!")
+string_magic("My BFF{$s, are} {enum?x}!")
 
 x = "J."
-smagic("My BFF{$s, are} {enum?x}!")
+string_magic("My BFF{$s, are} {enum?x}!")
 ```
 
 As you can notice in Ex.2, you can chain operations (here `'s'` and `'are'`). 
@@ -283,16 +283,16 @@ treats a 0-length or a 0-value as plural.
 
 ```{r}
 nfiles = 1
-smagic("We've found {#n.no ? nfiles} file{#s}.")
+string_magic("We've found {#n.no ? nfiles} file{#s}.")
 
 nfiles = 0
-smagic("We've found {#n.no ? nfiles} file{#s}.")
+string_magic("We've found {#n.no ? nfiles} file{#s}.")
 
 nfiles = 0
-smagic("We've found {#n.no ? nfiles} file{#s.0}.")
+string_magic("We've found {#n.no ? nfiles} file{#s.0}.")
 
 nfiles = 4
-smagic("We've found {#n.no ? nfiles} file{#s.0}.")
+string_magic("We've found {#n.no ? nfiles} file{#s.0}.")
 ```
 
 ### y or ies
@@ -302,13 +302,13 @@ treats a 0-length or a 0-value as plural.
 
 ```{r}
 ndir = 1
-smagic("We've found {ndir} director{#y}.")
+string_magic("We've found {ndir} director{#y}.")
 
 ndir = 5
-smagic("We've found {ndir} director{#y}.")
+string_magic("We've found {ndir} director{#y}.")
 
 ndir = 1
-smagic("We've found {ndir} director{#ies}.")
+string_magic("We've found {ndir} director{#ies}.")
 ```
 
 ### enum
@@ -317,10 +317,10 @@ Enumerates the elements (see help for the [regular operation `enum`](LINK)).
 
 ```{r}
 fruits = c("apples", "oranges")
-smagic("The fruit{$s ? fruits} I love {$are, enum}.")
+string_magic("The fruit{$s ? fruits} I love {$are, enum}.")
 
 fruits = "apples"
-smagic("The fruit{$s ? fruits} I love {$are, enum}.")
+string_magic("The fruit{$s ? fruits} I love {$are, enum}.")
 ```
 
 ### n, N, len, Len
@@ -334,20 +334,20 @@ pass a free-form argument to be used in lieu of 0 values.
 
 ```{r}
 nfiles = 5
-smagic("{#N.upper.No ? nfiles} file{#s, are} compromised.")
+string_magic("{#N.upper.No ? nfiles} file{#s, are} compromised.")
 
 nfiles = 1
-smagic("{#N.upper.No ? nfiles} file{#s, are} compromised.")
+string_magic("{#N.upper.No ? nfiles} file{#s, are} compromised.")
 
 nfiles = 0
-smagic("{#N.upper.No ? nfiles} file{#s, are} compromised.")
+string_magic("{#N.upper.No ? nfiles} file{#s, are} compromised.")
 
 # Using free-form arguments
 nfiles = 5
-smagic("{#'Absolutely no'N.upper ? nfiles} file{#s, are} compromised.")
+string_magic("{#'Absolutely no'N.upper ? nfiles} file{#s, are} compromised.")
 
 nfiles = 0
-smagic("{#'Absolutely no'N.upper ? nfiles} file{#s, are} compromised.")
+string_magic("{#'Absolutely no'N.upper ? nfiles} file{#s, are} compromised.")
 ```
 
 ### nth, ntimes
@@ -357,7 +357,7 @@ to write the numbers in letters (uppercase version of the operator does the same
 
 ```{r}
 n = 2
-smagic("Writing the same sentence {#Ntimes ? n} is unnecessary.")
+string_magic("Writing the same sentence {#Ntimes ? n} is unnecessary.")
 ```
 
 ### is, or any verb
@@ -373,13 +373,13 @@ conditional statements described in the next section.
 Ex.3: multiple verbs and conditional statements.
 ```{r}
 pple = c("Francis", "Henry")
-smagic("{$enum, is, (a;) ? pple} tall guy{$s}.",
+string_magic("{$enum, is, (a;) ? pple} tall guy{$s}.",
         "{$(He;They), like} to eat donuts.",
         "When happy, at the pub {$(he;they), goes}!",
         "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", .sep = "\n")
 
 pple = "Francis"
-smagic("{$enum, is, (a;) ? pple} tall guy{$s}.",
+string_magic("{$enum, is, (a;) ? pple} tall guy{$s}.",
         "{$(He;They), like} to eat donuts.",
         "When happy, at the pub {$(he;they), goes}!",
         "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", .sep = "\n")
@@ -400,13 +400,13 @@ you need not refer explicitly to the variable for pluralization interpolations.
 
 ```{r}
 x = 0
-smagic("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
+string_magic("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
 
 x = 1
-smagic("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
+string_magic("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
 
 x = 3
-smagic("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
+string_magic("{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}")
 ```
 
 

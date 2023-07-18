@@ -357,11 +357,11 @@ format_difftime = function(x, options){
       n_hour = xi %/% 3600
       rest_s = floor(xi %% 3600)
       n_min = rest_s %/% 60
-      res[i] = smagic("{n ? n_hour} hour{#s} {%02i ? n_min} min")
+      res[i] = string_magic("{n ? n_hour} hour{#s} {%02i ? n_min} min")
     } else if(xi > 60){
       n_min = xi %/% 60
       n_sec = floor(xi %% 60)
-      res[i] = smagic("{n ? n_min} min {%02i ? n_sec} sec")
+      res[i] = string_magic("{n ? n_min} min {%02i ? n_sec} sec")
     } else if(xi > 0.9){
       res[i] = paste0(fsignif(xi, 2, 1), "s")
     } else if(xi > 1e-3){
@@ -991,8 +991,8 @@ renvir_get = function(key){
   return(value)
 }
 
-is_smagic_root = function(){
-  isTRUE(renvir_get("smagic_ROOT"))
+is_string_magic_root = function(){
+  isTRUE(renvir_get("string_magic_ROOT"))
 }
 
 is_box_open = function(x, .delim){
@@ -1025,7 +1025,7 @@ extract_pipe = function(x, op, double = FALSE, numeric = FALSE, data = NULL, mbt
     if(!mbt){
       return(res)
     } else {
-      stop_hook("In `smagic`, the operator {bq?op} must take an argument which has no default value.",
+      stop_hook("In `string_magic`, the operator {bq?op} must take an argument which has no default value.",
                 "\nPROBLEM: no argument is given. Please provide one.")
     }
   }
@@ -1035,7 +1035,7 @@ extract_pipe = function(x, op, double = FALSE, numeric = FALSE, data = NULL, mbt
     # we evaluate
     new_value = try(eval(str2lang(res$value), data), silent = TRUE)
     if(inherits(new_value, "try-error")){
-      stop_hook("In `smagic`, the operator {bq?op} must take a numeric argument.",
+      stop_hook("In `string_magic`, the operator {bq?op} must take a numeric argument.",
                 "\nPROBLEM: {bq?res$value} could not be evaluated. See problem below:",
                 "\n{new_value}")
     }
@@ -1044,7 +1044,7 @@ extract_pipe = function(x, op, double = FALSE, numeric = FALSE, data = NULL, mbt
   
   if(numeric){
     if(!is.numeric(res$value) && !is_numeric_in_char(res$value)){
-      stop_hook("In `smagic`, the operator {bq?op} must take a numeric argument.",
+      stop_hook("In `string_magic`, the operator {bq?op} must take a numeric argument.",
                 "\nPROBLEM: {bq?value_raw} is not numeric.")
     }
     
@@ -1069,13 +1069,13 @@ extract_first = function(x, pattern, fixed = FALSE){
 }
 
 tag_gen = function(){
-  id = getOption("smagic_tag")
+  id = getOption("string_magic_tag")
   
   if(is.null(id)){
     id = 1
   }
     
-  options(smagic_tag = id + 1)
+  options(string_magic_tag = id + 1)
   
   items = letters
   n_shifts = id %% 26

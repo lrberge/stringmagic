@@ -1,5 +1,5 @@
 ---
-title: "`smagic`: Magical string interpolation"
+title: "`string_magic`: Magical string interpolation"
 author: "Laurent R. Berge"
 date: "`r Sys.Date()`"
 output:
@@ -16,10 +16,10 @@ output:
     toc: yes
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{smagic_walkthrough}
+  %\VignetteIndexEntry{string_magic_walkthrough}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
---TEMPORAR-
+---
 
 String interpolation is a common feature of many programming languages and is
 used to insert the value of variables directly into character strings.
@@ -32,7 +32,7 @@ In general, you can't. Well, actually you can but have to use the language's own
 And it can be surprising how performing a few basic operations can quickly amount to lot of typing.
 
 The aim of the package `stringmagic` is to simplify and empower string interpolation. 
-With the `smagic` function, you can apply 50+ basic operations to interpolated variables, 
+With the `string_magic` function, you can apply 50+ basic operations to interpolated variables, 
 interpolations can be nested, there is advanced support for pluralization, and much more.
 
 ```{r setup, include=FALSE}
@@ -48,11 +48,11 @@ knitr::opts_chunk$set(
 library(stringmagic)
 ```
 
-Before moving on, we set the global option `.smagic.class` to `TRUE` such that 
-the character vectors produced by `smagic` are displayed nicely in this vignette.
+Before moving on, we set the global option `.string_magic.class` to `TRUE` such that 
+the character vectors produced by `string_magic` are displayed nicely in this vignette.
 ```{r}
 library(stringmagic)
-smagic = smagic_alias(.class = "smagic")
+string_magic = string_magic_alias(.class = "string_magic")
 ```
 
 # Motivating examples and advice for reading
@@ -61,17 +61,17 @@ Here's a few things the algorithm can do (don't worry if it looks like gibberish
 discovering it: it will make sense later!):
 ```{r}
 name = "john doe"
-smagic("Hi {title ? name}.")
+string_magic("Hi {title ? name}.")
 
 cars = row.names(mtcars)
 print(cars)
-smagic("I like cars starting with C like {'i/^c'get, x, unik, enum.or ? cars}.")
+string_magic("I like cars starting with C like {'i/^c'get, x, unik, enum.or ? cars}.")
 
 friends = c("Piglet", "Eeyore")
-smagic("My best friend{$s, are, enum ? friends}. Who am I?")
+string_magic("My best friend{$s, are, enum ? friends}. Who am I?")
 
 friends = "Mercutio"
-smagic("My best friend{$s, are, enum ? friends}. Who am I?")
+string_magic("My best friend{$s, are, enum ? friends}. Who am I?")
 ```
 
 If you discover this package, since it's a lot of content, here's some advice:
@@ -87,7 +87,7 @@ And you should be good to go for some basic usage.
 the error messages will remind you the available operations. 
 You can also use the argument `help = TRUE` to get 
 interactive help (use `help = "regex"` to perform a regex search on the full doc!).
-Finally, `smagic("--help")` gives you a compact help.
+Finally, `string_magic("--help")` gives you a compact help.
 
 Once you're a bit comfortable, here are extra sections of interest:
 
@@ -104,13 +104,13 @@ To interpolate a variable, say `x`, simply use `{x}`.
 
 ```{r hello-world}
 x = "world"
-smagic("hello {x}")
+string_magic("hello {x}")
 ```
 
 As we can see, anything in curly brackets gets interpolated. This behavior is similar
 to the well known function [glue](https://glue.tidyverse.org/) from the tidyverse.
 
-Now let's come to what `smagic` really brings to the table.
+Now let's come to what `string_magic` really brings to the table.
 
 # Interpolation with operations: Principle {#sec_interpol}
 
@@ -120,7 +120,7 @@ This means upper casing all letters of the interpolated variable and adding a sp
 each of them. Let's do it:
 
 ```{r hw-ops}
-smagic("hello {upper, ''s, c ? x}")
+string_magic("hello {upper, ''s, c ? x}")
 ```
 
 Now let's explain what happened. Within the `{}` *box*, we first write a set of 
@@ -141,23 +141,23 @@ with a dot followed by the option name. Formally: `op.option1.option2`, etc. Exa
 
 ```{r ex-ops}
 x = "hi there. what's up? fine."
-smagic("He said: {upper.sentence, Q ? x}")
+string_magic("He said: {upper.sentence, Q ? x}")
 ```
 
-Both operators and options are partially matched. So `smagic("He said: {up.s, Q ? x}")` would 
+Both operators and options are partially matched. So `string_magic("He said: {up.s, Q ? x}")` would 
 also work. You have more details on the operations syntax in the [syntax section](#sec_syntax). 
 
 # Verbatim interpolation and nesting: Principle {#sec_verbatim}
 
 Instead of interpolating a variable, say `x`, with `{x}`, you can use an exclamation 
-mark to trigger verbatim evaluation. For example `smagic("hello {!x}")` would lead to "hello x". 
+mark to trigger verbatim evaluation. For example `string_magic("hello {!x}")` would lead to "hello x". 
 (To use `!` as a regular logical operator, see the [section on special cases](#sec_special_cases).)
 Please hold on a little bit to see the point.
 
 Verbatim evaluation is a powerful way to apply operations to plain text. For example:
 
 ```{r}
-smagic("hello {upper, ''s, c ! world}")
+string_magic("hello {upper, ''s, c ! world}")
 ```
 
 Before moving on, a necessary detail. The spaces surrounding the exclamation mark are non necessary,
@@ -166,7 +166,7 @@ expression only begins after the space. This is illustrated below
 ```{r}
 # The decorative space in verbatim mode
 #                  v                      => adds a space before 'hi'
-smagic("{upper, Q! hi}", 
+string_magic("{upper, Q! hi}", 
         #         v v                     => no space added (ie decorative space)
         "{upper, Q ! hi}", 
         #         v vv                    => adds a space before 'hi'
@@ -177,7 +177,7 @@ smagic("{upper, Q! hi}",
 ### Nesting
 
 The main advantage, and real power, of verbatim evaluations is *nesting*. Anything in a verbatim 
-expression becomes evaluated with the function `smagic`.
+expression becomes evaluated with the function `string_magic`.
 This means that any *box* will be evaluated as previously described. 
 
 Let's give an example. You want to write the expression of a polynomial of order `n`: `a + bx + cx^2 + etc`.
@@ -185,12 +185,12 @@ You can do that with nesting:
 
 ```{r}
 n = 2
-smagic("poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}")
+string_magic("poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}")
 ```
 
 How does it work? The verbatim expression (the one following the exclamation mark),
-here `"{letters[1 + 0:n]}x^{0:n}"`, is evaluated with `smagic`.
-`smagic("{letters[1 + 0:n]}x^{0:n}")` leads to the vector `c("ax^0", "bx^1", "cx^2")`.
+here `"{letters[1 + 0:n]}x^{0:n}"`, is evaluated with `string_magic`.
+`string_magic("{letters[1 + 0:n]}x^{0:n}")` leads to the vector `c("ax^0", "bx^1", "cx^2")`.
 
 The operation `' + 'c` then concatenates (or collapses) that vector with `' + '`.
 This value is then appended to the previous string.
@@ -200,7 +200,7 @@ by the empty string. Let's do it:
 
 ```{r}
 n = 4
-smagic("poly({n}): {' + 'c, 'f/x^0, ^1'clean ! {letters[1 + 0:n]}x^{0:n}}")
+string_magic("poly({n}): {' + 'c, 'f/x^0, ^1'clean ! {letters[1 + 0:n]}x^{0:n}}")
 ```
 
 We obtain the desired result. 
@@ -215,7 +215,7 @@ Operations can have arguments, and operations can also have options. The general
 syntax, with argument and options, is:
 
 ```{r, eval=FALSE}
-smagic("{'arg1'op1.optionA.optionB, arg2 op2.optionC, 
+string_magic("{'arg1'op1.optionA.optionB, arg2 op2.optionC, 
           `arg3`op3, 51op4, op5 ? x}")
 ```
 
@@ -238,25 +238,25 @@ for example, that command `"upper.first"` is equivalent to `"up.f"`.
 Here are examples for each types of arguments:
 ```{r}
 # quoted argument
-smagic("y = {'x'paste, ' + 'c ? 1:2}")
+string_magic("y = {'x'paste, ' + 'c ? 1:2}")
 
 # verbatim argument, space separated
-smagic("y = {x paste, ' + 'c ? 1:2}")
+string_magic("y = {x paste, ' + 'c ? 1:2}")
 
 # evaluated argument
 x = "z"
-smagic("y = {`x`paste, ' + 'c ? 1:2}")
+string_magic("y = {`x`paste, ' + 'c ? 1:2}")
 
 # digits accolated to the operator
-smagic("y = {0paste, ' + 'c ? 1:2}")
+string_magic("y = {0paste, ' + 'c ? 1:2}")
 
 # options `bq` (back quote) and `a` passed to operator `enum`
-smagic("y = the sum of {'x'paste, enum.bq.a ? 1:2}")
+string_magic("y = the sum of {'x'paste, enum.bq.a ? 1:2}")
 ```
 
 A few operators have two arguments. Pass multiple arguments using a pipe as follows:
 ```{r, eval = FALSE}
-smagic("{'arg1|arg2'op, 'arg1||arg2'op ? x}")
+string_magic("{'arg1|arg2'op, 'arg1||arg2'op ? x}")
 ```
 You can escape the meaning of the pipe as a separator with a double backslash. 
 Some operators accept a double pipe which modifies the behavior of the second argument.
@@ -264,66 +264,13 @@ Here is an example:
 ```{r}
 x = "Quels sont ces serpents qui sifflent sur vos têtes?"
 # let's shorten this
-smagic("Oreste: {s, '4|..'k, c, Q ? x}")
+string_magic("Oreste: {s, '4|..'k, c, Q ? x}")
 
 rome = c("Rome qui t'a vu naître et que ton coeur adore",
          "Rome enfin, que je hais parce qu'elle t'honore!")
 # the double pipe triggers a different behavior in this operator
-smagic("Camille: {s, '4||..'k, c, Q ? rome}")
+string_magic("Camille: {s, '4||..'k, c, Q ? rome}")
 ```
 
 
-# Escaping and special cases {#sec_special_cases}
-
-The opening and closing brakets, `{}`, are special characters and cannot be used as regular text. 
-To bypass their special meaning, you need to escape them with a double backslash.
-
-You only need to escape the special delimiters which the algorithm is currently looking for.
-In the examples below, you don't need to escape the closing bracket in Ex.1 since no box
-was open. On the other hand, you need to escape it in Ex.2.
-
-```{r}
-# the closing bracket does not have a special meaning since no open bracket
-smagic("open = \\{, close = }")
-
-# we need to escape the first closing bracket
-smagic("many {5 times.c ! \\}}")
-```
-
-Alternatively, use the argument `.delim` to change the delimiters. 
-
-Ex.3: changing the delimiter.
-```{r}
-smagic("Here I {interpolate} with .[this] ", .delim = ".[ ]", this = ".[]")
-```
-
-You can also use the following hack:
-Ex.4: using regular interpolation to pass verbatim text.
-```{r}
-smagic("I {'can {write} {{what}} I want'}")
-```
-
-Since `{expr}` evaluates `expr`, the stuff inside the *box*, you can pass a 
-character string and it will stay untouched.
-
-In the few operations expecting a semi-colon (if-else and pluralization), it can also be
-escaped with a double backslash.
-
-```{r}
-is_c = TRUE
-smagic("{&is_c ; int i =1\\; ; i = 1}")
-
-is_c = FALSE
-smagic("{&is_c ; int i =1\\; ; i = 1}")
-```
-
-In interpolations, the exclamation mark (`!`) signals a verbatim expression. But what
-if you use it to mean the logical operation *not* in an operation-free interpolation? 
-In that case, you need a hack: use a question mark (`?`) first to indicate to the
-algorithm that you want to evaluate the expression. 
-
-Ex.4: using the `?` hack to use `!` as a logical operation.
-```{r}
-smagic("{!TRUE} is {?!TRUE}")
-```
 

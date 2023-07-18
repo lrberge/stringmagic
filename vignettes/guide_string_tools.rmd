@@ -32,7 +32,7 @@ knitr::opts_chunk$set(
 library(stringmagic)
 
 # Option to allow caching in non interactive mode
-options("smagic_string_get_forced_caching" = TRUE)
+options("string_magic_string_get_forced_caching" = TRUE)
 ```
 
 This vignette describes `stringmagic` tools for handling character vectors. 
@@ -66,7 +66,7 @@ these examples are equivalent with `string_is` or `string_which`.
 Ex.1: series of examples using the *recommended syntax*.
 ```{r}
 cars = row.names(mtcars)
-smagic("All cars from mtcars:\n{C, 60 width ? cars}")
+string_magic("All cars from mtcars:\n{C, 60 width ? cars}")
 
 # cars with an 'a', an 'e', an 'i', and an 'o', all in lower case
 string_get(cars, "a & e & i & o")
@@ -160,7 +160,7 @@ Even for simple tasks, the number of operations can quickly balloon, adding many
 lines of code, reducing readability, and all this for basic processing.
 
 The function `string_ops` tries to solve this problem. 
-It has access to all (50+) [`smagic` operations](LINK), allowing for
+It has access to all (50+) [`string_magic` operations](LINK), allowing for
 a compact and readable way to chain basic operations on character strings.
 
 Below are a few motivating examples.
@@ -231,7 +231,7 @@ This function is of the form `string_clean(x, ...)` with `x` the vector to clean
 
 1. use `"pat1, pat2 => replacement"` to replace the regex patterns `pat1` and `pat2` 
 with the value `replacement`.
-1. use `"@op1, op2"` to perform any arbitrary sequence of [`smagic` operation](LINK)
+1. use `"@op1, op2"` to perform any arbitrary sequence of [`string_magic` operation](LINK)
 
 In the operation `"pat1, pat2 => replacement"`, the pattern is first split with respect
 to the pipe, `" => "` (change it with argument `pipe`), to get `replacement`. 
@@ -265,7 +265,7 @@ monologue = c("For who would bear the whips and scorns of time",
 
 # Cleaning a text
 string_clean(monologue, 
-          # use smagic to: lower the case and remove basic stopwords
+          # use string_magic to: lower the case and remove basic stopwords
           "@lower, stopword",
           # remove a few extra stopwords(we use the flag word 'w/')
           "w/th, 's",
@@ -301,7 +301,7 @@ more_fruits = string_vec("lemon, {fruits}, peach")
 more_fruits
 ```
 
-The interpolation is performed with [`smagic`](LINK). This means that any [`smagic` operation](LINK)
+The interpolation is performed with [`string_magic`](LINK). This means that any [`string_magic` operation](LINK)
 can be applied on-the-fly.
 
 Ex.3: replicating Ex.2 but shortening long fruit names.
@@ -310,7 +310,7 @@ more_fruits = string_vec("lemon, {6 Shorten ? fruits}, peach")
 more_fruits
 ```
 
-Since interpolations are resolved with `smagic`, you can add any text before/after the 
+Since interpolations are resolved with `string_magic`, you can add any text before/after the 
 interpolation:
 
 Ex.4: adding text before the interpolation.

@@ -8,9 +8,9 @@
 # - should go through all the branches
 # - I test the conditional operations inside the operators when relevant
 
-chunk("smagic")
+chunk("string_magic")
 
-dsb = smagic_alias(.delim = ".[ ]")
+dsb = string_magic_alias(.delim = ".[ ]")
 
 #
 # collapse ####
@@ -18,24 +18,24 @@ dsb = smagic_alias(.delim = ".[ ]")
 
 # regular
 x = 1:3
-test(smagic("win = {'-'c ? x}"), "win = 1-2-3")
+test(string_magic("win = {'-'c ? x}"), "win = 1-2-3")
 
-test(smagic("win = {c ? x}"), "win = 1 2 3")
+test(string_magic("win = {c ? x}"), "win = 1 2 3")
 
 # with last element
-test(smagic("win = {C ? x}"), "win = 1, 2 and 3")
+test(string_magic("win = {C ? x}"), "win = 1, 2 and 3")
 
-test(smagic("win = {'|/'c ? x}"), "win = 12/3")
+test(string_magic("win = {'|/'c ? x}"), "win = 12/3")
 
 # default behavior
-test(smagic("win = {c ? x}"), "win = 1 2 3")
+test(string_magic("win = {c ? x}"), "win = 1 2 3")
 
 # empty collapse
-test(smagic("win = {''c ? x}"), "win = 123")
+test(string_magic("win = {''c ? x}"), "win = 123")
 
 # conditional collapse
 x = string_vec("bonjour les gens., comment ca va?, bien?, bien.")
-txt = smagic("{' 'S, ~(firstchar.3, '.'c) ? x}")
+txt = string_magic("{' 'S, ~(firstchar.3, '.'c) ? x}")
 test(txt, c("bon.les.gen", "com.ca.va?", "bie", "bie"))
 
 #
@@ -43,10 +43,10 @@ test(txt, c("bon.les.gen", "com.ca.va?", "bie", "bie"))
 #
 
 x = "Cogito...Ergo...Sum"
-txt = smagic("He said: {'f/...'s ? x}")
+txt = string_magic("He said: {'f/...'s ? x}")
 test(txt, c("He said: Cogito", "He said: Ergo", "He said: Sum"))
 
-txt = smagic("He said: {'i/[cs]'s ? x}")
+txt = string_magic("He said: {'i/[cs]'s ? x}")
 test(txt, c("He said: ", "He said: ogito...Ergo...", "He said: um"))
 
 
@@ -56,59 +56,59 @@ test(txt, c("He said: ", "He said: ogito...Ergo...", "He said: um"))
 #
 
 x = c("Blanche dit 'Bla bla blanc'.")
-txt = smagic("She said: {'bla'r, ws ? x}")
+txt = string_magic("She said: {'bla'r, ws ? x}")
 test(txt, "She said: Blanche dit 'Bla nc'.")
 
-txt = smagic("She said: {'bla'r.ignore, ws ? x}")
+txt = string_magic("She said: {'bla'r.ignore, ws ? x}")
 test(txt, "She said: nche dit ' nc'.")
 
-txt = smagic("She said: {'i/bla'r, ws ? x}")
+txt = string_magic("She said: {'i/bla'r, ws ? x}")
 test(txt, "She said: nche dit ' nc'.")
 
-txt = smagic("She said: {'bla'r.word, ws ? x}")
+txt = string_magic("She said: {'bla'r.word, ws ? x}")
 test(txt, "She said: Blanche dit 'Bla blanc'.")
 
-txt = smagic("She said: {'w/bla'r, ws ? x}")
+txt = string_magic("She said: {'w/bla'r, ws ? x}")
 test(txt, "She said: Blanche dit 'Bla blanc'.")
 
-txt = smagic("She said: {'bla'r.word.ignore, ws ? x}")
+txt = string_magic("She said: {'bla'r.word.ignore, ws ? x}")
 test(txt, "She said: Blanche dit ' blanc'.")
 
-txt = smagic("She said: {'wi/bla'r, ws ? x}")
+txt = string_magic("She said: {'wi/bla'r, ws ? x}")
 test(txt, "She said: Blanche dit ' blanc'.")
 
-txt = smagic("She said: {'.'r.fixed, ws ? x}")
+txt = string_magic("She said: {'.'r.fixed, ws ? x}")
 test(txt, "She said: Blanche dit 'Bla bla blanc'")
 
-txt = smagic("She said: {'fixed/.'r, ws ? x}")
+txt = string_magic("She said: {'fixed/.'r, ws ? x}")
 test(txt, "She said: Blanche dit 'Bla bla blanc'")
 
-txt = smagic("She said: {'Bla, blanc => ??'r.word, ws ? x}")
+txt = string_magic("She said: {'Bla, blanc => ??'r.word, ws ? x}")
 test(txt, "She said: Blanche dit '?? bla ??'.")
 
-txt = smagic("She said: {'word/Bla, blanc => ??'r, ws ? x}")
+txt = string_magic("She said: {'word/Bla, blanc => ??'r, ws ? x}")
 test(txt, "She said: Blanche dit '?? bla ??'.")
 
-txt = smagic("She said: {'Bla, blanc => \\1\\1'r.w, ws ? x}")
+txt = string_magic("She said: {'Bla, blanc => \\1\\1'r.w, ws ? x}")
 test(txt, "She said: Blanche dit 'BlaBla bla blancblanc'.")
 
-txt = smagic("She said: {'w/Bla, blanc => \\1\\1'r, ws ? x}")
+txt = string_magic("She said: {'w/Bla, blanc => \\1\\1'r, ws ? x}")
 test(txt, "She said: Blanche dit 'BlaBla bla blancblanc'.")
 
 # total replacement
 x = string_vec("jingle bells, jingle bells, jingle, all the way")
-txt = smagic("{', 'c ! {'t/jing => [sound]'r ? x}}")
+txt = string_magic("{', 'c ! {'t/jing => [sound]'r ? x}}")
 test(txt, "[sound], [sound], [sound], all the way")
 
-txt = smagic("{', 'c ! {'jing => [sound]'r.total ? x}}")
+txt = string_magic("{', 'c ! {'jing => [sound]'r.total ? x}}")
 test(txt, "[sound], [sound], [sound], all the way")
 
-txt = smagic("{'(?<!\\b)e => a'replace.single ! Where is the letter e?}")
+txt = string_magic("{'(?<!\\b)e => a'replace.single ! Where is the letter e?}")
 test(txt, "Whare is the letter e?")
 
 # default
-test(smagic("a = {r ? 1:5}"), "err")
-test(smagic("a = {R ? 1:5}"), "err")
+test(string_magic("a = {r ? 1:5}"), "err")
+test(string_magic("a = {R ? 1:5}"), "err")
 
 # other with replacement
 
@@ -132,27 +132,27 @@ test(txt, c("Stare at the []", "Stare at the Poon", "Stare at the Pun"))
 #
 
 x = c("Blanche dit", " 'Bla bla blanc'.")
-txt = smagic("mots: {'bla'x ? x}")
+txt = string_magic("mots: {'bla'x ? x}")
 test(txt, c("mots: ", "mots: bla"))
 
-test(smagic("mots: {'bla'x.ignore ? x}"), 
+test(string_magic("mots: {'bla'x.ignore ? x}"), 
      c("mots: Bla", "mots: Bla"))
      
-test(smagic("mots: {'i/bla'x ? x}"), 
+test(string_magic("mots: {'i/bla'x ? x}"), 
      c("mots: Bla", "mots: Bla"))
 
-test(smagic("mots: {'bla'x.i.w ? x}"), 
+test(string_magic("mots: {'bla'x.i.w ? x}"), 
      c("mots: ", "mots: Bla"))
 
-test(smagic("mots: {'iw/bla'x ? x}"), 
+test(string_magic("mots: {'iw/bla'x ? x}"), 
      c("mots: ", "mots: Bla"))
 
 # default
-txt = smagic("mots: {x ? x}")
+txt = string_magic("mots: {x ? x}")
 test(txt, c("mots: Blanche", "mots: Bla"))
 
 # alias
-test(smagic("mots: {'iw/bla'extract.first ? x}"), 
+test(string_magic("mots: {'iw/bla'extract.first ? x}"), 
      c("mots: ", "mots: Bla"))
 
 
@@ -161,24 +161,24 @@ test(smagic("mots: {'iw/bla'extract.first ? x}"),
 #
 
 x = c("Blanche dit", " 'Bla bla blanc'.")
-txt = smagic("{'bla'X ? x}")
+txt = string_magic("{'bla'X ? x}")
 test(txt, c("bla", "bla"))
 
-txt = smagic("{'bla'X.i ? x}")
+txt = string_magic("{'bla'X.i ? x}")
 test(txt, c("Bla", "Bla", "bla", "bla"))
 
-txt = smagic("{'i/bla'X ? x}")
+txt = string_magic("{'i/bla'X ? x}")
 test(txt, c("Bla", "Bla", "bla", "bla"))
 
-txt = smagic("{'bla'X.i.w ? x}")
+txt = string_magic("{'bla'X.i.w ? x}")
 test(txt, c("Bla", "bla"))
 
-txt = smagic("{'ignore, word/bla'X ? x}")
+txt = string_magic("{'ignore, word/bla'X ? x}")
 test(txt, c("Bla", "bla"))
 
 # conditional
 x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
-txt = smagic("info: {'\\d+'X, ~('-'c), C ? x}")
+txt = string_magic("info: {'\\d+'X, ~('-'c), C ? x}")
 test(txt, "info: 57-26, 32-7, 29-8 and 55")
 
 #
@@ -186,10 +186,10 @@ test(txt, "info: 57-26, 32-7, 29-8 and 55")
 #
 
 x = c("Hi Mary.", "Hi Charles!", "Are you OK?", "I think so Charles.", "Great to hear, Mary!")
-txt = smagic("A few quotes:\n{Q, 'mary | charles & \\!'get.ignore, '  'paste, '\n'c ? x}")
+txt = string_magic("A few quotes:\n{Q, 'mary | charles & \\!'get.ignore, '  'paste, '\n'c ? x}")
 test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
 
-txt = smagic("A few quotes:\n{Q, 'i/mary | charles & \\!'get, '  'paste, '\n'c ? x}")
+txt = string_magic("A few quotes:\n{Q, 'i/mary | charles & \\!'get, '  'paste, '\n'c ? x}")
 test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
 
 x = c("It's me again.", "What do you mean a gain?", "Yes, again!", "Ah AGAIN, I thought A GAIN!")
@@ -201,7 +201,7 @@ test(index, c(TRUE, FALSE, FALSE, FALSE))
 
 # conditional
 x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
-txt = smagic("info: {' 'S, '!\\d'get, ~('-'c), C ? x}")
+txt = string_magic("info: {' 'S, '!\\d'get, ~('-'c), C ? x}")
 test(txt, "info: laura-and, charles-and, charly-and and june")
 
 
@@ -209,14 +209,14 @@ test(txt, "info: laura-and, charles-and, charly-and and june")
 # each/times ####
 #
 
-test(smagic("I like {5 times.c ! ?} marks!"), "I like ????? marks!")
+test(string_magic("I like {5 times.c ! ?} marks!"), "I like ????? marks!")
 
 x = c("mary", "richard")
 y = c("yes", "no")
-txt = smagic("The discussion: {', 'c ! {upper.first, 2 times ? x}: '{2 times ? y}'}...")
+txt = string_magic("The discussion: {', 'c ! {upper.first, 2 times ? x}: '{2 times ? y}'}...")
 test(txt, "The discussion: Mary: 'yes', Richard: 'no', Mary: 'yes', Richard: 'no'...")
 
-test(smagic("values: {2 each.c ? c('a', 'b')}"), "values: aabb")
+test(string_magic("values: {2 each.c ? c('a', 'b')}"), "values: aabb")
 
 #
 # case ####
@@ -254,7 +254,7 @@ test(txt, "Results From a New Estimator: A New Hope")
 #
 
 x = "siren"
-txt = smagic("Is it the song of the {q ? x}, of the {Q ? x} or of the {bq ? x}?")
+txt = string_magic("Is it the song of the {q ? x}, of the {Q ? x} or of the {bq ? x}?")
 test(txt, "Is it the song of the 'siren', of the \"siren\" or of the `siren`?")
 
 #
@@ -262,40 +262,40 @@ test(txt, "Is it the song of the 'siren', of the \"siren\" or of the `siren`?")
 #
 
 x = c(1, 123, 123456)
-txt = smagic("The numbers are:\n{'\n'c ! - {format ? x} | {rev, Format ? x}}")
+txt = string_magic("The numbers are:\n{'\n'c ! - {format ? x} | {rev, Format ? x}}")
 test(txt, "The numbers are:\n- 1       | 123,456\n- 123     |     123\n- 123,456 |       1")
 
-txt = smagic("The numbers are:\n{'\n'c ! - {format.0 ? x} | {rev, Format.zero ? x}}")
+txt = string_magic("The numbers are:\n{'\n'c ! - {format.0 ? x} | {rev, Format.zero ? x}}")
 test(txt, "The numbers are:\n- 0000001 | 123,456\n- 0000123 | 0000123\n- 123,456 | 0000001")
 
 today = structure(19531, class = "Date")
-txt = smagic("Today is {'%d, %m, %Y'for ? today}")
+txt = string_magic("Today is {'%d, %m, %Y'for ? today}")
 test(txt, "Today is 23, 06, 2023")
 
-txt = smagic("Today is {'%d, %m, %Y'for ? .date}")
+txt = string_magic("Today is {'%d, %m, %Y'for ? .date}")
 test_contains(txt, "\\d\\d, \\d\\d, \\d{4}")
 
-txt = smagic("Today is {.now}")
+txt = string_magic("Today is {.now}")
 test_contains(txt, "\\d{4} & \\d:\\d")
 
-txt = smagic("We're {.now('%H:%M %Y')}")
+txt = string_magic("We're {.now('%H:%M %Y')}")
 test_contains(txt, "\\d:\\d & \\d{4}")
 
 #
 # sprintf ####
 #
 
-txt = smagic("pi = {%.3f ? pi}")
+txt = string_magic("pi = {%.3f ? pi}")
 test(txt, "pi = 3.142")
 
-txt = smagic("pi = {% 8.3f ? pi}")
+txt = string_magic("pi = {% 8.3f ? pi}")
 test(txt, "pi =    3.142")
 
 x = c("michael", "ana")
-txt = smagic("The winners are:\n{'\n'c ! - {% 10s ? x}}")
+txt = string_magic("The winners are:\n{'\n'c ! - {% 10s ? x}}")
 test(txt, "The winners are:\n-    michael\n-        ana")
 
-txt = smagic("The winners are:\n{'\n'c ! - {%- 10s ? x}!}")
+txt = string_magic("The winners are:\n{'\n'c ! - {%- 10s ? x}!}")
 test(txt, "The winners are:\n- michael   !\n- ana       !")
 
 #
@@ -358,28 +358,28 @@ test(txt, c("onjou", "he"))
 #
 
 x = c("this is a long sentence", "a short one")
-txt = smagic("{11k, ' and 'c ? x}")
+txt = string_magic("{11k, ' and 'c ? x}")
 test(txt, "this is a l and a short one")
 
-txt = smagic("{11 k, ' and 'c ? x}")
+txt = string_magic("{11 k, ' and 'c ? x}")
 test(txt, "this is a l and a short one")
 
-txt = smagic("{'11|..'k, ' and 'c ? x}")
+txt = string_magic("{'11|..'k, ' and 'c ? x}")
 test(txt, "this is a l.. and a short one")
 
-txt = smagic("{11|.. shorten, ' and 'c ? x}")
+txt = string_magic("{11|.. shorten, ' and 'c ? x}")
 test(txt, "this is a l.. and a short one")
 
-txt = smagic("{'11||..'k, ' and 'c ? x}")
+txt = string_magic("{'11||..'k, ' and 'c ? x}")
 test(txt, "this is a.. and a short one")
 
-txt = smagic("{11|.. shorten.inclu, ' and 'c ? x}")
+txt = string_magic("{11|.. shorten.inclu, ' and 'c ? x}")
 test(txt, "this is a.. and a short one")
 
-txt = smagic("{11k.d, ' and 'c ? x}")
+txt = string_magic("{11k.d, ' and 'c ? x}")
 test(txt, "this is a .. and a short one")
 
-txt = smagic("{11 Shorten, ' and 'c ? x}")
+txt = string_magic("{11 Shorten, ' and 'c ? x}")
 test(txt, "this is a .. and a short one")
 
 #
@@ -388,54 +388,54 @@ test(txt, "this is a .. and a short one")
 
 x = 1:5
 
-txt = smagic("{3K ? x}")
+txt = string_magic("{3K ? x}")
 test(txt, 1:3)
 
-txt = smagic("{3KO ? x}")
+txt = string_magic("{3KO ? x}")
 test(txt, c("1", "2", "three others"))
 
-txt = smagic("{3Ko ? x}")
+txt = string_magic("{3Ko ? x}")
 test(txt, c("1", "2", "3 others"))
 
-txt = smagic("{'3|le reste'K ? x}")
+txt = string_magic("{'3|le reste'K ? x}")
 test(txt, c("1", "2", "3", "le reste"))
 
-txt = smagic("{'3||le reste'K ? x}")
+txt = string_magic("{'3||le reste'K ? x}")
 test(txt, c("1", "2", "le reste"))
 
-txt = smagic("{'3||et :rest:/:n:'K ? x}")
+txt = string_magic("{'3||et :rest:/:n:'K ? x}")
 test(txt, c("1", "2", "et 3/5"))
 
-txt = smagic("{'3||et :REST:/:N:'K ? x}")
+txt = string_magic("{'3||et :REST:/:N:'K ? x}")
 test(txt, c("1", "2", "et three/five"))
 
 # conditional
 x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
-test(smagic("info: {' 'S, ~(2Ko), C ? x}"), "err")
+test(string_magic("info: {' 'S, ~(2Ko), C ? x}"), "err")
 
 #
 # enum ####
 #
 
 x = 1:5
-txt = smagic("{enum.q.3.oxf ? x}")
+txt = string_magic("{enum.q.3.oxf ? x}")
 test(txt, "'1', '2', and 3 others")
 
-txt = smagic("{enum.bq.or ! x{1:3}}")
+txt = string_magic("{enum.bq.or ! x{1:3}}")
 test(txt, "`x1`, `x2` or `x3`")
 
-txt = smagic("{enum.Q.nor.1 ! x{1:3}}")
+txt = string_magic("{enum.Q.nor.1 ! x{1:3}}")
 test(txt, '1) "x1", 2) "x2", nor 3) "x3"')
 
-txt = smagic("{enum.a ! x{1:3}}")
+txt = string_magic("{enum.a ! x{1:3}}")
 test(txt, "a) x1, b) x2, and c) x3")
 
-txt = smagic("{enum.i ! x{1:3}}")
+txt = string_magic("{enum.i ! x{1:3}}")
 test(txt, "i) x1, ii) x2, and iii) x3")
 
 # conditional
 x = c("123", "abc", "a1b2")
-txt = smagic("{''S, ~(enum), ' ; 'c ? x}")
+txt = string_magic("{''S, ~(enum), ' ; 'c ? x}")
 test(txt, "1, 2 and 3 ; a, b and c ; a, 1, b and 2")
 
 #
@@ -443,28 +443,28 @@ test(txt, "1, 2 and 3 ; a, b and c ; a, 1, b and 2")
 #
 
 x = 1:5
-txt = smagic("{2 first, ''c ? x}")
+txt = string_magic("{2 first, ''c ? x}")
 test(txt, "12")
 
-txt = smagic("{last.2, ''c ? x}")
+txt = string_magic("{last.2, ''c ? x}")
 test(txt, "45")
 
 a = 2
-txt = smagic("{'3'first, `a`last, ''c ? x}")
+txt = string_magic("{'3'first, `a`last, ''c ? x}")
 test(txt, "23")
 
-txt = smagic("{'1|1'first, ''c ? x}")
+txt = string_magic("{'1|1'first, ''c ? x}")
 test(txt, "15")
 
-txt = smagic("{'-3'first, ''c ? x}")
+txt = string_magic("{'-3'first, ''c ? x}")
 test(txt, "45")
 
 # conditional
 x = c("123", "abc", "a1b2")
-txt = smagic("{''S, ~(first), ' ; 'c ? x}")
+txt = string_magic("{''S, ~(first), ' ; 'c ? x}")
 test(txt, "1 ; a ; a")
 
-txt = smagic("{''S, ~(last), ' ; 'c ? x}")
+txt = string_magic("{''S, ~(last), ' ; 'c ? x}")
 test(txt, "3 ; c ; 2")
 
 #
@@ -473,18 +473,18 @@ test(txt, "3 ; c ; 2")
 
 x = c("bonjour", "les", "gens")
 a = 2
-txt = smagic("{3 firstchar, `a`lastchar ? x}")
+txt = string_magic("{3 firstchar, `a`lastchar ? x}")
 test(txt, c("on", "es", "en"))
 
 #
 # rev ####
 #
 
-test(smagic("{rev ? 1:3}"), 3:1)
+test(string_magic("{rev ? 1:3}"), 3:1)
 
 # conditional
 x = c("123", "abc", "a1b2")
-txt = smagic("{''S, ~(rev, ''c), ' ; 'c ? x}")
+txt = string_magic("{''S, ~(rev, ''c), ' ; 'c ? x}")
 test(txt, "321 ; cba ; 2b1a")
 
 #
@@ -492,24 +492,24 @@ test(txt, "321 ; cba ; 2b1a")
 #
 
 x = c(5, 3, 8, 1)
-test(smagic("{sort ? x}"), c(1, 3, 5, 8))
+test(string_magic("{sort ? x}"), c(1, 3, 5, 8))
 
-test(smagic("{dsort ? x}"), c(8, 5, 3, 1))
+test(string_magic("{dsort ? x}"), c(8, 5, 3, 1))
 
 # with preprocessing
 x = "Mark is 34, Bianca is 55, Odette is 101, Julie is 21 and Frank is 5"
-txt = smagic("{', | and 's, '\\D'sort, C ? x}")
+txt = string_magic("{', | and 's, '\\D'sort, C ? x}")
 test(txt, "Odette is 101, Julie is 21, Mark is 34, Frank is 5 and Bianca is 55")
 
-txt = smagic("{', | and 's, '\\D'sort.num, C ? x}")
+txt = string_magic("{', | and 's, '\\D'sort.num, C ? x}")
 test(txt, "Frank is 5, Julie is 21, Mark is 34, Bianca is 55 and Odette is 101")
 
 # conditional
 x = c("521", "aebc")
-txt = smagic("{''S, ~(sort, ''c), ' ; 'c ? x}")
+txt = string_magic("{''S, ~(sort, ''c), ' ; 'c ? x}")
 test(txt, "125 ; abce")
 
-txt = smagic("{''S, ~(dsort, ''c), ' ; 'c ? x}")
+txt = string_magic("{''S, ~(dsort, ''c), ' ; 'c ? x}")
 test(txt, "521 ; ecba")
 
 #
@@ -517,21 +517,21 @@ test(txt, "521 ; ecba")
 #
 
 x = 1:2
-txt = smagic("{'x'paste, ', 'c ? x}")
+txt = string_magic("{'x'paste, ', 'c ? x}")
 test(txt, "x1, x2")
 
-txt = smagic("{'*'paste.both, ', 'c ? x}")
+txt = string_magic("{'*'paste.both, ', 'c ? x}")
 test(txt, "*1*, *2*")
 
-txt = smagic("{_ paste.right, ', 'c ? x}")
+txt = string_magic("{_ paste.right, ', 'c ? x}")
 test(txt, "1_, 2_")
 
 x = 1:3
-txt = smagic("The number{if(.N>1 ; 's are 'paste.front ; ' is'paste.front), C ? x}.")
+txt = string_magic("The number{if(.N>1 ; 's are 'paste.front ; ' is'paste.front), C ? x}.")
 test(txt, "The numbers are 1, 2 and 3.")
 
 x = 5
-txt = smagic("The number{if(.N>1 ; 's are 'paste.front ; ' is 'paste.front), C ? x}.")
+txt = string_magic("The number{if(.N>1 ; 's are 'paste.front ; ' is 'paste.front), C ? x}.")
 test(txt, "The number is 5.")
 
 #
@@ -539,41 +539,41 @@ test(txt, "The number is 5.")
 #
 
 x = 1:2
-txt = smagic("{'0'insert, ''c ? x}")
+txt = string_magic("{'0'insert, ''c ? x}")
 test(txt, "012")
 
-txt = smagic("{'0'insert.both, ''c ? x}")
+txt = string_magic("{'0'insert.both, ''c ? x}")
 test(txt, "0120")
 
-txt = smagic("{'0'insert.right, ''c ? x}")
+txt = string_magic("{'0'insert.right, ''c ? x}")
 test(txt, "120")
 
 # conditional
 x = c("521", "aebc")
-test(smagic("{''S, ~('0'insert, ''c), ' ; 'c ? x}"), "err")
+test(string_magic("{''S, ~('0'insert, ''c), ' ; 'c ? x}"), "err")
 
 #
 # fill ####
 #
 
 x = c("bon", "bonjour les gens")
-txt = smagic("{fill, q, C ? x}")
+txt = string_magic("{fill, q, C ? x}")
 test(txt, "'bon             ' and 'bonjour les gens'")
 
-txt = smagic("{fill.right, q, C ? x}")
+txt = string_magic("{fill.right, q, C ? x}")
 test(txt, "'             bon' and 'bonjour les gens'")
 
-txt = smagic("{fill.center, q, C ? x}")
+txt = string_magic("{fill.center, q, C ? x}")
 test(txt, "'      bon       ' and 'bonjour les gens'")
 
 x = c(5, 15)
-txt = smagic("{3 fill.right, q, C ? x}")
+txt = string_magic("{3 fill.right, q, C ? x}")
 test(txt, "'  5' and ' 15'")
 
-txt = smagic("{1 fill.right, q, C ? x}")
+txt = string_magic("{1 fill.right, q, C ? x}")
 test(txt, "'5' and '15'")
 
-txt = smagic("{'3|0'fill.right, q, C ? x}")
+txt = string_magic("{'3|0'fill.right, q, C ? x}")
 test(txt, "'005' and '015'")
 
 #
@@ -581,7 +581,7 @@ test(txt, "'005' and '015'")
 #
 
 x = "\n    bonjour \\\n   les gens\n est-ce que ca va?"
-txt = smagic("Text: {tws, join ? x}")
+txt = string_magic("Text: {tws, join ? x}")
 test(txt, "Text: bonjour les gens\n est-ce que ca va?")
 
 #
@@ -589,7 +589,7 @@ test(txt, "Text: bonjour les gens\n est-ce que ca va?")
 #
 
 x = "bon\njour \t les \t gens"
-txt = smagic(x, .last = "escape")
+txt = string_magic(x, .last = "escape")
 test(txt, "bon\\njour \\t les \\t gens")
 
 #
@@ -597,11 +597,11 @@ test(txt, "bon\\njour \\t les \\t gens")
 #
 
 x = c(1, 1, 2, 3, 3, 3) 
-test(smagic("{unik ? x}"), 1:3)
+test(string_magic("{unik ? x}"), 1:3)
 
 # conditional
 x = c("11211125564454", "aggafsgaffasg")
-txt = smagic("{''S, ~(unik, ''c), ' ; 'c ? x}")
+txt = string_magic("{''S, ~(unik, ''c), ' ; 'c ? x}")
 test(txt, "12564 ; agfs")
 
 #
@@ -609,10 +609,10 @@ test(txt, "12564 ; agfs")
 #
 
 x = c(1, 6)
-txt = smagic("They arrived {nth, C ? x}.")
+txt = string_magic("They arrived {nth, C ? x}.")
 test(txt, "They arrived 1st and 6th.")
 
-txt = smagic("They arrived {Nth, C ? x}.")
+txt = string_magic("They arrived {Nth, C ? x}.")
 test(txt, "They arrived first and sixth.")
 
 #
@@ -620,10 +620,10 @@ test(txt, "They arrived first and sixth.")
 #
 
 x = c(1, 6)
-txt = smagic("They won {ntimes, C ? x}.")
+txt = string_magic("They won {ntimes, C ? x}.")
 test(txt, "They won once and 6 times.")
 
-txt = smagic("They won {Ntimes, C ? x}.")
+txt = string_magic("They won {Ntimes, C ? x}.")
 test(txt, "They won once and six times.")
 
 #
@@ -631,17 +631,17 @@ test(txt, "They won once and six times.")
 #
 
 x = c(45546, "bonjour")
-txt = smagic("A = {n ? x} ; B = {n.l ? 55}")
+txt = string_magic("A = {n ? x} ; B = {n.l ? 55}")
 test(txt, c("A = 45,546 ; B = fifty-five", "A = bonjour ; B = fifty-five"))
 
-txt = smagic("{N.up ? 8} times he won!")
+txt = string_magic("{N.up ? 8} times he won!")
 test(txt, "Eight times he won!")
 
 year = 2023
-txt = smagic("This test was written in {n.R?year}.")
+txt = string_magic("This test was written in {n.R?year}.")
 test(txt, "This test was written in MMXXIII.")
 
-txt = smagic("This test was written in {n.r?year}.")
+txt = string_magic("This test was written in {n.r?year}.")
 test(txt, "This test was written in mmxxiii.")
 
 #
@@ -649,20 +649,20 @@ test(txt, "This test was written in mmxxiii.")
 #
 
 x = 1:5
-txt = smagic("{Len.up ? x} numbers.")
+txt = string_magic("{Len.up ? x} numbers.")
 test(txt, "Five numbers.")
 
 x = 1:2
-txt = smagic("x is of length {len ? x}, or {Len ? x}.")
+txt = string_magic("x is of length {len ? x}, or {Len ? x}.")
 test(txt, "x is of length 2, or two.")
 
 x = 1:1e5
-txt = smagic("x is of length {len ? x}, or {len.num ? x}.")
+txt = string_magic("x is of length {len ? x}, or {len.num ? x}.")
 test(txt, "x is of length 100,000, or 100000.")
 
 # conditionaly
 x = c("bonjour les gens", "la pluie", "est drue, je rentre")
-txt = smagic("Number of words: {' 'S, ~(len), C ? x}.")
+txt = string_magic("Number of words: {' 'S, ~(len), C ? x}.")
 test(txt, "Number of words: 3, 2 and 4.")
 
 num = string_ops(x, "' 'S, ~(len), num")
@@ -673,7 +673,7 @@ test(num, c(3, 2, 4))
 #
 
 x = "Rome, l'unique objet de mon ressentiment, Rome a qui vient ton bras d'immoler mon amant"
-txt = smagic("Voici le texte a apprendre:\n{'40|>'width ? x}.")
+txt = string_magic("Voici le texte a apprendre:\n{'40|>'width ? x}.")
 test(txt, c("Voici le texte a apprendre:\n> Rome, l'unique objet de mon\n> ressentiment, Rome a qui vient ton\n> bras d'immoler mon amant."))
 
 #
@@ -681,11 +681,11 @@ test(txt, c("Voici le texte a apprendre:\n> Rome, l'unique objet de mon\n> resse
 #
 
 x = 3654
-txt = smagic("Time since last check: {dtime ? x}.")
+txt = string_magic("Time since last check: {dtime ? x}.")
 test(txt, "Time since last check: 1 hour 00 min.")
 
 x = structure(1680294984.14505, class = c("POSIXct", "POSIXt")) - structure(1680292481.19258, class = c("POSIXct", "POSIXt"))
-txt = smagic("Time since last check: {dtime ? x}.")
+txt = string_magic("Time since last check: {dtime ? x}.")
 test(txt, "Time since last check: 41 min 42 sec.")
 
 #
@@ -693,7 +693,7 @@ test(txt, "Time since last check: 41 min 42 sec.")
 #
 
 x = 1:5
-txt = smagic("{if(. <= 3 ; erase), '.'c ? x}")
+txt = string_magic("{if(. <= 3 ; erase), '.'c ? x}")
 test(txt, "...4.5")
 
 #
@@ -701,7 +701,7 @@ test(txt, "...4.5")
 #
 
 x = 1:5
-txt = smagic("nothing = {nuke ? x}")
+txt = string_magic("nothing = {nuke ? x}")
 test(txt, "nothing = ")
 
 #
@@ -709,27 +709,27 @@ test(txt, "nothing = ")
 #
 
 x = c("", "    ", "556", ":!", "pour qui sont ces", "serpents qui sifflent sur nos tetes?")
-txt = smagic("{5 firstchar, rm, ', 'c ? x}")
+txt = string_magic("{5 firstchar, rm, ', 'c ? x}")
 test(txt, "    , 556, :!, pour , serpe")
 
-txt = smagic("{5 firstchar, rm.blank, ', 'c ? x}")
+txt = string_magic("{5 firstchar, rm.blank, ', 'c ? x}")
 test(txt, "556, :!, pour , serpe")
 
-txt = smagic("{5 firstchar, rm.noalpha, ', 'c ? x}")
+txt = string_magic("{5 firstchar, rm.noalpha, ', 'c ? x}")
 test(txt, "pour , serpe")
 
-txt = smagic("{5 firstchar, rm.noalnum, ', 'c ? x}")
+txt = string_magic("{5 firstchar, rm.noalnum, ', 'c ? x}")
 test(txt, "556, pour , serpe")
 
-txt = smagic("{5 firstchar, rm.all, ', 'c ? x}")
+txt = string_magic("{5 firstchar, rm.all, ', 'c ? x}")
 test(txt, "")
 
-txt = smagic("{5 firstchar, 'pour'rm.blank, ', 'c ? x}")
+txt = string_magic("{5 firstchar, 'pour'rm.blank, ', 'c ? x}")
 test(txt, "556, :!, serpe")
 
 # conditional
 x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
-txt = smagic("{' 'S, rm.noalpha, ~('-'c), C ? x}")
+txt = string_magic("{' 'S, rm.noalpha, ~('-'c), C ? x}")
 test(txt, "laura-and, charles-and, charly-and and june")
 
 #
@@ -741,21 +741,21 @@ txt = string_ops(x, "'\\d+'x, num")
 test(txt, 55)
 
 x = c("55", "abc")
-txt = smagic("{num ? x}")
+txt = string_magic("{num ? x}")
 test(txt, c(55, NA))
 
-txt = smagic("{num.soft ? x}")
+txt = string_magic("{num.soft ? x}")
 test(txt, c(55, "abc"))
 
-txt = smagic("{num.clear ? x}")
+txt = string_magic("{num.clear ? x}")
 test(txt, c(55, ""))
 
-txt = smagic("{num.rm ? x}")
+txt = string_magic("{num.rm ? x}")
 test(txt, 55)
 
 # conditional
 x = string_vec("laura 57 and 26, charles 32 and 7, charly 29 and 8, june 55")
-txt = smagic("{' 'S, num.rm, ~('-'c), C ? x}")
+txt = string_magic("{' 'S, num.rm, ~('-'c), C ? x}")
 test(txt, "57-26, 32-7, 29-8 and 55")
 
 #
@@ -769,7 +769,7 @@ test(txt, "57-26, 32-7, 29-8 and 55")
 #
 
 x = "Hi I'm Laurent and I'm trying to remove stop-words."
-txt = smagic("Before: {x}\nAfter: {stop, ws ? x}")
+txt = string_magic("Before: {x}\nAfter: {stop, ws ? x}")
 test(txt, "Before: Hi I'm Laurent and I'm trying to remove stop-words.\nAfter: Hi Laurent trying remove stop-words.")
 
 #
@@ -803,7 +803,7 @@ test(txt, "The max value is .")
 
 # nesting
 x = c(15, 550)
-txt = smagic("The values are{& length(x) < 5 ; ': {C ? x}' ; 'too many'}.")
+txt = string_magic("The values are{& length(x) < 5 ; ': {C ? x}' ; 'too many'}.")
 test(txt, "The values are: 15 and 550.")
 
 # special if else
@@ -814,11 +814,11 @@ test(txt, c("The value is 15", "The value is > 50"))
 # long interpolated true and false
 x = 1:3
 y = letters[1:3]
-txt = smagic("{C ! {&&x %% 2 == 1;{y}}}")
+txt = string_magic("{C ! {&&x %% 2 == 1;{y}}}")
 test(txt, "a, 2 and c")
 
 z = tail(letters, 3)
-txt = smagic("{C ! {&x %% 2 == 1; {y} ; {bq?z}}}")
+txt = string_magic("{C ! {&x %% 2 == 1; {y} ; {bq?z}}}")
 test(txt, "`x`,  b and `z`")
 
 #
@@ -828,27 +828,27 @@ test(txt, "`x`,  b and `z`")
 # special values: ., .len (or .N), .nchar (or .C)
 
 x = c(5, 25, 30, 7)
-txt = smagic("The large numbers are {if(.<10 ; nuke), C ? x}.")
+txt = string_magic("The large numbers are {if(.<10 ; nuke), C ? x}.")
 test(txt, "The large numbers are 25 and 30.")
 
 x = c(5, 25, 30, 7)
-txt = smagic("The numbers are {if(.C < 2 ; 'x'pa ; 1k), C ? x}.")
+txt = string_magic("The numbers are {if(.C < 2 ; 'x'pa ; 1k), C ? x}.")
 test(txt, "The numbers are x5, 2, 3 and x7.")
 
-txt = smagic("The numbers are {if(.nchar >= 2 ; 'x'pa ; 1k), C ? x}.")
+txt = string_magic("The numbers are {if(.nchar >= 2 ; 'x'pa ; 1k), C ? x}.")
 test(txt, "The numbers are 5, x25, x30 and 7.")
 
 x = c(5, 25, 30, 7)
-txt = smagic("The hash is {if(.N < 4 ; ':'c ; '-'c), C ? x}.")
+txt = string_magic("The hash is {if(.N < 4 ; ':'c ; '-'c), C ? x}.")
 test(txt, "The hash is 5-25-30-7.")
 
 x = c(5, 25, 30)
-txt = smagic("The hash is {if(.N < 4 ; ':'c ; '-'c), C ? x}.")
+txt = string_magic("The hash is {if(.N < 4 ; ':'c ; '-'c), C ? x}.")
 test(txt, "The hash is 5:25:30.")
 
 # conditional
 x = c(5, 25, 30)
-txt = smagic("Example: {if(.C < 2 ; 'x'pa ; ''s, ~('/'c)), C ? x}.")
+txt = string_magic("Example: {if(.C < 2 ; 'x'pa ; ''s, ~('/'c)), C ? x}.")
 test(txt, "Example: x5, 2/5 and 3/0.")
 
 
@@ -857,43 +857,43 @@ test(txt, "Example: x5, 2/5 and 3/0.")
 #
 
 x = c(5, 25, 30, 7)
-txt = smagic("There are {vif(.len<3 ; not many ; many), C ? x} numbers.")
+txt = string_magic("There are {vif(.len<3 ; not many ; many), C ? x} numbers.")
 test(txt, "There are many numbers.")
 
 x = c(5, 25)
-txt = smagic("There are {vif(.N<3 ; not many ; many), C ? x} numbers.")
+txt = string_magic("There are {vif(.N<3 ; not many ; many), C ? x} numbers.")
 test(txt, "There are not many numbers.")
 
 # elementwise
 x = c(5, 25, 30, 7)
-txt = smagic("Numbers: {vif(.<10 ; small ; large), C ? x}.")
+txt = string_magic("Numbers: {vif(.<10 ; small ; large), C ? x}.")
 test(txt, "Numbers: small, large, large and small.")
 
 # nesting
 x = c(5, 25, 30, 7)
-txt = smagic("Numbers: {vif(.N > 5 ; sum = {n?sum(x)} ; prod = {n?prod(x)}), C ? x}.")
+txt = string_magic("Numbers: {vif(.N > 5 ; sum = {n?sum(x)} ; prod = {n?prod(x)}), C ? x}.")
 test(txt, "Numbers: prod = 26,250.")
 
 x = c(5, 25, 30, 7, 5, 4)
-txt = smagic("Numbers: {vif(.N > 5 ; sum = {n?sum(x)} ; prod = {n?prod(x)}), C ? x}.")
+txt = string_magic("Numbers: {vif(.N > 5 ; sum = {n?sum(x)} ; prod = {n?prod(x)}), C ? x}.")
 test(txt, "Numbers: sum = 76.")
 
 # '.' as a placeholder
 x = c(5, 12, 20, 35)
-txt = smagic("y = {3 first, vif(.N<2 ; short ; {' + 'c ? .}) ? x}")
+txt = string_magic("y = {3 first, vif(.N<2 ; short ; {' + 'c ? .}) ? x}")
 test(txt, "y = 5 + 12 + 20")
 
 #
 # escaping ####
 #
 
-txt = smagic("\\{} it's some braces")
+txt = string_magic("\\{} it's some braces")
 test(txt, "{} it's some braces")
 
 txt = dsb("\\.[] it's some dsb")
 test(txt, ".[] it's some dsb")
 
-txt = smagic("I'm saying {q!ha \\} ha}!")
+txt = string_magic("I'm saying {q!ha \\} ha}!")
 test(txt, "I'm saying 'ha } ha'!")
 
 txt = dsb("I'm saying .[q!ha \\] ha]!")
@@ -908,56 +908,56 @@ xplode = function(x, argument, options, ...){
   unlist(strsplit(as.character(x), ""))
 }
 
-smagic_register_fun(xplode, "xplode")
+string_magic_register_fun(xplode, "xplode")
 
-txt = smagic("bon{xplode!jour}")
+txt = string_magic("bon{xplode!jour}")
 test(txt, c("bonj", "bono", "bonu", "bonr"))
 
-smagic_register_ops("'50|-'fill", "h2")
-txt = smagic("my header ", .last = "h2")
+string_magic_register_ops("'50|-'fill", "h2")
+txt = string_magic("my header ", .last = "h2")
 
 
 # with scope
-smagic_register_ops("''s, x paste, ' + 'c", "equick", namespace = "test_ns")
+string_magic_register_ops("''s, x paste, ' + 'c", "equick", namespace = "test_ns")
 
-sma_test = smagic_alias(.namespace = "test_ns")
+sma_test = string_magic_alias(.namespace = "test_ns")
 txt = sma_test("y = {equick!173ab}")
 test(txt, "y = x1 + x7 + x3 + xa + xb")
 
-test_err_contains(smagic("y = {equick!173ab}"), "valid operator")
+test_err_contains(string_magic("y = {equick!173ab}"), "valid operator")
 test_err_contains(sma_test("y = {aezgfaffs!173ab}"), "!xplode")
 
 #
 # errors ####
 #
 
-test_err_contains(smagic("hi {there"), "bracket")
+test_err_contains(string_magic("hi {there"), "bracket")
 
-test_err_contains(smagic("hi {upper ! there"), "bracket")
+test_err_contains(string_magic("hi {upper ! there"), "bracket")
 
-test_err_contains(smagic("hi {S, ''S, ~(first ! bon, jour}"), "parenthesis")
+test_err_contains(string_magic("hi {S, ''S, ~(first ! bon, jour}"), "parenthesis")
 
-test_err_contains(smagic("hi {$(bon) ! jour}"), "if/plurali & (v1")
+test_err_contains(string_magic("hi {$(bon) ! jour}"), "if/plurali & (v1")
 
-test_err_contains(smagic("hi {&bonjour}"), "semi-colon")
+test_err_contains(string_magic("hi {&bonjour}"), "semi-colon")
 
-test_err_contains(smagic("hi {&bonjour ; jour}"), "bonjour & evaluated")
+test_err_contains(string_magic("hi {&bonjour ; jour}"), "bonjour & evaluated")
 
-test_err_contains(smagic("hi {&TRUE ; {upper ! jour ; voir}"), "closing bracket")
+test_err_contains(string_magic("hi {&TRUE ; {upper ! jour ; voir}"), "closing bracket")
 
-test_err_contains(smagic("hi {&TRUE ; {upperest ! jour} ; voir}"), "w/upper")
+test_err_contains(string_magic("hi {&TRUE ; {upperest ! jour} ; voir}"), "w/upper")
 
-test_err_contains(smagic("hi {&TRUE ; {upperest ? jour} ; voir}"), "jour & evaluated")
+test_err_contains(string_magic("hi {&TRUE ; {upperest ? jour} ; voir}"), "jour & evaluated")
 
-test_err_contains(smagic("hi {&bonjour ; jour}"), "bonjour & not found")
+test_err_contains(string_magic("hi {&bonjour ; jour}"), "bonjour & not found")
 
-test_err_contains(smagic("error operation: {if(1:5 ; upper ; lower) ! ohohoh}"), "w/if & length")
+test_err_contains(string_magic("error operation: {if(1:5 ; upper ; lower) ! ohohoh}"), "w/if & length")
 
-test_err_contains(smagic("error operation: {if(fakfak; upper ; lower) ! ohohoh}"), "w/if & evaluated & not found")
+test_err_contains(string_magic("error operation: {if(fakfak; upper ; lower) ! ohohoh}"), "w/if & evaluated & not found")
 
-test_err_contains(smagic("error operation: {if(fakfak%m; upper ; lower) ! ohohoh}"), "w/if & parsed")
+test_err_contains(string_magic("error operation: {if(fakfak%m; upper ; lower) ! ohohoh}"), "w/if & parsed")
 
-test_err_contains(smagic("error operation: {S, ~(sekg) ! ohohoh, hihihi}"), "not a valid op")
+test_err_contains(string_magic("error operation: {S, ~(sekg) ! ohohoh, hihihi}"), "not a valid op")
 
 test_err_contains(string_vec("hi, {there"), "bracket & matched & escape")
 
@@ -965,14 +965,14 @@ test_err_contains(string_vec("hi, {there"), "bracket & matched & escape")
 # multi line expressions ####
 #
 
-txt = smagic("The solution to x + 32 = 5 is {
+txt = string_magic("The solution to x + 32 = 5 is {
      y = 32
      z = 5
      z - y
 }")
 test(txt, "The solution to x + 32 = 5 is -27")
 
-txt = smagic("First letters: {
+txt = string_magic("First letters: {
      x = head(letters)
      fun = function(z){
           paste(z, collapse = '')
@@ -985,35 +985,35 @@ test(txt, "First letters: abcdef")
 # variables as arguments ####
 #
 
-txt = smagic("Hi {you}!", you = "Omer")
+txt = string_magic("Hi {you}!", you = "Omer")
 test(txt, "Hi Omer!")
 
-txt = smagic("m * n = {m * n}", m = 5, n = 4)
+txt = string_magic("m * n = {m * n}", m = 5, n = 4)
 test(txt, "m * n = 20")
 
 # with nesting
-txt = smagic("vars = {' + 'c ! {v1}_{suffix}}", v1 = c("x1", "z5"), suffix = "post")
+txt = string_magic("vars = {' + 'c ! {v1}_{suffix}}", v1 = c("x1", "z5"), suffix = "post")
 test(txt, "vars = x1_post + z5_post")
 
 # with ifelse
-txt = smagic("value = {&v1 > 0 ; {.} ; {v2}}", v1 = 55, v2 = "error")
+txt = string_magic("value = {&v1 > 0 ; {.} ; {v2}}", v1 = 55, v2 = "error")
 test(txt, "value = 55")
 
-txt = smagic("value = {&v1 > 0 ; {.} ; {v2}}", v1 = -55, v2 = "error")
+txt = string_magic("value = {&v1 > 0 ; {.} ; {v2}}", v1 = -55, v2 = "error")
 test(txt, "value = error")
 
 # with plural
-txt = smagic("The number{$s, is, ({v};{$enum}) ? x}", x = 1:3, v = "error")
+txt = string_magic("The number{$s, is, ({v};{$enum}) ? x}", x = 1:3, v = "error")
 test(txt, "The numbers are 1, 2 and 3")
 
-txt = smagic("The number{$s, is, ({v};{$enum}) ? x}", x = 3, v = "error")
+txt = string_magic("The number{$s, is, ({v};{$enum}) ? x}", x = 3, v = "error")
 test(txt, "The number is error")
 
 #
 # default options ####
 #
 
-sma2 = smagic_alias(.delim = "$[ ]")
+sma2 = string_magic_alias(.delim = "$[ ]")
 txt = sma2("x$[1:2]", .last = "C")
 test(txt, "x1 and x2")
 
@@ -1021,14 +1021,14 @@ test(txt, "x1 and x2")
 # .post + .last ####
 #
 
-x = smagic("{1:5}0", .last = "num", .post = sum)
+x = string_magic("{1:5}0", .last = "num", .post = sum)
 test(x, 150)
 
 #
 # .default ####
 #
 
-x = smagic("{1:5}0", .default = "'1|1'first, enum")
+x = string_magic("{1:5}0", .default = "'1|1'first, enum")
 test(x, "1 and 50")
 
 
