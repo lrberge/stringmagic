@@ -645,13 +645,20 @@ string_magic("{'5|0'fill.right, enum ? c(1, 55)}")
 ## Append text: paste
 
 Pastes a custom character string to all elements of the string. 
-This operation has no default.
+This operation has no default. 
 Options: `"both"`, `"right"`, `"front"`, `"back"`, `"delete"`. By default, a string is pasted on the left.
 Option `"right"` pastes on the right and `"both"` pastes on both sides. Option `"front"` only 
 pastes on the first element while option `"back"` only pastes on the last element. Option `"delete"`
 first replaces all elements with the empty string.
 ```{r}
-string_magic("6 = {'|'paste.both, ' + 'collapse ? -3:-1}")
+string_magic("y = {'x'paste, ' + 'collapse ? 1:3}")
+```
+
+The argument can be of the form `s1` or `s1|s2`. If of the second form, this is equivalent 
+to chaining two `paste` operations, once on the left and once on the right: `'s1'paste, 's2'paste.right`.
+
+```{r}
+string_magic("y = {'x|0'paste, ' + 'collapse ? 1:3}")
 ```
 
 ## Join lines: join

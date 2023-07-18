@@ -407,6 +407,8 @@
 #' pastes on the first element while option "back" only pastes on the last element. Option "delete"
 #' first replaces all elements with the empty string.
 #' Example: `string_magic("6 = {'|'paste.both, ' + 'c ? -3:-1}")` leads to "6 = |-3| + |-2| + |-1|".
+#' The argument can be of the form `s` or `s1|s2`. If of the second form, this is equivalent 
+#' to chaining two `paste` operations, once on the left and once on the right: `'s1'paste, 's2'paste.right`.
 #' + join: joins lines ending with a double backslash. Ex: `x = "the sun \\\n is shining"`; 
 #' `string_magic("{join ? x}")` leads to "the sun is shining".
 #' + escape: adds backslashes in front of specific characters. Options `"nl"`, `"tab"`. 

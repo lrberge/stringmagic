@@ -1905,18 +1905,24 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     }
     
     options = check_set_options(options, valid_options)
-
+    
+    left = right = ""
+    if(!any(c("both", "right") %in% options) && grepl("|", argument, fixed = TRUE)){
+      args = extract_pipe(argument, op)
+      left = args$value
+      right = args$extra
+    } else {
+      if("both" %in% options){
+        left = right = argument
+      } else if("right" %in% options){
+        right = argument
+      } else {
+        left = argument
+      }
+    }
+    
     if("delete" %in% options){
       x = character(length(x))
-    }
-
-    left = right = ""
-    if("both" %in% options){
-      left = right = argument
-    } else if("right" %in% options){
-      right = argument
-    } else {
-      left = argument
     }
 
     if(nchar(argument) == 0){

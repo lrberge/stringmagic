@@ -1022,6 +1022,11 @@ extract_pipe = function(x, op, double = FALSE, numeric = FALSE, data = NULL, mbt
   res = cpp_extract_pipe(x, double)
   
   if(x == "" || res$value == ""){
+    
+    if(identical(x, "|")){
+      res$value = "|"
+    }
+    
     if(!mbt){
       return(res)
     } else {
