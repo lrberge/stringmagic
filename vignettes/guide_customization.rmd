@@ -21,23 +21,56 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE, 
+  comment = "#>"
+)
 
+library(stringmagic)
+```
 
+You can customize The package stringmagic provides 
 
-# Creating your own operations {#sec_creation}
+# Creating your own string operations {#sec_creation}
 
-You can add any arbitraty operation to `string_magic`. You only need to 
-use the function `string_magic_register_fun` or `string_magic_register_ops`. 
+You can add any arbitraty operation to `string_magic`. There are two main ways:
+
+- registering a custom sequence of regular string_magic operations (`string_magic_register_ops`) 
+- registering a custom function (`string_magic_register_fun`)
+
+### New operations as a sequence of existing operations {sec_reg_ops}
+
+Create new sequence of operations with `string_magic_register_ops`. It takes two arguments:
+1) the sequence of `string_magic` operations, and 2) the name of the new operation.
+
+For example, let's create a new operation `h1` which formats a string into a header. 
+It adds an hypen before the text and adds hyphens after the text up to the 40th column.
+
+Ex.1: creating a header operation.
+```{r}
+# 1) we register the sequence of regular string_magic operations
+string_magic_register_ops("'- | 'paste, '40|-'fill", "h1")
+# 2) we use it
+string_magic("h1 ! That's my header", .nest = TRUE)
+```
+
+### New operations using a custom function
+
+To implement new operations using functions, you have two steps: 1) create the custom function,
+2) register the function an provide an alias to the operation.
 
 First you need to create a function that will be applied to a character vector. 
-That function must have at least the arguments 'x' and '...'. 
-Additionnaly, it can have the arguments: 'argument', 'options', 'group', 'group_flag'.
+That function **must** have at least the arguments `x` and `...`. 
+Additionnaly, it can have the optional arguments: `argument`, `options`, `group`, `group_flag`.
+This function must return a vector. Optionnally, and only if relevant (see the last example),
+you can add an attribute `"group"` to the returned object which will be used in grouped operations.
 
-Second, this function must return a vector or a list of two items: `x` and `group`. The latter
-form is only used in functions modifying the length or order of the vector.
+Second, you need to register the function with `string_magic_register_fun` and assign an alias to it. 
+Optionnally, you can provide a list of valid options. 
 
-Finally, you need to register the function with `string_magic_register_fun` and provide it an
-alias. Optionnally, you can provide a list of valid options. 
+Let's create an example in which we add markdown emphasis to words.
 
 Ex.1: a new operation adding markdown emphasis.
 ```{r}
@@ -50,10 +83,8 @@ string_magic_register_fun(fun_emph, "emph")
 
 # C) use it
 x = string_vec("right, now")
-string_magic("Take heed, {emph, c? x}.")
+string_magic("Take heed, {emph, collapse? x}.")
 ```
-
-Above, we have created a simple functon that adds markdown emphasis to words.
 
 More generally, the function taken by `string_magic_register_fun` is called internally 
 by `string_magic` in the form `fun(x, argument, options, group, group_flag)`.
@@ -93,7 +124,8 @@ string_magic("Take heed, {'_'emph.s, c? x}.")
 try(string_magic("Take heed, {'_'emph.aaa, c? x}."))
 ```
 
-Finally let's illustrate an example with group-wise axareness. 
+Finally let's illustrate an example with group-wise awareness. This is somewhat advanced and should
+be of concern only when you regularly use [group-wise operations](LINK).
 
 Ex.3: we create a function that only keeps variable names (ex: x5, is_num, etc).
 ```{r}
@@ -103,10 +135,13 @@ keep_varnames = function(x, group, group_flag, ...){
   
   if(group_flag != 0){
     group = group[is_ok]
-    group = stringmagic:::cpp_recreate_index(group)
+    # recreating the index
+    group = unclass(as.factor(group))
   } 
   
-  res = list(x = x[is_ok], group = group)
+  res = x[is_ok]
+  # we add the group in an attribute (this is the way)
+  attr(res, "group") = group
   
   return(res)
 }
@@ -114,9 +149,100 @@ keep_varnames = function(x, group, group_flag, ...){
 string_magic_register_fun(keep_varnames, "keepvar")
 
 expr = c("x1 + 52", "73 %% 5 == x", "y[y > .z_5]")
-string_magic("All vars: {'[^[:alnum:]_.]+'s, keepvar, unik, bq, C ? expr}.")
+string_magic("All vars: {'[^[:alnum:]_.]+'split, keepvar, unik, enum.bq ? expr}.")
 
 # thanks to the group flag, we can apply group-wise operations
+# we apply cat after the function (using .post) to have a nice display of the newlines 
 string_magic("Vars in each expr:\n",
-        "{'\n'c ! - {1:3}) {'[^[:alnum:]_.]+'s, keepvar, bq, ~(unik, C) ? expr}}")
+             "{'\n'c ! - {1:3}) {'[^[:alnum:]_.]+'split, ",
+                                 "keepvar, ~(unik, enum.bq) ? expr}}", .post = cat)
+```
+
+
+# Using `stringmagic` with custom operations as a dependency
+
+This is section is only relevant if: 1) you use `stringmagic` as a dependency in your package,
+and 2) you use custom `stringmagic` operations. If you answer "no" to any of these 
+two points, do not read this section, it's only about details. *Otherwise it's a must read.*
+
+To use custom `stringmagic` operations within a package, you need to explicitly register
+the operations in a specific namespace, and, when using the `stringmagic` functions, 
+you need to add the argument .namespace telling where the new operations are located.
+
+## Why do I need a namespace?
+
+There are two reasons: i) to ensure compatibility with future versions of the `stringmagic` package,
+and ii) to avoid conflicts with user-created operations. 
+Let's take an example. You create a package an use `stringmagic` with the custom operation
+`h1`, detailed [here](#sec_reg_ops), to create headers. Now let's say a future version of 
+`stringmagic` also introduces a `h1` function, that works differently from yours. This means
+that your package will work with the old `stringmagic` version but will lead to a bug with 
+the new version. Not great!
+
+Same story if the user defines her own `h1` operation: we end up with two operations with the 
+same name, hence a conflict. 
+
+We need a mechanism to ensure that the `h1` operation in
+your package always work, irrespecive of the doings of the user and of the version of `stringmagic`.
+We now detail how to do it.
+
+## Using custom operations in a package
+
+To use custom operations in a package:
+
+1. add the argument `.namespace = "my_package_name"` to the calls to `string_magic_register_ops` 
+and `string_magic_register_fun`
+2. add the argument `.namespace = "my_package_name"` to any call to `stringmagic`'s functions using 
+custom operation. Achive this simply by creating aliases to `stringmagic` function.
+
+### Example
+
+You develop the package `superpack` which uses `stringmagic` to display messages to the user 
+and you want to register the `header` operation (behaving [similarly to `h1`](#sec_reg_ops)).
+```{r}
+string_magic_register_ops("'- | 'paste, '70|-'fill", 
+                          alias = "header", 
+                          namespace = "superpack")
+```
+
+You can now summon your new operation to write a message to the user. Just remenber that 
+you need the `.namespace` argument:
+
+```{r}
+time = 0.7
+cat_magic("{header!Important message to you, user}",
+          "The algorithm converged in {time}s.", 
+          .sep = "\n", .namespace = "superpack")
+```
+
+Without the namespace argument, this leads to an error:
+```{r, error = TRUE}
+time = 0.7
+cat_magic("{header!Important message to you, user}",
+          "The algorithm converged in {time}s.", 
+          .sep = "\n")
+```
+
+Using the `.namsepace` argument is cumbersome. That is why `stringmagic` offers alias generators to
+easily create aliases of the `stringmagic` functions using custom operations.
+
+### Using aliases
+
+To avoid providing the argument `.namespace` at each call (which makes the function completely useless),
+use the alias genetaors. Functions with the suffix `_alias` are alias generators. Let's continue on the
+previous example but this time we avoid the argument `.namespace` by creating an alias.
+
+To create the alias, we use `cat_magic_alias` which creates a copy of `cat_magic` for which
+the default values have been modified. Here we override the function name (of course you can use 
+any other name, like `cmagic`, `magcat`, whatever!):
+```{r}
+cat_magic = stringmagic::cat_magic_alias(.namespace = "superpack")
+```
+
+An now we are able to access our previously defined function without error:
+```{r, error = TRUE}
+time = 0.7
+cat_magic("{header!Important message to you, user}",
+          "The algorithm converged in {time}s.", 
+          .sep = "\n")
 ```
