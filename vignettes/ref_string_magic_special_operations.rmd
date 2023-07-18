@@ -50,7 +50,7 @@ string_magic("Troubles ahead: {', 'split, ~(' loves 'c), C ? x}.")
 ```
 
 Almost all operations can be applied group-wise (although only operations changing the order or 
-the length of the strings really matter, see the [dedicated section](LINK)).
+the length of the strings really matter, see the [dedicated section](https://lrberge.github.io/stringmagic/articles/ref_operations.html#sec_op_length)).
 
 # Conditional operations {#sec_conditional}
 
@@ -313,7 +313,7 @@ string_magic("We've found {ndir} director{#ies}.")
 
 ### enum
 
-Enumerates the elements (see help for the [regular operation `enum`](LINK)).
+Enumerates the elements (see help for the [regular operation `enum`](https://lrberge.github.io/stringmagic/articles/ref_operations.html#create-an-enumeration-enum)).
 
 ```{r}
 fruits = c("apples", "oranges")

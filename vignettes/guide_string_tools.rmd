@@ -160,7 +160,7 @@ Even for simple tasks, the number of operations can quickly balloon, adding many
 lines of code, reducing readability, and all this for basic processing.
 
 The function `string_ops` tries to solve this problem. 
-It has access to all (50+) [`string_magic` operations](LINK), allowing for
+It has access to all (50+) [`string_magic` operations](https://lrberge.github.io/stringmagic/articles/ref_operations.html), allowing for
 a compact and readable way to chain basic operations on character strings.
 
 Below are a few motivating examples.
@@ -231,7 +231,7 @@ This function is of the form `string_clean(x, ...)` with `x` the vector to clean
 
 1. use `"pat1, pat2 => replacement"` to replace the regex patterns `pat1` and `pat2` 
 with the value `replacement`.
-1. use `"@op1, op2"` to perform any arbitrary sequence of [`string_magic` operation](LINK)
+1. use `"@op1, op2"` to perform any arbitrary sequence of [`string_magic` operation](https://lrberge.github.io/stringmagic/articles/ref_operations.html)
 
 In the operation `"pat1, pat2 => replacement"`, the pattern is first split with respect
 to the pipe, `" => "` (change it with argument `pipe`), to get `replacement`. 
@@ -301,7 +301,7 @@ more_fruits = string_vec("lemon, {fruits}, peach")
 more_fruits
 ```
 
-The interpolation is performed with [`string_magic`](LINK). This means that any [`string_magic` operation](LINK)
+The interpolation is performed with [`string_magic`](https://lrberge.github.io/stringmagic/articles/guide_string_magic.html). This means that any [`string_magic` operation](https://lrberge.github.io/stringmagic/articles/ref_operations.html)
 can be applied on-the-fly.
 
 Ex.3: replicating Ex.2 but shortening long fruit names.

@@ -173,7 +173,7 @@ string_magic("{upper.sentence ? oversight}")
 ```
 
 **Wrapping up.** With `string_magic` you can perform string interpolations *à la* `glue` and 
-also empower these interpolations by adding operations on-the-fly (see the [operations reference](LINK)). 
+also empower these interpolations by adding operations on-the-fly (see the [operations reference](https://lrberge.github.io/stringmagic/articles/ref_operations.html)). 
 This can take us a long way already. We are presenting next how you can nest interpolations and follow with
 an introduction to pluralization.
 
@@ -231,7 +231,7 @@ To achieve our goal, we used the operation `clean` which replaces
 comma separated regular expression patterns (of the form `'flags/pat1, pat2, etc'`) with the empty
 string. We also used the flag `f` (standing for 'fixed') to suppress the regular expression
 meaning of the patterns (because `'^'` has a specific meaning in regexes) -- see the 
-[vignette on flags](LINK) for more information.
+[vignette on flags](https://lrberge.github.io/stringmagic/articles/ref_regex_flags.html) for more information.
 Finally, you can notice that the operation `collapse` has a single letter alias.
 
 
@@ -275,7 +275,7 @@ The first interpolation is a regular one. The second one, `{#s, is}`, deduces th
 expression over which to pluralize from this previous interpolation.
 
 This was only an introduction. To have more information on pluralization,
-please see the [dedicated section](LINK).
+please see the [dedicated section](https://lrberge.github.io/stringmagic/articles/ref_string_magic_special_operations.html#sec_pluralization).
 
 
 # Escaping and special cases {#sec_special_cases}

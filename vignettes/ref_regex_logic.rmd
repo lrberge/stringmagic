@@ -31,7 +31,7 @@ regular expressions is intuitive: simply use regular logical operators and it wi
 
 The functions for whcih regex logic is available are: a) pattern detection functions 
 (`string_is`, `string_get`, etc), and b) string replacement functions (`string_clean`, 
-`string_replace`) with the `total` flag (see the [vignette on regex flags](LINK)).
+`string_replace`) with the `total` flag (see the [vignette on regex flags](https://lrberge.github.io/stringmagic/articles/ref_regex_flags.html)).
 
 
 # Logically combining regex patterns {#detect_logic}
@@ -93,7 +93,7 @@ The two solutions work for the three operators: `" & "`, `" | "` and `"!"`.
 
 ### How do regex flags work with logically combined regexes? {#logical_flags}
 
-All `stringmagic` regexes accept optional flags. Please see the [associated vignette](LINK).
+All `stringmagic` regexes accept optional flags. Please see the [associated vignette](https://lrberge.github.io/stringmagic/articles/ref_regex_flags.html).
 
 When you add flags to a pattern, these apply to *all* regex sub-patterns. 
 This means that `"f/( | )"` treats the two parentheses as "fixed". 

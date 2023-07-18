@@ -34,8 +34,9 @@ library(stringmagic)
 This vignette presents how to customize `stringmagic` to (better) suit your needs. It covers:
 
 - how to [create custom functions with alias generators](#sec_alias)
-- how to [create new string operations](#sec_creation) available within [`string_magic`](LINK)
-- how to [use `stringmagic` in a package when employing custom operations](LINK) (this is advanced)
+- how to [create new string operations](#sec_creation) available within 
+[`string_magic`](https://lrberge.github.io/stringmagic/articles/guide_string_magic.html)
+- how to [use `stringmagic` in a package when employing custom operations](#sec_package) (this is advanced)
 
 # Creating new functions with alias generators {#sec_alias}
 
@@ -88,7 +89,7 @@ fml_builder("{y} ~ {'+'collapse ! scale({x})}")
 
 ### Changing `str_clean`
 
-The function [`str_clean`](LINK) specialses in cleaning character vectors. To do so it uses a specific syntax
+The function [`str_clean`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_clean) specialses in cleaning character vectors. To do so it uses a specific syntax
 to transform various regular expressions at once. For example `"pat1, pat2 => replacement"` will turn the 
 regular expression `pat1` and `pat2` into the `replacement`. The syntax is: i) a comma separated
 list of regular expressions, 2) a pipe (`" => "`), 3) the replacement. 
@@ -108,7 +109,7 @@ my_clean(x, "e; o >> a")
 
 ### Creating small numeric matrices
 
-The function [`string_vec`](LINK) facilitates the creation of small character vectors.
+The function [`string_vec`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_vec) facilitates the creation of small character vectors.
 With its arguments `.nmat`, you can turn the vector into a numeric matrix. Hence, let us write
 a function to create small numeric matrices.
 
@@ -218,7 +219,7 @@ try(string_magic("Take heed, {'_'emph.aaa, c? x}."))
 ```
 
 Finally let's illustrate an example with group-wise awareness. This is somewhat advanced and should
-be of concern only when you regularly use [group-wise operations](LINK).
+be of concern only when you regularly use [group-wise operations](https://lrberge.github.io/stringmagic/articles/ref_string_magic_special_operations.html#sec_group_wise).
 
 Ex.3: we create a function that only keeps variable names (ex: x5, is_num, etc).
 ```{r}

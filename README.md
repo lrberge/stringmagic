@@ -4,10 +4,10 @@
 The purpose of `stringmagic` is to facilitate the manipulation of character strings.
 
 It introduces various functions to facilitate pattern detections via
-[regular expression (regex) logic](LINK), or to efficienty [clean character vectors](LINK) in a 
-readable way. Consistently across the package, regular expressions gain [optional flags](LINK) 
+[regular expression (regex) logic](https://lrberge.github.io/stringmagic/articles/ref_regex_logic.html), or to efficienty [clean character vectors](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_clean) in a 
+readable way. Consistently across the package, regular expressions gain [optional flags](https://lrberge.github.io/stringmagic/articles/ref_regex_flags.html) 
 to monitor how the patterns should behave (fixed search? ignore case? add word boundaries? etc).
-For more information, see the vignette on [string tools](LINK).
+For more information, see the vignette on [string tools](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html).
 
 The main contribution of this package, and flagship function, is `string_magic` which introduces 
 a new language tailored to create complex character strings. 
@@ -79,9 +79,9 @@ Other features are: advanced support for pluralization, nesting, conditional ope
 grouped operations, compact if-else statements, and unlimited customization.
 Here is a list of resources:
 
-+ [an introduction to `string_magic`](LINK)
-+ [`string_magic`'s reference](LINK)
-+ [operations reference](LINK)
++ [an introduction to `string_magic`](https://lrberge.github.io/stringmagic/articles/guide_string_magic.html)
++ [`string_magic`'s regular operations](https://lrberge.github.io/stringmagic/articles/ref_operations.html)
++ [`string_magic`'s special operations](https://lrberge.github.io/stringmagic/articles/ref_string_magic_special_operations.html)
 
 ### Friendly errors
 

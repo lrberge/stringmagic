@@ -40,7 +40,7 @@ display within this vignette we create an alias to `string_magic` which applies 
 just before leaving the function.
 ```{r}
 library(stringmagic)
-string_magic = string_magic_alias(.post = base::cat)
+string_magic = string_magic_alias(.post = base::cat, .invisible = TRUE)
 ```
 
 # Basic string operations {#sec_basic}
@@ -57,7 +57,7 @@ Splits the string according to a pattern. The four operations have different def
 for `s` and `split`, and `',[ \t\n]*'` for `S` and `Split` (i.e. comma separation). 
 
 When character strings are split, their identity is kept in memory 
-so that group-wise operations can be applied. See the [section on group-wise operations](LINK).
+so that group-wise operations can be applied. See the [section on group-wise operations](https://lrberge.github.io/stringmagic/articles/ref_string_magic_special_operations.html#sec_group_wise).
 ```{r}
 # 'Split' with its default (comma separation)
 string_magic("{Split ! romeo, juliet}")
@@ -111,7 +111,7 @@ Command `"extract"` accepts the option `"first"`, and
 Use the option `"first"` to extract only the first match for each string.
 
 When patterns are extracted, the identity of each original character string is kept in memory 
-so that group-wise operations can be applied. See the [section on group-wise operations](LINK).
+so that group-wise operations can be applied. See the [section on group-wise operations](https://lrberge.github.io/stringmagic/articles/ref_string_magic_special_operations.html#sec_group_wise).
 ```{r}
 x = c("margo: 32, 1m75", "luke doe: 27, 1m71")
 string_magic("{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}")
