@@ -131,7 +131,6 @@ bool delim::is_close(const char *str, int &i, int n, bool skip){
 // END OF: delimiter class ----------------------------------------------------- 
 //
 
-
 inline bool is_escaped(const char *str, int i){
   bool ok_escape = i >= 1 && str[i - 1] == '\\';
   
