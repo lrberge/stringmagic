@@ -31,17 +31,20 @@ knitr::opts_chunk$set(
 # we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
 library(stringmagic)
 
+# Option to allow caching in non interactive mode
 options("smagic_string_get_forced_caching" = TRUE)
 ```
 
 This vignette describes `stringmagic` tools for handling character vectors. 
-For a quick start, here are the sections describing:
+It details:
 
-- how to [detect complex regex (=regular expression) patterns](#detect_funs)
+- how to [detect complex regex (=regular expression) patterns](#sec_detect)
 - how to easily, and clearly, [chain multiple string operations](#sec_ops)
 - how to efficiently, and clearly, [clean character strings](#sec_clean)
+- how to quickly [create character vectors](#sec_vec)
+- how to [split a vector and turn the result into a data frame, and vice versa](#sec_split)
 
-# Intuivite detection of regex patterns
+# Detection of regex patterns {#sec_detect}
 
 Detecting a single regex pattern is pretty straightforward with regular tools
 like `base::grepl` or `stringr::string_detect`. Things become more complicated
@@ -50,16 +53,8 @@ when we want to detect the presence of multiple patterns.
 `stringmagic` offers three functions with an intuitive syntax to deal with 
 complex pattern detection:
 
-- [string_is](#detect_funs): returns a logical vector
-- [string_which](#detect_funs): returns the indexes of the matches
-- [string_get](#detect_funs): returns the matches
 
-As described in the next section., these tools benefit from a streamlined syntax to 
-logically combine several regex patterns. 
-
-
-
-## Pattern detection with `string_is`, `string_which` and `string_get` {#detect_funs}
+# Pattern detection with `string_is`, `string_which` and `string_get` {#detect_funs}
 
 Use `string_is`, `string_which` and `string_get` to detect patterns in character vectors and obtain either 
 a logical vector, an integer vector, or the values.
@@ -165,7 +160,7 @@ Even for simple tasks, the number of operations can quickly balloon, adding many
 lines of code, reducing readability, and all this for basic processing.
 
 The function `string_ops` tries to solve this problem. 
-It has access to all (50+) [`smagic` operations](https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html#sec_operations_reference), allowing for
+It has access to all (50+) [`smagic` operations](LINK), allowing for
 a compact and readable way to chain basic operations on character strings.
 
 Below are a few motivating examples.
@@ -174,19 +169,20 @@ Ex.1: Parsing data.
 ```{r}
 # parsing an input: extracting the numbers
 input = "8.5in, 5.5, .5 cm"
-string_ops(input, "','s, tws, '^\\. => 0.'r, '^\\D+|\\D+$'r, num")
+string_ops(input, "','split, tws, '^\\. => 0.'replace, '^\\D+|\\D+$'replace, num")
 # Explanation------------------------------------------------------------------|
-# ','s: splitting w.r.t. ','                                                   |
+# ','split: splitting w.r.t. ','                                               |
 # tws: trimming the whitespaces                                                |
-# '^\\. => 0.'r: adds a 0 to strings starting with '.'                         |
-# '^\\D+|\\D+$'r: removes non-digits on both ends of the string                |
+# '^\\. => 0.'replace: adds a 0 to strings starting with '.'                   |
+# '^\\D+|\\D+$'replace: removes non-digits on both ends of the string          |
 # num: converts to numeric                                                     |
 
 # now extracting the units
-string_ops(input, "','s, '^[ \\d.]+'r, tws")
+string_ops(input, "','split, '^[ \\d.]+'replace, tws")
 # Explanation------------------------------------------------------------------|
-# ','s: splitting w.r.t. ','                                                   |
-# '^[ \\d.]+'r: removes the ' ', digit and '.' at the beginning of the string  |
+# ','split: splitting w.r.t. ','                                               |
+# '^[ \\d.]+'replace: removes the ' ', digit                                   |
+#                     and '.' at the beginning of the string                   |
 # tws: trimming the whitespaces                                                |
 ```
 
@@ -235,7 +231,7 @@ This function is of the form `string_clean(x, ...)` with `x` the vector to clean
 
 1. use `"pat1, pat2 => replacement"` to replace the regex patterns `pat1` and `pat2` 
 with the value `replacement`.
-1. use `"@op1, op2"` to perform any arbitrary sequence of [`smagic` operation](https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html#sec_operations_reference)
+1. use `"@op1, op2"` to perform any arbitrary sequence of [`smagic` operation](LINK)
 
 In the operation `"pat1, pat2 => replacement"`, the pattern is first split with respect
 to the pipe, `" => "` (change it with argument `pipe`), to get `replacement`. 
@@ -281,5 +277,119 @@ string_clean(monologue,
           "@ws.punct")
 
 ```
+
+
+# Create simple character vectors with `string_vec` {#sec_vec}
+
+
+The function `string_vec` is dedicated to the creation of small character vectors.
+You feed it a comma separated list of values in a string and it will turn it 
+into a vector. 
+
+Ex.1: creating a simple vector.
+```{r}
+fruits = string_vec("orange, apple, pineapple, strawberry")
+fruits
+```
+
+Within the enumeration, you can use interpolation, with curly brackets (`{}`), to 
+insert the elements from a vector into the current string. 
+
+Ex.2: adding a vector into an enumeration.
+```{r}
+more_fruits = string_vec("lemon, {fruits}, peach")
+more_fruits
+```
+
+The interpolation is performed with [`smagic`](LINK). This means that any [`smagic` operation](LINK)
+can be applied on-the-fly.
+
+Ex.3: replicating Ex.2 but shortening long fruit names.
+```{r}
+more_fruits = string_vec("lemon, {6 Shorten ? fruits}, peach")
+more_fruits
+```
+
+Since interpolations are resolved with `smagic`, you can add any text before/after the 
+interpolation:
+
+Ex.4: adding text before the interpolation.
+```{r}
+pkgs = string_vec("pandas, os, time, re")
+imports = string_vec("import numpy as np, import {pkgs}")
+imports
+```
+
+### Creating small matrices or data frames
+
+You can transform the returned vector into a matrix or a data frame using the 
+arguments `.cmat`, `.nmat` (**c**haracter or **n**umeric matrix) or `.df`.
+
+Ex.5: returning a matrix.
+```{r}
+string_vec("1, 5,
+            3, 2,
+            5, 12", .nmat = TRUE)
+```
+
+The number of rows is guessed from the number of newlines in the string. You can avoid using
+character strings, but in that case you need to explicitly give the number of rows.
+
+Ex.5-bis: returning a numeric matrix, giving `.nmat` the number of rows.
+```{r}
+string_vec(1, 5,
+           3, 2,
+           5, 12, .nmat = 3)
+```
+
+If you want to return a data.frame, you can add the column names in the .df argument: either
+in a regular vector, either in a comma separated list. Note that columns looking like
+numeric values are always converted.
+
+Ex.6: returning a data frame.
+```{r}
+# you can add the column names directly in the argument .df
+df = string_vec("1, john,
+                 3, marie,
+                 5, harry", .df = "id, name")
+df
+# automatic conversion of numeric values
+df$id * 5
+```
+
+# Split vectors and turn the result into a data frame, and vice versa {#sec_split}
+
+The function `string_split2df` (and `string_split2dt`) splits a vector using a 
+regular expression pattern and turns it into a data frame, remembering the 
+original identifiers. You can get the original vectors back (almost) with the 
+function `paste_conditional`.
+
+Ex.1: breaking up two sentences with respect to punctuation and spaces; then merging them back.
+```{r}
+x = c("Nor rain, wind, thunder, fire are my daughters.",
+      "When my information changes, I alter my conclusions.")
+
+# we split at each word
+sentences_split = string_split2df(x, "[[:punct:] ]+")
+sentences_split
+
+# recovering the original vectors (we only lose the punctuation)
+paste_conditional(sentences_split$x, sentences_split$obs)
+```
+
+If identifiers are associated to the elements of the vector, you can provide them
+so that the data frame returned contains them.
+
+Ex.2: splitting with identifiers and merging back with a formula.
+```{r}
+id = c("ws", "jmk")
+# we add the identifier
+base_words = string_split2df(x, "[[:punct:] ]+", id = list(author = id))
+
+# merging back using a formula
+paste_conditional(x ~ author, base_words)
+```
+
+
 
 
