@@ -31,7 +31,100 @@ knitr::opts_chunk$set(
 library(stringmagic)
 ```
 
-You can customize The package stringmagic provides 
+This vignette presents how to customize `stringmagic` to (better) suit your needs. It covers:
+
+- how to [create custom functions with alias generators](#sec_alias)
+- how to [create new string operations](#sec_creation) available within [`string_magic`](LINK)
+- how to [use `stringmagic` in a package when employing custom operations](LINK) (this is advanced)
+
+# Creating new functions with alias generators {#sec_alias}
+
+Several `stringmagic` functions dispose of alias generators, which end with the suffix
+`_alias`. They generate a copy of the function with different default values (and also take
+care of setting up the environment correctly). Some functions have many arguments,
+by changing the default arguments you can create completely new functions. 
+
+This section will guide you through alias generation, and how they can be useful, using examples.
+
+### Creating a formula builder
+
+This is a common R problem: *how to turn a character string into a formula, in a handy way*? 
+You can use a few arguments of `string_magic` to make it work:
+
+- `.default`: to apply a default sequence of operations to interpolations
+- `.post`: to appy a custom function right before returning the object
+
+The objective here is to inject variable names into a character vector and turn it into a formula.
+Since variables in a formula are separated with a `"+"`, we need to collapse several variables
+with `"+"`. This will be achieved with the `.default` argument. Then we turn it into a formula
+by passing `as.formula` in the `.post` argument.
+
+```{r}
+y = "Petal.Length"
+x = c("Sepal.Length", "Petal.Width", "Species")
+string_magic("{y} ~ {x}", .default = "' + 'collapse", .post = as.formula)
+```
+
+Now that we see that our builder works with `string_magic`, we create a dedicated function with an alias.
+
+```{r}
+fml_builder = string_magic_alias(.default = "' + 'collapse", .post = as.formula)
+```
+
+The function `fml_builder` works as string_magic buut with different default values. 
+Now we can apply it directly.
+
+```{r}
+fml_builder("{y} ~ {x}")
+```
+
+Since this function is just a call to `string_magic`, you can apply anything you want. Let's
+scale the variables on the right-hand-side by using nesting:
+
+```{r}
+x = c("Sepal.Length", "Petal.Width")
+fml_builder("{y} ~ {'+'collapse ! scale({x})}")
+```
+
+### Changing `str_clean`
+
+The function [`str_clean`](LINK) specialses in cleaning character vectors. To do so it uses a specific syntax
+to transform various regular expressions at once. For example `"pat1, pat2 => replacement"` will turn the 
+regular expression `pat1` and `pat2` into the `replacement`. The syntax is: i) a comma separated
+list of regular expressions, 2) a pipe (`" => "`), 3) the replacement. 
+If you are not happy with the fact that regexes are separated with commas, or of the look of the pipe, no problem!
+
+Let's change the default values, let's: i) use a semi-colon separation, ii) use ">>" instead of the regular pipe.
+```{r}
+my_clean = string_clean_alias(split = "; ", pipe = " >> ")
+
+x = "My name is Bond, James Bond"
+# old way
+string_clean(x, "e, o => a")
+
+# new way
+my_clean(x, "e; o >> a")
+```
+
+### Creating small numeric matrices
+
+The function [`string_vec`](LINK) facilitates the creation of small character vectors.
+With its arguments `.nmat`, you can turn the vector into a numeric matrix. Hence, let us write
+a function to create small numeric matrices.
+
+We will use:
+
+- `.nmat = TRUE` to ask to transform the result into a numeric matrix. The number of 
+rows will be deduced from the number of newlines.
+-  `.last = "'[\n ,]+'split"` (`.last` means *last* operation) to split the resulting character vector with respect to
+newlines, commas and space, so that numbers can be separated by any succession of these
+
+```{r}
+num_mat = string_vec_alias(.nmat = TRUE, .last = "'[\n ,]+'split")
+num_mat("1, 2, 3
+         7, 5, 0
+         0, 0, 1")
+```
 
 # Creating your own string operations {#sec_creation}
 
@@ -159,7 +252,7 @@ string_magic("Vars in each expr:\n",
 ```
 
 
-# Using `stringmagic` with custom operations as a dependency
+# Using `stringmagic` with custom operations as a dependency {#sec_package}
 
 This is section is only relevant if: 1) you use `stringmagic` as a dependency in your package,
 and 2) you use custom `stringmagic` operations. If you answer "no" to any of these 
@@ -229,7 +322,7 @@ easily create aliases of the `stringmagic` functions using custom operations.
 ### Using aliases
 
 To avoid providing the argument `.namespace` at each call (which makes the function completely useless),
-use the alias genetaors. Functions with the suffix `_alias` are alias generators. Let's continue on the
+use the alias genetaors, as described in [the first section](#sec_alias). Let's continue on the
 previous example but this time we avoid the argument `.namespace` by creating an alias.
 
 To create the alias, we use `cat_magic_alias` which creates a copy of `cat_magic` for which
