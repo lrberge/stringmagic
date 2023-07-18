@@ -9,6 +9,7 @@ string_vec_alias(
   .cmat = FALSE,
   .nmat = FALSE,
   .df = FALSE,
+  .df.convert = TRUE,
   .last = NULL,
   .delim = c("{", "}"),
   .split = TRUE,
@@ -23,6 +24,7 @@ string_vec(
   .cmat = FALSE,
   .nmat = FALSE,
   .df = FALSE,
+  .df.convert = TRUE,
   .delim = c("{", "}"),
   .envir = parent.frame(),
   .split = TRUE,
@@ -62,7 +64,12 @@ is of length 1, its values are comma separated (i.e. the value \code{"id, name"}
 identical to \code{c("id", "name")}).
 
 Note that the columns that can be converted to numeric are converted to numeric.
-The other columns are in string form.}
+The other columns are in string form. Monitor this behavior with \code{.df.convert}.}
+
+\item{.df.convert}{Logical scalar, default is \code{TRUE}. Only used when the result is
+to be converted to a data frame (with the argument \code{.df}). If \code{TRUE}, any column
+looking like a numeric vector is converted to numeric. Otherwise all columns
+are character strings.}
 
 \item{.last}{Character scalar, a function, or \code{NULL} (default). If provided and character:
 it must be an \code{smagic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations

@@ -1506,7 +1506,12 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' identical to `c("id", "name")`).
 #' 
 #' Note that the columns that can be converted to numeric are converted to numeric.
-#' The other columns are in string form.
+#' The other columns are in string form. Monitor this behavior with `.df.convert`.
+#' 
+#' @param .df.convert Logical scalar, default is `TRUE`. Only used when the result is 
+#' to be converted to a data frame (with the argument `.df`). If `TRUE`, any column
+#' looking like a numeric vector is converted to numeric. Otherwise all columns 
+#' are character strings.
 #' 
 #' @details 
 #' The default of the argument `.protect.vars` is `FALSE` so as to avoid unwanted 
@@ -1556,6 +1561,7 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #'         8, 6, 2")
 #' 
 string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
+                   .df.convert = TRUE,
                    .delim = c("{", "}"), .envir = parent.frame(), 
                    .split = TRUE, .protect.vars = TRUE, .sep = NULL, 
                    .last = NULL,
@@ -1738,9 +1744,12 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
         names(res) = colnames
       }
       # conversion of the columns to numeric
-      for(i in 1:ncol(res)){
-        if(is_numeric_in_char(res[[i]])){
-          res[[i]] = as.numeric(res[[i]])
+      check_logical(.df.convert, scalar = TRUE)
+      if(.df.convert){
+        for(i in 1:ncol(res)){
+          if(is_numeric_in_char(res[[i]])){
+            res[[i]] = as.numeric(res[[i]])
+          }
         }
       }
     }

@@ -317,8 +317,8 @@ string_clean_alias = function(replacement = "", pipe = " => ", split = ",[ \n\t]
 }
 
 #' @describeIn string_vec Create `string_vec` aliases with custom defaults
-string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .df = FALSE, .last = NULL,
-                            .delim = c("{", "}"), .split = TRUE, 
+string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .df = FALSE, .df.convert = TRUE, 
+                            .last = NULL, .delim = c("{", "}"), .split = TRUE, 
                             .protect.vars = TRUE, .sep = NULL, 
                             .collapse = NULL, .namespace = NULL){
   
@@ -330,11 +330,13 @@ string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .df = FALSE, .last = N
   check_character(.namespace, scalar = TRUE, null = TRUE)
   .split = check_set_split(.split)
   check_set_mat(.cmat, .nmat, .df)
+  check_logical(.df.convert, scalar = TRUE)
   
   # forcing evaluation
   nmat = .nmat
   cmat = .cmat
   df = .df
+  df.convert = .df.convert
   last = .last
   delim = .delim
   split = .split
@@ -343,12 +345,12 @@ string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .df = FALSE, .last = N
   collapse = .collapse
   namespace = .namespace  
   
-  res = function(..., .cmat = cmat, .nmat = nmat, .df = df, .last = last, 
-                   .delim = delim, .envir = parent.frame(), 
-                   .split = split, .protect.vars = protect.vars, .sep = sep, 
-                   .collapse = collapse, .namespace = namespace){
+  res = function(..., .cmat = cmat, .nmat = nmat, .df = df, .df.convert = df.convert,
+                 .last = last, .delim = delim, .envir = parent.frame(), 
+                 .split = split, .protect.vars = protect.vars, .sep = sep, 
+                 .collapse = collapse, .namespace = namespace){
 
-    string_vec(..., .cmat = .cmat, .nmat = .nmat, .df = .df, 
+    string_vec(..., .cmat = .cmat, .nmat = .nmat, .df = .df, .df.convert = .df.convert, 
                    .last = last, .delim = .delim, .envir = .envir, 
                    .split = .split, .protect.vars = .protect.vars, .sep = .sep, 
                    .collapse = .collapse, .namespace = .namespace)
