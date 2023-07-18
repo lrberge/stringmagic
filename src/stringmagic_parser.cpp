@@ -845,7 +845,14 @@ void parse_box(delim &delims, bool &is_pblm, const char * str, int &i, int n,
         ++i;
       } else if(is_quote(str, i)){
         // we extract the quoted argument
-        extract_quote(str, i, n, operator_tmp);
+        // only if the quote is the first element, ie not yet inside an operator
+        
+        if(!in_operator){
+          extract_quote(str, i, n, operator_tmp);
+        } else {
+          operator_tmp += str[i++];
+        }       
+        
       } else if(str[i] == '('){
 
         if(in_operator){
