@@ -715,6 +715,7 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
       }
     }
   }
+  
 
   # NOTE on the parsing:
   # - parsing returns a list.
