@@ -373,13 +373,13 @@ conditional statements described in the next section.
 Ex.3: multiple verbs and conditional statements.
 ```{r}
 pple = c("Francis", "Henry")
-string_magic("{$enum, is, (a;) ? pple} tall guy{$s}.",
+cat_magic("{$enum, is, (a;) ? pple} tall guy{$s}.",
         "{$(He;They), like} to eat donuts.",
         "When happy, at the pub {$(he;they), goes}!",
         "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", .sep = "\n")
 
 pple = "Francis"
-string_magic("{$enum, is, (a;) ? pple} tall guy{$s}.",
+cat_magic("{$enum, is, (a;) ? pple} tall guy{$s}.",
         "{$(He;They), like} to eat donuts.",
         "When happy, at the pub {$(he;they), goes}!",
         "{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?", .sep = "\n")
