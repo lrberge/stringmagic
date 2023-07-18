@@ -72,7 +72,7 @@ looking like a numeric vector is converted to numeric. Otherwise all columns
 are character strings.}
 
 \item{.last}{Character scalar, a function, or \code{NULL} (default). If provided and character:
-it must be an \code{smagic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
+it must be an \code{string_magic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
 are applied just before returning the vector. If a function,
 it will be applied to the resulting vector.}
 
@@ -108,17 +108,17 @@ is performed on all variables.}
 \code{\link[base:paste]{base::paste()}} is applied to the resulting vector with \code{collapse = .collapse}.
 
 If so, pass the name of your package in this argument so that your function can access
-the new \code{smagic} operations defined within your package.}
+the new \code{string_magic} operations defined within your package.}
 
 \item{.namespace}{Character scalar or \code{NULL} (default). \strong{Only useful for package developers.}
-As a regular end-user you shouldn't care! If your package uses \code{smagic}, you should care.
-It is useful \strong{only} if your package uses 'custom' \code{smagic} operations, set with
-\code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.}
+As a regular end-user you shouldn't care! If your package uses \code{string_magic}, you should care.
+It is useful \strong{only} if your package uses 'custom' \code{string_magic} operations, set with
+\code{\link[=string_magic_register_fun]{string_magic_register_fun()}} or \code{\link[=string_magic_register_ops]{string_magic_register_ops()}}.}
 
 \item{...}{Character vectors that will be vectorized. If commas are present in the
 character vector, it will be split with respect to commas and following blanks.
 The vectors can contain any interpolation in the form \code{"{var}"} and
-any \code{\link[=smagic]{smagic()}} operation can be applied. To change the delimiters for interpolation,
+any \code{\link[=string_magic]{string_magic()}} operation can be applied. To change the delimiters for interpolation,
 see \code{.delim}. Named arguments are used in priority for variable substitution,
 otherwise the value of the variables to be interpolated are fetched in the calling environment
 (see argument \code{.envir}).
@@ -137,7 +137,7 @@ Create string vectors in multiple ways: 1) add successive string elements (like 
 or 2) write a character string that will be broken with respect to commas
 (\code{"hi, there"} becomes \code{c("hi", "there")}), or 3) interpolate variables in
 character strings (\code{"x{1:2}"} becomes \code{c("x1", "x2")}) with full access to
-\code{\link[=smagic]{smagic()}} operations, or any combination of the three.
+\code{\link[=string_magic]{string_magic()}} operations, or any combination of the three.
 }
 \details{
 The default of the argument \code{.protect.vars} is \code{FALSE} so as to avoid unwanted
@@ -188,9 +188,9 @@ matgen("5, 4, 3
 \seealso{
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
-\code{\link{smagic_alias}()},
-\code{\link{smagic}()},
 \code{\link{string_clean_alias}()},
+\code{\link{string_magic_alias}()},
+\code{\link{string_magic}()},
 \code{\link{string_ops_alias}()}
 }
 \author{

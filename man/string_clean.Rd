@@ -91,12 +91,12 @@ the first match found. Ex: \code{string_clean("abc", "[[:alpha:]] => _", single 
 to \code{"_bc"}, while \code{string_clean("abc", "[[:alpha:]] => _")} leads to \code{"___"}.}
 
 \item{namespace}{Character scalar or \code{NULL} (default). \strong{Only useful for package developers.}
-As a regular end-user you shouldn't care! If your package uses \code{smagic}, you should care.
-It is useful \strong{only} if your package uses 'custom' \code{smagic} operations, set with
-\code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.
+As a regular end-user you shouldn't care! If your package uses \code{string_magic}, you should care.
+It is useful \strong{only} if your package uses 'custom' \code{string_magic} operations, set with
+\code{\link[=string_magic_register_fun]{string_magic_register_fun()}} or \code{\link[=string_magic_register_ops]{string_magic_register_ops()}}.
 
 If so pass the name of your package in this argument so that your function can access
-the new \code{smagic} operations defined within your package.}
+the new \code{string_magic} operations defined within your package.}
 
 \item{x}{A character vector.}
 
@@ -227,15 +227,15 @@ with \code{\link[=string_clean]{string_clean()}}.
 
 Use \code{\link[=string_vec]{string_vec()}} to create simple string vectors.
 
-String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}. You can change \code{smagic}
-default values with \code{\link[=smagic_alias]{smagic_alias()}} and add custom operations with \code{\link[=smagic_register_fun]{smagic_register_fun()}}.
+String interpolation combined with operation chaining: \code{\link[=string_magic]{string_magic()}}. You can change \code{string_magic}
+default values with \code{\link[=string_magic_alias]{string_magic_alias()}} and add custom operations with \code{\link[=string_magic_register_fun]{string_magic_register_fun()}}.
 
-Display messages while benefiting from \code{smagic} interpolation with \code{\link[=cat_magic]{cat_magic()}} and \code{\link[=message_magic]{message_magic()}}.
+Display messages while benefiting from \code{string_magic} interpolation with \code{\link[=cat_magic]{cat_magic()}} and \code{\link[=message_magic]{message_magic()}}.
 
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
-\code{\link{smagic_alias}()},
-\code{\link{smagic}()},
+\code{\link{string_magic_alias}()},
+\code{\link{string_magic}()},
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }

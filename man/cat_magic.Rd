@@ -103,7 +103,7 @@ The default value is equivalent to \code{"{ }"}.
 [", "]: R:\%22,\%20\%22}
 
 \item{.last}{Character scalar, a function, or \code{NULL} (default). If provided and character:
-it must be an \code{smagic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
+it must be an \code{string_magic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
 are applied just before returning the vector. If a function,
 it will be applied to the resulting vector.}
 
@@ -117,9 +117,9 @@ Without error-handling you can save something of the order of 40us. Useful only
 in long loops.}
 
 \item{.namespace}{Character scalar or \code{NULL} (default). \strong{Only useful for package developers.}
-As a regular end-user you shouldn't care! If your package uses \code{smagic}, you should care.
-It is useful \strong{only} if your package uses 'custom' \code{smagic} operations, set with
-\code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.}
+As a regular end-user you shouldn't care! If your package uses \code{string_magic}, you should care.
+It is useful \strong{only} if your package uses 'custom' \code{string_magic} operations, set with
+\code{\link[=string_magic_register_fun]{string_magic_register_fun()}} or \code{\link[=string_magic_register_ops]{string_magic_register_ops()}}.}
 
 \item{...}{Character scalars that will be collapsed with the argument \code{sep}. Note that
 named arguments are used for substitution.
@@ -150,10 +150,10 @@ documentation and any section containining a match is displayed. The user can ea
 navigate across matches.}
 }
 \description{
-Utilities to display messages using \code{smagic} interpolation and operations to generate the message.
+Utilities to display messages using \code{string_magic} interpolation and operations to generate the message.
 }
 \details{
-These functions are \code{\link[base:cat]{base::cat()}}/\code{\link[=message]{message()}} wrappers aroung \code{\link[=smagic]{smagic()}}. There is one notable difference
+These functions are \code{\link[base:cat]{base::cat()}}/\code{\link[=message]{message()}} wrappers aroung \code{\link[=string_magic]{string_magic()}}. There is one notable difference
 with respect to \code{cat}/\code{message}. It's the ability to add newlines after words for
 the message to fit a target width. This is controlled with the argument \code{.width}. This is
 active by default for \code{message_magic} (default is \code{.width = NULL} which leads to the
@@ -163,9 +163,9 @@ You can very easily change the default values with the alias generators \code{ca
 \code{message_magic_alias}.
 
 \verb{[Advanced]} A note for package developers who would use these functions \strong{and}
-also use custom \code{smagic} operations created with \code{\link[=smagic_register_fun]{smagic_register_fun()}} or
-\code{\link[=smagic_register_ops]{smagic_register_ops()}}. To ensure forward compatibility the new operations created
-should be defined in the package namespace (see the \emph{ad hoc} section in \code{\link[=smagic_register_fun]{smagic_register_fun()}} help).
+also use custom \code{string_magic} operations created with \code{\link[=string_magic_register_fun]{string_magic_register_fun()}} or
+\code{\link[=string_magic_register_ops]{string_magic_register_ops()}}. To ensure forward compatibility the new operations created
+should be defined in the package namespace (see the \emph{ad hoc} section in \code{\link[=string_magic_register_fun]{string_magic_register_fun()}} help).
 To access these operators in their specific namespaces, you must use an alias with
 \code{cat_magic_alias} or \code{message_magic_alias} with the argument \code{.namespace = "myPackageName"}
 (to avoid having to provide the \code{.namespace} argument repeatedly).
@@ -208,14 +208,14 @@ cat_magic("Here's a list:",
 cat_column = cat_magic_alias(.sep = "\n", .end = "\n", .vectorize = TRUE, 
                             .last = "fill.center, ' + 'paste.both")
 
-cat_column("code smagic", "write the docs", "write the vignettes")
+cat_column("code string_magic", "write the docs", "write the vignettes")
 
 }
 \seealso{
 Other tools with aliases: 
-\code{\link{smagic_alias}()},
-\code{\link{smagic}()},
 \code{\link{string_clean_alias}()},
+\code{\link{string_magic_alias}()},
+\code{\link{string_magic}()},
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }

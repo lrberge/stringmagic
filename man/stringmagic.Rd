@@ -7,15 +7,15 @@
 \title{String operations and interpolation: magic edition}
 \description{
 The stringmagic package introduces a new language tailored to create complex character strings.
-Use the function smagic to interpolate a variable inside a character string and to apply,
+Use the function string_magic to interpolate a variable inside a character string and to apply,
 on-the-fly, any arbitrary string operation.
 }
 \details{
 It supports over 50 basic operations, seamless customization, nesting,
 pluralization, and much more. Writing complex character strings has never been that easy!
 
-To get an overview of the package: \href{https://lrberge.github.io/stringmagic/articles/stringmagic_tour.html}{take the tour}. To get started with smagic,
-see \href{https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html}{the vignette}.
+To get an overview of the package: \href{https://lrberge.github.io/stringmagic/articles/stringmagic_tour.html}{take the tour}. To get started with string_magic,
+see \href{https://lrberge.github.io/stringmagic/articles/string_magic_walkthrough.html}{the vignette}.
 
 This package also enhances regular string functions (like grep and co) with
 specialized functions to:

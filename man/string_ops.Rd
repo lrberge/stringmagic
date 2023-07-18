@@ -12,7 +12,7 @@ string_ops(x, op, pre_unik = NULL, namespace = NULL, envir = parent.frame())
 \arguments{
 \item{op}{Character \strong{scalar}. Character scalar containing the comma separated values
 of operations to perform to the vector. The 50+ operations are detailed in the help
-page of \code{\link[=smagic]{smagic()}}.}
+page of \code{\link[=string_magic]{string_magic()}}.}
 
 \item{pre_unik}{Logical scalar, default is \code{NULL}. Whether to first unique the vector
 before applying the possibly costly string operations, and merging back the result.
@@ -20,12 +20,12 @@ For very large vectors with repeated values the time gained can be substantial. 
 default, this is \code{TRUE} for vector of length 1M or more.}
 
 \item{namespace}{Character scalar or \code{NULL} (default). \strong{Only useful for package developers.}
-As a regular end-user you shouldn't care! If your package uses \code{smagic}, you should care.
-It is useful \strong{only} if your package uses 'custom' \code{smagic} operations, set with
-\code{\link[=smagic_register_fun]{smagic_register_fun()}} or \code{\link[=smagic_register_ops]{smagic_register_ops()}}.
+As a regular end-user you shouldn't care! If your package uses \code{string_magic}, you should care.
+It is useful \strong{only} if your package uses 'custom' \code{string_magic} operations, set with
+\code{\link[=string_magic_register_fun]{string_magic_register_fun()}} or \code{\link[=string_magic_register_ops]{string_magic_register_ops()}}.
 
 If so pass the name of your package in this argument so that your function can access
-the new \code{smagic} operations defined within your package.}
+the new \code{string_magic} operations defined within your package.}
 
 \item{x}{A character vector. If not a character vector but atomistic (i.e. not a list),
 it will be converted to a character vector.}
@@ -41,8 +41,8 @@ one, depending on the operations performed.
 Simple tool to perform multiple operations to character vectors.
 }
 \details{
-This function is a simple wrapper around smagic. Formally, \code{string_ops(x, "op1, op2")}
-is equivalent to \code{smagic("{op1, op2 ? x}")}.
+This function is a simple wrapper around string_magic. Formally, \code{string_ops(x, "op1, op2")}
+is equivalent to \code{string_magic("{op1, op2 ? x}")}.
 }
 \section{Functions}{
 \itemize{
@@ -64,7 +64,7 @@ string_ops(cars, "'i/^m'get, x, unik")
 # x: extracts the first pattern. The default pattern is "[[:alnum:]]+"
 #    which means an alpha-numeric word
 # unik: applies unique() to the vector
-# => see help in ?smagic for more details on the operations
+# => see help in ?string_magic for more details on the operations
 
 
 # let's get the 3 largest numbers appearing in the car models
@@ -84,9 +84,9 @@ string_ops(cars, "'\\\\d+'x, rm, unik, num, dsort, 3 first")
 \seealso{
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
-\code{\link{smagic_alias}()},
-\code{\link{smagic}()},
 \code{\link{string_clean_alias}()},
+\code{\link{string_magic_alias}()},
+\code{\link{string_magic}()},
 \code{\link{string_vec_alias}()}
 }
 \author{

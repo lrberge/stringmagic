@@ -71,15 +71,15 @@ with \code{\link[=string_clean]{string_clean()}}.
 
 Use \code{\link[=string_vec]{string_vec()}} to create simple string vectors.
 
-String interpolation combined with operation chaining: \code{\link[=smagic]{smagic()}}. You can change \code{smagic}
-default values with \code{\link[=smagic_alias]{smagic_alias()}} and add custom operations with \code{\link[=smagic_register_fun]{smagic_register_fun()}}.
+String interpolation combined with operation chaining: \code{\link[=string_magic]{string_magic()}}. You can change \code{string_magic}
+default values with \code{\link[=string_magic_alias]{string_magic_alias()}} and add custom operations with \code{\link[=string_magic_register_fun]{string_magic_register_fun()}}.
 
-Display messages while benefiting from \code{smagic} interpolation with \code{\link[=cat_magic]{cat_magic()}} and \code{\link[=message_magic]{message_magic()}}.
+Display messages while benefiting from \code{string_magic} interpolation with \code{\link[=cat_magic]{cat_magic()}} and \code{\link[=message_magic]{message_magic()}}.
 
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
-\code{\link{smagic_alias}()},
-\code{\link{smagic}()},
+\code{\link{string_magic_alias}()},
+\code{\link{string_magic}()},
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }
