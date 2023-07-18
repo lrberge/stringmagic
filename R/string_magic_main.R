@@ -442,7 +442,7 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 
 #' @describeIn string_magic String interpolation with operation chaining
 string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
-                   .delim = c("{", "}"), .last = NULL, .post = NULL,
+                   .delim = c("{", "}"), .last = NULL, .post = NULL, .nest = FALSE,
                    .collapse = NULL, .invisible = FALSE, .default = NULL,
                    .check = TRUE, .class = NULL, .help = NULL, 
                    .namespace = NULL){
@@ -453,6 +453,7 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
     if(!missing(.envir)) check_envir(.envir)
     if(!missing(.sep)) check_character(.sep, scalar = TRUE)
     if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
+    if(!missing(.nest)) check_logical(.nest, scalar = TRUE)
     if(!missing(.delim)){
       .delim = check_set_delimiters(.delim)
     }
@@ -476,7 +477,7 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
   } 
   
   res = string_magic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
-                            .vectorize = .vectorize, .help = .help, 
+                            .vectorize = .vectorize, .help = .help, .nest = .nest,
                             .collapse = .collapse, .is_root = TRUE, 
                             .namespace = .namespace, .default = .default,
                             .check = .check, .last = .last)
@@ -505,7 +506,7 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
 
 #' @describeIn string_magic A simpler version of `string_magic` without any error handling to save a few micro seconds
 .string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
-                    .delim = c("{", "}"), .collapse = NULL, .last = NULL,
+                    .delim = c("{", "}"), .collapse = NULL, .last = NULL, .nest = FALSE,
                     .namespace = NULL){
   
   if(length(.delim) == 1){
@@ -513,7 +514,7 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
   }
 
   string_magic_internal(..., .delim = .delim, .envir = .envir, 
-                      .sep = .sep, .namespace = .namespace,
+                      .sep = .sep, .namespace = .namespace, .nest = .nest,
                       .vectorize = .vectorize, .is_root = TRUE, 
                       .collapse = .collapse,
                       .check = FALSE, .last = .last)
@@ -528,7 +529,7 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
 
 string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .data = list(),
                                .sep = "", .vectorize = FALSE,
-                               .collapse = NULL, .last = NULL,  
+                               .collapse = NULL, .last = NULL, .nest = FALSE,
                                .help = NULL, .is_root = FALSE, 
                                .namespace = NULL, .user_funs = NULL,
                                .valid_operators = NULL, .default = NULL,
@@ -618,6 +619,12 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
       dots$sep = .sep
       x = do.call(paste, dots)
     } else {
+      
+      if(.nest){
+        stop_hook("The argument `.nest` is not compatible with the argument `.vectorize`.",
+                  "One of the two must be set to `FALSE`.")
+      }
+      
       # vectorize
       n = length(dots)
       res = vector("list", n)
@@ -673,6 +680,10 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
 
   if(is.na(x) || length(x) == 0){
     return(x)
+  }
+  
+  if(.nest){
+    x = paste0(.delim[1], x, .delim[2])
   }
 
   BOX_OPEN = .delim[1]
@@ -1212,7 +1223,8 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       res = fun(x = x, argument = argument, options = options, group = group_index, 
                 group_flag = group_flag)
 
-      group_index = attr(res, "group_index")
+      # NOTA: for the users I use 'group', internally I use 'group_index'
+      group_index = attr(res, "group")
       if(group_flag != 0 && is.null(group_index) && !isTRUE(attr(fun, "group_flag")) 
           && length(x) == length(res)){
         # This is the case in which there is grouping but we don"t impose

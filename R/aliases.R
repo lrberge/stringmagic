@@ -16,7 +16,7 @@
 #' operator an `ops` is a character scalar representing the associated string_magic operations.
 #' Ex: `list(add = "' + 'collapse")` creates the operation `add` which collapses the 
 #' string with pluses. All operations created here are only available to the
-#' generated function.h
+#' generated function.
 #' 
 #' @details 
 #' 
@@ -48,7 +48,7 @@
 #' 
 string_magic_alias = function(.sep = "", .vectorize = FALSE, 
                         .delim = c("{", "}"), .last = NULL, 
-                        .post = NULL, .default = NULL, 
+                        .post = NULL, .default = NULL, .nest = FALSE,
                         .invisible = FALSE, .local_ops = NULL,
                         .collapse = NULL,  .check = TRUE, 
                         .class = NULL, .namespace = NULL){
@@ -60,6 +60,7 @@ string_magic_alias = function(.sep = "", .vectorize = FALSE,
   check_last(.last)
   check_function(.post, null = TRUE)
   check_character(.default, scalar = TRUE, null = TRUE)
+  check_logical(.nest, scalar = TRUE)
   check_logical(.invisible, scalar = TRUE)
   # .local_ops, see below
   check_character(.collapse, scalar = TRUE, null = TRUE)
@@ -124,21 +125,26 @@ string_magic_alias = function(.sep = "", .vectorize = FALSE,
   last = .last
   post = .post
   default = .default
+  nest = .nest
   invisible = .invisible
   collapse = .collapse
   check = .check
   class = .class
   namespace = .namespace
   
+  if(.nest && .vectorize){
+    stop("You cannot have `.nest` and `.vectorize` at the same time. One of the two must be set to `FALSE`.")
+  }
+  
   res = function(..., .envir = parent.frame(), .sep = sep, .vectorize = vectorize, 
                    .delim = delim, .last = last, .post = post, .default = default,
-                   .invisible = invisible, .collapse = collapse, 
+                   .nest = nest, .invisible = invisible, .collapse = collapse, 
                    .check = check, .class = class, .help = NULL, 
                    .namespace = namespace){
                     
     string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
             .delim = .delim, .last = .last, .post = .post, .default = .default,
-            .invisible = .invisible, .collapse = .collapse,
+            .nest = .nest, .invisible = .invisible, .collapse = .collapse,
             .check = .check, .class = .class, .help = .help,
             .namespace = .namespace)
   }

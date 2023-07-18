@@ -11,6 +11,7 @@ string_magic_alias(
   .last = NULL,
   .post = NULL,
   .default = NULL,
+  .nest = FALSE,
   .invisible = FALSE,
   .local_ops = NULL,
   .collapse = NULL,
@@ -53,6 +54,11 @@ and is equivalent to \code{string_magic("x = {enum?x}")}. Note that this default
 not apply to nested expressions. That is \code{string_magic("{!x{1:2}}", .default = "enum")} leads
 to \code{c("x1", "x2")} and NOT \code{"x1 and 2"}.}
 
+\item{.nest}{Logical, default is \code{FALSE}. If \code{TRUE}, it will nest the original string within
+interpolation delimiters, so that you can apply operations directly on the string. Example:
+\code{string_magic("upper ! hello")} returns "upper ! hello", while \code{string_magic("upper ! hello", .nest = TRUE)}
+returns \code{"HELLO"}.}
+
 \item{.invisible}{Logical scalar, default is \code{FALSE}. Whether the object returned should be
 invisible (i.e. not printed on the console).}
 
@@ -61,7 +67,7 @@ of the form \code{list(alias1 = ops1, alias2 = ops2)} where alias is the name of
 operator an \code{ops} is a character scalar representing the associated string_magic operations.
 Ex: \code{list(add = "' + 'collapse")} creates the operation \code{add} which collapses the
 string with pluses. All operations created here are only available to the
-generated function.h}
+generated function.}
 
 \item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
 that should be returned is collapsed with the value of this argument. This leads

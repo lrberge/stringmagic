@@ -76,6 +76,10 @@
 #' As a regular end-user you shouldn't care! If your package uses `string_magic`, you should care. 
 #' It is useful **only** if your package uses 'custom' `string_magic` operations, set with 
 #' [string_magic_register_fun()] or [string_magic_register_ops()].
+#' @param .nest Logical, default is `FALSE`. If `TRUE`, it will nest the original string within 
+#' interpolation delimiters, so that you can apply operations directly on the string. Example:
+#' `string_magic("upper ! hello")` returns "upper ! hello", while `string_magic("upper ! hello", .nest = TRUE)`
+#' returns `"HELLO"`.
 #' 
 #'
 #' @details 
