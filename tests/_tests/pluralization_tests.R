@@ -64,16 +64,16 @@ test(txt, "There are 5 files and five directories.")
 
 # with 0 option
 n = 0
-txt = string_magic("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
+txt = string_magic("There {#is.0, n.letter.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
 test(txt, "There are no files and zero directories.")
 
 n = 1
-txt = string_magic("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
-test(txt, "There is 1 file and one directory.")
+txt = string_magic("There {#is.0, n.letter.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
+test(txt, "There is one file and one directory.")
 
 n = 5
-txt = string_magic("There {#is.0, n.letters.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
-test(txt, "There are 5 files and five directories.")
+txt = string_magic("There {#is.0, n.letter.no ? n} file{#s.ze} and {#N} director{#y.zero}.")
+test(txt, "There are five files and five directories.")
 
 #
 # plural: nested evaluation ####
