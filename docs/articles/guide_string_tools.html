@@ -53,7 +53,7 @@
     </li>
 <li class="dropdown-header">Guides</li>
     <li>
-      <a href="../articles/guide_smagic.html">`stringmagic`: A quick tour</a>
+      <a href="../articles/guide_string_magic.html">`string_magic`: Magical String Interpolation</a>
     </li>
     <li>
       <a href="../articles/guide_string_tools.html">String tools: magic edition</a>
@@ -65,10 +65,10 @@
     </li>
 <li class="dropdown-header">References</li>
     <li>
-      <a href="../articles/ref_smagic.html">`smagic`: Magical string interpolation</a>
+      <a href="../articles/ref_operations.html">`string_magic`'s operations: The reference</a>
     </li>
     <li>
-      <a href="../articles/ref_operations.html">`smagic`'s operations: The reference</a>
+      <a href="../articles/ref_string_magic_special_operations.html">`string_magic`'s sepcial operations</a>
     </li>
     <li>
       <a href="../articles/ref_regex_flags.html">Regular expression flags</a>
@@ -106,7 +106,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-06-30</h4>
+            <h4 data-toc-skip class="date">2023-07-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/guide_string_tools.rmd" class="external-link"><code>vignettes/guide_string_tools.rmd</code></a></small>
       <div class="hidden name"><code>guide_string_tools.rmd</code></div>
@@ -116,10 +116,9 @@ Bergé</h4>
     
     
 <p>This vignette describes <code>stringmagic</code> tools for handling
-character vectors. For a quick start, here are the sections
-describing:</p>
+character vectors. It details:</p>
 <ul>
-<li>how to <a href="#detect_funs">detect complex regex (=regular
+<li>how to <a href="#sec_detect">detect complex regex (=regular
 expression) patterns</a>
 </li>
 <li>how to easily, and clearly, <a href="#sec_ops">chain multiple string
@@ -128,286 +127,14 @@ operations</a>
 <li>how to efficiently, and clearly, <a href="#sec_clean">clean
 character strings</a>
 </li>
+<li>how to quickly <a href="#sec_vec">create character vectors</a>
+</li>
+<li>how to <a href="#sec_split">split a vector and turn the result into
+a data frame, and vice versa</a>
+</li>
 </ul>
-<p>This vignette is also a reference for i) the <a href="#sec_regex">optional regex flags</a> available to all
-<code>stringmagic</code> regular expressions, and ii) the <a href="#detect_logic">logical combination of regular expressions</a>.</p>
 <div class="section level2">
-<h2 id="sec_regex">Regex flags<a class="anchor" aria-label="anchor" href="#sec_regex"></a>
-</h2>
-<p>All functions in <code>stringmagic</code> accept optional regex flags
-when regular expressions are expected. The idea is similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#advanced_searching_with_flags" class="external-link">regular
-regex flags</a>, but the flags are different in name and effect.</p>
-<div class="section level3">
-<h3 id="regex-flags-syntax">Regex flags: Syntax<a class="anchor" aria-label="anchor" href="#regex-flags-syntax"></a>
-</h3>
-<p>Use <code>"flag1, flag2/regex"</code> to add the flags
-<code>flag1</code> and <code>flag2</code> to the regular expression
-<code>regex</code>. For example <code>"ignore, fixed/dt["</code> will
-add the flags <code>ignore</code> and <code>fixed</code> to the regex
-<code>dt[</code>.</p>
-<p>Alternatively, use only the initials of the flags. Hence,
-<code>"if/dt["</code> would also add the flags <code>ignore</code> and
-<code>fixed</code>.</p>
-<p>If the regex does not contain a slash (<code>/</code>), no flags are
-added. If your regex should contain a slash, see the <a href="#flag_escaping">section on escaping</a>.</p>
-<p>Ex: let’s find lines containing <code>"dt["</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">code</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DT = as.data.table(iris)"</span>, </span>
-<span>         <span class="st">"DT[, .(pl_sl = smagic('PL/SL = {Petal.Length / Sepal.Length}')]"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">code</span>, <span class="st">"if/dt["</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "DT[, .(pl_sl = smagic('PL/SL = {Petal.Length / Sepal.Length}')]"</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="regex-flags-reference">Regex flags: Reference<a class="anchor" aria-label="anchor" href="#regex-flags-reference"></a>
-</h3>
-<p>The available flags are:</p>
-<ul>
-<li>
-<a href="#flag_ignore">ignore</a>: always available</li>
-<li>
-<a href="#flag_fixed">fixed</a>: always available</li>
-<li>
-<a href="#flag_word">word</a>: always available</li>
-<li>
-<a href="#flag_magic">magic</a>: always available</li>
-<li>
-<a href="#flag_total">total</a>: only available in functions
-performing a replacement</li>
-<li>
-<a href="#flag_single">single</a>: only available in functions
-performing a replacement</li>
-</ul>
-<div class="section level4">
-<h4 id="flag_ignore">ignore<a class="anchor" aria-label="anchor" href="#flag_ignore"></a>
-</h4>
-<p>The flag <code>"ignore"</code> leads to a case-insensitive
-search.</p>
-<p>Ex: let’s extract words starting with the last letters of the
-alphabet.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">unhappy</span> <span class="op">=</span> <span class="st">"Rumble thy bellyful! Spit, fire! spout, rain!</span></span>
-<span><span class="st">Nor rain, wind, thunder, fire are my daughters.</span></span>
-<span><span class="st">I tax not you, you elements, with unkindness.</span></span>
-<span><span class="st">I never gave you kingdom, call'd you children,</span></span>
-<span><span class="st">You owe me no subscription. Then let fall</span></span>
-<span><span class="st">Your horrible pleasure. Here I stand your slave,</span></span>
-<span><span class="st">A poor, infirm, weak, and despis'd old man."</span></span>
-<span></span>
-<span><span class="co"># the ignore flag allows to retain words starting with the</span></span>
-<span><span class="co"># upper cased letters</span></span>
-<span><span class="co"># ex: getting words starting with the letter 'r' to 'z'</span></span>
-<span><span class="fu"><a href="../reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"{'i/\\b[r-z]\\w+'extract, c, 60 width ? unhappy}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Rumble thy Spit spout rain rain wind thunder tax you you\nwith unkindness you you You subscription Then Your stand\nyour slave weak"</span></span></code></pre></div>
-<p><em>Technically</em>, the <a href="https://www.pcre.org/" class="external-link">perl</a>
-expression <code>"(?i)"</code> is added at the beginning of the
-pattern.</p>
-</div>
-<div class="section level4">
-<h4 id="flag_fixed">fixed<a class="anchor" aria-label="anchor" href="#flag_fixed"></a>
-</h4>
-<p>The flag <code>"fixed"</code> removes any special regular expression
-meaning from the pattern, and treats it as verbatim.</p>
-<p>Ex: let’s fix the equation by changing the operators.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"50 + 5 * 5 = 40"</span></span>
-<span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"f/+, * =&gt; -"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "50 - 5 - 5 = 40"</span></span>
-<span></span>
-<span><span class="co"># Without the fixed flag, we would have gotten an error since '+' or '*'</span></span>
-<span><span class="co"># have a special meaning in regular expressions and expects something before</span></span>
-<span></span>
-<span><span class="co"># Here's the error</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"+, * =&gt; -"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error : in string_clean(x, "+, * =&gt; -"): </span></span>
-<span><span class="co">#&gt; CONTEXT: evaluation of "+, * =&gt; -"</span></span>
-<span><span class="co">#&gt;          pattern     = "+" </span></span>
-<span><span class="co">#&gt;          replacement = "-"</span></span>
-<span><span class="co">#&gt; EXPECTATION: the pattern must be a valid regular expression</span></span>
-<span><span class="co">#&gt; PROBLEM: `gsub` led to an error, see below:</span></span>
-<span><span class="co">#&gt; invalid regular expression '+'</span></span>
-<span><span class="co">#&gt; PCRE pattern compilation error</span></span>
-<span><span class="co">#&gt;  'quantifier does not follow a repeatable item'</span></span>
-<span><span class="co">#&gt;  at '+'</span></span></code></pre></div>
-<p><em>Technically</em>, if <code>"fixed"</code> is the only flag, then
-the functions <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::grepl</a></code> or <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::gsub</a></code> are
-run with the argument <code>fixed = TRUE</code>. If there are also the
-flags <code>"ignore"</code> or <code>"word"</code>, the pattern is
-nested into the perl boundaries <code>\\Q</code> and <code>\\E</code>
-which strip any special meaning from the pattern.</p>
-</div>
-<div class="section level4">
-<h4 id="flag_word">word<a class="anchor" aria-label="anchor" href="#flag_word"></a>
-</h4>
-<p>The flag <code>"word"</code>:</p>
-<ul>
-<li>adds word boundaries to the pattern</li>
-<li>accepts comma-separated enumerations of words which are concatenated
-with a logical ‘or’</li>
-</ul>
-<p>The logic of accepting comma-separated enumerations is to increase
-readability. For example, with the flag <code>"word"</code>,
-<code>"is, are, were"</code> is equivalent to
-<code>"\\b(is|are|were)\\b"</code>.</p>
-<p>Ex: we hide a few words from Alfred de Vigny’s poem.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">le_mont_des_oliviers</span> <span class="op">=</span> <span class="st">"S'il est vrai qu'au Jardin sacré des Écritures,</span></span>
-<span><span class="st">Le Fils de l'homme ai dit ce qu'on voit rapporté ;</span></span>
-<span><span class="st">Muet, aveugle et sourd au cri des créatures,</span></span>
-<span><span class="st">Si le Ciel nous laissa comme un monde avorté,</span></span>
-<span><span class="st">Alors le Juste opposera le dédain à l'absence</span></span>
-<span><span class="st">Et ne répondra plus que par un froid silence</span></span>
-<span><span class="st">Au silence éternel de la Divinité."</span></span>
-<span></span>
-<span><span class="co"># we hide a few words from this poem</span></span>
-<span><span class="fu"><a href="../reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"{'wi/et, le, il, au, des?, ce =&gt; _'r ? le_mont_des_oliviers}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "S'_ est vrai qu'_ Jardin sacré _ Écritures,\n_ Fils _ l'homme ai dit _ qu'on voit rapporté ;\nMuet, aveugle _ sourd _ cri _ créatures,\nSi _ Ciel nous laissa comme un monde avorté,\nAlors _ Juste opposera _ dédain à l'absence\n_ ne répondra plus que par un froid silence\n_ silence éternel _ la Divinité."</span></span></code></pre></div>
-<p><em>Technically</em>, first the pattern is split with respect to
-<code>",[ \t\n]+"</code>, then all elements are collapsed with
-<code>"|"</code>. If the flag <code>"fixed"</code> was also present,
-each element is first wrapped into <code>"\\Q"</code> and
-<code>"\\E"</code>. Finally, we add parentheses (to enable capture) and
-word boundaries (<code>"\\b"</code>) on both sides.</p>
-</div>
-<div class="section level4">
-<h4 id="flag_magic">magic<a class="anchor" aria-label="anchor" href="#flag_magic"></a>
-</h4>
-<p>The flag <code>"magic"</code> allows the user to interpolate
-variables inside the regular expression before the regex is
-evaluated.</p>
-<p>Ex: interpolating variables inside regular expressions.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">vowels</span> <span class="op">=</span><span class="st">"aeiouy"</span></span>
-<span><span class="co"># let's keep only the vowels</span></span>
-<span><span class="co"># we want the pattern: "[^aeiouy]"</span></span>
-<span><span class="va">lmb</span> <span class="op">=</span> <span class="st">"'Tis safer to be that which we destroy</span></span>
-<span><span class="st">Than by destruction dwell in doubtful joy."</span></span>
-<span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">lmb</span>, <span class="st">"magic/[^{vowels}] =&gt; _"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "__i___a_e___o__e___a____i____e__e___oy___a___y__e___u__io____e___i___ou___u___oy_"</span></span>
-<span></span>
-<span><span class="co">#</span></span>
-<span><span class="co"># Illustration of `smagic` operations before regex application</span></span>
-<span></span>
-<span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="co"># Which of these models contain a digit?</span></span>
-<span><span class="va">models</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Toyota"</span>, <span class="st">"Hornet"</span>, <span class="st">"Porsche"</span><span class="op">)</span></span>
-<span><span class="co"># we want the pattern "(Toyota|Hornet|"Porsche).+\\d"</span></span>
-<span><span class="co"># we collapse the models with a pipe using '|'c</span></span>
-<span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"m/({'|'c?models}).+\\d"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Hornet 4 Drive" "Porsche 914-2"</span></span>
-<span></span>
-<span><span class="co"># alternative: same as above but we first comma-split the vector</span></span>
-<span><span class="va">models_comma</span> <span class="op">=</span> <span class="st">"Toyota, Hornet, Porsche"</span></span>
-<span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"m/({S, '|'c?models_comma}).+\\d"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Hornet 4 Drive" "Porsche 914-2"</span></span>
-<span></span>
-<span><span class="co">#</span></span>
-<span><span class="co"># Interpolation does not apply to regex-specific curly brackets</span></span>
-<span></span>
-<span><span class="co"># We delete only successions of 2+ vowels</span></span>
-<span><span class="co"># {2,} has a rexex meaning and is not interpolated:</span></span>
-<span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">lmb</span>, <span class="st">"magic/[{vowels}]{2,} =&gt; _"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "'Tis safer to be that which we destr_\nThan by destruct_n dwell in d_btful j_."</span></span></code></pre></div>
-<p><em>Technically</em>, the algorithm does not interpolate curly
-brackets having a regular expression meaning. The expression of the form
-<code>"{a, b}"</code> with <code>"a"</code> and <code>"b"</code> digits
-means a repetition of the previous symbol of at least <code>"a"</code>
-times and at most <code>"b"</code> times. The variables are fetched in
-the calling environment. To obtain fetch them from a different location,
-you can use the argument <code>envir</code>.</p>
-</div>
-<div class="section level4">
-<h4 id="flag_total">total<a class="anchor" aria-label="anchor" href="#flag_total"></a>
-</h4>
-<p>The flag <code>"total"</code> is only available to functions
-performing a replacement. In that case, if a pattern is detected,
-<em>the full character string</em> is replaced (instead of just the
-pattern).</p>
-<p>Ex: let’s replace a few car models.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cars_small</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cars_small</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Mazda RX4"         "Mazda RX4 Wag"     "Datsun 710"       </span></span>
-<span><span class="co">#&gt; [4] "Hornet 4 Drive"    "Hornet Sportabout" "Valiant"</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">cars_small</span>, <span class="st">"ti/mazda =&gt; Mazda: sold out!"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Mazda: sold out!"  "Mazda: sold out!"  "Datsun 710"       </span></span>
-<span><span class="co">#&gt; [4] "Hornet 4 Drive"    "Hornet Sportabout" "Valiant"</span></span></code></pre></div>
-<p>On top of this, the <code>"total"</code> flag allows to perform
-logical operations across several regex patterns. You have more
-information on this in the <a href="#detect_logic">dedicated
-section</a>. In a nutshell, you can write
-<code>"pat1 &amp; !pat2 | pat3"</code> with <code>"patx"</code> regular
-expresion patterns. This means: contains <code>pat1</code> and does not
-contain <code>pat2</code>, or contains <code>pat3</code>.</p>
-<p>Ex: detect car brands with a digit and no ‘e’.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cars_small</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cars_small</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Mazda RX4"         "Mazda RX4 Wag"     "Datsun 710"       </span></span>
-<span><span class="co">#&gt; [4] "Hornet 4 Drive"    "Hornet Sportabout" "Valiant"</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">cars_small</span>, <span class="st">"ti/\\d &amp; !e =&gt; I don't like that brand!"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "I don't like that brand!" "I don't like that brand!"</span></span>
-<span><span class="co">#&gt; [3] "I don't like that brand!" "Hornet 4 Drive"          </span></span>
-<span><span class="co">#&gt; [5] "Hornet Sportabout"        "Valiant"</span></span></code></pre></div>
-<p><em>Technically</em>, instead of using <code>gsub</code> to replace
-the pattern, <a href="#detect_funs"><code>string_is</code></a> is used
-to detect which element contains the pattern. Each element with the
-pattern is then substituted with the replacement.</p>
-</div>
-<div class="section level4">
-<h4 id="flag_single">single<a class="anchor" aria-label="anchor" href="#flag_single"></a>
-</h4>
-<p>The flag <code>"single"</code> is only available to functions
-performing a replacement. It allows only a single substitution to take
-place. Said differently, only the first replacement is performed.</p>
-<p>Ex: single substitutions.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">encounter</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"Hi Cyclops., Hi you. What's your name?, Odysseus is my name."</span><span class="op">)</span></span>
-<span><span class="co"># we only remove the first word</span></span>
-<span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">encounter</span>, <span class="st">"single/\\w+ =&gt; ..."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "... Cyclops."               "... you. What's your name?"</span></span>
-<span><span class="co">#&gt; [3] "... is my name."</span></span></code></pre></div>
-<p><em>Technically</em>, the function <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::sub</a></code> is used
-instead of <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::gsub</a></code>.</p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="flag_escaping">Escaping flags: How to, and a word of caution with paths<a class="anchor" aria-label="anchor" href="#flag_escaping"></a>
-</h3>
-<p>If your regular expression contains a slash (<code>"/"</code>), this
-will come in conflict with the parsing of the optional flags. At the
-moment a <code>/</code> is present in a pattern, the algorithm will
-throw an error if the expected flags are not written correctly.</p>
-<p>To use a slash in the regex without adding flags there are two
-solutions:</p>
-<ul>
-<li>start the pattern with a <code>"/"</code>. This is considered the
-empty flag and will be discared.</li>
-<li>escape the first <code>"/"</code> with a double backslash</li>
-</ul>
-<p>Ex: let’s invert the numerator and denominator of a division.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eq</span> <span class="op">=</span> <span class="st">"5/x = 3/2"</span></span>
-<span><span class="co"># a) escaping with empty flags</span></span>
-<span><span class="co">#string_clean(eq, "/(\\d)/(\\w) =&gt; \\2/\\1")</span></span>
-<span></span>
-<span><span class="co"># b) escaping with backslashes</span></span>
-<span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">eq</span>, <span class="st">"(\\d)\\/(\\w) =&gt; \\2/\\1"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "x/5 = 2/3"</span></span></code></pre></div>
-<p><strong>Warning:</strong> when applying regular expressions on file
-paths, the escaping of the slash can be highly confusing. This is a
-limitation of the current implementation of the optional flags. For
-example <code>"/[^/]+$"</code> looks like a legit regex to get the
-parent folder, but it won’t work as expected within
-<code>stringmagic</code>. To behave as expected, you would need to write
-<code>"//[^/]+$"</code> which looks weird, or
-<code>"\\/[^/]+$"</code>.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="intuivite-detection-of-regex-patterns">Intuivite detection of regex patterns<a class="anchor" aria-label="anchor" href="#intuivite-detection-of-regex-patterns"></a>
+<h2 id="sec_detect">Detection of regex patterns<a class="anchor" aria-label="anchor" href="#sec_detect"></a>
 </h2>
 <p>Detecting a single regex pattern is pretty straightforward with
 regular tools like <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::grepl</a></code> or
@@ -415,98 +142,11 @@ regular tools like <code><a href="https://rdrr.io/r/base/grep.html" class="exter
 we want to detect the presence of multiple patterns.</p>
 <p><code>stringmagic</code> offers three functions with an intuitive
 syntax to deal with complex pattern detection:</p>
-<ul>
-<li>
-<a href="#detect_funs">string_is</a>: returns a logical vector</li>
-<li>
-<a href="#detect_funs">string_which</a>: returns the indexes of the
-matches</li>
-<li>
-<a href="#detect_funs">string_get</a>: returns the matches</li>
-</ul>
-<p>As described in the next section., these tools benefit from a
-streamlined syntax to logically combine several regex patterns.</p>
-<div class="section level3">
-<h3 id="detect_logic">Logically combining regex patterns<a class="anchor" aria-label="anchor" href="#detect_logic"></a>
-</h3>
-<p>Assume <code>"pat1"</code> and <code>"pat2"</code> are two regular
-expression patterns and we want to test whether the string
-<code>x</code> contains a combination of these patterns. Then:</p>
-<ul>
-<li>
-<code>"pat1 &amp; pat2"</code> = <code>x</code> contains
-<code>pat1</code> AND <code>x</code> contains <code>pat2</code>
-</li>
-<li>
-<code>"pat1 | pat2"</code> = <code>x</code> contains
-<code>pat1</code> OR <code>x</code> contains <code>pat2</code>
-</li>
-<li>
-<code>"!pat1"</code> = <code>x</code> does not contain
-<code>pat1</code>
-</li>
-<li>
-<code>"!pat1 &amp; pat2"</code> = <code>x</code> does not contain
-<code>pat1</code> AND <code>x</code> contains <code>pat2</code>
-</li>
-</ul>
-<p>Hence the three logial operators are:</p>
-<ul>
-<li>
-<code>" &amp; "</code>: logical AND, it <strong>must</strong> be a
-space + an ampersand + a space (just the <code>&amp;</code> does not
-work)</li>
-<li>
-<code>" | "</code>: logical OR, it <strong>must</strong> be a space
-+ a pipe + a space (just the <code>|</code> does not work)</li>
-<li>
-<code>"!"</code>: logical NOT, it works only when it is the first
-character of the pattern. Note that anything after it (including spaces
-and other <code>!</code>) <em>is part of the regular
-expression</em>
-</li>
-</ul>
-<p>The parsing of the logical elements is done before any regex
-interpretation. The logical evaluations are done from left to right and
-are sequentially combined.</p>
-<p>You <strong>cannot</strong> combine logical statements with
-parentheses.</p>
-<p>For example: <code>"hello | (world &amp; my lady)"</code> leads to:
-<code>x</code> contains <code>"hello"</code> or contains
-<code>"(world"</code>, and contains <code>"my lady)"</code>. The two
-latter are invalid regexes but can make sense if you have the flag
-“fixed” turned on. To escape the meaning of the logical operators, see
-the <a href="#logical_escape">dedicated section</a>.</p>
-<p>In general, the logical <code>"not"</code> always apply to a single
-pattern and <strong>not</strong> to the full pattern. But see the <a href="#logical_flags">section on flags</a> for an exception.</p>
-<div class="section level4">
-<h4 id="logical_escape">Escaping the meaning of the logical operators<a class="anchor" aria-label="anchor" href="#logical_escape"></a>
-</h4>
-<p>To escape the meaning of the logical operators, there are two
-solutions to escape them:</p>
-<ul>
-<li>use two backslashes just before the operator:
-<code>"a \\&amp; b"</code> means <code>x</code> contains
-<code>"a &amp; b"</code>
-</li>
-<li>use a regex hack: the previous example is equivalent to
-<code>"a [&amp;] b"</code> in regex parlance and won’t be parsed as a
-logical AND</li>
-</ul>
 </div>
-<div class="section level4">
-<h4 id="logical_flags">How do regex flags work with logically combined regexes?<a class="anchor" aria-label="anchor" href="#logical_flags"></a>
-</h4>
-<p>When you add flags to a pattern, these apply to <em>all</em> regex
-sub-patterns. This means that <code>"f/( | )"</code> treats the two
-parentheses as “fixed”. <em>You cannot add flags specific to a single
-sub-pattern.</em></p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="detect_funs">Pattern detection with <code>string_is</code>,
+<div class="section level2">
+<h2 id="detect_funs">Pattern detection with <code>string_is</code>,
 <code>string_which</code> and <code>string_get</code><a class="anchor" aria-label="anchor" href="#detect_funs"></a>
-</h3>
+</h2>
 <p>Use <code>string_is</code>, <code>string_which</code> and
 <code>string_get</code> to detect patterns in character vectors and
 obtain either a logical vector, an integer vector, or the values.</p>
@@ -516,9 +156,9 @@ record, <code>string_get</code> uses <code>string_is</code> internally
 so these examples are equivalent with <code>string_is</code> or
 <code>string_which</code>.</p>
 <p>Ex.1: series of examples using the <em>recommended syntax</em>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"All cars from mtcars:\n{C, 60 width ? cars}"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"All cars from mtcars:\n{C, 60 width ? cars}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "All cars from mtcars:\nMazda RX4, Mazda RX4 Wag, Datsun 710, Hornet 4 Drive, Hornet\nSportabout, Valiant, Duster 360, Merc 240D, Merc 230, Merc\n280, Merc 280C, Merc 450SE, Merc 450SL, Merc 450SLC,\nCadillac Fleetwood, Lincoln Continental, Chrysler Imperial,\nFiat 128, Honda Civic, Toyota Corolla, Toyota Corona, Dodge\nChallenger, AMC Javelin, Camaro Z28, Pontiac Firebird, Fiat\nX1-9, Porsche 914-2, Lotus Europa, Ford Pantera L, Ferrari\nDino, Maserati Bora and Volvo 142E"</span></span>
 <span></span>
 <span><span class="co"># cars with an 'a', an 'e', an 'i', and an 'o', all in lower case</span></span>
@@ -544,7 +184,7 @@ To combine them with a logical OR, you need to use the argument
 <code>or = TRUE</code>. You can also pass the flags as regular function
 arguments. They then apply to all patterns.</p>
 <p>Ex.2: replication of Ex.1 using an alternative syntax.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># string_get(cars, "a &amp; e &amp; i &amp; o")</span></span>
 <span><span class="co"># cars with an 'a', an 'e', an 'i', and an 'o', all in lower case</span></span>
 <span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"a"</span>, <span class="st">"e"</span>, <span class="st">"i"</span>, <span class="st">"o"</span><span class="op">)</span></span>
@@ -592,7 +232,7 @@ you obtain the vector
 <p>Using <code>seq.unik = TRUE</code> is like <code>seq</code> but
 applies the function <code><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique()</a></code> at the end.</p>
 <p>Ex: sequentially combining results.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># cars without digits, then cars with 2 'a's or 2 'e's and a digit</span></span>
 <span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"!\\d"</span>, <span class="st">"i/a.+a | e.+e &amp; \\d"</span>, seq <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "Hornet Sportabout"   "Valiant"             "Cadillac Fleetwood" </span></span>
@@ -624,13 +264,12 @@ values. Note that <code>string_get</code> is the only
 <code>stringmagic</code> function to have this ability.</p>
 <p>Caching is always enabled, you don’t need to do anything.</p>
 <p>Ex: caching of the data.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Since we used `car_first` in the previous example, we don't need to provide</span></span>
 <span><span class="co"># it explicitly now</span></span>
 <span><span class="co"># =&gt; brands containing 'M' and ending with 'a' or 'i'; brands containing 'M'</span></span>
 <span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="st">"M &amp; [ai]$"</span>, <span class="st">"M"</span>, seq.unik <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Mazda"    "Maserati" "Merc"     "AMC"</span></span></code></pre></div>
-</div>
 </div>
 </div>
 </div>
@@ -642,32 +281,33 @@ for parsing, text analysis, etc). Even for simple tasks, the number of
 operations can quickly balloon, adding many lines of code, reducing
 readability, and all this for basic processing.</p>
 <p>The function <code>string_ops</code> tries to solve this problem. It
-has access to all (50+) <a href="https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html#sec_operations_reference" class="external-link"><code>smagic</code>
+has access to all (50+) <a href="LINK"><code>string_magic</code>
 operations</a>, allowing for a compact and readable way to chain basic
 operations on character strings.</p>
 <p>Below are a few motivating examples.</p>
 <p>Ex.1: Parsing data.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># parsing an input: extracting the numbers</span></span>
 <span><span class="va">input</span> <span class="op">=</span> <span class="st">"8.5in, 5.5, .5 cm"</span></span>
-<span><span class="fu"><a href="../reference/string_ops.html">string_ops</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"','s, tws, '^\\. =&gt; 0.'r, '^\\D+|\\D+$'r, num"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_ops.html">string_ops</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"','split, tws, '^\\. =&gt; 0.'replace, '^\\D+|\\D+$'replace, num"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 8.5 5.5 0.5</span></span>
 <span><span class="co"># Explanation------------------------------------------------------------------|</span></span>
-<span><span class="co"># ','s: splitting w.r.t. ','                                                   |</span></span>
+<span><span class="co"># ','split: splitting w.r.t. ','                                               |</span></span>
 <span><span class="co"># tws: trimming the whitespaces                                                |</span></span>
-<span><span class="co"># '^\\. =&gt; 0.'r: adds a 0 to strings starting with '.'                         |</span></span>
-<span><span class="co"># '^\\D+|\\D+$'r: removes non-digits on both ends of the string                |</span></span>
+<span><span class="co"># '^\\. =&gt; 0.'replace: adds a 0 to strings starting with '.'                   |</span></span>
+<span><span class="co"># '^\\D+|\\D+$'replace: removes non-digits on both ends of the string          |</span></span>
 <span><span class="co"># num: converts to numeric                                                     |</span></span>
 <span></span>
 <span><span class="co"># now extracting the units</span></span>
-<span><span class="fu"><a href="../reference/string_ops.html">string_ops</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"','s, '^[ \\d.]+'r, tws"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_ops.html">string_ops</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"','split, '^[ \\d.]+'replace, tws"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "in" ""   "cm"</span></span>
 <span><span class="co"># Explanation------------------------------------------------------------------|</span></span>
-<span><span class="co"># ','s: splitting w.r.t. ','                                                   |</span></span>
-<span><span class="co"># '^[ \\d.]+'r: removes the ' ', digit and '.' at the beginning of the string  |</span></span>
+<span><span class="co"># ','split: splitting w.r.t. ','                                               |</span></span>
+<span><span class="co"># '^[ \\d.]+'replace: removes the ' ', digit                                   |</span></span>
+<span><span class="co">#                     and '.' at the beginning of the string                   |</span></span>
 <span><span class="co"># tws: trimming the whitespaces                                                |</span></span></code></pre></div>
 <p>Ex.2: extracing information from text.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Now using the car data</span></span>
 <span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
 <span></span>
@@ -723,8 +363,7 @@ cleaning operations which can be of two types:</p>
 <li>use <code>"pat1, pat2 =&gt; replacement"</code> to replace the regex
 patterns <code>pat1</code> and <code>pat2</code> with the value
 <code>replacement</code>.</li>
-<li>use <code>"@op1, op2"</code> to perform any arbitrary sequence of <a href="https://lrberge.github.io/stringmagic/articles/smagic_walkthrough.html#sec_operations_reference" class="external-link"><code>smagic</code>
-operation</a>
+<li>use <code>"@op1, op2"</code> to perform any arbitrary sequence of <a href="LINK"><code>string_magic</code> operation</a>
 </li>
 </ol>
 <p>In the operation <code>"pat1, pat2 =&gt; replacement"</code>, the
@@ -747,7 +386,7 @@ ASCII and lowers the case.</p>
 <div class="section level3">
 <h3 id="clean_example">Example of text cleaning<a class="anchor" aria-label="anchor" href="#clean_example"></a>
 </h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">monologue</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"For who would bear the whips and scorns of time"</span>,</span>
 <span>              <span class="st">"Th' oppressor's wrong, the proud man's contumely,"</span>,</span>
 <span>              <span class="st">"The pangs of despis'd love, the law's delay,"</span>,</span>
@@ -764,7 +403,7 @@ ASCII and lowers the case.</p>
 <span></span>
 <span><span class="co"># Cleaning a text</span></span>
 <span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">monologue</span>, </span>
-<span>          <span class="co"># use smagic to: lower the case and remove basic stopwords</span></span>
+<span>          <span class="co"># use string_magic to: lower the case and remove basic stopwords</span></span>
 <span>          <span class="st">"@lower, stopword"</span>,</span>
 <span>          <span class="co"># remove a few extra stopwords(we use the flag word 'w/')</span></span>
 <span>          <span class="st">"w/th, 's"</span>,</span>
@@ -782,6 +421,148 @@ ASCII and lowers the case.</p>
 <span><span class="co">#&gt; [11] "traveller return puzzle will"        "make us rather bear ills"           </span></span>
 <span><span class="co">#&gt; [13] "fly other know"</span></span></code></pre></div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="sec_vec">Create simple character vectors with <code>string_vec</code><a class="anchor" aria-label="anchor" href="#sec_vec"></a>
+</h2>
+<p>The function <code>string_vec</code> is dedicated to the creation of
+small character vectors. You feed it a comma separated list of values in
+a string and it will turn it into a vector.</p>
+<p>Ex.1: creating a simple vector.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fruits</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"orange, apple, pineapple, strawberry"</span><span class="op">)</span></span>
+<span><span class="va">fruits</span></span>
+<span><span class="co">#&gt; [1] "orange"     "apple"      "pineapple"  "strawberry"</span></span></code></pre></div>
+<p>Within the enumeration, you can use interpolation, with curly
+brackets (<code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code>), to insert the elements from a vector into
+the current string.</p>
+<p>Ex.2: adding a vector into an enumeration.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">more_fruits</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"lemon, {fruits}, peach"</span><span class="op">)</span></span>
+<span><span class="va">more_fruits</span></span>
+<span><span class="co">#&gt; [1] "lemon"      "orange"     "apple"      "pineapple"  "strawberry"</span></span>
+<span><span class="co">#&gt; [6] "peach"</span></span></code></pre></div>
+<p>The interpolation is performed with <a href="LINK"><code>string_magic</code></a>. This means that any <a href="LINK"><code>string_magic</code> operation</a> can be applied
+on-the-fly.</p>
+<p>Ex.3: replicating Ex.2 but shortening long fruit names.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">more_fruits</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"lemon, {6 Shorten ? fruits}, peach"</span><span class="op">)</span></span>
+<span><span class="va">more_fruits</span></span>
+<span><span class="co">#&gt; [1] "lemon"   "orange"  "apple"   "pinea.." "straw.." "peach"</span></span></code></pre></div>
+<p>Since interpolations are resolved with <code>string_magic</code>, you
+can add any text before/after the interpolation:</p>
+<p>Ex.4: adding text before the interpolation.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pkgs</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"pandas, os, time, re"</span><span class="op">)</span></span>
+<span><span class="va">imports</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"import numpy as np, import {pkgs}"</span><span class="op">)</span></span>
+<span><span class="va">imports</span></span>
+<span><span class="co">#&gt; [1] "import numpy as np" "import pandas"      "import os"         </span></span>
+<span><span class="co">#&gt; [4] "import time"        "import re"</span></span></code></pre></div>
+<div class="section level4">
+<h4 id="creating-small-matrices-or-data-frames">Creating small matrices or data frames<a class="anchor" aria-label="anchor" href="#creating-small-matrices-or-data-frames"></a>
+</h4>
+<p>You can transform the returned vector into a matrix or a data frame
+using the arguments <code>.cmat</code>, <code>.nmat</code>
+(<strong>c</strong>haracter or <strong>n</strong>umeric matrix) or
+<code>.df</code>.</p>
+<p>Ex.5: returning a matrix.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"1, 5,</span></span>
+<span><span class="st">            3, 2,</span></span>
+<span><span class="st">            5, 12"</span>, .nmat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      [,1] [,2]</span></span>
+<span><span class="co">#&gt; [1,]    1    5</span></span>
+<span><span class="co">#&gt; [2,]    3    2</span></span>
+<span><span class="co">#&gt; [3,]    5   12</span></span></code></pre></div>
+<p>The number of rows is guessed from the number of newlines in the
+string. You can avoid using character strings, but in that case you need
+to explicitly give the number of rows.</p>
+<p>Ex.5-bis: returning a numeric matrix, giving <code>.nmat</code> the
+number of rows.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>,</span>
+<span>           <span class="fl">3</span>, <span class="fl">2</span>,</span>
+<span>           <span class="fl">5</span>, <span class="fl">12</span>, .nmat <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      [,1] [,2]</span></span>
+<span><span class="co">#&gt; [1,]    1    5</span></span>
+<span><span class="co">#&gt; [2,]    3    2</span></span>
+<span><span class="co">#&gt; [3,]    5   12</span></span></code></pre></div>
+<p>If you want to return a data.frame, you can add the column names in
+the .df argument: either in a regular vector, either in a comma
+separated list. Note that columns looking like numeric values are always
+converted.</p>
+<p>Ex.6: returning a data frame.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># you can add the column names directly in the argument .df</span></span>
+<span><span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"1, john,</span></span>
+<span><span class="st">                 3, marie,</span></span>
+<span><span class="st">                 5, harry"</span>, .df <span class="op">=</span> <span class="st">"id, name"</span><span class="op">)</span></span>
+<span><span class="va">df</span></span>
+<span><span class="co">#&gt;   id  name</span></span>
+<span><span class="co">#&gt; 1  1  john</span></span>
+<span><span class="co">#&gt; 2  3 marie</span></span>
+<span><span class="co">#&gt; 3  5 harry</span></span>
+<span><span class="co"># automatic conversion of numeric values</span></span>
+<span><span class="va">df</span><span class="op">$</span><span class="va">id</span> <span class="op">*</span> <span class="fl">5</span></span>
+<span><span class="co">#&gt; [1]  5 15 25</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="sec_split">Split vectors and turn the result into a data frame, and vice
+versa<a class="anchor" aria-label="anchor" href="#sec_split"></a>
+</h2>
+<p>The function <code>string_split2df</code> (and
+<code>string_split2dt</code>) splits a vector using a regular expression
+pattern and turns it into a data frame, remembering the original
+identifiers. You can get the original vectors back (almost) with the
+function <code>paste_conditional</code>.</p>
+<p>Ex.1: breaking up two sentences with respect to punctuation and
+spaces; then merging them back.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Nor rain, wind, thunder, fire are my daughters."</span>,</span>
+<span>      <span class="st">"When my information changes, I alter my conclusions."</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># we split at each word</span></span>
+<span><span class="va">sentences_split</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_split2df.html">string_split2df</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"[[:punct:] ]+"</span><span class="op">)</span></span>
+<span><span class="va">sentences_split</span></span>
+<span><span class="co">#&gt;    obs           x</span></span>
+<span><span class="co">#&gt; 1    1         Nor</span></span>
+<span><span class="co">#&gt; 2    1        rain</span></span>
+<span><span class="co">#&gt; 3    1        wind</span></span>
+<span><span class="co">#&gt; 4    1     thunder</span></span>
+<span><span class="co">#&gt; 5    1        fire</span></span>
+<span><span class="co">#&gt; 6    1         are</span></span>
+<span><span class="co">#&gt; 7    1          my</span></span>
+<span><span class="co">#&gt; 8    1   daughters</span></span>
+<span><span class="co">#&gt; 9    2        When</span></span>
+<span><span class="co">#&gt; 10   2          my</span></span>
+<span><span class="co">#&gt; 11   2 information</span></span>
+<span><span class="co">#&gt; 12   2     changes</span></span>
+<span><span class="co">#&gt; 13   2           I</span></span>
+<span><span class="co">#&gt; 14   2       alter</span></span>
+<span><span class="co">#&gt; 15   2          my</span></span>
+<span><span class="co">#&gt; 16   2 conclusions</span></span>
+<span></span>
+<span><span class="co"># recovering the original vectors (we only lose the punctuation)</span></span>
+<span><span class="fu"><a href="../reference/paste_conditional.html">paste_conditional</a></span><span class="op">(</span><span class="va">sentences_split</span><span class="op">$</span><span class="va">x</span>, <span class="va">sentences_split</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                                    1 </span></span>
+<span><span class="co">#&gt;        "Nor rain wind thunder fire are my daughters" </span></span>
+<span><span class="co">#&gt;                                                    2 </span></span>
+<span><span class="co">#&gt; "When my information changes I alter my conclusions"</span></span></code></pre></div>
+<p>If identifiers are associated to the elements of the vector, you can
+provide them so that the data frame returned contains them.</p>
+<p>Ex.2: splitting with identifiers and merging back with a formula.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">id</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ws"</span>, <span class="st">"jmk"</span><span class="op">)</span></span>
+<span><span class="co"># we add the identifier</span></span>
+<span><span class="va">base_words</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_split2df.html">string_split2df</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"[[:punct:] ]+"</span>, id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>author <span class="op">=</span> <span class="va">id</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># merging back using a formula</span></span>
+<span><span class="fu"><a href="../reference/paste_conditional.html">paste_conditional</a></span><span class="op">(</span><span class="va">x</span> <span class="op">~</span> <span class="va">author</span>, <span class="va">base_words</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                          author: jmk </span></span>
+<span><span class="co">#&gt; "When my information changes I alter my conclusions" </span></span>
+<span><span class="co">#&gt;                                           author: ws </span></span>
+<span><span class="co">#&gt;        "Nor rain wind thunder fire are my daughters"</span></span></code></pre></div>
 </div>
   </div>
 

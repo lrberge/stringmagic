@@ -3,11 +3,11 @@ pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   guide_customization: guide_customization.html
-  guide_smagic: guide_smagic.html
+  guide_string_magic: guide_string_magic.html
   guide_string_tools: guide_string_tools.html
   ref_operations: ref_operations.html
   ref_regex_flags: ref_regex_flags.html
   ref_regex_logic: ref_regex_logic.html
-  ref_smagic: ref_smagic.html
-last_built: 2023-06-30T17:14Z
+  ref_smagic_special_operations: ref_smagic_special_operations.html
+last_built: 2023-07-18T14:46Z
 

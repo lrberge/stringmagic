@@ -3,7 +3,7 @@
 or 2) write a character string that will be broken with respect to commas
 ("hi, there" becomes c("hi", "there")), or 3) interpolate variables in
 character strings ("x{1:2}" becomes c("x1", "x2")) with full access to
-smagic() operations, or any combination of the three.'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
+string_magic() operations, or any combination of the three.'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
@@ -38,7 +38,7 @@ smagic() operations, or any combination of the three.'><!-- mathjax --><script s
   <ul class="dropdown-menu" role="menu"><li class="divider">
     <li class="dropdown-header">Guides</li>
     <li>
-      <a href="../articles/guide_smagic.html">`stringmagic`: A quick tour</a>
+      <a href="../articles/guide_string_magic.html">`string_magic`: Magical String Interpolation</a>
     </li>
     <li>
       <a href="../articles/guide_string_tools.html">String tools: magic edition</a>
@@ -49,10 +49,10 @@ smagic() operations, or any combination of the three.'><!-- mathjax --><script s
     <li class="divider">
     <li class="dropdown-header">References</li>
     <li>
-      <a href="../articles/ref_smagic.html">`smagic`: Magical string interpolation</a>
+      <a href="../articles/ref_operations.html">`string_magic`'s operations: The reference</a>
     </li>
     <li>
-      <a href="../articles/ref_operations.html">`smagic`'s operations: The reference</a>
+      <a href="../articles/ref_string_magic_special_operations.html">`string_magic`'s sepcial operations</a>
     </li>
     <li>
       <a href="../articles/ref_regex_flags.html">Regular expression flags</a>
@@ -89,13 +89,15 @@ smagic() operations, or any combination of the three.'><!-- mathjax --><script s
 or 2) write a character string that will be broken with respect to commas
 (<code>"hi, there"</code> becomes <code>c("hi", "there")</code>), or 3) interpolate variables in
 character strings (<code>"x{1:2}"</code> becomes <code>c("x1", "x2")</code>) with full access to
-<code><a href="smagic.html">smagic()</a></code> operations, or any combination of the three.</p>
+<code><a href="string_magic.html">string_magic()</a></code> operations, or any combination of the three.</p>
     </div>
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">string_vec_alias</span><span class="op">(</span></span>
 <span>  .cmat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  .nmat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .df <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .df.convert <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  .last <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  .delim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"{"</span>, <span class="st">"}"</span><span class="op">)</span>,</span>
 <span>  .split <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -109,6 +111,8 @@ character strings (<code>"x{1:2}"</code> becomes <code>c("x1", "x2")</code>) wit
 <span>  <span class="va">...</span>,</span>
 <span>  .cmat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  .nmat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .df <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .df.convert <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  .delim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"{"</span>, <span class="st">"}"</span><span class="op">)</span>,</span>
 <span>  .envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  .split <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -140,9 +144,30 @@ If a complex, the imaginary part represents the number of columns. Ex: <code>5i<
 <p>The matrix is always filled by row. Non numbers are silently turned to NA.</p></dd>
 
 
+<dt>.df</dt>
+<dd><p>Logical scalar (default is <code>FALSE</code>), integer, complex with integer values, or
+character vector.
+If <code>TRUE</code>, we try to coerce the result into a <code>data.frame</code>. The number of rows and columns
+is deduced from the look of the arguments. An integer indicates the number of rows.
+If a complex, the imaginary part represents the number of columns. Ex: <code>5i</code> means
+5 columns, <code>3 + 2i</code> means 3 rows and 2 columns.</p>
+<p>If a character vector: it should give the column names. Note that if the vector
+is of length 1, its values are comma separated (i.e. the value <code>"id, name"</code> is
+identical to <code>c("id", "name")</code>).</p>
+<p>Note that the columns that can be converted to numeric are converted to numeric.
+The other columns are in string form. Monitor this behavior with <code>.df.convert</code>.</p></dd>
+
+
+<dt>.df.convert</dt>
+<dd><p>Logical scalar, default is <code>TRUE</code>. Only used when the result is
+to be converted to a data frame (with the argument <code>.df</code>). If <code>TRUE</code>, any column
+looking like a numeric vector is converted to numeric. Otherwise all columns
+are character strings.</p></dd>
+
+
 <dt>.last</dt>
 <dd><p>Character scalar, a function, or <code>NULL</code> (default). If provided and character:
-it must be an <code>smagic</code> chain of operations of the form <code>"'arg1'op1, op2, etc"</code>. All these operations
+it must be an <code>string_magic</code> chain of operations of the form <code>"'arg1'op1, op2, etc"</code>. All these operations
 are applied just before returning the vector. If a function,
 it will be applied to the resulting vector.</p></dd>
 
@@ -182,23 +207,23 @@ is performed on all variables.</p></dd>
 
 <dt>.collapse</dt>
 <dd><p>Character scalar or <code>NULL</code> (default). If not <code>NULL</code>, the function
-<code><a href="https://rdrr.io/r/base/paste.html" class="external-link">base::paste()</a></code> is applied to the resulting vector with <code>collapse = .collapse</code>.</p></dd>
+<code><a href="https://rdrr.io/r/base/paste.html" class="external-link">base::paste()</a></code> is applied to the resulting vector with <code>collapse = .collapse</code>.</p>
+<p>If so, pass the name of your package in this argument so that your function can access
+the new <code>string_magic</code> operations defined within your package.</p></dd>
 
 
 <dt>.namespace</dt>
 <dd><p>Character scalar or <code>NULL</code> (default). <strong>Only useful for package developers.</strong>
-As a regular end-user you shouldn't care! If your package uses <code>smagic</code>, you should care.
-It is useful <strong>only</strong> if your package uses 'custom' <code>smagic</code> operations, set with
-<code><a href="smagic_register_fun.html">smagic_register_fun()</a></code> or <code><a href="smagic_register_fun.html">smagic_register_ops()</a></code>.</p>
-<p>If so, pass the name of your package in this argument so that your function can access
-the new <code>smagic</code> operations defined within your package.</p></dd>
+As a regular end-user you shouldn't care! If your package uses <code>string_magic</code>, you should care.
+It is useful <strong>only</strong> if your package uses 'custom' <code>string_magic</code> operations, set with
+<code><a href="string_magic_register_fun.html">string_magic_register_fun()</a></code> or <code><a href="string_magic_register_fun.html">string_magic_register_ops()</a></code>.</p></dd>
 
 
 <dt>...</dt>
 <dd><p>Character vectors that will be vectorized. If commas are present in the
 character vector, it will be split with respect to commas and following blanks.
 The vectors can contain any interpolation in the form <code>"{var}"</code> and
-any <code><a href="smagic.html">smagic()</a></code> operation can be applied. To change the delimiters for interpolation,
+any <code><a href="string_magic.html">string_magic()</a></code> operation can be applied. To change the delimiters for interpolation,
 see <code>.delim</code>. Named arguments are used in priority for variable substitution,
 otherwise the value of the variables to be interpolated are fetched in the calling environment
 (see argument <code>.envir</code>).</p>
@@ -231,9 +256,9 @@ function call.</p>
     <h2>See also</h2>
     <div class="dont-index"><p>Other tools with aliases: 
 <code><a href="cat_magic.html">cat_magic_alias</a>()</code>,
-<code><a href="smagic_alias.html">smagic_alias</a>()</code>,
-<code><a href="smagic.html">smagic</a>()</code>,
 <code><a href="string_clean.html">string_clean_alias</a>()</code>,
+<code><a href="string_magic_alias.html">string_magic_alias</a>()</code>,
+<code><a href="string_magic.html">string_magic</a>()</code>,
 <code><a href="string_ops.html">string_ops_alias</a>()</code></p></div>
     </div>
     <div id="author">

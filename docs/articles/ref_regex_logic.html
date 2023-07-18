@@ -53,7 +53,7 @@
     </li>
 <li class="dropdown-header">Guides</li>
     <li>
-      <a href="../articles/guide_smagic.html">`stringmagic`: A quick tour</a>
+      <a href="../articles/guide_string_magic.html">`string_magic`: Magical String Interpolation</a>
     </li>
     <li>
       <a href="../articles/guide_string_tools.html">String tools: magic edition</a>
@@ -65,10 +65,10 @@
     </li>
 <li class="dropdown-header">References</li>
     <li>
-      <a href="../articles/ref_smagic.html">`smagic`: Magical string interpolation</a>
+      <a href="../articles/ref_operations.html">`string_magic`'s operations: The reference</a>
     </li>
     <li>
-      <a href="../articles/ref_operations.html">`smagic`'s operations: The reference</a>
+      <a href="../articles/ref_string_magic_special_operations.html">`string_magic`'s sepcial operations</a>
     </li>
     <li>
       <a href="../articles/ref_regex_flags.html">Regular expression flags</a>
@@ -106,7 +106,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-06-30</h4>
+            <h4 data-toc-skip class="date">2023-07-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/ref_regex_logic.rmd" class="external-link"><code>vignettes/ref_regex_logic.rmd</code></a></small>
       <div class="hidden name"><code>ref_regex_logic.rmd</code></div>
@@ -115,12 +115,132 @@ Bergé</h4>
 
     
     
-
+<p>In <code>stringmagic</code>, any time you use a regular expression
+(regex) to <em>detect a pattern</em> in a character string, you can use
+regex logic. The syntax to logically combine regular expressions is
+intuitive: simply use regular logical operators and it will work!</p>
+<p>The functions for whcih regex logic is available are: a) pattern
+detection functions (<code>string_is</code>, <code>string_get</code>,
+etc), and b) string replacement functions (<code>string_clean</code>,
+<code>string_replace</code>) with the <code>total</code> flag (see the
+<a href="LINK">vignette on regex flags</a>).</p>
+<div class="section level2">
+<h2 id="detect_logic">Logically combining regex patterns<a class="anchor" aria-label="anchor" href="#detect_logic"></a>
+</h2>
+<p>Assume <code>"pat1"</code> and <code>"pat2"</code> are two regular
+expression patterns and we want to test whether the string
+<code>x</code> contains a combination of these patterns. Then:</p>
+<ul>
+<li>
+<code>"pat1 &amp; pat2"</code> = <code>x</code> contains
+<code>pat1</code> AND <code>x</code> contains <code>pat2</code>
+</li>
+<li>
+<code>"pat1 | pat2"</code> = <code>x</code> contains
+<code>pat1</code> OR <code>x</code> contains <code>pat2</code>
+</li>
+<li>
+<code>"!pat1"</code> = <code>x</code> does not contain
+<code>pat1</code>
+</li>
+<li>
+<code>"!pat1 &amp; pat2"</code> = <code>x</code> does not contain
+<code>pat1</code> AND <code>x</code> contains <code>pat2</code>
+</li>
+</ul>
+<p>Hence the three logial operators are:</p>
+<ul>
+<li>
+<code>" &amp; "</code>: logical AND, it <strong>must</strong> be a
+space + an ampersand + a space (just the <code>&amp;</code> <em>does not
+work</em>)</li>
+<li>
+<code>" | "</code>: logical OR, it <strong>must</strong> be a space
++ a pipe + a space (just the <code>|</code> <em>does not work</em>)</li>
+<li>
+<code>"!"</code>: logical NOT, it works only when it is the first
+character of the pattern. Note that anything after it (including spaces
+and other <code>!</code>) <em>is part of the regular
+expression</em>
+</li>
+</ul>
+<p>The parsing of the logical elements is done before any regex
+interpretation. The logical evaluations are done from left to right and
+are sequentially combined.</p>
+<p>Ex: selecting cars.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] "Mazda RX4"           "Mazda RX4 Wag"       "Datsun 710"         </span></span>
+<span><span class="co">##  [4] "Hornet 4 Drive"      "Hornet Sportabout"   "Valiant"            </span></span>
+<span><span class="co">##  [7] "Duster 360"          "Merc 240D"           "Merc 230"           </span></span>
+<span><span class="co">## [10] "Merc 280"            "Merc 280C"           "Merc 450SE"         </span></span>
+<span><span class="co">## [13] "Merc 450SL"          "Merc 450SLC"         "Cadillac Fleetwood" </span></span>
+<span><span class="co">## [16] "Lincoln Continental" "Chrysler Imperial"   "Fiat 128"           </span></span>
+<span><span class="co">## [19] "Honda Civic"         "Toyota Corolla"      "Toyota Corona"      </span></span>
+<span><span class="co">## [22] "Dodge Challenger"    "AMC Javelin"         "Camaro Z28"         </span></span>
+<span><span class="co">## [25] "Pontiac Firebird"    "Fiat X1-9"           "Porsche 914-2"      </span></span>
+<span><span class="co">## [28] "Lotus Europa"        "Ford Pantera L"      "Ferrari Dino"       </span></span>
+<span><span class="co">## [31] "Maserati Bora"       "Volvo 142E"</span></span></code></pre>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># which one...</span></span>
+<span><span class="co"># ... contains all letters 'a', 'e', 'i' AND 'o'?</span></span>
+<span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"a &amp; e &amp; i &amp; o"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "Cadillac Fleetwood"  "Lincoln Continental" "Pontiac Firebird"   </span></span>
+<span><span class="co">## [4] "Ferrari Dino"        "Maserati Bora"</span></span></code></pre>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># ... does NOT contain any digit?</span></span>
+<span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"!\\d"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] "Hornet Sportabout"   "Valiant"             "Cadillac Fleetwood" </span></span>
+<span><span class="co">##  [4] "Lincoln Continental" "Chrysler Imperial"   "Honda Civic"        </span></span>
+<span><span class="co">##  [7] "Toyota Corolla"      "Toyota Corona"       "Dodge Challenger"   </span></span>
+<span><span class="co">## [10] "AMC Javelin"         "Pontiac Firebird"    "Lotus Europa"       </span></span>
+<span><span class="co">## [13] "Ford Pantera L"      "Ferrari Dino"        "Maserati Bora"</span></span></code></pre>
+<p>You <strong>cannot</strong> combine logical statements with
+parentheses.</p>
+<p>For example: <code>"hello | (world &amp; my lady)"</code> leads to:
+<code>x</code> contains <code>"hello"</code> or contains
+<code>"(world"</code>, and contains <code>"my lady)"</code>. The two
+latter are invalid regexes but can make sense if you have the flag
+“fixed” turned on. To escape the meaning of the logical operators, see
+the <a href="#logical_escape">dedicated section</a>.</p>
+<p>The logical <code>"not"</code> always apply to a single pattern and
+<strong>not</strong> to the full pattern.</p>
+<div class="section level4">
+<h4 id="logical_escape">Escaping the meaning of the logical operators<a class="anchor" aria-label="anchor" href="#logical_escape"></a>
+</h4>
+<p>To escape the meaning of the logical operators, there are two
+solutions to escape them:</p>
+<ul>
+<li>use two backslashes just before the operator:
+<code>"a \\&amp; b"</code> means <code>x</code> contains
+<code>"a &amp; b"</code>
+</li>
+<li>use a regex hack: the previous example is equivalent to
+<code>"a [&amp;] b"</code> in regex parlance and won’t be parsed as a
+logical AND</li>
+</ul>
+<p>The two solutions work for the three operators:
+<code>" &amp; "</code>, <code>" | "</code> and <code>"!"</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="logical_flags">How do regex flags work with logically combined regexes?<a class="anchor" aria-label="anchor" href="#logical_flags"></a>
+</h4>
+<p>All <code>stringmagic</code> regexes accept optional flags. Please
+see the <a href="LINK">associated vignette</a>.</p>
+<p>When you add flags to a pattern, these apply to <em>all</em> regex
+sub-patterns. This means that <code>"f/( | )"</code> treats the two
+parentheses as “fixed”. <em>You cannot add flags specific to a single
+sub-pattern.</em></p>
+</div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-      </div>
+        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
+    </nav>
+</div>
 
 </div>
 

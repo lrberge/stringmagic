@@ -53,7 +53,7 @@
     </li>
 <li class="dropdown-header">Guides</li>
     <li>
-      <a href="articles/guide_smagic.html">`stringmagic`: A quick tour</a>
+      <a href="articles/guide_string_magic.html">`string_magic`: Magical String Interpolation</a>
     </li>
     <li>
       <a href="articles/guide_string_tools.html">String tools: magic edition</a>
@@ -65,10 +65,10 @@
     </li>
 <li class="dropdown-header">References</li>
     <li>
-      <a href="articles/ref_smagic.html">`smagic`: Magical string interpolation</a>
+      <a href="articles/ref_operations.html">`string_magic`'s operations: The reference</a>
     </li>
     <li>
-      <a href="articles/ref_operations.html">`smagic`'s operations: The reference</a>
+      <a href="articles/ref_string_magic_special_operations.html">`string_magic`'s sepcial operations</a>
     </li>
     <li>
       <a href="articles/ref_regex_flags.html">Regular expression flags</a>
@@ -106,19 +106,19 @@
 </h1></div>
 <p>The purpose of <code>stringmagic</code> is to facilitate the manipulation of character strings.</p>
 <p>It introduces various functions to facilitate pattern detections via <a href="LINK">regular expression (regex) logic</a>, or to efficienty <a href="LINK">clean character vectors</a> in a readable way. Consistently across the package, regular expressions gain <a href="LINK">optional flags</a> to monitor how the patterns should behave (fixed search? ignore case? add word boundaries? etc). For more information, see the vignette on <a href="LINK">string tools</a>.</p>
-<p>The main contribution of this package, and flagship function, is <code>smagic</code> which introduces a new language tailored to create complex character strings.</p>
+<p>The main contribution of this package, and flagship function, is <code>string_magic</code> which introduces a new language tailored to create complex character strings.</p>
 <div class="section level3">
-<h3 id="getting-started-with-smagic">Getting started with <code>smagic</code>
-<a class="anchor" aria-label="anchor" href="#getting-started-with-smagic"></a>
+<h3 id="getting-started-with-string_magic">Getting started with <code>string_magic</code>
+<a class="anchor" aria-label="anchor" href="#getting-started-with-string_magic"></a>
 </h3>
-<p><code>smagic</code> behaves in a similar way to the well known function <a href="https://glue.tidyverse.org/" class="external-link">glue</a>. Use curly brackets to interpolate variables: i.e to insert their value directly in the string:</p>
+<p><code>string_magic</code> behaves in a similar way to the well known function <a href="https://glue.tidyverse.org/" class="external-link">glue</a>. Use curly brackets to interpolate variables: i.e to insert their value directly in the string:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/stringmagic/" class="external-link">stringmagic</a></span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="st">"John"</span> ; <span class="va">y</span> <span class="op">=</span> <span class="st">"Mary"</span></span>
-<span><span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"Hi {x}! How's {y} doing?"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Hi {x}! How's {y} doing?"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Hi John! How's Mary doing?"</span></span></code></pre></div>
-<p>Almost anything <code>glue</code> can do, <code>smagic</code> can do, and if you’re thinking about speed, they’re about as fast (see the section <a href="#Performance">Performance</a>).</p>
-<p>The difference, and originality, of <code>smagic</code> is that you can apply any arbitrary operation to the interpolated variables. You want to create an enumeration? Sure. Add quotation marks? Check. Change the case? No problem. Sort on a substring? Of course! There are over 50 built-in operations and the magic is that applying these operations is about as simple as saying them.</p>
+<p>Almost anything <code>glue</code> can do, <code>string_magic</code> can do, and if you’re thinking about speed, they’re about as fast (see the section <a href="#Performance">Performance</a>).</p>
+<p>The difference, and originality, of <code>string_magic</code> is that you can apply any arbitrary operation to the interpolated variables. You want to create an enumeration? Sure. Add quotation marks? Check. Change the case? No problem. Sort on a substring? Of course! There are over 50 built-in operations and the magic is that applying these operations is about as simple as saying them.</p>
 <p><strong>Operations.</strong> The syntax to add operations is as follows:</p>
 <div class="float">
 <img src="reference/figures/operation-template.png" alt="operation"><div class="figcaption">operation</div>
@@ -126,7 +126,7 @@
 <p>The <code>operations</code> are a comma separated sequence of keywords, each keyword being bound to a specific function. Here is an example in which we apply two operations:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lovers</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"romeo"</span>, <span class="st">"juliet"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"Famous lovers: {title, enum ? lovers}."</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Famous lovers: {title, enum ? lovers}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Famous lovers: Romeo and Juliet."</span></span></code></pre></div>
 <div class="float">
 <img src="reference/figures/example-simple_operation.png" alt="example-lovers"><div class="figcaption">example-lovers</div>
@@ -138,56 +138,56 @@
 <p>Let’s take the example of splitting an email address and keeping the text before the domain:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">email</span> <span class="op">=</span> <span class="st">"John@Doe.com"</span></span>
-<span><span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"This message comes from {'@'split, first ? email}."</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"This message comes from {'@'split, first ? email}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "This message comes from John."</span></span></code></pre></div>
 <div class="float">
 <img src="reference/figures/example-argument.png" alt="example-argument"><div class="figcaption">example-argument</div>
 </div>
-<p><strong>Options.</strong> Many arguments acccept options. These options are keywords working like flags (i.e. things that can be turned on) and change the behavior of the current operation. Add options using a dot separated sequence of keywords attached to the operation:</p>
+<p><strong>Options.</strong> Many operations accept options. These options are keywords working like flags (i.e. things that can be turned on) and change the behavior of the current operation. Add options using a dot separated sequence of keywords attached to the operation:</p>
 <div class="float">
 <img src="reference/figures/options.png" alt="options"><div class="figcaption">options</div>
 </div>
 <p>We have seen the <code>enum</code> operation in an earlier example, let’s add a couple of options to it.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fields</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"maths"</span>, <span class="st">"physics"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"This position requires a PhD in either: {enum.i.or ? fields}."</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"This position requires a PhD in either: {enum.i.or ? fields}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "This position requires a PhD in either: i) maths, or ii) physics."</span></span></code></pre></div>
 <div class="float">
 <img src="reference/figures/example-options.png" alt="example-options"><div class="figcaption">example-options</div>
 </div>
-<p><strong>Anything else?</strong> So far we have just scratched the surface of <code>smagic</code> possiblities. Other features are: advanced support for pluralization, nesting, conditional operations, grouped operations, compact if-else statements, and unlimited customization. Here is a list of resources:</p>
+<p><strong>Anything else?</strong> So far we have just scratched the surface of <code>string_magic</code> possiblities. Other features are: advanced support for pluralization, nesting, conditional operations, grouped operations, compact if-else statements, and unlimited customization. Here is a list of resources:</p>
 <ul>
-<li><a href="LINK">an introduction to <code>smagic</code></a></li>
-<li><a href="LINK"><code>smagic</code>’s reference</a></li>
+<li><a href="LINK">an introduction to <code>string_magic</code></a></li>
+<li><a href="LINK"><code>string_magic</code>’s reference</a></li>
 <li><a href="LINK">operations reference</a></li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="friendly-errors">Friendly errors<a class="anchor" aria-label="anchor" href="#friendly-errors"></a>
 </h3>
-<p><code>smagic</code> tries to be friendly to the user by providing useful error messages:</p>
+<p><code>string_magic</code> tries to be friendly to the user by providing useful error messages:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Zeus"</span>, <span class="st">"Hades"</span>, <span class="st">"Poseidon"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"The {len?x} brothers: {anum?x}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: in smagic("The {len?x} brothers: {anum?x}."): </span></span>
+<span><span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The {len?x} brothers: {anum?x}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: in string_magic("The {len?x} brothers: {anum?x}."): </span></span>
 <span><span class="co">#&gt; CONTEXT: Problem found in "The {len?x} brothers: {anum?x}.",</span></span>
 <span><span class="co">#&gt;          when dealing with the interpolation `{anum?x}`.</span></span>
 <span><span class="co">#&gt; PROBLEM: `anum` is not a valid operator. Maybe you meant `enum`?</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; INFO: Type smagic(.help = "regex") or smagic(.help = TRUE) for help.</span></span>
-<span><span class="co">#&gt; Ex. of valid stuff: smagic("Letters: {10 first, `6/2`last, ''c, 'i =&gt; e'r, upper.first ? letters}!")</span></span>
+<span><span class="co">#&gt; INFO: Type string_magic(.help = "regex") or string_magic(.help = TRUE) for help.</span></span>
+<span><span class="co">#&gt; Ex. of valid stuff: string_magic("Letters: {10 first, `6/2`last, ''c, 'i =&gt; e'r, upper.first ? letters}!")</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"The iris species are: {unik, sort ? iris[['Species']}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: in smagic("The iris species are: {unik, sort ? iris[...: </span></span>
-<span><span class="co">#&gt; CONTEXT: Problem found in "The iris species are: {unik, sort ? iris[['Species']}.",</span></span>
-<span><span class="co">#&gt;          when dealing with the interpolation `{unik, sort ? iris[['Species']}.`.   </span></span>
+<span><span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The iris species are: {unik, sort, enum ? iris[['Species']}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: in string_magic("The iris species are: {unik, sort, enum ?...: </span></span>
+<span><span class="co">#&gt; CONTEXT: Problem found in "The iris species are: {unik, sort, enum ? iris[['Species']}.",</span></span>
+<span><span class="co">#&gt;          when dealing with the interpolation `{unik, sort, enum ? iris[['Species']}.`.   </span></span>
 <span><span class="co">#&gt; PROBLEM: in the expression `iris[['Species']`, a bracket (`[`) open is not closed.</span></span></code></pre></div>
-<p>The cost of this feature in terms of computing time is of the order of magnitude of 50 micro seconds (of course it depends on context). If you’re not interested in informative error messages, <code>.smagic</code> (note the <code>"."</code> prefix) is identical to <code>smagic</code> but avoids error handling and is then slightly faster.</p>
+<p>The cost of this feature in terms of computing time is of the order of magnitude of 50 micro seconds (of course it depends on context). If you’re not interested in informative error messages, <code>.string_magic</code> (note the <code>"."</code> prefix) is identical to <code>string_magic</code> but avoids error handling and is then slightly faster.</p>
 </div>
 <div class="section level3">
 <h3 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
 </h3>
-<p><strong>Basic interpolation.</strong> For regular string interpolations, the performance of <code>smagic</code> is similar to the performance of <code>glue</code>. That is to say, the price to pay for user experience is in the ballpark of 100 micro seconds (on my – slow – computer). Let’s have a simple benchmark:</p>
+<p><strong>Basic interpolation.</strong> For regular string interpolations, the performance of <code>string_magic</code> is similar to the performance of <code>glue</code>. That is to say, the price to pay for user experience is in the ballpark of 100 micro seconds (on my – slow – computer). Let’s have a simple benchmark:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/joshuaulrich/microbenchmark/" class="external-link">microbenchmark</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidyverse/glue" class="external-link">glue</a></span><span class="op">)</span></span>
@@ -195,22 +195,22 @@
 <span><span class="va">x</span> <span class="op">=</span> <span class="st">"Romeo"</span> ; <span class="va">y</span> <span class="op">=</span> <span class="st">"Juliet"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span>base    <span class="op">=</span>   <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">" seems to love "</span>, <span class="va">y</span>, <span class="st">"."</span><span class="op">)</span>,</span>
 <span>               glue    <span class="op">=</span>     <span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">"{x} seems to love {y}."</span><span class="op">)</span>,</span>
-<span>               smagic  <span class="op">=</span>   <span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"{x} seems to love {y}."</span><span class="op">)</span>,</span>
-<span>               .smagic <span class="op">=</span>  <span class="fu"><a href="reference/smagic.html">.smagic</a></span><span class="op">(</span><span class="st">"{x} seems to love {y}."</span><span class="op">)</span><span class="op">)</span></span>
+<span>               string_magic  <span class="op">=</span>   <span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{x} seems to love {y}."</span><span class="op">)</span>,</span>
+<span>               .string_magic <span class="op">=</span>  <span class="fu"><a href="reference/string_magic.html">.string_magic</a></span><span class="op">(</span><span class="st">"{x} seems to love {y}."</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unit: microseconds</span></span>
-<span><span class="co">#&gt;     expr   min     lq    mean median     uq   max neval</span></span>
-<span><span class="co">#&gt;     base   1.6   2.35   2.587   2.60   2.85   4.5   100</span></span>
-<span><span class="co">#&gt;     glue 121.2 133.60 142.583 139.10 145.90 249.4   100</span></span>
-<span><span class="co">#&gt;   smagic 108.6 120.15 129.114 125.75 132.50 290.1   100</span></span>
-<span><span class="co">#&gt;  .smagic  65.9  72.75  78.987  77.60  84.05 145.0   100</span></span></code></pre></div>
-<p>The difference with the base function <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">base::paste0</a></code> looks impressive (it looks 50 times faster), but is in fact not really important. Both <code>glue</code> and <code>smagic</code> processing time is due to overheads: a fixed cost that does not depend on the size of the vectors in input. Hence for large vectors or operations that run in one millisecond or more, this difference is negligible.</p>
-<p>As you can notice, <code>.smagic</code>, <code>smagic</code> without error handling, is about twice faster than <code>glue</code>. But I’m not sure that sacrificing user expericence for a 50us overhead is really worth it!</p>
-<p><strong>Complex operations</strong> The function <code>smagic</code> shines when performing complex string manipulation. The question we ask here is: how much does it cost in terms of perfomance? Let’s look at the following operation:</p>
+<span><span class="co">#&gt;     expr  min    lq   mean median    uq   max neval</span></span>
+<span><span class="co">#&gt;     base  1.3  1.50  1.604   1.60  1.70   2.4   100</span></span>
+<span><span class="co">#&gt;     glue 77.7 83.70 93.560  87.45 92.90 470.6   100</span></span>
+<span><span class="co">#&gt;   string_magic 69.9 73.75 78.257  77.50 80.75 106.5   100</span></span>
+<span><span class="co">#&gt;  .string_magic 43.2 45.70 50.205  48.20 52.15 137.9   100</span></span></code></pre></div>
+<p>The difference with the base function <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">base::paste0</a></code> looks impressive (it looks 50 times faster), but is in fact not really important. Both <code>glue</code> and <code>string_magic</code> processing time is due to overheads: a fixed cost that does not depend on the size of the vectors in input. Hence for large vectors or operations that run in one millisecond or more, this difference is negligible.</p>
+<p>As you can notice, <code>.string_magic</code>, <code>string_magic</code> without error handling, is about twice faster than <code>glue</code>. But I’m not sure that sacrificing user expericence for a 50us overhead is really worth it!</p>
+<p><strong>Complex operations</strong> The function <code>string_magic</code> shines when performing complex string manipulation. The question we ask here is: how much does it cost in terms of perfomance? Let’s look at the following operation:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Zeus"</span>, <span class="st">"Hades"</span>, <span class="st">"Poseidon"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"The {len?x} brothers: {enum?x}."</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The {len?x} brothers: {enum?x}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "The 3 brothers: Zeus, Hades and Poseidon."</span></span></code></pre></div>
-<p>Although the interface is different, let’s compare <code>smagic</code> to <code>glue</code> and <code>paste0</code>:</p>
+<p>Although the interface is different, let’s compare <code>string_magic</code> to <code>glue</code> and <code>paste0</code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Zeus"</span>, <span class="st">"Hades"</span>, <span class="st">"Poseidon"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span>base <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"The "</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="st">" brothers: "</span>, </span>
@@ -221,18 +221,18 @@
 <span>                        x_enum <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">]</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>, </span>
 <span>                                        <span class="st">" and "</span>, <span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                                        </span>
-<span>               smagic <span class="op">=</span> <span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"The {len?x} brothers: {enum?x}."</span><span class="op">)</span>,</span>
+<span>               string_magic <span class="op">=</span> <span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The {len?x} brothers: {enum?x}."</span><span class="op">)</span>,</span>
 <span>               </span>
-<span>               smagic_bis <span class="op">=</span> <span class="fu"><a href="reference/smagic.html">smagic</a></span><span class="op">(</span><span class="st">"The {length(x)} brothers: {x_enum}."</span>, </span>
+<span>               string_magic_bis <span class="op">=</span> <span class="fu"><a href="reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The {length(x)} brothers: {x_enum}."</span>, </span>
 <span>                              x_enum <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">]</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>, </span>
 <span>                                        <span class="st">" and "</span>, <span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unit: microseconds</span></span>
-<span><span class="co">#&gt;        expr   min     lq    mean median    uq   max neval</span></span>
-<span><span class="co">#&gt;        base   5.9   8.30   8.870   8.75   9.3  23.0   100</span></span>
-<span><span class="co">#&gt;        glue 141.6 155.75 167.266 162.35 172.6 254.3   100</span></span>
-<span><span class="co">#&gt;      smagic 498.9 512.85 533.808 520.70 540.2 696.1   100</span></span>
-<span><span class="co">#&gt;  smagic_bis 146.3 161.70 171.086 168.75 172.7 283.3   100</span></span></code></pre></div>
-<p>As we can see, the processing overhead of <code>smagic</code> specific syntax is a few hundred microseconds. Remember that since regular interpolation can be performed, you can always fall back to <code>glue</code>-like processing (and benefit from the same performance), as is illustrated by the last command of the benchmark.</p>
+<span><span class="co">#&gt;        expr     min       lq      mean   median      uq       max neval</span></span>
+<span><span class="co">#&gt;        base   4.701   5.5510  54.37105   6.2010   6.802  4792.601   100</span></span>
+<span><span class="co">#&gt;        glue  93.900 104.6015 121.23295 118.8510 129.901   219.100   100</span></span>
+<span><span class="co">#&gt;      string_magic 316.701 331.3010 628.79896 351.2510 391.401 26576.501   100</span></span>
+<span><span class="co">#&gt;  string_magic_bis  94.601 106.5010 118.10602 114.8015 123.301   250.301   100</span></span></code></pre></div>
+<p>As we can see, the processing overhead of <code>string_magic</code> specific syntax is a few hundred microseconds. Remember that since regular interpolation can be performed, you can always fall back to <code>glue</code>-like processing (and benefit from the same performance), as is illustrated by the last command of the benchmark.</p>
 </div>
 </div>
   </div>

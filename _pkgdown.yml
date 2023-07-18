@@ -23,11 +23,11 @@ reference:
     contents:
       - string_magic
       - matches("_magic")
-      - matches("sma")
+      - matches("string_ma")
   - title: Other string operations
     desc: Pattern detection, operations chaining, string cleaning and more
     contents:
-      - matches("^string_")
+      - matches("^string_[^m]")
       - parse_regex_pattern
       - paste_conditional
       - _index_

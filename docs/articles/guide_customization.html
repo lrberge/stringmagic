@@ -53,7 +53,7 @@
     </li>
 <li class="dropdown-header">Guides</li>
     <li>
-      <a href="../articles/guide_smagic.html">`stringmagic`: A quick tour</a>
+      <a href="../articles/guide_string_magic.html">`string_magic`: Magical String Interpolation</a>
     </li>
     <li>
       <a href="../articles/guide_string_tools.html">String tools: magic edition</a>
@@ -65,10 +65,10 @@
     </li>
 <li class="dropdown-header">References</li>
     <li>
-      <a href="../articles/ref_smagic.html">`smagic`: Magical string interpolation</a>
+      <a href="../articles/ref_operations.html">`string_magic`'s operations: The reference</a>
     </li>
     <li>
-      <a href="../articles/ref_operations.html">`smagic`'s operations: The reference</a>
+      <a href="../articles/ref_string_magic_special_operations.html">`string_magic`'s sepcial operations</a>
     </li>
     <li>
       <a href="../articles/ref_regex_flags.html">Regular expression flags</a>
@@ -106,7 +106,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-06-30</h4>
+            <h4 data-toc-skip class="date">2023-07-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/guide_customization.rmd" class="external-link"><code>vignettes/guide_customization.rmd</code></a></small>
       <div class="hidden name"><code>guide_customization.rmd</code></div>
@@ -115,12 +115,417 @@ Bergé</h4>
 
     
     
-
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span></span>
+<span>  echo <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  collapse <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>  comment <span class="op">=</span> <span class="st">"#&gt;"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/stringmagic/" class="external-link">stringmagic</a></span><span class="op">)</span></span></code></pre></div>
+<p>This vignette presents how to customize <code>stringmagic</code> to
+(better) suit your needs. It covers:</p>
+<ul>
+<li>how to <a href="#sec_alias">create custom functions with alias
+generators</a>
+</li>
+<li>how to <a href="#sec_creation">create new string operations</a>
+available within <a href="LINK"><code>string_magic</code></a>
+</li>
+<li>how to <a href="LINK">use <code>stringmagic</code> in a package when
+employing custom operations</a> (this is advanced)</li>
+</ul>
+<div class="section level2">
+<h2 id="sec_alias">Creating new functions with alias generators<a class="anchor" aria-label="anchor" href="#sec_alias"></a>
+</h2>
+<p>Several <code>stringmagic</code> functions dispose of alias
+generators, which end with the suffix <code>_alias</code>. They generate
+a copy of the function with different default values (and also take care
+of setting up the environment correctly). Some functions have many
+arguments, by changing the default arguments you can create completely
+new functions.</p>
+<p>This section will guide you through alias generation, and how they
+can be useful, using examples.</p>
+<div class="section level4">
+<h4 id="creating-a-formula-builder">Creating a formula builder<a class="anchor" aria-label="anchor" href="#creating-a-formula-builder"></a>
+</h4>
+<p>This is a common R problem: <em>how to turn a character string into a
+formula, in a handy way</em>? You can use a few arguments of
+<code>string_magic</code> to make it work:</p>
+<ul>
+<li>
+<code>.default</code>: to apply a default sequence of operations to
+interpolations</li>
+<li>
+<code>.post</code>: to appy a custom function right before returning
+the object</li>
+</ul>
+<p>The objective here is to inject variable names into a character
+vector and turn it into a formula. Since variables in a formula are
+separated with a <code>"+"</code>, we need to collapse several variables
+with <code>"+"</code>. This will be achieved with the
+<code>.default</code> argument. Then we turn it into a formula by
+passing <code>as.formula</code> in the <code>.post</code> argument.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">y</span> <span class="op">=</span> <span class="st">"Petal.Length"</span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span>, <span class="st">"Species"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{y} ~ {x}"</span>, .default <span class="op">=</span> <span class="st">"' + 'collapse"</span>, .post <span class="op">=</span> <span class="va">as.formula</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x0000024a8fed9cc8&gt;</span></span></code></pre></div>
+<p>Now that we see that our builder works with
+<code>string_magic</code>, we create a dedicated function with an
+alias.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fml_builder</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic_alias.html">string_magic_alias</a></span><span class="op">(</span>.default <span class="op">=</span> <span class="st">"' + 'collapse"</span>, .post <span class="op">=</span> <span class="va">as.formula</span><span class="op">)</span></span></code></pre></div>
+<p>The function <code>fml_builder</code> works as string_magic buut with
+different default values. Now we can apply it directly.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {x}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x0000024a8f2a69d8&gt;</span></span></code></pre></div>
+<p>Since this function is just a call to <code>string_magic</code>, you
+can apply anything you want. Let’s scale the variables on the
+right-hand-side by using nesting:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span><span class="op">)</span></span>
+<span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {'+'collapse ! scale({x})}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Petal.Length ~ scale(Sepal.Length) + scale(Petal.Width)</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x0000024a91164910&gt;</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="changing-str_clean">Changing <code>str_clean</code><a class="anchor" aria-label="anchor" href="#changing-str_clean"></a>
+</h4>
+<p>The function <a href="LINK"><code>str_clean</code></a> specialses in
+cleaning character vectors. To do so it uses a specific syntax to
+transform various regular expressions at once. For example
+<code>"pat1, pat2 =&gt; replacement"</code> will turn the regular
+expression <code>pat1</code> and <code>pat2</code> into the
+<code>replacement</code>. The syntax is: i) a comma separated list of
+regular expressions, 2) a pipe (<code>" =&gt; "</code>), 3) the
+replacement. If you are not happy with the fact that regexes are
+separated with commas, or of the look of the pipe, no problem!</p>
+<p>Let’s change the default values, let’s: i) use a semi-colon
+separation, ii) use “&gt;&gt;” instead of the regular pipe.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_clean</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_clean.html">string_clean_alias</a></span><span class="op">(</span>split <span class="op">=</span> <span class="st">"; "</span>, pipe <span class="op">=</span> <span class="st">" &gt;&gt; "</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="st">"My name is Bond, James Bond"</span></span>
+<span><span class="co"># old way</span></span>
+<span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"e, o =&gt; a"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "My nama is Band, Jamas Band"</span></span>
+<span></span>
+<span><span class="co"># new way</span></span>
+<span><span class="fu">my_clean</span><span class="op">(</span><span class="va">x</span>, <span class="st">"e; o &gt;&gt; a"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "My nama is Band, Jamas Band"</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="creating-small-numeric-matrices">Creating small numeric matrices<a class="anchor" aria-label="anchor" href="#creating-small-numeric-matrices"></a>
+</h4>
+<p>The function <a href="LINK"><code>string_vec</code></a> facilitates
+the creation of small character vectors. With its arguments
+<code>.nmat</code>, you can turn the vector into a numeric matrix.
+Hence, let us write a function to create small numeric matrices.</p>
+<p>We will use:</p>
+<ul>
+<li>
+<code>.nmat = TRUE</code> to ask to transform the result into a
+numeric matrix. The number of rows will be deduced from the number of
+newlines.</li>
+<li>
+<code>.last = "'[\n ,]+'split"</code> (<code>.last</code> means
+<em>last</em> operation) to split the resulting character vector with
+respect to newlines, commas and space, so that numbers can be separated
+by any succession of these</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">num_mat</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec_alias</a></span><span class="op">(</span>.nmat <span class="op">=</span> <span class="cn">TRUE</span>, .last <span class="op">=</span> <span class="st">"'[\n ,]+'split"</span><span class="op">)</span></span>
+<span><span class="fu">num_mat</span><span class="op">(</span><span class="st">"1, 2, 3</span></span>
+<span><span class="st">         7, 5, 0</span></span>
+<span><span class="st">         0, 0, 1"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      [,1] [,2] [,3]</span></span>
+<span><span class="co">#&gt; [1,]    1    2    3</span></span>
+<span><span class="co">#&gt; [2,]    7    5    0</span></span>
+<span><span class="co">#&gt; [3,]    0    0    1</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="sec_creation">Creating your own string operations<a class="anchor" aria-label="anchor" href="#sec_creation"></a>
+</h2>
+<p>You can add any arbitraty operation to <code>string_magic</code>.
+There are two main ways:</p>
+<ul>
+<li>registering a custom sequence of regular string_magic operations
+(<code>string_magic_register_ops</code>)</li>
+<li>registering a custom function
+(<code>string_magic_register_fun</code>)</li>
+</ul>
+<div class="section level4">
+<h4 id="new-operations-as-a-sequence-of-existing-operations-sec_reg_ops">New operations as a sequence of existing operations
+{sec_reg_ops}<a class="anchor" aria-label="anchor" href="#new-operations-as-a-sequence-of-existing-operations-sec_reg_ops"></a>
+</h4>
+<p>Create new sequence of operations with
+<code>string_magic_register_ops</code>. It takes two arguments: 1) the
+sequence of <code>string_magic</code> operations, and 2) the name of the
+new operation.</p>
+<p>For example, let’s create a new operation <code>h1</code> which
+formats a string into a header. It adds an hypen before the text and
+adds hyphens after the text up to the 40th column.</p>
+<p>Ex.1: creating a header operation.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1) we register the sequence of regular string_magic operations</span></span>
+<span><span class="fu"><a href="../reference/string_magic_register_fun.html">string_magic_register_ops</a></span><span class="op">(</span><span class="st">"'- | 'paste, '40|-'fill"</span>, <span class="st">"h1"</span><span class="op">)</span></span>
+<span><span class="co"># 2) we use it</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"h1 ! That's my header"</span>, .nest <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "- That's my header ---------------------"</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="new-operations-using-a-custom-function">New operations using a custom function<a class="anchor" aria-label="anchor" href="#new-operations-using-a-custom-function"></a>
+</h4>
+<p>To implement new operations using functions, you have two steps: 1)
+create the custom function, 2) register the function an provide an alias
+to the operation.</p>
+<p>First you need to create a function that will be applied to a
+character vector. That function <strong>must</strong> have at least the
+arguments <code>x</code> and <code>...</code>. Additionnaly, it can have
+the optional arguments: <code>argument</code>, <code>options</code>,
+<code>group</code>, <code>group_flag</code>. This function must return a
+vector. Optionnally, and only if relevant (see the last example), you
+can add an attribute <code>"group"</code> to the returned object which
+will be used in grouped operations.</p>
+<p>Second, you need to register the function with
+<code>string_magic_register_fun</code> and assign an alias to it.
+Optionnally, you can provide a list of valid options.</p>
+<p>Let’s create an example in which we add markdown emphasis to
+words.</p>
+<p>Ex.1: a new operation adding markdown emphasis.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/stringmagic/" class="external-link">stringmagic</a></span><span class="op">)</span></span>
+<span><span class="co"># A) define the function</span></span>
+<span><span class="va">fun_emph</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"*"</span>, <span class="va">x</span>, <span class="st">"*"</span><span class="op">)</span></span>
+<span> </span>
+<span><span class="co"># B) register it</span></span>
+<span><span class="fu"><a href="../reference/string_magic_register_fun.html">string_magic_register_fun</a></span><span class="op">(</span><span class="va">fun_emph</span>, <span class="st">"emph"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># C) use it</span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"right, now"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Take heed, {emph, collapse? x}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Take heed, *right* *now*."</span></span></code></pre></div>
+<p>More generally, the function taken by
+<code>string_magic_register_fun</code> is called internally by
+<code>string_magic</code> in the form
+<code>fun(x, argument, options, group, group_flag)</code>. Here is the
+meaning of the arguments:</p>
+<ul>
+<li>
+<code>x</code>: the value to which the operation applies.</li>
+<li>
+<code>argument</code>: the quoted <code>string_magic</code> argument
+(always character).</li>
+<li>
+<code>options</code>: a character vector of
+<code>string_magic</code> options.</li>
+<li>
+<code>group</code>: an index of the group to which belongs each
+observation (integer).</li>
+<li>
+<code>group_flag</code>: value between 0 and 2; 0: no grouping
+operation requested; 1: keep track of groups; 2: apply grouping.</li>
+</ul>
+<p>The two last arguments, <code>group</code> and
+<code>group_flag</code>, are of use only in group-wise operations only
+if <code>fun</code> changes the length or the order of vectors.</p>
+<p>Let’s add an argument and an option to the <code>"emph"</code>
+operation that we defined in Ex.1.</p>
+<p>Ex.2: new operation with argument and option.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fun_emph</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">argument</span>, <span class="va">options</span>, <span class="va">...</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">arg</span> <span class="op">=</span> <span class="va">argument</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">arg</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="va">arg</span> <span class="op">=</span> <span class="st">"*"</span></span>
+<span>  </span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="st">"strong"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">options</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">arg</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">arg</span>, <span class="fl">3</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">arg</span>, <span class="va">x</span>, <span class="va">arg</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/string_magic_register_fun.html">string_magic_register_fun</a></span><span class="op">(</span><span class="va">fun_emph</span>, <span class="st">"emph"</span>, <span class="st">"strong"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"right, now"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Take heed, {'_'emph.s, c? x}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Take heed, ___right___ ___now___."</span></span>
+<span></span>
+<span><span class="co"># In string_magic_register_fun, the valid_option argument is used to validate them.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Take heed, {'_'emph.aaa, c? x}."</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error : in string_magic("Take heed, {'_'emph.aaa, c? x}."): </span></span>
+<span><span class="co">#&gt; CONTEXT: Problem found in "Take heed, {'_'emph.aaa, c? x}.",</span></span>
+<span><span class="co">#&gt;          when dealing with the interpolation `{'_'emph.aaa, c? x}`. See</span></span>
+<span><span class="co">#&gt;          error below:</span></span>
+<span><span class="co">#&gt; The option `aaa` is not valid for the current operation.</span></span>
+<span><span class="co">#&gt; FYI the option available is `strong`.</span></span></code></pre></div>
+<p>Finally let’s illustrate an example with group-wise awareness. This
+is somewhat advanced and should be of concern only when you regularly
+use <a href="LINK">group-wise operations</a>.</p>
+<p>Ex.3: we create a function that only keeps variable names (ex: x5,
+is_num, etc).</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">keep_varnames</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">group</span>, <span class="va">group_flag</span>, <span class="va">...</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">is_ok</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^[[:alpha:].][[:alnum:]._]*$"</span>, <span class="va">x</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="va">group_flag</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">group</span> <span class="op">=</span> <span class="va">group</span><span class="op">[</span><span class="va">is_ok</span><span class="op">]</span></span>
+<span>    <span class="co"># recreating the index</span></span>
+<span>    <span class="va">group</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">unclass</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span> </span>
+<span>  </span>
+<span>  <span class="va">res</span> <span class="op">=</span> <span class="va">x</span><span class="op">[</span><span class="va">is_ok</span><span class="op">]</span></span>
+<span>  <span class="co"># we add the group in an attribute (this is the way)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">"group"</span><span class="op">)</span> <span class="op">=</span> <span class="va">group</span></span>
+<span>  </span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/string_magic_register_fun.html">string_magic_register_fun</a></span><span class="op">(</span><span class="va">keep_varnames</span>, <span class="st">"keepvar"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">expr</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1 + 52"</span>, <span class="st">"73 %% 5 == x"</span>, <span class="st">"y[y &gt; .z_5]"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"All vars: {'[^[:alnum:]_.]+'split, keepvar, unik, enum.bq ? expr}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "All vars: `x1`, `x`, `y` and `.z_5`."</span></span>
+<span></span>
+<span><span class="co"># thanks to the group flag, we can apply group-wise operations</span></span>
+<span><span class="co"># we apply cat after the function (using .post) to have a nice display of the newlines </span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Vars in each expr:\n"</span>,</span>
+<span>             <span class="st">"{'\n'c ! - {1:3}) {'[^[:alnum:]_.]+'split, "</span>,</span>
+<span>                                 <span class="st">"keepvar, ~(unik, enum.bq) ? expr}}"</span>, .post <span class="op">=</span> <span class="va">cat</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Vars in each expr:</span></span>
+<span><span class="co">#&gt; - 1) `x1`, `x`, `y` and `.z_5`</span></span>
+<span><span class="co">#&gt; - 2) `x1`, `x`, `y` and `.z_5`</span></span>
+<span><span class="co">#&gt; - 3) `x1`, `x`, `y` and `.z_5`</span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="sec_package">Using <code>stringmagic</code> with custom operations as a
+dependency<a class="anchor" aria-label="anchor" href="#sec_package"></a>
+</h2>
+<p>This is section is only relevant if: 1) you use
+<code>stringmagic</code> as a dependency in your package, and 2) you use
+custom <code>stringmagic</code> operations. If you answer “no” to any of
+these two points, do not read this section, it’s only about details.
+<em>Otherwise it’s a must read.</em></p>
+<p>To use custom <code>stringmagic</code> operations within a package,
+you need to explicitly register the operations in a specific namespace,
+and, when using the <code>stringmagic</code> functions, you need to add
+the argument .namespace telling where the new operations are
+located.</p>
+<div class="section level3">
+<h3 id="why-do-i-need-a-namespace">Why do I need a namespace?<a class="anchor" aria-label="anchor" href="#why-do-i-need-a-namespace"></a>
+</h3>
+<p>There are two reasons: i) to ensure compatibility with future
+versions of the <code>stringmagic</code> package, and ii) to avoid
+conflicts with user-created operations. Let’s take an example. You
+create a package an use <code>stringmagic</code> with the custom
+operation <code>h1</code>, detailed <a href="#sec_reg_ops">here</a>, to
+create headers. Now let’s say a future version of
+<code>stringmagic</code> also introduces a <code>h1</code> function,
+that works differently from yours. This means that your package will
+work with the old <code>stringmagic</code> version but will lead to a
+bug with the new version. Not great!</p>
+<p>Same story if the user defines her own <code>h1</code> operation: we
+end up with two operations with the same name, hence a conflict.</p>
+<p>We need a mechanism to ensure that the <code>h1</code> operation in
+your package always work, irrespecive of the doings of the user and of
+the version of <code>stringmagic</code>. We now detail how to do it.</p>
+</div>
+<div class="section level3">
+<h3 id="using-custom-operations-in-a-package">Using custom operations in a package<a class="anchor" aria-label="anchor" href="#using-custom-operations-in-a-package"></a>
+</h3>
+<p>To use custom operations in a package:</p>
+<ol style="list-style-type: decimal">
+<li>add the argument <code>.namespace = "my_package_name"</code> to the
+calls to <code>string_magic_register_ops</code> and
+<code>string_magic_register_fun</code>
+</li>
+<li>add the argument <code>.namespace = "my_package_name"</code> to any
+call to <code>stringmagic</code>’s functions using custom operation.
+Achive this simply by creating aliases to <code>stringmagic</code>
+function.</li>
+</ol>
+<div class="section level4">
+<h4 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h4>
+<p>You develop the package <code>superpack</code> which uses
+<code>stringmagic</code> to display messages to the user and you want to
+register the <code>header</code> operation (behaving <a href="#sec_reg_ops">similarly to <code>h1</code></a>).</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic_register_fun.html">string_magic_register_ops</a></span><span class="op">(</span><span class="st">"'- | 'paste, '70|-'fill"</span>, </span>
+<span>                          alias <span class="op">=</span> <span class="st">"header"</span>, </span>
+<span>                          namespace <span class="op">=</span> <span class="st">"superpack"</span><span class="op">)</span></span></code></pre></div>
+<p>You can now summon your new operation to write a message to the user.
+Just remenber that you need the <code>.namespace</code> argument:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">time</span> <span class="op">=</span> <span class="fl">0.7</span></span>
+<span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"{header!Important message to you, user}"</span>,</span>
+<span>          <span class="st">"The algorithm converged in {time}s."</span>, </span>
+<span>          .sep <span class="op">=</span> <span class="st">"\n"</span>, .namespace <span class="op">=</span> <span class="st">"superpack"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; - Important message to you, user -------------------------------------</span></span>
+<span><span class="co">#&gt; The algorithm converged in 0.7s.</span></span></code></pre></div>
+<p>Without the namespace argument, this leads to an error:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">time</span> <span class="op">=</span> <span class="fl">0.7</span></span>
+<span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"{header!Important message to you, user}"</span>,</span>
+<span>          <span class="st">"The algorithm converged in {time}s."</span>, </span>
+<span>          .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: in cat_magic("{header!Important message to you, user...: </span></span>
+<span><span class="co">#&gt; CONTEXT: Problem found in "{header!Important message to you, user}\nThe</span></span>
+<span><span class="co">#&gt; algorithm converged in {time}s.",</span></span>
+<span><span class="co">#&gt;          when dealing with the interpolation `{header!Important message</span></span>
+<span><span class="co">#&gt;          to you, user}`.</span></span>
+<span><span class="co">#&gt; PROBLEM: `header` is not a valid operator. Maybe you meant `head`?</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; INFO: Type string_magic(.help = "regex") or string_magic(.help = TRUE)</span></span>
+<span><span class="co">#&gt; for help.</span></span>
+<span><span class="co">#&gt; Ex. of valid stuff: string_magic("Letters: {10 first, `6/2`last, ''c, 'i</span></span>
+<span><span class="co">#&gt; =&gt; e'r, upper.first ? letters}!")</span></span></code></pre></div>
+<p>Using the <code>.namsepace</code> argument is cumbersome. That is why
+<code>stringmagic</code> offers alias generators to easily create
+aliases of the <code>stringmagic</code> functions using custom
+operations.</p>
+</div>
+<div class="section level4">
+<h4 id="using-aliases">Using aliases<a class="anchor" aria-label="anchor" href="#using-aliases"></a>
+</h4>
+<p>To avoid providing the argument <code>.namespace</code> at each call
+(which makes the function completely useless), use the alias genetaors,
+as described in <a href="#sec_alias">the first section</a>. Let’s
+continue on the previous example but this time we avoid the argument
+<code>.namespace</code> by creating an alias.</p>
+<p>To create the alias, we use <code>cat_magic_alias</code> which
+creates a copy of <code>cat_magic</code> for which the default values
+have been modified. Here we override the function name (of course you
+can use any other name, like <code>cmagic</code>, <code>magcat</code>,
+whatever!):</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cat_magic</span> <span class="op">=</span> <span class="fu">stringmagic</span><span class="fu">::</span><span class="fu"><a href="../reference/cat_magic.html">cat_magic_alias</a></span><span class="op">(</span>.namespace <span class="op">=</span> <span class="st">"superpack"</span><span class="op">)</span></span></code></pre></div>
+<p>An now we are able to access our previously defined function without
+error:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">time</span> <span class="op">=</span> <span class="fl">0.7</span></span>
+<span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"{header!Important message to you, user}"</span>,</span>
+<span>          <span class="st">"The algorithm converged in {time}s."</span>, </span>
+<span>          .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; - Important message to you, user -------------------------------------</span></span>
+<span><span class="co">#&gt; The algorithm converged in 0.7s.</span></span></code></pre></div>
+</div>
+</div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-      </div>
+        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
+    </nav>
+</div>
 
 </div>
 

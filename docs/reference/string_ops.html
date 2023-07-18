@@ -34,7 +34,7 @@
   <ul class="dropdown-menu" role="menu"><li class="divider">
     <li class="dropdown-header">Guides</li>
     <li>
-      <a href="../articles/guide_smagic.html">`stringmagic`: A quick tour</a>
+      <a href="../articles/guide_string_magic.html">`string_magic`: Magical String Interpolation</a>
     </li>
     <li>
       <a href="../articles/guide_string_tools.html">String tools: magic edition</a>
@@ -45,10 +45,10 @@
     <li class="divider">
     <li class="dropdown-header">References</li>
     <li>
-      <a href="../articles/ref_smagic.html">`smagic`: Magical string interpolation</a>
+      <a href="../articles/ref_operations.html">`string_magic`'s operations: The reference</a>
     </li>
     <li>
-      <a href="../articles/ref_operations.html">`smagic`'s operations: The reference</a>
+      <a href="../articles/ref_string_magic_special_operations.html">`string_magic`'s sepcial operations</a>
     </li>
     <li>
       <a href="../articles/ref_regex_flags.html">Regular expression flags</a>
@@ -95,7 +95,7 @@
     <dl><dt>op</dt>
 <dd><p>Character <strong>scalar</strong>. Character scalar containing the comma separated values
 of operations to perform to the vector. The 50+ operations are detailed in the help
-page of <code><a href="smagic.html">smagic()</a></code>.</p></dd>
+page of <code><a href="string_magic.html">string_magic()</a></code>.</p></dd>
 
 
 <dt>pre_unik</dt>
@@ -107,11 +107,11 @@ default, this is <code>TRUE</code> for vector of length 1M or more.</p></dd>
 
 <dt>namespace</dt>
 <dd><p>Character scalar or <code>NULL</code> (default). <strong>Only useful for package developers.</strong>
-As a regular end-user you shouldn't care! If your package uses <code>smagic</code>, you should care.
-It is useful <strong>only</strong> if your package uses 'custom' <code>smagic</code> operations, set with
-<code><a href="smagic_register_fun.html">smagic_register_fun()</a></code> or <code><a href="smagic_register_fun.html">smagic_register_ops()</a></code>.</p>
+As a regular end-user you shouldn't care! If your package uses <code>string_magic</code>, you should care.
+It is useful <strong>only</strong> if your package uses 'custom' <code>string_magic</code> operations, set with
+<code><a href="string_magic_register_fun.html">string_magic_register_fun()</a></code> or <code><a href="string_magic_register_fun.html">string_magic_register_ops()</a></code>.</p>
 <p>If so pass the name of your package in this argument so that your function can access
-the new <code>smagic</code> operations defined within your package.</p></dd>
+the new <code>string_magic</code> operations defined within your package.</p></dd>
 
 
 <dt>x</dt>
@@ -133,8 +133,8 @@ one, depending on the operations performed.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>This function is a simple wrapper around smagic. Formally, <code>string_ops(x, "op1, op2")</code>
-is equivalent to <code>smagic("{op1, op2 ? x}")</code>.</p>
+    <p>This function is a simple wrapper around string_magic. Formally, <code>string_ops(x, "op1, op2")</code>
+is equivalent to <code>string_magic("{op1, op2 ? x}")</code>.</p>
     </div>
     <div id="functions">
     <h2>Functions</h2>
@@ -145,9 +145,9 @@ is equivalent to <code>smagic("{op1, op2 ? x}")</code>.</p>
     <h2>See also</h2>
     <div class="dont-index"><p>Other tools with aliases: 
 <code><a href="cat_magic.html">cat_magic_alias</a>()</code>,
-<code><a href="smagic_alias.html">smagic_alias</a>()</code>,
-<code><a href="smagic.html">smagic</a>()</code>,
 <code><a href="string_clean.html">string_clean_alias</a>()</code>,
+<code><a href="string_magic_alias.html">string_magic_alias</a>()</code>,
+<code><a href="string_magic.html">string_magic</a>()</code>,
 <code><a href="string_vec.html">string_vec_alias</a>()</code></p></div>
     </div>
     <div id="author">
@@ -172,7 +172,7 @@ is equivalent to <code>smagic("{op1, op2 ? x}")</code>.</p>
 <span class="r-in"><span><span class="co"># x: extracts the first pattern. The default pattern is "[[:alnum:]]+"</span></span></span>
 <span class="r-in"><span><span class="co">#    which means an alpha-numeric word</span></span></span>
 <span class="r-in"><span><span class="co"># unik: applies unique() to the vector</span></span></span>
-<span class="r-in"><span><span class="co"># =&gt; see help in ?smagic for more details on the operations</span></span></span>
+<span class="r-in"><span><span class="co"># =&gt; see help in ?string_magic for more details on the operations</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># let's get the 3 largest numbers appearing in the car models</span></span></span>
