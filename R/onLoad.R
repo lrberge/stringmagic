@@ -12,6 +12,9 @@
 
   # help
   setup_help_extensive()
+  
+  # To circumvent a peculiar behavior from pkgdown
+  fix_pkgwdown_path()
 
   invisible()
 }

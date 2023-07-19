@@ -1104,3 +1104,52 @@ setNames = function(x, nm){
   x
 }
 
+fix_pkgwdown_path = function(){
+    # https://github.com/r-lib/pkgdown/issues/1218
+    # just because I use google drive... it seems pkgdown cannot convert to relative path...
+
+    # This is to ensure it only works for me
+    if(!is_string_magic_root()) return(NULL)
+    # we check we're in the right directory (otherwise there can be prblms with Rmakdown)
+    if(!isTRUE(file.exists("R/string_magic_main.R"))) return(NULL)
+
+    all_files = list.files("docs/articles/", full.names = TRUE, pattern = "html$")
+
+    for(f in all_files){
+        my_file = file(f, "r", encoding = "UTF-8")
+        text = readLines(f)
+        close(my_file)
+        if(any(grepl("../../../", text, fixed = TRUE))){
+            # We embed the images directly: safer
+
+            # A) we get the path
+            # B) we transform to URI
+            # C) we replace the line
+
+            pat = "<img.+\\.\\./.+/stringmagic/.+/images/"
+            qui = which(grepl(pat, text))
+            for(i in qui){
+                # ex: line = "<img src = \"../../../Google drive/stringmagic/stringmagic/vignettes/images/etable/etable_tex_2021-12-02_1.05477838.png\">"
+                line = text[i]
+                line_split = strsplit(line, "src *= *\"")[[1]]
+                path = gsub("\".*", "", line_split[2])
+                # ROOT is always stringmagic
+                path = gsub(".+stringmagic/", "", path)
+                path = gsub("^articles", "vignettes", path)
+
+                URI = knitr::image_uri(path)
+
+                rest = gsub("^[^\"]+\"", "", line_split[2])
+                new_line = .sma('{line_split[1]} src = "{URI}"{rest}')
+
+                text[i] = new_line
+            }
+
+            my_file = file(f, "w", encoding = "UTF-8")
+            writeLines(text, f)
+            close(my_file)
+        }
+    }
+
+}
+
