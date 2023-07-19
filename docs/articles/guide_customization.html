@@ -163,7 +163,7 @@ passing <code>as.formula</code> in the <code>.post</code> argument.</p>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span>, <span class="st">"Species"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{y} ~ {x}"</span>, .default <span class="op">=</span> <span class="st">"' + 'collapse"</span>, .post <span class="op">=</span> <span class="va">as.formula</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x000001ed386c2660&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x0000027c1e34d990&gt;</span></span></code></pre></div>
 <p>Now that we see that our builder works with
 <code>string_magic</code>, we create a dedicated function with an
 alias.</p>
@@ -174,7 +174,7 @@ different default values. Now we can apply it directly.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x000001ed378a4b80&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x0000027c1d5339a8&gt;</span></span></code></pre></div>
 <p>Since this function is just a call to <code>string_magic</code>, you
 can apply anything you want. Let’s scale the variables on the
 right-hand-side by using nesting:</p>
@@ -182,7 +182,7 @@ right-hand-side by using nesting:</p>
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span><span class="op">)</span></span>
 <span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {'+'collapse ! scale({x})}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ scale(Sepal.Length) + scale(Petal.Width)</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x000001ed398e6428&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x0000027c1f524178&gt;</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="changing-str_clean">Changing <code>str_clean</code><a class="anchor" aria-label="anchor" href="#changing-str_clean"></a>
@@ -252,8 +252,7 @@ There are two main ways:</p>
 (<code>string_magic_register_fun</code>)</li>
 </ul>
 <div class="section level4">
-<h4 id="new-operations-as-a-sequence-of-existing-operations-sec_reg_ops">New operations as a sequence of existing operations
-{sec_reg_ops}<a class="anchor" aria-label="anchor" href="#new-operations-as-a-sequence-of-existing-operations-sec_reg_ops"></a>
+<h4 id="sec_reg_ops">New operations as a sequence of existing operations<a class="anchor" aria-label="anchor" href="#sec_reg_ops"></a>
 </h4>
 <p>Create new sequence of operations with
 <code>string_magic_register_ops</code>. It takes two arguments: 1) the

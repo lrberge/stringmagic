@@ -134,7 +134,7 @@ You can add any arbitraty operation to `string_magic`. There are two main ways:
 - registering a custom sequence of regular string_magic operations (`string_magic_register_ops`) 
 - registering a custom function (`string_magic_register_fun`)
 
-### New operations as a sequence of existing operations {sec_reg_ops}
+### New operations as a sequence of existing operations {#sec_reg_ops}
 
 Create new sequence of operations with `string_magic_register_ops`. It takes two arguments:
 1) the sequence of `string_magic` operations, and 2) the name of the new operation.
