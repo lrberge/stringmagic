@@ -66,7 +66,7 @@ these examples are equivalent with `string_is` or `string_which`.
 Ex.1: series of examples using the *recommended syntax*.
 ```{r}
 cars = row.names(mtcars)
-string_magic("All cars from mtcars:\n{C, 60 width ? cars}")
+cat_magic("All cars from mtcars:\n{C, 60 width ? cars}")
 
 # cars with an 'a', an 'e', an 'i', and an 'o', all in lower case
 string_get(cars, "a & e & i & o")
@@ -170,6 +170,8 @@ Ex.1: Parsing data.
 # parsing an input: extracting the numbers
 input = "8.5in, 5.5, .5 cm"
 string_ops(input, "','split, tws, '^\\. => 0.'replace, '^\\D+|\\D+$'replace, num")
+
+
 # Explanation------------------------------------------------------------------|
 # ','split: splitting w.r.t. ','                                               |
 # tws: trimming the whitespaces                                                |
@@ -177,8 +179,11 @@ string_ops(input, "','split, tws, '^\\. => 0.'replace, '^\\D+|\\D+$'replace, num
 # '^\\D+|\\D+$'replace: removes non-digits on both ends of the string          |
 # num: converts to numeric                                                     |
 
+
 # now extracting the units
 string_ops(input, "','split, '^[ \\d.]+'replace, tws")
+
+
 # Explanation------------------------------------------------------------------|
 # ','split: splitting w.r.t. ','                                               |
 # '^[ \\d.]+'replace: removes the ' ', digit                                   |
@@ -193,6 +198,8 @@ cars = row.names(mtcars)
 
 # let's get the brands starting with an "m"
 string_ops(cars, "'i/^m'get, x, unik")
+
+
 # Explanation------------------------------------------------------------------|
 # 'i/^m'get: keeps only the elements starting with an m,                       |
 #            i/ is the 'regex-flag' "ignore" to ignore the case                |
@@ -201,8 +208,11 @@ string_ops(cars, "'i/^m'get, x, unik")
 #    which means an alpha-numeric word                                         |
 # unik: applies unique() to the vector                                         |
 
+
 # let's get the 3 largest numbers appearing in the car models
 string_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
+
+
 # Explanation------------------------------------------------------------------|
 # '\\d+'x: extracts the first pattern, the pattern meaning "a succession"      |
 #          of digits in regex language                                         |
@@ -353,6 +363,7 @@ df = string_vec("1, john,
                  3, marie,
                  5, harry", .df = "id, name")
 df
+
 # automatic conversion of numeric values
 df$id * 5
 ```

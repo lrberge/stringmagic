@@ -22,6 +22,11 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
 library(stringmagic)
 ```
 
@@ -35,13 +40,11 @@ The operations are divided into four groups:
 - [formatting operations](#sec_format)
 - [other operations](#sec_other)
 
-By default the function `string_magic` returns a plain character vector. To have a nicer
-display within this vignette we create an alias to `string_magic` which applies `base::cat`
-just before leaving the function.
-```{r}
-library(stringmagic)
-string_magic = string_magic_alias(.post = base::cat, .invisible = TRUE)
-```
+By default the function `string_magic` returns a plain character vector. In this 
+vignette it is sometimes nicer to apply the function `base::cat` to display 
+`string_magic` results containing newlines. Ths function `cat_magic` does exactly 
+that and we will use it from time to time.
+
 
 # Basic string operations {#sec_basic}
 
@@ -74,8 +77,8 @@ prince_talk = c("O that this too too solid flesh would melt",
                 "Thaw, and resolve itself into a dew!",
                 "Or that the Everlasting had not fix'd",
                 "His canon 'gainst self-slaughter!")
-string_magic("Order matters:\n{split, ~(sort, collapse), align.center, lower, upper.sentence,
-                          Q, '\n'collapse ? prince_talk}")
+cat_magic("Order matters:\n{split, ~(sort, collapse), align.center, lower, upper.sentence,
+                            Q, '\n'collapse ? prince_talk}")
 ```
 
 ## Collapse strings: c, C, collapse, Collapse
@@ -123,9 +126,11 @@ x = c("Combien de marins, combien de capitaines.",
       "Dans ce morne horizon se sont évanouis !")
 string_magic("Endings with i: {'i\\w*'extract, ~(', 'collapse), enum.1 ? x}.")
 
+
 x = c("6 feet under", "mahogany")
 # single extraction
 string_magic("{'\\w{3}'x ? x}")
+
 # multiple extraction
 string_magic("{'\\w{3}'X ? x}")
 ```
@@ -312,8 +317,10 @@ If previous operations were applied, it is likely that numeric data were transfo
 ```{r}
 # note the difference
 x = c(20, 100, 10)
+
 # sorting on numeric
 string_magic("{sort, ' + 'collapse ? x}")
+
 # sorting on character since 'n' operation transformed the vector to character
 string_magic("{n, sort, ' + 'collapse ? x}")
 ```
@@ -450,11 +457,11 @@ the empty string. This means that `string_magic("ws.punct ! Meg's car")` will be
 
 ```{r}
 x = "   I    should? review 85 4 this text!!"
-string_magic("v0: {x}", 
-        "v1: {ws ? x}",
-        "v2: {ws.punct ? x}",
-        "v3: {ws.punct.digit ? x}",
-        "v4: {ws.punct.digit.isolated ? x}", .sep = "\n")
+cat_magic("v0: {x}", 
+          "v1: {ws ? x}",
+          "v2: {ws.punct ? x}",
+          "v3: {ws.punct.digit ? x}",
+          "v4: {ws.punct.digit.isolated ? x}", .sep = "\n")
 ```
 
 ## Trim white spaces: tws
@@ -483,10 +490,10 @@ Options `"0"` or `"zero"` fills the blanks with 0s: useful to format numbers. Op
 and `"center"` centers the strings.
 ```{r}
 x = c(1, 12345) 
-string_magic("left:   {format, q, enum ? x}", 
-        "right:  {Format, q, enum ? x}",
-        "center: {format.center, q, enum ? x}",
-        "zero:   {format.0, q, enum ? x}", .sep = "\n")
+cat_magic("left  : {format, q, enum ? x}", 
+          "right : {Format, q, enum ? x}",
+          "center: {format.center, q, enum ? x}",
+          "zero  : {format.0, q, enum ? x}", .sep = "\n")
 ```
 
 ## Apply `sprintf` formatting: %
@@ -533,7 +540,7 @@ x = c(5, 12, 52123)
 string_magic("She owes {n, '$'paste, enum ? x}.")
 
 # option 0: all same width, no ',' for thousands
-string_magic("|---|\n{n.0, '\n'collapse ? x}")
+cat_magic("|---|\n{n.0, '\n'collapse ? x}")
 
 # option "upper"
 n = 5
@@ -614,11 +621,11 @@ for the argument `s`, like in `'n||s'`.
 
 ```{r}
 x = "long sentence"
-string_magic("v0: {x}", 
-        "v1: {4 shorten ? x}", 
-        "v2: {'4|..'shorten ? x}", 
-        "v3: {'4|..'shorten.include ? x}", 
-        "v4: {4 shorten.dots ? x}", .sep = "\n")
+cat_magic("v0: {x}", 
+          "v1: {4 shorten ? x}", 
+          "v2: {'4|..'shorten ? x}", 
+          "v3: {'4|..'shorten.include ? x}", 
+          "v4: {4 shorten.dots ? x}", .sep = "\n")
 ```
 
 ## Fill character strings: fill, align
@@ -636,7 +643,7 @@ See help for [`string_fill()`](https://lrberge.github.io/stringmagic/reference/s
 for more information.
 ```{r}
 life = "full of sound and fury, Signifying nothing"
-string_magic("{'[ ,]+'split, upper.first, fill.center, q, '\n'collapse ? life}")
+cat_magic("{'[ ,]+'split, upper.first, fill.center, q, '\n'collapse ? life}")
 
 # fixing the length and filling with 0s
 string_magic("{'5|0'fill.right, enum ? c(1, 55)}")
@@ -682,7 +689,7 @@ The default behavior is to escape both newlines and tabs.
 ```{r}
 input = "yes \n\n no"
 msg = string_magic("Your input, equal to {escape, bq ? input} is incorrect.")
-cat(msg, "\n")
+cat(msg, sep = "\n")
 ```
 
 
@@ -699,11 +706,11 @@ Option `"rm"` converts and removes the elements that could not be converted.
 Option `"clear"` turns failed conversions into the empty string, and hence lead to a character vector.
 ```{r}
 x = c(5, "six")
-string_magic("   origin: {enum, q ? x}", 
-        "      num: {num, enum, q ? x}", 
-        "   num.rm: {num.rm, enum, q ? x}", 
-        " num.soft: {num.soft, enum, q ? x}", 
-        "num.clear: {num.clear, enum, q ? x}", .sep = "\n")
+cat_magic("   origin: {enum, q ? x}", 
+          "      num: {num, enum, q ? x}", 
+          "   num.rm: {num.rm, enum, q ? x}", 
+          " num.soft: {num.soft, enum, q ? x}", 
+          "num.clear: {num.clear, enum, q ? x}", .sep = "\n")
 ```
 
 ## Create an enumeration: enum
@@ -745,9 +752,9 @@ Option `"letter"` writes the length in words (up to 100). Option `"upper"` is th
 as letter but uppercases the first letter. By default, the number is formatted:
 commas are inserted to separate thousands.
 ```{r}
-string_magic("The length of 1:5000:", 
-       " - len     = {len ? 1:5000}", 
-       " - len.num = {len.num ? 1:5000}", .sep = " \n")
+cat_magic("The length of 1:5000:", 
+          " - len     = {len ? 1:5000}", 
+          " - len.num = {len.num ? 1:5000}", .sep = " \n")
 ```
 The upper case command (`Len`) adds the option `"letter"` (only for small numbers).
 ```{r}
@@ -767,10 +774,10 @@ target size as a fraction of the current screen. Finally it can be an expression
 uses the variable `.sw` which will capture the value of the current screen width.
 ```{r}
 x = "this is a long sentence"
-string_magic("------ version 0 ------\n{x}", 
-        "------ version 1 ------\n{15 width ? x}", 
-        "------ version 2 ------\n{'15|#>'width ? x}",
-        "------ version 3 ------\n{'15|#>_'width ? x}", .sep = "\n")
+cat_magic("------ version 0 ------\n{x}", 
+          "------ version 1 ------\n{15 width ? x}", 
+          "------ version 2 ------\n{'15|#>'width ? x}",
+          "------ version 3 ------\n{'15|#>_'width ? x}", .sep = "\n")
 ```
 
 ## Formatted time difference: dtime

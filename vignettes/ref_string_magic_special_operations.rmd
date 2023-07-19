@@ -21,6 +21,15 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(stringmagic)
+```
+
 This vingette presents advanced operations included in `string_magic`. There are four parts:
 
 - [group-wise operations](#sec_group_wise)
@@ -28,13 +37,10 @@ This vingette presents advanced operations included in `string_magic`. There are
 - [compact if-else operator](#sec_ifelse)
 - [pluralization](#sec_pluralization)
 
-By default the function `string_magic` returns a plain character vector. This may not render
-nicely in this vignette. Hence we create an alias to `string_magic` which applies `base::cat`
-just before leaving the function.
-```{r}
-library(stringmagic)
-string_magic = string_magic_alias(.post = base::cat)
-```
+By default the function `string_magic` returns a plain character vector. In this 
+vignette it is sometimes nicer to apply the function `base::cat` to display 
+`string_magic` results containing newlines. Ths function `cat_magic` does exactly 
+that and we will use it from time to time.
 
 # Group-wise operations {#sec_group_wise}
 
@@ -125,7 +131,8 @@ Ex.3: we want to replace all values lower than 10 by the the string "<10", and t
 create an enumeration.
 ```{r}
 pval = c(1e-20, 0.15, 0.5)
-string_magic("pvalues: {vif(.<1e-16 ; <1e-16 ; {%05f?.}), fill.right ? pval}", .collapse = "\n")
+cat_magic("pvalues: {vif(.<1e-16 ; <1e-16 ; {%05f?.}), fill.right ? pval}", 
+          .sep = "\n")
 ```
 
 In this example, the condition is of the same length as the vector, so an element-wise 
