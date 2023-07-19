@@ -106,7 +106,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-07-18</h4>
+            <h4 data-toc-skip class="date">2023-07-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/ref_regex_logic.rmd" class="external-link"><code>vignettes/ref_regex_logic.rmd</code></a></small>
       <div class="hidden name"><code>ref_regex_logic.rmd</code></div>
@@ -123,7 +123,8 @@ intuitive: simply use regular logical operators and it will work!</p>
 detection functions (<code>string_is</code>, <code>string_get</code>,
 etc), and b) string replacement functions (<code>string_clean</code>,
 <code>string_replace</code>) with the <code>total</code> flag (see the
-<a href="LINK">vignette on regex flags</a>).</p>
+<a href="https://lrberge.github.io/stringmagic/articles/ref_regex_flags.html" class="external-link">vignette
+on regex flags</a>).</p>
 <div class="section level2">
 <h2 id="detect_logic">Logically combining regex patterns<a class="anchor" aria-label="anchor" href="#detect_logic"></a>
 </h2>
@@ -170,32 +171,32 @@ are sequentially combined.</p>
 <p>Ex: selecting cars.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##  [1] "Mazda RX4"           "Mazda RX4 Wag"       "Datsun 710"         </span></span>
-<span><span class="co">##  [4] "Hornet 4 Drive"      "Hornet Sportabout"   "Valiant"            </span></span>
-<span><span class="co">##  [7] "Duster 360"          "Merc 240D"           "Merc 230"           </span></span>
-<span><span class="co">## [10] "Merc 280"            "Merc 280C"           "Merc 450SE"         </span></span>
-<span><span class="co">## [13] "Merc 450SL"          "Merc 450SLC"         "Cadillac Fleetwood" </span></span>
-<span><span class="co">## [16] "Lincoln Continental" "Chrysler Imperial"   "Fiat 128"           </span></span>
-<span><span class="co">## [19] "Honda Civic"         "Toyota Corolla"      "Toyota Corona"      </span></span>
-<span><span class="co">## [22] "Dodge Challenger"    "AMC Javelin"         "Camaro Z28"         </span></span>
-<span><span class="co">## [25] "Pontiac Firebird"    "Fiat X1-9"           "Porsche 914-2"      </span></span>
-<span><span class="co">## [28] "Lotus Europa"        "Ford Pantera L"      "Ferrari Dino"       </span></span>
-<span><span class="co">## [31] "Maserati Bora"       "Volvo 142E"</span></span></code></pre>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># which one...</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "Mazda RX4"           "Mazda RX4 Wag"       "Datsun 710"         </span></span>
+<span><span class="co">#&gt;  [4] "Hornet 4 Drive"      "Hornet Sportabout"   "Valiant"            </span></span>
+<span><span class="co">#&gt;  [7] "Duster 360"          "Merc 240D"           "Merc 230"           </span></span>
+<span><span class="co">#&gt; [10] "Merc 280"            "Merc 280C"           "Merc 450SE"         </span></span>
+<span><span class="co">#&gt; [13] "Merc 450SL"          "Merc 450SLC"         "Cadillac Fleetwood" </span></span>
+<span><span class="co">#&gt; [16] "Lincoln Continental" "Chrysler Imperial"   "Fiat 128"           </span></span>
+<span><span class="co">#&gt; [19] "Honda Civic"         "Toyota Corolla"      "Toyota Corona"      </span></span>
+<span><span class="co">#&gt; [22] "Dodge Challenger"    "AMC Javelin"         "Camaro Z28"         </span></span>
+<span><span class="co">#&gt; [25] "Pontiac Firebird"    "Fiat X1-9"           "Porsche 914-2"      </span></span>
+<span><span class="co">#&gt; [28] "Lotus Europa"        "Ford Pantera L"      "Ferrari Dino"       </span></span>
+<span><span class="co">#&gt; [31] "Maserati Bora"       "Volvo 142E"</span></span>
+<span></span>
+<span><span class="co"># which one...</span></span>
 <span><span class="co"># ... contains all letters 'a', 'e', 'i' AND 'o'?</span></span>
-<span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"a &amp; e &amp; i &amp; o"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "Cadillac Fleetwood"  "Lincoln Continental" "Pontiac Firebird"   </span></span>
-<span><span class="co">## [4] "Ferrari Dino"        "Maserati Bora"</span></span></code></pre>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># ... does NOT contain any digit?</span></span>
-<span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"!\\d"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##  [1] "Hornet Sportabout"   "Valiant"             "Cadillac Fleetwood" </span></span>
-<span><span class="co">##  [4] "Lincoln Continental" "Chrysler Imperial"   "Honda Civic"        </span></span>
-<span><span class="co">##  [7] "Toyota Corolla"      "Toyota Corona"       "Dodge Challenger"   </span></span>
-<span><span class="co">## [10] "AMC Javelin"         "Pontiac Firebird"    "Lotus Europa"       </span></span>
-<span><span class="co">## [13] "Ford Pantera L"      "Ferrari Dino"        "Maserati Bora"</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"a &amp; e &amp; i &amp; o"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Cadillac Fleetwood"  "Lincoln Continental" "Pontiac Firebird"   </span></span>
+<span><span class="co">#&gt; [4] "Ferrari Dino"        "Maserati Bora"</span></span>
+<span></span>
+<span><span class="co"># ... does NOT contain any digit?</span></span>
+<span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"!\\d"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "Hornet Sportabout"   "Valiant"             "Cadillac Fleetwood" </span></span>
+<span><span class="co">#&gt;  [4] "Lincoln Continental" "Chrysler Imperial"   "Honda Civic"        </span></span>
+<span><span class="co">#&gt;  [7] "Toyota Corolla"      "Toyota Corona"       "Dodge Challenger"   </span></span>
+<span><span class="co">#&gt; [10] "AMC Javelin"         "Pontiac Firebird"    "Lotus Europa"       </span></span>
+<span><span class="co">#&gt; [13] "Ford Pantera L"      "Ferrari Dino"        "Maserati Bora"</span></span></code></pre></div>
 <p>You <strong>cannot</strong> combine logical statements with
 parentheses.</p>
 <p>For example: <code>"hello | (world &amp; my lady)"</code> leads to:
@@ -227,7 +228,8 @@ logical AND</li>
 <h4 id="logical_flags">How do regex flags work with logically combined regexes?<a class="anchor" aria-label="anchor" href="#logical_flags"></a>
 </h4>
 <p>All <code>stringmagic</code> regexes accept optional flags. Please
-see the <a href="LINK">associated vignette</a>.</p>
+see the <a href="https://lrberge.github.io/stringmagic/articles/ref_regex_flags.html" class="external-link">associated
+vignette</a>.</p>
 <p>When you add flags to a pattern, these apply to <em>all</em> regex
 sub-patterns. This means that <code>"f/( | )"</code> treats the two
 parentheses as “fixed”. <em>You cannot add flags specific to a single

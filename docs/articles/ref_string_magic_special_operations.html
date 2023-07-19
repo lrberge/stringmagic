@@ -108,7 +108,7 @@ operations</h1>
                         <h4 data-toc-skip class="author">Laurent R.
 Berge</h4>
             
-            <h4 data-toc-skip class="date">2023-07-18</h4>
+            <h4 data-toc-skip class="date">2023-07-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/ref_string_magic_special_operations.rmd" class="external-link"><code>vignettes/ref_string_magic_special_operations.rmd</code></a></small>
       <div class="hidden name"><code>ref_string_magic_special_operations.rmd</code></div>
@@ -126,12 +126,10 @@ Berge</h4>
 <li><a href="#sec_pluralization">pluralization</a></li>
 </ul>
 <p>By default the function <code>string_magic</code> returns a plain
-character vector. This may not render nicely in this vignette. Hence we
-create an alias to <code>string_magic</code> which applies
-<code><a href="https://rdrr.io/r/base/cat.html" class="external-link">base::cat</a></code> just before leaving the function.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/stringmagic/" class="external-link">stringmagic</a></span><span class="op">)</span></span>
-<span><span class="va">string_magic</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic_alias.html">string_magic_alias</a></span><span class="op">(</span>.post <span class="op">=</span> <span class="fu">base</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">)</span></span></code></pre></div>
+character vector. In this vignette it is sometimes nicer to apply the
+function <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">base::cat</a></code> to display <code>string_magic</code>
+results containing newlines. Ths function <code>cat_magic</code> does
+exactly that and we will use it from time to time.</p>
 <div class="section level2">
 <h2 id="sec_group_wise">Group-wise operations<a class="anchor" aria-label="anchor" href="#sec_group_wise"></a>
 </h2>
@@ -142,14 +140,14 @@ element).</p>
 <p>Use the tilde operator, of the form <code>~(op1, op2)</code>, to
 apply operations group-wise, to each of the split strings. Better with
 an example.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Oreste, Hermione"</span>, <span class="st">"Hermione, Pyrrhus"</span>, <span class="st">"Pyrrhus, Andromaque"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Troubles ahead: {', 'split, ~(' loves 'c), C ? x}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Troubles ahead: Oreste loves Hermione, Hermione loves Pyrrhus and Pyrrhus loves Andromaque.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Troubles ahead: {', 'split, ~(' loves 'c), C ? x}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Troubles ahead: Oreste loves Hermione, Hermione loves Pyrrhus and Pyrrhus loves Andromaque."</span></span></code></pre></div>
 <p>Almost all operations can be applied group-wise (although only
 operations changing the order or the length of the strings really
-matter, see the <a href="LINK">dedicated section</a>).</p>
+matter, see the <a href="https://lrberge.github.io/stringmagic/articles/ref_operations.html#sec_op_length" class="external-link">dedicated
+section</a>).</p>
 </div>
 <div class="section level2">
 <h2 id="sec_conditional">Conditional operations<a class="anchor" aria-label="anchor" href="#sec_conditional"></a>
@@ -183,11 +181,10 @@ current vector (equivalent to <code>length(.)</code>)</li>
 </ul>
 <p>Ex.1: Let’s take a sentence, delete words of less than 4 characters,
 and trim words of 7+ characters.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"Songe Céphise à cette nuit cruelle qui fut pour tout un peuple une nuit éternelle"</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{' 'split, if(.nchar&lt;=4 ; nuke ; '7|..'k), c ? x}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Songe Céphise cette cruelle peuple éternel..</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{' 'split, if(.nchar&lt;=4 ; nuke ; '7|..'k), c ? x}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Songe Céphise cette cruelle peuple éternel.."</span></span></code></pre></div>
 <p>Let’s break it down. First the sentence is split w.r.t. spaces
 (command <code>' 'split</code>), leading to a vector of words. Then we
 use the special variable <code>.nchar</code> in <code>if</code>’s
@@ -205,22 +202,16 @@ for which operations modifying the length of the vectors are
 in full-string conditions.</p>
 <p>Ex.2: we write the sum of several elements, if the vector is longer
 than 4, we replace all remaining elements with an ellispsis.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># same expression for two values of x give different results</span></span>
-<span><span class="va">x_short</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{1:4}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## x1 x2 x3 x4</span></span></code></pre>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># the false statement is missing: it means that nothing is done is .N&lt;=4</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {if(.N&gt;4 ; 3 first, '...'insert.right), ' + 'c ? x_short}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## y =</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x_long</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{1:10}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## x1 x2 x3 x4 x5 x6 x7 x8 x9 x10</span></span></code></pre>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {if(.N&gt;4 ; 3 first, '...'insert.right), ' + 'c ? x_long}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## y =</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="va">x_short</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{1:4}"</span><span class="op">)</span></span>
+<span><span class="co"># the false statement is missing: it means that nothing is done is .N&lt;=4</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {if(.N&gt;4 ; 3 first, '...'insert.right), ' + 'c ? x_short}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "y = x1 + x2 + x3 + x4"</span></span>
+<span></span>
+<span><span class="va">x_long</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{1:10}"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {if(.N&gt;4 ; 3 first, '...'insert.right), ' + 'c ? x_long}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "y = x1 + x2 + x3 + ..."</span></span></code></pre></div>
 <p>In this example, the operations applied are:</p>
 <ul>
 <li>short vector:
@@ -248,13 +239,13 @@ this, you can use <code>'.'</code> to refer to the current value in
 the following example.</p>
 <p>Ex.3: we want to replace all values lower than 10 by the the string
 “&lt;10”, and then create an enumeration.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pval</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1e-20</span>, <span class="fl">0.15</span>, <span class="fl">0.5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"pvalues: {vif(.&lt;1e-16 ; &lt;1e-16 ; {%05f?.}), fill.right ? pval}"</span>, .collapse <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## pvalues:   &lt;1e-16</span></span>
-<span><span class="co">## pvalues: 0.150000</span></span>
-<span><span class="co">## pvalues: 0.500000</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"pvalues: {vif(.&lt;1e-16 ; &lt;1e-16 ; {%05f?.}), fill.right ? pval}"</span>, </span>
+<span>          .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; pvalues:   &lt;1e-16</span></span>
+<span><span class="co">#&gt; pvalues: 0.150000</span></span>
+<span><span class="co">#&gt; pvalues: 0.500000</span></span></code></pre></div>
 <p>In this example, the condition is of the same length as the vector,
 so an element-wise operation is triggered. Note that we use
 <code>'.'</code> to refer to <code>pval</code> in the condition.
@@ -267,13 +258,10 @@ to the values of <code>pval</code> respecting the condition. And
 this, we right align the results.</p>
 <p>Conditions of length 1 apply the replacement to the full vector.
 Knowing this, let’s redo Ex.2 differently:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{1:10}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## x1 x2 x3 x4 x5 x6 x7 x8 x9 x10</span></span></code></pre>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {vif(.N&gt;4 ; {first?x} + ... + {last?x} ; {' + 'c?x}) ? x}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## y =</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{1:10}"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {vif(.N&gt;4 ; {first?x} + ... + {last?x} ; {' + 'c?x}) ? x}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "y = x1 + ... + x10"</span></span></code></pre></div>
 <p>Let’s break it down. If the length of the vector is greater than 4
 (here it’s 10), then the full string is replaced with
 <code>"{first?x} + ... + {last?x}"</code>. Since this string contains
@@ -311,21 +299,18 @@ section.</p>
 If its length is lower than 10 then we write the message
 <code>"x is short"</code>, otherwise we write <code>"x is long"</code>,
 and insert <code>"very"</code> depending on the number of digits.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x is {&amp;len(x)&lt;10 ; short ; {`log10(.N)-1`times, ''c ! very }long}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## x is short</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">50</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x is {&amp;len(x)&lt;10 ; short ; {`log10(.N)-1`times, ''c ! very }long}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## x is long</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5000</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x is {&amp;len(x)&lt;10 ; short ; {`log10(.N)-1`times, ''c ! very }long}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## x is very very long</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x is {&amp;len(x)&lt;10 ; short ; {`log10(.N)-1`times, ''c ! very }long}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "x is short"</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">50</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x is {&amp;len(x)&lt;10 ; short ; {`log10(.N)-1`times, ''c ! very }long}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "x is long"</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5000</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x is {&amp;len(x)&lt;10 ; short ; {`log10(.N)-1`times, ''c ! very }long}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "x is very very long"</span></span></code></pre></div>
 <p>If a condition leads to a result of length 1, the full string is
 replaced by the verbatim expression. Further, this expression will be
 interpolated if requested. This was the case in Ex.1 where
@@ -341,12 +326,11 @@ There can be interpolation on the values <code>verb_true</code> and
 a vector of either length 1 or a length equal to the condition. Then
 element-wise replacements are made, a la <code><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">base::ifelse</a></code>.</p>
 <p>Ex.2: illustration of element-wise replacements.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span></span>
 <span><span class="va">y</span> <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{&amp;x %% 2 ; odd ; {y}}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## odd b odd d</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{&amp;x %% 2 ; odd ; {y}}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "odd" "b"   "odd" "d"</span></span></code></pre></div>
 <p>In that example, when x is odd, it is replaced with
 <code>"odd"</code>, and when even it is replaced with the elements of
 y.</p>
@@ -362,16 +346,14 @@ is the variable used in the condition itself. So the syntax is
 accept</em> <code>verb_false</code>.</p>
 <p>Ex.3: let’s write the integer <code>i</code> in letters when equal to
 3 only.</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">i</span> <span class="op">=</span> <span class="fl">3</span> </span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"i = {&amp;&amp;i == 3 ; three}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## i = three</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">i</span> <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"i = {&amp;&amp;i == 3 ; three}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## i = 5</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"i = {&amp;&amp;i == 3 ; three}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "i = three"</span></span>
+<span></span>
+<span><span class="va">i</span> <span class="op">=</span> <span class="fl">5</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"i = {&amp;&amp;i == 3 ; three}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "i = 5"</span></span></code></pre></div>
 <p>When the condition is of length 1: the full vector is replaced. When
 the condition is of the length of the vector, an element-wise
 replacement is triggered, like in example 3.</p>
@@ -396,16 +378,14 @@ Ex.1)</li>
 Ex.2)</li>
 </ul>
 <p>Ex.1: we add an ending ‘s’ based on a number.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"I bought {N?x} book{#s}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## I bought five books.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"I bought {N?x} book{#s}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## I bought one book.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"I bought {N?x} book{#s}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "I bought five books."</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"I bought {N?x} book{#s}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "I bought one book."</span></span></code></pre></div>
 <p>The syntax is <code>{#plural_ops ? variable}</code> or
 <code>{#plural_ops}</code> where <code>plural_ops</code> are specific
 pluralization operations which will be described below. The
@@ -424,16 +404,14 @@ used (see Ex.2). If no variable is interpolated at all, an error is
 thrown.</p>
 <p>Ex.2: we add an ending ‘s’ and conjugate the verb ‘be’ based on the
 length of a vector.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"J."</span>, <span class="st">"M."</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"My BFF{$s, are} {enum?x}!"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## My BFFs are J. and M.!</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"J."</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"My BFF{$s, are} {enum?x}!"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## My BFF is J.!</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"My BFF{$s, are} {enum?x}!"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "My BFFs are J. and M.!"</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="st">"J."</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"My BFF{$s, are} {enum?x}!"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "My BFF is J.!"</span></span></code></pre></div>
 <p>As you can notice in Ex.2, you can chain operations (here
 <code>'s'</code> and <code>'are'</code>). In that case a whitespace is
 automatically added between them.</p>
@@ -449,26 +427,22 @@ different from regular operations.</p>
 <p>Adds an <code>"s"</code> (or <code>"es"</code>) if it is plural (&gt;
 1), nothing otherwise. Accepts the option <code>0</code> or
 <code>zero</code> which treats a 0-length or a 0-value as plural.</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {#n.no ? nfiles} file{#s}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## We've found 1 file.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {#n.no ? nfiles} file{#s}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## We've found no file.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {#n.no ? nfiles} file{#s.0}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## We've found no files.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">4</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {#n.no ? nfiles} file{#s.0}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## We've found 4 files.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {#n.no ? nfiles} file{#s}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "We've found 1 file."</span></span>
+<span></span>
+<span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {#n.no ? nfiles} file{#s}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "We've found no file."</span></span>
+<span></span>
+<span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {#n.no ? nfiles} file{#s.0}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "We've found no files."</span></span>
+<span></span>
+<span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">4</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {#n.no ? nfiles} file{#s.0}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "We've found 4 files."</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="y-or-ies">y or ies<a class="anchor" aria-label="anchor" href="#y-or-ies"></a>
@@ -476,37 +450,32 @@ different from regular operations.</p>
 <p>Adds an ‘y’ if singular and ‘ies’ if plural (&gt;1). Accepts the
 option <code>0</code> or <code>zero</code> which treats a 0-length or a
 0-value as plural.</p>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ndir</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {ndir} director{#y}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## We've found 1 directory.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ndir</span> <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {ndir} director{#y}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## We've found 5 directories.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ndir</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {ndir} director{#ies}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## We've found 1 directory.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {ndir} director{#y}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "We've found 1 directory."</span></span>
+<span></span>
+<span><span class="va">ndir</span> <span class="op">=</span> <span class="fl">5</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {ndir} director{#y}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "We've found 5 directories."</span></span>
+<span></span>
+<span><span class="va">ndir</span> <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"We've found {ndir} director{#ies}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "We've found 1 directory."</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="enum">enum<a class="anchor" aria-label="anchor" href="#enum"></a>
 </h4>
-<p>Enumerates the elements (see help for the <a href="LINK">regular
+<p>Enumerates the elements (see help for the <a href="https://lrberge.github.io/stringmagic/articles/ref_operations.html#create-an-enumeration-enum" class="external-link">regular
 operation <code>enum</code></a>).</p>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fruits</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"apples"</span>, <span class="st">"oranges"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The fruit{$s ? fruits} I love {$are, enum}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## The fruits I love are apples and oranges.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fruits</span> <span class="op">=</span> <span class="st">"apples"</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The fruit{$s ? fruits} I love {$are, enum}."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## The fruit I love is apples.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The fruit{$s ? fruits} I love {$are, enum}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "The fruits I love are apples and oranges."</span></span>
+<span></span>
+<span><span class="va">fruits</span> <span class="op">=</span> <span class="st">"apples"</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The fruit{$s ? fruits} I love {$are, enum}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "The fruit I love is apples."</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="n-n-len-len">n, N, len, Len<a class="anchor" aria-label="anchor" href="#n-n-len-len"></a>
@@ -518,32 +487,27 @@ in letter) and <code>upper</code> (to uppercase the first letter).</p>
 <p>You can also pass the options <code>no</code> or <code>No</code>,
 which replace the 0 values with “no”/“No”. Alternatively, pass a
 free-form argument to be used in lieu of 0 values.</p>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#N.upper.No ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Five files are compromised.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#N.upper.No ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## One file is compromised.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#N.upper.No ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## No file is compromised.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Using free-form arguments</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#N.upper.No ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Five files are compromised."</span></span>
+<span></span>
+<span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#N.upper.No ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "One file is compromised."</span></span>
+<span></span>
+<span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#N.upper.No ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "No file is compromised."</span></span>
+<span></span>
+<span><span class="co"># Using free-form arguments</span></span>
 <span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#'Absolutely no'N.upper ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Five files are compromised.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#'Absolutely no'N.upper ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Absolutely no file is compromised.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#'Absolutely no'N.upper ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Five files are compromised."</span></span>
+<span></span>
+<span><span class="va">nfiles</span> <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#'Absolutely no'N.upper ? nfiles} file{#s, are} compromised."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Absolutely no file is compromised."</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="nth-ntimes">nth, ntimes<a class="anchor" aria-label="anchor" href="#nth-ntimes"></a>
@@ -551,11 +515,10 @@ free-form argument to be used in lieu of 0 values.</p>
 <p>Writes the value of the variable as an order (nth) or a frequence
 (ntimes). Accepts the option <code>letter</code> to write the numbers in
 letters (uppercase version of the operator does the same).</p>
-<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">2</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Writing the same sentence {#Ntimes ? n} is unnecessary."</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Writing the same sentence twice is unnecessary.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Writing the same sentence {#Ntimes ? n} is unnecessary."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Writing the same sentence twice is unnecessary."</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="is-or-any-verb">is, or any verb<a class="anchor" aria-label="anchor" href="#is-or-any-verb"></a>
@@ -567,26 +530,26 @@ described is treated as a verb.</p>
 <p>Multiple verbs are illustrated in the example below. It also
 anticipaed the conditional statements described in the next section.</p>
 <p>Ex.3: multiple verbs and conditional statements.</p>
-<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pple</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Francis"</span>, <span class="st">"Henry"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"{$enum, is, (a;) ? pple} tall guy{$s}."</span>,</span>
 <span>        <span class="st">"{$(He;They), like} to eat donuts."</span>,</span>
 <span>        <span class="st">"When happy, at the pub {$(he;they), goes}!"</span>,</span>
-<span>        <span class="st">"{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?"</span>, .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Francis and Henry are tall guys.</span></span>
-<span><span class="co">## They like to eat donuts.</span></span>
-<span><span class="co">## When happy, at the pub they go!</span></span>
-<span><span class="co">## Don't they have wit, they who try?</span></span></code></pre>
-<div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pple</span> <span class="op">=</span> <span class="st">"Francis"</span></span>
+<span>        <span class="st">"{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?"</span>, .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Francis and Henry are tall guys.</span></span>
+<span><span class="co">#&gt; They like to eat donuts.</span></span>
+<span><span class="co">#&gt; When happy, at the pub they go!</span></span>
+<span><span class="co">#&gt; Don't they have wit, they who try?</span></span>
+<span></span>
+<span><span class="va">pple</span> <span class="op">=</span> <span class="st">"Francis"</span></span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"{$enum, is, (a;) ? pple} tall guy{$s}."</span>,</span>
 <span>        <span class="st">"{$(He;They), like} to eat donuts."</span>,</span>
 <span>        <span class="st">"When happy, at the pub {$(he;they), goes}!"</span>,</span>
-<span>        <span class="st">"{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?"</span>, .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Francis is a tall guy.</span></span>
-<span><span class="co">## He likes to eat donuts.</span></span>
-<span><span class="co">## When happy, at the pub he goes!</span></span>
-<span><span class="co">## Doesn't he have wit, he who tries?</span></span></code></pre>
+<span>        <span class="st">"{$Don't, (he;they)} have wit, {$(he;they)} who {$try}?"</span>, .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Francis is a tall guy.</span></span>
+<span><span class="co">#&gt; He likes to eat donuts.</span></span>
+<span><span class="co">#&gt; When happy, at the pub he goes!</span></span>
+<span><span class="co">#&gt; Doesn't he have wit, he who tries?</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -610,21 +573,18 @@ or plural (i.e. &gt;=1)</li>
 interpolated</strong> (if appropriate). In these interpolations you need
 not refer explicitly to the variable for pluralization
 interpolations.</p>
-<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Sorry, nothing found.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## One match was found.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
-<div class="sourceCode" id="cb111"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">3</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Three matches were found.</span></span></code></pre>
-<pre><code><span><span class="co">## NULL</span></span></code></pre>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Sorry, nothing found."</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "One match was found."</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fl">3</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{#(Sorry, nothing found.;;{#N.upper} match{#es, were} found.)?x}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Three matches were found."</span></span></code></pre></div>
 </div>
 </div>
   </div>
