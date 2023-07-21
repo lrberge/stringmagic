@@ -82,6 +82,7 @@ Here is a list of resources:
 + [an introduction to `string_magic`](https://lrberge.github.io/stringmagic/articles/guide_string_magic.html)
 + [`string_magic`'s regular operations](https://lrberge.github.io/stringmagic/articles/ref_operations.html)
 + [`string_magic`'s special operations](https://lrberge.github.io/stringmagic/articles/ref_string_magic_special_operations.html)
++ [create new operations](https://lrberge.github.io/stringmagic/articles/guide_customization.html#sec_creation)
 
 ### Friendly errors
 
@@ -95,7 +96,7 @@ string_magic("The {len?x} brothers: {anum?x}.")
 #> PROBLEM: `anum` is not a valid operator. Maybe you meant `enum`?
 #> 
 #> INFO: Type string_magic(.help = "regex") or string_magic(.help = TRUE) for help.
-#> Ex. of valid stuff: string_magic("Letters: {10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!")
+#> Or look at the vignette: https://lrberge.github.io/stringmagic/articles/guide_string_magic.html
 
 string_magic("The iris species are: {unik, sort, enum ? iris[['Species']}.")
 #> Error: in string_magic("The iris species are: {unik, sort, enum ?...: 
@@ -116,8 +117,8 @@ library(microbenchmark)
 library(glue)
 
 x = "Romeo" ; y = "Juliet"
-microbenchmark(base    =   paste0(x, " seems to love ", y, "."),
-               glue    =     glue("{x} seems to love {y}."),
+microbenchmark(      base    =   paste0(x, " seems to love ", y, "."),
+                     glue    =     glue("{x} seems to love {y}."),
                string_magic  =   string_magic("{x} seems to love {y}."),
                .string_magic =  .string_magic("{x} seems to love {y}."))
 #> Unit: microseconds
