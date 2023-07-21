@@ -121,9 +121,9 @@ microbenchmark(base    =   paste0(x, " seems to love ", y, "."),
                string_magic  =   string_magic("{x} seems to love {y}."),
                .string_magic =  .string_magic("{x} seems to love {y}."))
 #> Unit: microseconds
-#>     expr  min    lq   mean median    uq   max neval
-#>     base  1.3  1.50  1.604   1.60  1.70   2.4   100
-#>     glue 77.7 83.70 93.560  87.45 92.90 470.6   100
+#>           expr  min    lq   mean median    uq   max neval
+#>           base  1.3  1.50  1.604   1.60  1.70   2.4   100
+#>           glue 77.7 83.70 93.560  87.45 92.90 470.6   100
 #>   string_magic 69.9 73.75 78.257  77.50 80.75 106.5   100
 #>  .string_magic 43.2 45.70 50.205  48.20 52.15 137.9   100
 ```
@@ -158,9 +158,9 @@ microbenchmark(base = paste0("The ", length(x), " brothers: ",
                               x_enum = paste0(paste0(x[-length(x)], collapse = ", "), 
                                         " and ", x[length(x)])))
 #> Unit: microseconds
-#>        expr     min       lq      mean   median      uq       max neval
-#>        base   4.701   5.5510  54.37105   6.2010   6.802  4792.601   100
-#>        glue  93.900 104.6015 121.23295 118.8510 129.901   219.100   100
+#>              expr     min       lq      mean   median      uq       max neval
+#>              base   4.701   5.5510  54.37105   6.2010   6.802  4792.601   100
+#>              glue  93.900 104.6015 121.23295 118.8510 129.901   219.100   100
 #>      string_magic 316.701 331.3010 628.79896 351.2510 391.401 26576.501   100
 #>  string_magic_bis  94.601 106.5010 118.10602 114.8015 123.301   250.301   100
 ```

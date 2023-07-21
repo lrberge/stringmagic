@@ -52,7 +52,7 @@ group-wise, to each of the split strings. Better with an example.
 
 ```{r}
 x = c("Oreste, Hermione", "Hermione, Pyrrhus", "Pyrrhus, Andromaque")
-string_magic("Troubles ahead: {', 'split, ~(' loves 'c), C ? x}.")
+string_magic("Troubles ahead: {', 'split, ~(' loves 'collapse), enum ? x}.")
 ```
 
 Almost all operations can be applied group-wise (although only operations changing the order or 
@@ -80,15 +80,15 @@ Ex.1: Let's take a sentence, delete words of less than 4 characters, and trim
 words of 7+ characters. 
 ```{r}
 x = "Songe Céphise à cette nuit cruelle qui fut pour tout un peuple une nuit éternelle"
-string_magic("{' 'split, if(.nchar<=4 ; nuke ; '7|..'k), c ? x}")
+string_magic("{' 'split, if(.nchar<=4 ; nuke ; 7 shorten), collapse ? x}")
 ```
 
 Let's break it down. First the sentence is split w.r.t. spaces (command `' 'split`), leading to a vector
 of words. Then we use the special variable `.nchar` in `if`'s condition to refer 
 to the number of characters of the current vector (the words). The words with 
 less than 4 characters are nuked (i.e. removed), and the other words are
-trimmed at 7 characters (`'7|..'k`). Finally the modified vector of words is collapsed with 
-the command `c`, leading to the result.
+trimmed at 7 characters (`7 Shorten`). Finally the modified vector of words is collapsed with 
+the command `collapse`, leading to the result.
 
 In Ex.1 the condition led to a vector of length greater than 1 (length = number of words), 
 triggerring element-wise operations. 
@@ -131,7 +131,7 @@ Ex.3: we want to replace all values lower than 10 by the the string "<10", and t
 create an enumeration.
 ```{r}
 pval = c(1e-20, 0.15, 0.5)
-cat_magic("pvalues: {vif(.<1e-16 ; <1e-16 ; {%05f?.}), fill.right ? pval}", 
+cat_magic("pvalues: {vif(.<1e-16 ; <1e-16 ; {%05f ? .}), align.right ? pval}", 
           .sep = "\n")
 ```
 
@@ -146,7 +146,7 @@ Conditions of length 1 apply the replacement
 to the full vector. Knowing this, let's redo Ex.2 differently:
 ```{r}
 x = string_magic("x{1:10}")
-string_magic("y = {vif(.N>4 ; {first?x} + ... + {last?x} ; {' + 'c?x}) ? x}")
+string_magic("y = {vif(.N>4 ; {first?x} + ... + {last?x} ; {' + 'c ? x}) ? x}")
 ```
 
 Let's break it down. If the length of the vector is greater than 4 (here it's 10), then

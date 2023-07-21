@@ -1164,7 +1164,7 @@ sma_char2operator = function(x, .valid_operators){
       msg = .sma("{context}",
               "\nPROBLEM: {bq?op} is not a valid operator. ", sugg_txt,
               "\n\nINFO: Type string_magic(.help = \"regex\") or string_magic(.help = TRUE) for help.",
-              "\nEx. of valid stuff: string_magic(\"Letters: \\{10 first, `6/2`last, ''c, 'i => e'r, upper.first ? letters}!\") ")
+              "\nOr look at the vignette: https://lrberge.github.io/stringmagic/articles/guide_string_magic.html")
 
       .stop_hook(msg)
     }

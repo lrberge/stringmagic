@@ -68,7 +68,7 @@ So far, so good. Now let's come to `string_magic`'s originality: the ability to 
 In `string_magic` you can apply any arbitrary chain of operations to the interpolated variables. 
 The syntax is as follows:
 
-![operation](images/operation-template.png)
+![](images/operation-template.png)
 
 The `operations` are a comma separated sequence of keywords, each keyword being bound 
 to a specific function. Here is an example in which we apply two operations:
@@ -77,7 +77,7 @@ lovers = c("romeo", "juliet")
 string_magic("Famous lovers: {title, enum ? lovers}.")
 ```
 
-![example-lovers](images/example-simple_operation.png)
+![](images/example-simple_operation.png)
 
 As shown, `title` puts to title case and `enum` creates an enumeration (i.e. turns
 the elements of a vector into a single character string). These two operations are applied 
@@ -101,7 +101,7 @@ string_magic("The max of each variable is: {enum ? sapply(iris[, 1:4], max)}.")
 Many operations use arguments. Arguments are passed using quoted text
 just before the operation. The syntax is:
 
-![argument](images/argument.png)
+![](images/argument.png)
 
 Let's take the example of splitting an email address and keeping the text before the domain:
 ```{r}
@@ -109,7 +109,7 @@ email = "John@Doe.com"
 string_magic("This message comes from {'@'split, first ? email}.")
 ```
 
-![example-argument](images/example-argument.png)
+![](images/example-argument.png)
 
 In this example, `split` breaks `"John@Doe.com"` with respect to `"@"`, then `first` keeps 
 only the first element. Almost all operations have default values. For `split`, the 
@@ -123,7 +123,7 @@ string_magic("The first two species are: {unik, '2'first, q, enum ? iris$Species
 ### Alternative ways to pass arguments 
 
 There are three ways to pass arguments to operations:
-![passing-arguments](images/passing-arguments.png)
+![](images/passing-arguments.png)
 
 The first, canonical way, is using quotes like in the examples of the previous section. 
 
@@ -149,7 +149,7 @@ that can be turned on) and change the behavior of the current operation.
 Many operations acccept options.
 Add options using a dot separated sequence of keywords attached to the operation:
 
-![options](images/options.png)
+![](images/options.png)
 
 
 We have seen the `enum` operation in an earlier example, let's add a couple of options to it.
@@ -158,7 +158,7 @@ fields = c("maths", "physics")
 string_magic("This position requires a PhD in either: {enum.i.or ? fields}.")
 ```
 
-![example-options](images/example-options.png)
+![](images/example-options.png)
 
 As just seen, the option `i` triggers an enumeration with roman lower case numbers, and option
 `or` finishes the enumeration with an `or` instead of an `and`. The order of the options
@@ -182,7 +182,7 @@ an introduction to pluralization.
 In `string_magic`, you have two types of interpolations: regular interpolations (the ones we have covered so far),
 and verbatim evaluation. The syntax of vertatim interpolations is as follows:
 
-![verbatim](images/verbatim.png)
+![](images/verbatim.png)
 
 Anything after the exclamation mark is treated as verbatim: i.e. anything coming 
 before the closing bracket is treated as a simple character string. Let's give an example:
@@ -202,7 +202,7 @@ sum from `x1` to `x3`:
 string_magic("y = {' + 'collapse ! x{1:3}}")
 ```
 
-![example-verbatim](images/example-verbatim.png)
+![](images/example-verbatim.png)
 
 Now let's tackle a more challenging example: write a polynomial of order `n`. It should be
 of the form `a + bx + cx^2 + etc`.
@@ -244,7 +244,7 @@ briefly introduce here.
 
 The syntax for pluralization is as follows:
 
-![example-verbatim](images/plural.png)
+![](images/plural.png)
 
 After the opening bracket, to trigger pluralization use an hashtag (`#`) or a dollar sign (`$`) followed
 by plural operations. There is two kinds of pluralization: either on the value of the expresison (the `#`),
@@ -282,41 +282,53 @@ please see the [dedicated section](https://lrberge.github.io/stringmagic/article
 
 We end this introduction with a few special cases. 
 
-**Escape brackets.** The opening and closing brakets, `{}`, are special characters 
+### Escape brackets
+
+The opening and closing brakets, `{}`, are special characters 
 and cannot be used as regular text. 
 To bypass their special meaning, you need to escape them with a double backslash.
 
 You only need to escape the special delimiters which the algorithm is currently looking for.
-In the examples below, you don't need to escape the closing bracket in Ex.1 since no box
-was open. On the other hand, you need to escape it in Ex.2.
-
+For example, if we escape the opening delimiter, we don't need to escape the closing one:
 ```{r}
-# the closing bracket does not have a special meaning since no open bracket
+# Here opening delimiter is escaped: the closing delimiter has no special meaning
 string_magic("open = \\{, close = }")
-
-# we need to escape the first closing bracket
-string_magic("many {5 times.c ! \\}}")
 ```
 
-Alternatively, use the argument `.delim` to change the delimiters. 
+You need to escape the closing delimiter only when the algorithm is looking for it. 
+In the following example, we need to escape the closing curly bracket to treat it as a regular character:
+```{r}
+string_magic("Here are closing brackets: {5 times.c ! \\}}")
+```
 
-Ex.1: changing the delimiter.
+Alternatively, use the argument `.delim` to change the delimiters:
 ```{r}
 string_magic("Here I {interpolate} with .[this] ", .delim = ".[ ]", this = ".[]")
 ```
 
+When using delimiters composed of two or more characters, like in the previous example, 
+to escape it you need to add a double backslash before the first character (i.e. right before the
+delimiter):
+```{r}
+string_magic("Here I {interpolate} with \\.[] ", .delim = ".[ ]")
+
+# another example with {{ }}  as delimiter
+string_magic("I {{what}} with \\{{ }} ", .delim = "{{ }}", what = "interpolate")
+```
+
 Another way is to pass a character string in an expression.
 Indeed, since `{expr}` evaluates `expr`, if `expr` is a character string, it will stay untouched. 
-Ex.2: using regular interpolation to pass verbatim text.
 ```{r}
 string_magic("I {'can {write} {{what}} I want'}")
 ```
 
-**Other escapes.** In the few operations expecting a semi-colon (*if-else* and certain 
+### Other escapes 
+
+In the few operations expecting a semi-colon (*if-else* and certain 
 operations in *pluralization*), it can also be escaped with a double backslash.
 
-Ex.3: if-else statement with semi-colon.
 ```{r}
+# if-else statement with semi-colon
 is_c = TRUE
 string_magic("{&is_c ; int i = 1\\; ; i = 1}")
 
@@ -324,7 +336,9 @@ is_c = FALSE
 string_magic("{&is_c ; int i = 1\\; ; i = 1}")
 ```
 
-**Use a regular `!`.** In interpolations, the exclamation mark (`!`) signals a verbatim expression. 
+### How to use a regular `!` in interpolations?
+
+In interpolations, the exclamation mark (`!`) signals a verbatim expression. 
 But what if you use it to mean the logical operation *not* in an operation-free interpolation? 
 In that case, you need a hack: use a question mark (`?`) first to indicate to the
 algorithm that you want to evaluate the expression. 
