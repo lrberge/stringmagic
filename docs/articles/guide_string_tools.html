@@ -106,7 +106,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-07-18</h4>
+            <h4 data-toc-skip class="date">2023-07-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/guide_string_tools.rmd" class="external-link"><code>vignettes/guide_string_tools.rmd</code></a></small>
       <div class="hidden name"><code>guide_string_tools.rmd</code></div>
@@ -158,8 +158,16 @@ so these examples are equivalent with <code>string_is</code> or
 <p>Ex.1: series of examples using the <em>recommended syntax</em>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"All cars from mtcars:\n{C, 60 width ? cars}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "All cars from mtcars:\nMazda RX4, Mazda RX4 Wag, Datsun 710, Hornet 4 Drive, Hornet\nSportabout, Valiant, Duster 360, Merc 240D, Merc 230, Merc\n280, Merc 280C, Merc 450SE, Merc 450SL, Merc 450SLC,\nCadillac Fleetwood, Lincoln Continental, Chrysler Imperial,\nFiat 128, Honda Civic, Toyota Corolla, Toyota Corona, Dodge\nChallenger, AMC Javelin, Camaro Z28, Pontiac Firebird, Fiat\nX1-9, Porsche 914-2, Lotus Europa, Ford Pantera L, Ferrari\nDino, Maserati Bora and Volvo 142E"</span></span>
+<span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"All cars from mtcars:\n{C, 60 width ? cars}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; All cars from mtcars:</span></span>
+<span><span class="co">#&gt; Mazda RX4, Mazda RX4 Wag, Datsun 710, Hornet 4 Drive, Hornet</span></span>
+<span><span class="co">#&gt; Sportabout, Valiant, Duster 360, Merc 240D, Merc 230, Merc</span></span>
+<span><span class="co">#&gt; 280, Merc 280C, Merc 450SE, Merc 450SL, Merc 450SLC,</span></span>
+<span><span class="co">#&gt; Cadillac Fleetwood, Lincoln Continental, Chrysler Imperial,</span></span>
+<span><span class="co">#&gt; Fiat 128, Honda Civic, Toyota Corolla, Toyota Corona, Dodge</span></span>
+<span><span class="co">#&gt; Challenger, AMC Javelin, Camaro Z28, Pontiac Firebird, Fiat</span></span>
+<span><span class="co">#&gt; X1-9, Porsche 914-2, Lotus Europa, Ford Pantera L, Ferrari</span></span>
+<span><span class="co">#&gt; Dino, Maserati Bora and Volvo 142E</span></span>
 <span></span>
 <span><span class="co"># cars with an 'a', an 'e', an 'i', and an 'o', all in lower case</span></span>
 <span><span class="fu"><a href="../reference/string_get.html">string_get</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"a &amp; e &amp; i &amp; o"</span><span class="op">)</span></span>
@@ -281,7 +289,7 @@ for parsing, text analysis, etc). Even for simple tasks, the number of
 operations can quickly balloon, adding many lines of code, reducing
 readability, and all this for basic processing.</p>
 <p>The function <code>string_ops</code> tries to solve this problem. It
-has access to all (50+) <a href="LINK"><code>string_magic</code>
+has access to all (50+) <a href="https://lrberge.github.io/stringmagic/articles/ref_operations.html" class="external-link"><code>string_magic</code>
 operations</a>, allowing for a compact and readable way to chain basic
 operations on character strings.</p>
 <p>Below are a few motivating examples.</p>
@@ -291,6 +299,8 @@ operations on character strings.</p>
 <span><span class="va">input</span> <span class="op">=</span> <span class="st">"8.5in, 5.5, .5 cm"</span></span>
 <span><span class="fu"><a href="../reference/string_ops.html">string_ops</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"','split, tws, '^\\. =&gt; 0.'replace, '^\\D+|\\D+$'replace, num"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 8.5 5.5 0.5</span></span>
+<span></span>
+<span></span>
 <span><span class="co"># Explanation------------------------------------------------------------------|</span></span>
 <span><span class="co"># ','split: splitting w.r.t. ','                                               |</span></span>
 <span><span class="co"># tws: trimming the whitespaces                                                |</span></span>
@@ -298,9 +308,12 @@ operations on character strings.</p>
 <span><span class="co"># '^\\D+|\\D+$'replace: removes non-digits on both ends of the string          |</span></span>
 <span><span class="co"># num: converts to numeric                                                     |</span></span>
 <span></span>
+<span></span>
 <span><span class="co"># now extracting the units</span></span>
 <span><span class="fu"><a href="../reference/string_ops.html">string_ops</a></span><span class="op">(</span><span class="va">input</span>, <span class="st">"','split, '^[ \\d.]+'replace, tws"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "in" ""   "cm"</span></span>
+<span></span>
+<span></span>
 <span><span class="co"># Explanation------------------------------------------------------------------|</span></span>
 <span><span class="co"># ','split: splitting w.r.t. ','                                               |</span></span>
 <span><span class="co"># '^[ \\d.]+'replace: removes the ' ', digit                                   |</span></span>
@@ -314,6 +327,8 @@ operations on character strings.</p>
 <span><span class="co"># let's get the brands starting with an "m"</span></span>
 <span><span class="fu"><a href="../reference/string_ops.html">string_ops</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"'i/^m'get, x, unik"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Mazda"    "Merc"     "Maserati"</span></span>
+<span></span>
+<span></span>
 <span><span class="co"># Explanation------------------------------------------------------------------|</span></span>
 <span><span class="co"># 'i/^m'get: keeps only the elements starting with an m,                       |</span></span>
 <span><span class="co">#            i/ is the 'regex-flag' "ignore" to ignore the case                |</span></span>
@@ -322,9 +337,12 @@ operations on character strings.</p>
 <span><span class="co">#    which means an alpha-numeric word                                         |</span></span>
 <span><span class="co"># unik: applies unique() to the vector                                         |</span></span>
 <span></span>
+<span></span>
 <span><span class="co"># let's get the 3 largest numbers appearing in the car models</span></span>
 <span><span class="fu"><a href="../reference/string_ops.html">string_ops</a></span><span class="op">(</span><span class="va">cars</span>, <span class="st">"'\\d+'x, rm, unik, num, dsort, 3 first"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 914 710 450</span></span>
+<span></span>
+<span></span>
 <span><span class="co"># Explanation------------------------------------------------------------------|</span></span>
 <span><span class="co"># '\\d+'x: extracts the first pattern, the pattern meaning "a succession"      |</span></span>
 <span><span class="co">#          of digits in regex language                                         |</span></span>
@@ -363,7 +381,8 @@ cleaning operations which can be of two types:</p>
 <li>use <code>"pat1, pat2 =&gt; replacement"</code> to replace the regex
 patterns <code>pat1</code> and <code>pat2</code> with the value
 <code>replacement</code>.</li>
-<li>use <code>"@op1, op2"</code> to perform any arbitrary sequence of <a href="LINK"><code>string_magic</code> operation</a>
+<li>use <code>"@op1, op2"</code> to perform any arbitrary sequence of <a href="https://lrberge.github.io/stringmagic/articles/ref_operations.html" class="external-link"><code>string_magic</code>
+operation</a>
 </li>
 </ol>
 <p>In the operation <code>"pat1, pat2 =&gt; replacement"</code>, the
@@ -442,8 +461,9 @@ the current string.</p>
 <span><span class="va">more_fruits</span></span>
 <span><span class="co">#&gt; [1] "lemon"      "orange"     "apple"      "pineapple"  "strawberry"</span></span>
 <span><span class="co">#&gt; [6] "peach"</span></span></code></pre></div>
-<p>The interpolation is performed with <a href="LINK"><code>string_magic</code></a>. This means that any <a href="LINK"><code>string_magic</code> operation</a> can be applied
-on-the-fly.</p>
+<p>The interpolation is performed with <a href="https://lrberge.github.io/stringmagic/articles/guide_string_magic.html" class="external-link"><code>string_magic</code></a>.
+This means that any <a href="https://lrberge.github.io/stringmagic/articles/ref_operations.html" class="external-link"><code>string_magic</code>
+operation</a> can be applied on-the-fly.</p>
 <p>Ex.3: replicating Ex.2 but shortening long fruit names.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">more_fruits</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"lemon, {6 Shorten ? fruits}, peach"</span><span class="op">)</span></span>
@@ -502,6 +522,7 @@ converted.</p>
 <span><span class="co">#&gt; 1  1  john</span></span>
 <span><span class="co">#&gt; 2  3 marie</span></span>
 <span><span class="co">#&gt; 3  5 harry</span></span>
+<span></span>
 <span><span class="co"># automatic conversion of numeric values</span></span>
 <span><span class="va">df</span><span class="op">$</span><span class="va">id</span> <span class="op">*</span> <span class="fl">5</span></span>
 <span><span class="co">#&gt; [1]  5 15 25</span></span></code></pre></div>

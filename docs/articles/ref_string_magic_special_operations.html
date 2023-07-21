@@ -108,7 +108,7 @@ operations</h1>
                         <h4 data-toc-skip class="author">Laurent R.
 Berge</h4>
             
-            <h4 data-toc-skip class="date">2023-07-19</h4>
+            <h4 data-toc-skip class="date">2023-07-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/ref_string_magic_special_operations.rmd" class="external-link"><code>vignettes/ref_string_magic_special_operations.rmd</code></a></small>
       <div class="hidden name"><code>ref_string_magic_special_operations.rmd</code></div>
@@ -142,7 +142,7 @@ apply operations group-wise, to each of the split strings. Better with
 an example.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Oreste, Hermione"</span>, <span class="st">"Hermione, Pyrrhus"</span>, <span class="st">"Pyrrhus, Andromaque"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Troubles ahead: {', 'split, ~(' loves 'c), C ? x}."</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Troubles ahead: {', 'split, ~(' loves 'collapse), enum ? x}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Troubles ahead: Oreste loves Hermione, Hermione loves Pyrrhus and Pyrrhus loves Andromaque."</span></span></code></pre></div>
 <p>Almost all operations can be applied group-wise (although only
 operations changing the order or the length of the strings really
@@ -183,16 +183,17 @@ current vector (equivalent to <code>length(.)</code>)</li>
 and trim words of 7+ characters.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"Songe Céphise à cette nuit cruelle qui fut pour tout un peuple une nuit éternelle"</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{' 'split, if(.nchar&lt;=4 ; nuke ; '7|..'k), c ? x}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Songe Céphise cette cruelle peuple éternel.."</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{' 'split, if(.nchar&lt;=4 ; nuke ; 7 shorten), collapse ? x}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Songe Céphise cette cruelle peuple éternel"</span></span></code></pre></div>
 <p>Let’s break it down. First the sentence is split w.r.t. spaces
 (command <code>' 'split</code>), leading to a vector of words. Then we
 use the special variable <code>.nchar</code> in <code>if</code>’s
 condition to refer to the number of characters of the current vector
 (the words). The words with less than 4 characters are nuked
 (i.e. removed), and the other words are trimmed at 7 characters
-(<code>'7|..'k</code>). Finally the modified vector of words is
-collapsed with the command <code>c</code>, leading to the result.</p>
+(<code>7 Shorten</code>). Finally the modified vector of words is
+collapsed with the command <code>collapse</code>, leading to the
+result.</p>
 <p>In Ex.1 the condition led to a vector of length greater than 1
 (length = number of words), triggerring element-wise operations.</p>
 <p>If a condition leads to a result of length 1, then the operations are
@@ -241,7 +242,7 @@ the following example.</p>
 “&lt;10”, and then create an enumeration.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pval</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1e-20</span>, <span class="fl">0.15</span>, <span class="fl">0.5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"pvalues: {vif(.&lt;1e-16 ; &lt;1e-16 ; {%05f?.}), fill.right ? pval}"</span>, </span>
+<span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"pvalues: {vif(.&lt;1e-16 ; &lt;1e-16 ; {%05f ? .}), align.right ? pval}"</span>, </span>
 <span>          .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; pvalues:   &lt;1e-16</span></span>
 <span><span class="co">#&gt; pvalues: 0.150000</span></span>
@@ -260,7 +261,7 @@ this, we right align the results.</p>
 Knowing this, let’s redo Ex.2 differently:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{1:10}"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {vif(.N&gt;4 ; {first?x} + ... + {last?x} ; {' + 'c?x}) ? x}"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {vif(.N&gt;4 ; {first?x} + ... + {last?x} ; {' + 'c ? x}) ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "y = x1 + ... + x10"</span></span></code></pre></div>
 <p>Let’s break it down. If the length of the vector is greater than 4
 (here it’s 10), then the full string is replaced with
