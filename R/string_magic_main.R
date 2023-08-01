@@ -2823,7 +2823,7 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check,
     argument = op_parsed$argument
     if(op_parsed$eval){
       argument_call = check_set_oparg_parse(argument, op, .check)
-      argument = check_set_oparg_eval(argument_call, .data, .envir, opi, .check)
+      argument = check_set_oparg_eval(argument_call, .data, .envir, op, .check)
     }
 
     if(op %in% c("es", "s", "y", "ies")){
