@@ -1094,22 +1094,6 @@ fix_pkgwdown_path = function(){
 #### timer ####
 ####
 
-find_frame_object = function(obj_name){
-  found = FALSE
-  for(nf in 2:min(sys.nframe(), 20)){
-    if(exists(obj_name, parent.frame(nf), inherits = FALSE)){
-      found = TRUE
-      break
-    }
-  }
-  
-  if(found){
-    return(nf - 1)
-  } else {
-    return(FALSE)
-  }
-}
-
 timer = function(type = "simple"){
   
   if(type == "total"){
@@ -1124,7 +1108,6 @@ timer = function(type = "simple"){
   
   time_new = Sys.time()
   difftime = format_difftime(time_new - tm, "full")
-  # cat("diff time in: ", Sys.time() - time_new, "\n")
   
   if(type == "simple"){
     options(stringmagic_timer = time_new)
