@@ -1118,9 +1118,10 @@ timer = function(type = "simple"){
   
   time_new = Sys.time()
   difftime = format_difftime(time_new - tm, "full")
+  # cat("diff time in: ", Sys.time() - time_new, "\n")
   
   if(type == "simple"){
-    options(stringmagic_timer = tm)
+    options(stringmagic_timer = time_new)
   } 
   
   return(difftime)
