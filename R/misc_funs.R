@@ -354,12 +354,18 @@ format_difftime = function(x, options = character()){
     }
     
     if(opt_equal(options, "full")){
-      # we don't go at the us precision: don't makes sense
+      # we don't go at the micro second precision: don't makes sense
       s = trunc(xi)
-      ms = sprintf("%.1f", (xi - s) * 1e3)
+      if(s > 0){
+        s_fmt = sprintf("% 3ss", s)
+      } else {
+        s_fmt = "    "
+      }
       
-      res[i] = .sma("{&s>0;{3 align.right ? s}s;    } ",
-                    "{5 align.right ? ms}ms")
+      ms = sprintf("%.1f", (xi - s) * 1e3)
+      ms_fmt = sprintf("% 5s", ms)
+      
+      res[i] = paste0(s_fmt, " ", ms_fmt, "ms")
       
     } else {
       if(xi > 3600){
