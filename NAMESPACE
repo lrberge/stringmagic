@@ -27,4 +27,6 @@ export(timer_magic)
 
 importFrom(Rcpp, evalCpp)
 
+importFrom("stats", terms)
+
 importFrom("utils", "as.roman", "capture.output", "head", "tail")
