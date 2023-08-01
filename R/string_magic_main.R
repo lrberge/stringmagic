@@ -483,8 +483,8 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 #' 
 timer_magic = function(){
   tm = Sys.time()
-  attr(tm, "origin") = tm
-  assign(".timer_magic", tm, parent.frame())
+  options(stringmagic_timer = tm)
+  options(stringmagic_timer_origin = tm)
 }
 
 ####

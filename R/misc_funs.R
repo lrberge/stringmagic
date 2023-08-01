@@ -1094,47 +1094,23 @@ fix_pkgwdown_path = function(){
 #### timer ####
 ####
 
-find_frame_object = function(obj_name){
-  found = FALSE
-  for(nf in 1:min(sys.nframe(), 20)){
-    if(exists(obj_name, parent.frame(nf), inherits = FALSE)){
-      found = TRUE
-      break
-    }
-  }
-  
-  if(found){
-    return(nf - 1)
-  } else {
-    return(FALSE)
-  }
-}
-
 timer = function(type = "simple"){
   
-  nf = find_frame_object(".timer_magic")
-  if(isFALSE(nf)){
-    if(type == "simple"){
-      tm = Sys.time()
-      attr(tm, "origin") = tm
-      assign(".time_magic", tm, parent.frame(nf))
-      return("(Please set up the timer first with timer_magic().)")
-    } else {
-      return("0s (Please set up the timer first with timer_magic().)")
-    }
+  if(type == "total"){
+    tm = getOption("stringmagic_timer_origin")
+  } else {
+    tm = getOption("stringmagic_timer")
   }
   
-  tm = get(".timer_magic", parent.frame(nf))
-  if(type == "total"){
-    tm = attr(tm, "origin")
-  }
+  if(is.null(tm)){
+    return("(Error: Please set up the timer first with timer_magic().)")
+  }  
   
   time_new = Sys.time()
   difftime = format_difftime(time_new - tm, "full")
   
   if(type == "simple"){
-    tm[1] = time_new
-    assign(".timer_magic", tm, envir = parent.frame(nf))
+    options(stringmagic_timer = time_new)
   } 
   
   return(difftime)
