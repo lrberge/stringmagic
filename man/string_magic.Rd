@@ -17,6 +17,7 @@ string_magic(
   .collapse = NULL,
   .invisible = FALSE,
   .default = NULL,
+  .trigger = TRUE,
   .check = TRUE,
   .class = NULL,
   .help = NULL,
@@ -32,6 +33,7 @@ string_magic(
   .collapse = NULL,
   .last = NULL,
   .nest = FALSE,
+  .trigger = TRUE,
   .namespace = NULL
 )
 }
@@ -101,6 +103,9 @@ Ex: if \code{x = 1:2}, then \code{string_magic("x = {x}", .default = "enum")} le
 and is equivalent to \code{string_magic("x = {enum?x}")}. Note that this default operations does
 not apply to nested expressions. That is \code{string_magic("{!x{1:2}}", .default = "enum")} leads
 to \code{c("x1", "x2")} and NOT \code{"x1 and 2"}.}
+
+\item{.trigger}{Logical, default is \code{TRUE}. If \code{FALSE}, this function is not run. Can be
+useful in debugging situations where we want conditional evaluations.}
 
 \item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling (i.e.
 human readable error messages).
@@ -537,9 +542,9 @@ target size as a fraction of the current screen. Finally it can be an expression
 uses the variable \code{.sw} which will capture the value of the current screen width.
 Ex.1: \code{string_magic("{15 width ! this is a long sentence}")} leads to "this is a long\\nsentence".
 Ex.2: \code{string_magic("{15 width.#> ! this is a long sentence}")} leads to "#> this is a long\\n#> sentence".
-\item dtime: displays a formatted time difference. Option "silent" does not report a warning if the
+\item difftime: displays a formatted time difference. Option "silent" does not report a warning if the
 operation fails. It accepts either objects of class \code{POSIXt} or \code{difftime}.
-Example: \verb{x = Sys.time() ; Sys.sleep(0.5) ; string_magic("Time: \{dtime ? x\}")} leads to something
+Example: \verb{x = Sys.time() ; Sys.sleep(0.5) ; string_magic("Time: \{difftime ? x\}")} leads to something
 like "Time: 514ms".
 }
 }

@@ -80,6 +80,8 @@
 #' interpolation delimiters, so that you can apply operations directly on the string. Example:
 #' `string_magic("upper ! hello")` returns "upper ! hello", while `string_magic("upper ! hello", .nest = TRUE)`
 #' returns `"HELLO"`.
+#' @param .trigger Logical, default is `TRUE`. If `FALSE`, this function is not run. Can be 
+#' useful in debugging situations where we want conditional evaluations.
 #' 
 #'
 #' @details 
@@ -465,9 +467,9 @@
 #' uses the variable `.sw` which will capture the value of the current screen width.
 #' Ex.1: `string_magic("{15 width ! this is a long sentence}")` leads to "this is a long\\nsentence".
 #' Ex.2: `string_magic("{15 width.#> ! this is a long sentence}")` leads to "#> this is a long\\n#> sentence".
-#' + dtime: displays a formatted time difference. Option "silent" does not report a warning if the
+#' + difftime: displays a formatted time difference. Option "silent" does not report a warning if the
 #' operation fails. It accepts either objects of class `POSIXt` or `difftime`.
-#' Example: `x = Sys.time() ; Sys.sleep(0.5) ; string_magic("Time: {dtime ? x}")` leads to something 
+#' Example: `x = Sys.time() ; Sys.sleep(0.5) ; string_magic("Time: {difftime ? x}")` leads to something 
 #' like "Time: 514ms".
 #' 
 #' @section Group-wise operations:

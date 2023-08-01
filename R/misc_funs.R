@@ -318,7 +318,7 @@ enum_main = function(x, options){
   enumerate_items(x, quote = quote, or = or, enum = enum, nmax = nmax, oxford = oxford)
 }
 
-format_difftime = function(x, options){
+format_difftime = function(x, options = character()){
   # x: number of seconds or difftime or time
 
   if(is.character(x)){
@@ -331,9 +331,9 @@ format_difftime = function(x, options){
       # - should I return NA?
 
       if(!opt_equal(options, "silent")){
-        warn_hook("Operation `dtime` could not be applied since the data",
+        warn_hook("Operation `difftime` could not be applied since the data",
                   " was not numeric, nor a POSIX time, nor a time-difference.",
-                  "\n (To avoid this warning, use the option `silent`: `dtime.silent`.)")
+                  "\n (To avoid this warning, use the option `silent`: `difftime.silent`.)")
       }
 
       return(rep("(difftime: NA)", length(x)))
@@ -353,21 +353,31 @@ format_difftime = function(x, options){
       xi = as.double(xi, units = "secs")
     }
     
-    if(xi > 3600){
-      n_hour = xi %/% 3600
-      rest_s = floor(xi %% 3600)
-      n_min = rest_s %/% 60
-      res[i] = string_magic("{n ? n_hour} hour{#s} {%02i ? n_min} min")
-    } else if(xi > 60){
-      n_min = xi %/% 60
-      n_sec = floor(xi %% 60)
-      res[i] = string_magic("{n ? n_min} min {%02i ? n_sec} sec")
-    } else if(xi > 0.9){
-      res[i] = paste0(fsignif(xi, 2, 1), "s")
-    } else if(xi > 1e-3){
-      res[i] = paste0(fsignif(xi * 1000, 2, 0), "ms")
+    if(opt_equal(options, "full")){
+      # we don't go at the us precision: don't makes sense
+      s = trunc(xi)
+      ms = sprintf("%.1f", (xi - s) * 1e3)
+      
+      res[i] = .sma("{&s>0;{3 align.right ? s}s;    } ",
+                    "{5 align.right ? ms}ms")
+      
     } else {
-      res[i] = "<1 ms"
+      if(xi > 3600){
+        n_hour = xi %/% 3600
+        rest_s = floor(xi %% 3600)
+        n_min = rest_s %/% 60
+        res[i] = string_magic("{n ? n_hour} hour{#s} {%02i ? n_min} min")
+      } else if(xi > 60){
+        n_min = xi %/% 60
+        n_sec = floor(xi %% 60)
+        res[i] = string_magic("{n ? n_min} min {%02i ? n_sec} sec")
+      } else if(xi > 0.9){
+        res[i] = paste0(fsignif(xi, 2, 1), "s")
+      } else if(xi > 1e-3){
+        res[i] = paste0(fsignif(xi * 1000, 2, 0), "ms")
+      } else {
+        res[i] = "<1 ms"
+      }
     }
   }
   
@@ -817,89 +827,9 @@ insert_at = function(x, y, index){
 }
 
 
-convert_to_list = function(x){
-  if(is.list(x)){
-    res = unclass(x)
-  } else if(is.matrix(x)){
-    res = vector("list", ncol(x))
-    for(i in 1:ncol(x)){
-      res[[i]] = x[, i, drop = TRUE]
-    }
-    names(res) = colnames(x)
-  } else if(is.vector(x)){
-    res = as.list(x)
-  } else {
-    stop_up("Internal error: the current format ({bq, enum ? class(x)}) could not be converted to a list.")
-  }
-
-  res
-}
-
-
-uniquify = function(x){
-  x_int = to_integer(x)
-  n = length(x)
-
-  if(n == 0){
-    return(x)
-  }
-
-  if(max(x_int) == n){
-    return(x)
-  }
-
-  suffix = character(n)
-  x_tab = tabulate(x_int)
-  i_multiple = which(x_tab > 1)
-  for(i in i_multiple){
-    n_digits = ceiling(log10(x_tab[i] + 0.1))
-    suffix[x_int == i] = sprintf("%0*i", n_digits, 1:x_tab[i])
-  }
-
-  res = paste0(x, suffix)
-  res
-}
-
-
-apply_star_operation = function(x, all_operations){
-  # only a few operations can be applied
-
-  all_op = check_set_options(all_operations, c("fix", "lower"), free = TRUE)
-  txt = x
-
-  for(op in all_op){
-    if(op == "fix"){
-      txt = gsub("[^[:alnum:]._]", "_", txt)
-      txt = gsub("_+", "_", txt)
-      txt = gsub("^[_.]+", ".", txt)
-      txt = gsub("([[:lower:]])([[:upper:]])", "\\1_\\2", txt)
-      txt = tolower(txt)
-    } else if(op == "lower"){
-      txt = tolower(txt)
-    } else {
-      
-      op = gsub("^'|'$", "", op)
-      op = gsub("\\\\", "\\", op, fixed = TRUE)
-      if(grepl(" => ", op, fixed = TRUE)){
-        op_split = strsplit(op, " => ", fixed = TRUE)[[1]]
-      } else {
-        op_split = c(op, "")
-      }
-
-      txt = gsub(op_split[1], op_split[2], txt)
-    }
-  }
-
-  txt
-}
 
 
 
-duplicated_xy = function(x, y){
-  x_dup = duplicated(x)
-  y_dup = duplicated(y)
-  which(x_dup & y_dup)
-}
 
 eval_dt = function(call, data = list(), envir){
   
@@ -1152,4 +1082,57 @@ fix_pkgwdown_path = function(){
     }
 
 }
+
+
+####
+#### timer ####
+####
+
+find_frame_object = function(obj_name){
+  found = FALSE
+  for(nf in 1:min(sys.nframe(), 20)){
+    if(exists(obj_name, parent.frame(nf), inherits = FALSE)){
+      found = TRUE
+      break
+    }
+  }
+  
+  if(found){
+    return(nf - 1)
+  } else {
+    return(FALSE)
+  }
+}
+
+timer = function(type = "simple"){
+  
+  nf = find_frame_object(".timer_magic")
+  if(isFALSE(nf)){
+    if(type == "simple"){
+      tm = Sys.time()
+      attr(tm, "origin") = tm
+      assign(".time_magic", tm, parent.frame(nf))
+      return("(Please set up the timer first with timer_magic().)")
+    } else {
+      return("0s (Please set up the timer first with timer_magic().)")
+    }
+  }
+  
+  tm = get(".timer_magic", parent.frame(nf))
+  if(type == "total"){
+    tm = attr(tm, "origin")
+  }
+  
+  time_new = Sys.time()
+  difftime = format_difftime(time_new - tm, "full")
+  
+  if(type == "simple"){
+    tm[1] = time_new
+    assign(".timer_magic", tm, envir = parent.frame(nf))
+  } 
+  
+  return(difftime)
+}
+
+
 

@@ -340,7 +340,7 @@ save_user_fun = function(fun, alias, namespace){
 #' 
 #' start = Sys.time()
 #' Sys.sleep(0.05)
-#' message_magic("This example has run in {dtime ? start}.")
+#' message_magic("This example has run in {difftime ? start}.")
 #' 
 #' cat_magic("Let's write a very long message to illustrate how .width work.", 
 #'           .width = 40)
@@ -370,9 +370,11 @@ save_user_fun = function(fun, alias, namespace){
 cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "", 
                          .envir = parent.frame(), 
                          .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
-                         .collapse = NULL, 
+                         .collapse = NULL, .trigger = TRUE, 
                          .check = TRUE, .help = NULL, 
                          .namespace = NULL){
+  
+  if(!isTRUE(.trigger)) return(invisible(NULL))
   
   set_pblm_hook()
   txt = string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
@@ -405,9 +407,11 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
 message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "", 
                          .envir = parent.frame(), 
                          .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
-                         .collapse = NULL, 
+                         .collapse = NULL, .trigger = TRUE,
                          .check = TRUE, .help = NULL, 
                          .namespace = NULL){
+  
+  if(!isTRUE(.trigger)) return(invisible(NULL))
   
   set_pblm_hook()
   txt = string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
@@ -436,6 +440,53 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
   message(txt, appendLF = FALSE)
 }
 
+#' Sets up a timer that can be used within _magic functions
+#' 
+#' Sets up a timer which can later be summoned by [string_magic()] functions via
+#' the `.timer`, `.timer_lap` and `.timer_total` variables. Useful to report 
+#' timings within functions with the function [cat_magic()] or [message_magic()].
+#' 
+#' @details
+#' This functions sets up a timer with [base::Sys.time()]. This timer can then be tracked 
+#' and modified with the `.timer`, `.timer_lap` and `.timer_total` variables within 
+#' [cat_magic()] or [message_magic()].
+#' 
+#' Note that the timer is precise at +/- 1ms, hence it should be used to time 
+#' algorithms with very short execution times. 
+#' 
+#' @author 
+#' Laurent Berge
+#' 
+#' @inherit cat_magic seealso
+#' 
+#' @examples 
+#' 
+#' # simple example where we time the execution of some elements in a function
+#' # we trigger the message conditionally on the value of the argument `debug`.
+#' rnorm_crossprod = function(n, mean = 0, sd = 1, debug = FALSE){
+#'   # we set the timer
+#'   timer_magic()
+#'   # we compute some stuff
+#'   x = rnorm(n, mean, sd)
+#'   # we can report the time with .timer
+#'   message_magic("{15 align ! Generation}: {.timer}", .trigger = debug)
+#'   
+#'   res = x %*% x
+#'   message_magic("{15 align ! Product}: {.timer}",
+#'                 "{15 align ! Total}: {.timer_total}", 
+#'                 .sep = "\n", .trigger = debug)
+#'   res
+#' }
+#' 
+#' rnorm_crossprod(1e5, TRUE)
+#' 
+#' 
+timer_magic = function(){
+  tm = Sys.time()
+  attr(tm, "origin") = tm
+  assign(".timer_magic", tm, parent.frame())
+}
+
 ####
 #### ... string_magic ####
 ####
@@ -444,8 +495,11 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
                    .delim = c("{", "}"), .last = NULL, .post = NULL, .nest = FALSE,
                    .collapse = NULL, .invisible = FALSE, .default = NULL,
+                   .trigger = TRUE, 
                    .check = TRUE, .class = NULL, .help = NULL, 
                    .namespace = NULL){
+  
+  if(!isTRUE(.trigger)) return(invisible(NULL))
 
   if(.check){
     set_pblm_hook()
@@ -507,7 +561,9 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
 #' @describeIn string_magic A simpler version of `string_magic` without any error handling to save a few micro seconds
 .string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
                     .delim = c("{", "}"), .collapse = NULL, .last = NULL, .nest = FALSE,
-                    .namespace = NULL){
+                    .trigger = TRUE, .namespace = NULL){
+  
+  if(!.trigger) return(invisible(NULL))
   
   if(length(.delim) == 1){
     .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
@@ -646,6 +702,20 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
             now_done = TRUE
           }
           
+          if(grepl(".timer", di, fixed = TRUE)){
+            if(grepl(".timer([^_]|$)", di)){
+              .data[[".timer"]] = timer("simple")
+            }
+            
+            if(grepl(".timer_lap", di, fixed = TRUE)){
+              .data[[".timer_lap"]] = timer("lap")
+            }
+            
+            if(grepl(".timer_total", di, fixed = TRUE)){
+              .data[[".timer_total"]] = timer("total")
+            }
+          }
+          
           if(!date_done && grepl(".date", di, fixed = TRUE)){
             .data[[".date"]] = Sys.Date()
             date_done = TRUE
@@ -707,6 +777,20 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
           .data[[".now"]] = function(x) format(Sys.time(), x)
         } else {
           .data[[".now"]] = Sys.time()
+        }
+      }
+      
+      if(grepl(".timer", x, fixed = TRUE)){
+        if(grepl(".timer([^_]|$)", x)){
+          .data[[".timer"]] = timer("simple")
+        }
+        
+        if(grepl(".timer_lap", x, fixed = TRUE)){
+          .data[[".timer_lap"]] = timer("lap")
+        }
+        
+        if(grepl(".timer_total", x, fixed = TRUE)){
+          .data[[".timer_total"]] = timer("total")
         }
       }
       
@@ -2235,7 +2319,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       res = gsub("^(.)", "\\U\\1", res, perl = TRUE)
     }
   } else if(op == "width"){
-    # width, dtime ####
+    # width, difftime ####
     
     sw = getOption("width")
     data = list(.sw = sw)
@@ -2263,7 +2347,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       res[i] = fit_screen(x[i], width = nb, leader = comment)
     }
     
-  } else if(op == "dtime"){
+  } else if(op == "difftime"){
     res = format_difftime(x, options)
 
   } else if(op == "erase"){
@@ -3084,7 +3168,7 @@ setup_operations = function(){
                 "firstchar", "lastchar", "unik", "num", "enum",
                 "rev", "sort", "dsort", "ascii", "title",
                 "ws", "tws", "trim", "get", "is", "which",
-                "n", "N", "len", "Len", "width", "dtime",
+                "n", "N", "len", "Len", "width", "difftime",
                 "stopwords", "nth", "Nth", "ntimes", "Ntimes")
                 
   options("string_magic_operations_v1.0.0" = sort(OPERATORS))

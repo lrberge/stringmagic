@@ -780,14 +780,14 @@ cat_magic("------ version 0 ------\n{x}",
           "------ version 3 ------\n{'15|#>_'width ? x}", .sep = "\n")
 ```
 
-## Formatted time difference: dtime
+## Formatted time difference: difftime
 
 Displays a formatted time difference. Option `"silent"` does not report a warning if the
 operation fails. It accepts either objects of class `POSIXt` or `difftime`.
 ```{r}
 x = Sys.time()
 Sys.sleep(0.15) 
-string_magic("Time: {dtime ? x}")
+string_magic("Time: {difftime ? x}")
 ```
 
 

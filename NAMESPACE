@@ -19,6 +19,8 @@ export(string_magic_alias)
 export(cat_magic, cat_magic_alias)
 export(message_magic, message_magic_alias)
 
+export(timer_magic)
+
 #
 # imports
 #

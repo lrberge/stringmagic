@@ -44,6 +44,7 @@ cat_magic(
   .delim = c("{", "}"),
   .last = NULL,
   .collapse = NULL,
+  .trigger = TRUE,
   .check = TRUE,
   .help = NULL,
   .namespace = NULL
@@ -60,6 +61,7 @@ message_magic(
   .delim = c("{", "}"),
   .last = NULL,
   .collapse = NULL,
+  .trigger = TRUE,
   .check = TRUE,
   .help = NULL,
   .namespace = NULL
@@ -142,6 +144,9 @@ format the time. Ex: \code{.now('\%Y-\%m \%H:\%m')}.}
 evaluated using the environment from where the function is called or using the named
 arguments passed to the function.}
 
+\item{.trigger}{Logical, default is \code{TRUE}. If \code{FALSE}, this function is not run. Can be
+useful in debugging situations where we want conditional evaluations.}
+
 \item{.help}{Character scalar or \code{TRUE}, default is \code{NULL}. This argument
 is used to generate a dynamic help on the console. If \code{TRUE}, the user can select which
 topic to read from the main documentation, with the possibility to search for keywords and
@@ -183,7 +188,7 @@ To access these operators in their specific namespaces, you must use an alias wi
 
 start = Sys.time()
 Sys.sleep(0.05)
-message_magic("This example has run in {dtime ? start}.")
+message_magic("This example has run in {difftime ? start}.")
 
 cat_magic("Let's write a very long message to illustrate how .width work.", 
           .width = 40)

@@ -681,11 +681,11 @@ test(txt, c("Voici le texte a apprendre:\n> Rome, l'unique objet de mon\n> resse
 #
 
 x = 3654
-txt = string_magic("Time since last check: {dtime ? x}.")
+txt = string_magic("Time since last check: {difftime ? x}.")
 test(txt, "Time since last check: 1 hour 00 min.")
 
 x = structure(1680294984.14505, class = c("POSIXct", "POSIXt")) - structure(1680292481.19258, class = c("POSIXct", "POSIXt"))
-txt = string_magic("Time since last check: {dtime ? x}.")
+txt = string_magic("Time since last check: {difftime ? x}.")
 test(txt, "Time since last check: 41 min 42 sec.")
 
 #

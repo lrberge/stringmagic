@@ -1089,7 +1089,7 @@ suggest_item = function(x, items, write_msg = TRUE, newline = TRUE, info = "vari
 
   if(write_msg){
     if(length(res) == 0){
-      if(length(items) <= 5){
+      if(length(items_origin) <= 5){
         res = string_magic("FYI the {info}{$s, are, enum.bq ? items_origin}.")
       } else {
         res = string_magic("\nFYI the {info}s are: {sort, ', 'c ? items_origin}.")
