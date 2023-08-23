@@ -30,7 +30,7 @@
 #' @author 
 #' Laurent Berge
 #' 
-#' @family related to `string_magic`
+#' @family related to string_magic
 #' @family tools with aliases
 #' 
 #' @examples 

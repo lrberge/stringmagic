@@ -14,8 +14,9 @@ on-the-fly, any arbitrary string operation.
 It supports over 50 basic operations, seamless customization, nesting,
 pluralization, and much more. Writing complex character strings has never been that easy!
 
-To get an overview of the package: \href{https://lrberge.github.io/stringmagic/articles/stringmagic_tour.html}{take the tour}. To get started with string_magic,
-see \href{https://lrberge.github.io/stringmagic/articles/string_magic_walkthrough.html}{the vignette}.
+To get an overview of the package: see the \href{https://lrberge.github.io/stringmagic/index.html}{Readme}.
+To get started with string_magic,
+see \href{https://lrberge.github.io/stringmagic/articles/guide_string_magic.html}{the vignette}.
 
 This package also enhances regular string functions (like grep and co) with
 specialized functions to:
@@ -25,6 +26,6 @@ specialized functions to:
 \item clean character string vectors
 }
 
-See more in the \href{https://lrberge.github.io/stringmagic/articles/string_tools.html}{dedicated vignette}.
+See more in the \href{https://lrberge.github.io/stringmagic/articles/guide_string_tools.html}{dedicated vignette}.
 }
 \keyword{internal}

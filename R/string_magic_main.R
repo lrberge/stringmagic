@@ -78,7 +78,7 @@
 #' @author 
 #' Laurent R. Berge
 #' 
-#' @family related to `string_magic`
+#' @family related to string_magic
 #' 
 #' @inherit string_clean seealso
 #' 

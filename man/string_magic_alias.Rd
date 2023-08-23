@@ -146,7 +146,7 @@ sma2("Hello", ".[title ? person]", .sep = ": ")
 
 }
 \seealso{
-Other related to \code{string_magic}: 
+Other related to string_magic: 
 \code{\link{string_magic_register_fun}()}
 
 Other tools with aliases: 
@@ -159,5 +159,5 @@ Other tools with aliases:
 \author{
 Laurent Berge
 }
-\concept{related to \code{string_magic}}
+\concept{related to string_magic}
 \concept{tools with aliases}

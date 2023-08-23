@@ -680,7 +680,7 @@
 #' @return
 #' It returns a character vector whose length depends on the elements and operations in the interpolations.
 #' 
-#' @family `string_magic` functions
+#' @family string_magic functions
 #' @family tools with aliases
 #' 
 #' @inherit str_clean seealso
@@ -901,7 +901,8 @@
 #' # the list is from the Snowball project:
 #' #  http://snowball.tartarus.org/algorithms/english/stop.txt
 #'
-#' string_magic("{stop, ws ! It is a tale told by an idiot, full of sound and fury, signifying nothing.}")
+#' string_magic("{stop, ws ! It is a tale told by an idiot, ",
+#'                          "full of sound and fury, signifying nothing.}")
 #'
 #' #
 #' # k: keeps the first n characters

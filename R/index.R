@@ -8,8 +8,9 @@
 #' It supports over 50 basic operations, seamless customization, nesting, 
 #' pluralization, and much more. Writing complex character strings has never been that easy!
 #' 
-#' To get an overview of the package: [take the tour](https://lrberge.github.io/stringmagic/articles/stringmagic_tour.html). To get started with string_magic,
-#'  see [the vignette](https://lrberge.github.io/stringmagic/articles/string_magic_walkthrough.html).
+#' To get an overview of the package: see the [Readme](https://lrberge.github.io/stringmagic/index.html). 
+#' To get started with string_magic,
+#'  see [the vignette](https://lrberge.github.io/stringmagic/articles/guide_string_magic.html).
 #' 
 #' This package also enhances regular string functions (like grep and co) with
 #'  specialized functions to:
@@ -18,7 +19,7 @@
 #' - chain basic string operations
 #' - clean character string vectors
 #' 
-#' See more in the [dedicated vignette](https://lrberge.github.io/stringmagic/articles/string_tools.html).
+#' See more in the [dedicated vignette](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html).
 #' 
 #' 
 #' @name _index_

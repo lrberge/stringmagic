@@ -1010,7 +1010,8 @@ string_magic("Main reasons to pursue an academic career:\n {enum.i ? acad}.")
 # the list is from the Snowball project:
 #  http://snowball.tartarus.org/algorithms/english/stop.txt
 
-string_magic("{stop, ws ! It is a tale told by an idiot, full of sound and fury, signifying nothing.}")
+string_magic("{stop, ws ! It is a tale told by an idiot, ",
+                         "full of sound and fury, signifying nothing.}")
 
 #
 # k: keeps the first n characters
@@ -1175,5 +1176,5 @@ Other tools with aliases:
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }
-\concept{\code{string_magic} functions}
+\concept{string_magic functions}
 \concept{tools with aliases}

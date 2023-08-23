@@ -150,10 +150,10 @@ cat_magic("{h1 ! My title}\n my content")
 
 }
 \seealso{
-Other related to \code{string_magic}: 
+Other related to string_magic: 
 \code{\link{string_magic_alias}()}
 }
 \author{
 Laurent R. Berge
 }
-\concept{related to \code{string_magic}}
+\concept{related to string_magic}

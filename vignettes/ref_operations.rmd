@@ -52,7 +52,7 @@ This section describes some of the most common string operations: extracting,
 replacing, collapsing, splitting, etc. Because they are so common, many of these 
 operations have a one letter alias.
 These functions accept regex flags in their patterns. For more information on regex flags, 
-see the [dedicated section](https://lrberge.github.io/stringmagic/articles/string_tools.html).
+see the [dedicated section](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html).
 
 ## Split strings: s, S, split, Split: 
 
@@ -165,7 +165,7 @@ string_magic("{'total/e => here!'r ? x}")
 
 Replaces a pattern with a string. Similar to the operation `r`, except that here the comma is
 a pattern separator. The argument is of the form `"flags/pattern1, pattern2 => replacement"`. 
-See detailed explanations in [`string_clean()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_clean). 
+See detailed explanations in [`string_clean()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_clean). 
 
 ```{r}
 # we use the fixed pattern to remove the regex meaning
@@ -176,7 +176,7 @@ string_magic("{'f/[, ]'clean ! x[a]}")
 
 Restricts the string vector to only the values respecting a pattern. This operation has no default.
 Accepts the options `"equal"` and `"in"`.
-By default it uses the same syntax as [`string_get()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
+By default it uses the same syntax as [`string_get()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#detect_funs) 
 so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
 If the option `"equal"` is used, a simple string equality with the argument is tested (hence
@@ -196,8 +196,8 @@ string_magic("Mercedes models: {`models`get.in, enum ? x}.")
 ## Detect patterns in strings: is
 
 Detects if a pattern is present in a string, returns a logical vector. This operation has no default.
-Mostly useful as the final operation in a [`string_ops()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_ops) call.
-By default it uses the same syntax as [`string_is()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
+Mostly useful as the final operation in a [`string_ops()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_ops) call.
+By default it uses the same syntax as [`string_is()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#detect_funs) 
 so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
 If the option `"equal"` is used, a simple string equality with the argument is tested (hence
@@ -213,13 +213,13 @@ string_magic("Mark? {'i/mark'is, enum ? x}")
 
 Returns the index of string containing a specified pattern. With no default, can be applied
 to a logical vector directly. 
-By default it uses the same syntax as [`string_which()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#detect_funs) 
+By default it uses the same syntax as [`string_which()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#detect_funs) 
 so that you can use regex flags and 
 include logical operations between regex patterns with `' & '` and `' | '`.
 If the option `"equal"` is used, a simple string equality with the argument is tested (hence
 no flags are accepted). If the option `"in"` is used, the argument is first split with respect to commas
 and then set inclusion is tested. 
-Mostly useful as the final operation in a [`string_ops()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_ops) call.
+Mostly useful as the final operation in a [`string_ops()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_ops) call.
 ```{r}
 x = c("Mark", "Lucas", "Markus")
 # note that we use the flag `i` to ignore the case and `w` to add word boundaries
@@ -291,7 +291,7 @@ x = c("sort", "me")
 string_magic("{sort, collapse ? x}")
 ```
 If an argument is provided, it must be a regex pattern that will be applied to
-the vector using [`string_clean()`](https://lrberge.github.io/stringmagic/articles/string_tools.html#sec_clean). 
+the vector using [`string_clean()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_clean). 
 The sorting will be applied to the modified version of the vector
 and the original vector will be ordered according to this sorting. 
 ```{r}

@@ -434,7 +434,7 @@ string_magic("This message has been written on {.date}.")
 
 On top of this, you can use `.now` as a function whose sole argument
 provides the format of the time. The format follows 
-[base::strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime).
+`base::strptime` (see `?strptime`).
 In the following example, we display the day, month and the hour:
 
 ```{r}
