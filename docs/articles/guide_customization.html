@@ -106,7 +106,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-07-19</h4>
+            <h4 data-toc-skip class="date">2023-08-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/guide_customization.rmd" class="external-link"><code>vignettes/guide_customization.rmd</code></a></small>
       <div class="hidden name"><code>guide_customization.rmd</code></div>
@@ -163,7 +163,7 @@ passing <code>as.formula</code> in the <code>.post</code> argument.</p>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span>, <span class="st">"Species"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{y} ~ {x}"</span>, .default <span class="op">=</span> <span class="st">"' + 'collapse"</span>, .post <span class="op">=</span> <span class="va">as.formula</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x0000027c1e34d990&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x000001a460b34058&gt;</span></span></code></pre></div>
 <p>Now that we see that our builder works with
 <code>string_magic</code>, we create a dedicated function with an
 alias.</p>
@@ -174,7 +174,7 @@ different default values. Now we can apply it directly.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x0000027c1d5339a8&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x000001a45ff23798&gt;</span></span></code></pre></div>
 <p>Since this function is just a call to <code>string_magic</code>, you
 can apply anything you want. Let’s scale the variables on the
 right-hand-side by using nesting:</p>
@@ -182,7 +182,7 @@ right-hand-side by using nesting:</p>
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span><span class="op">)</span></span>
 <span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {'+'collapse ! scale({x})}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ scale(Sepal.Length) + scale(Petal.Width)</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x0000027c1f524178&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x000001a461fdc9d0&gt;</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="changing-str_clean">Changing <code>str_clean</code><a class="anchor" aria-label="anchor" href="#changing-str_clean"></a>
@@ -477,8 +477,8 @@ Just remenber that you need the <code>.namespace</code> argument:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; INFO: Type string_magic(.help = "regex") or string_magic(.help = TRUE)</span></span>
 <span><span class="co">#&gt; for help.</span></span>
-<span><span class="co">#&gt; Ex. of valid stuff: string_magic("Letters: {10 first, `6/2`last, ''c, 'i</span></span>
-<span><span class="co">#&gt; =&gt; e'r, upper.first ? letters}!")</span></span></code></pre></div>
+<span><span class="co">#&gt; Or look at the vignette:</span></span>
+<span><span class="co">#&gt; https://lrberge.github.io/stringmagic/articles/guide_string_magic.html</span></span></code></pre></div>
 <p>Using the <code>.namsepace</code> argument is cumbersome. That is why
 <code>stringmagic</code> offers alias generators to easily create
 aliases of the <code>stringmagic</code> functions using custom

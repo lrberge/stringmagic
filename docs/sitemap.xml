@@ -7,7 +7,7 @@
     <loc>/articles/guide_customization.html</loc>
   </url>
   <url>
-    <loc>/articles/guide_smagic.html</loc>
+    <loc>/articles/guide_string_magic.html</loc>
   </url>
   <url>
     <loc>/articles/guide_string_tools.html</loc>
@@ -25,22 +25,7 @@
     <loc>/articles/ref_regex_logic.html</loc>
   </url>
   <url>
-    <loc>/articles/ref_smagic.html</loc>
-  </url>
-  <url>
-    <loc>/articles/smagick_walkthrough.html</loc>
-  </url>
-  <url>
-    <loc>/articles/smagic_walkthrough.html</loc>
-  </url>
-  <url>
-    <loc>/articles/stringmagick_tour.html</loc>
-  </url>
-  <url>
-    <loc>/articles/stringmagic_tour.html</loc>
-  </url>
-  <url>
-    <loc>/articles/string_tools.html</loc>
+    <loc>/articles/ref_string_magic_special_operations.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
@@ -62,6 +47,9 @@
   </url>
   <url>
     <loc>/reference/parse_regex_pattern.html</loc>
+  </url>
+  <url>
+    <loc>/reference/paste_conditional.html</loc>
   </url>
   <url>
     <loc>/reference/print.smagic.html</loc>
@@ -112,6 +100,15 @@
     <loc>/reference/string_is.html</loc>
   </url>
   <url>
+    <loc>/reference/string_magic.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_magic_alias.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_magic_register_fun.html</loc>
+  </url>
+  <url>
     <loc>/reference/string_ops.html</loc>
   </url>
   <url>
@@ -140,5 +137,8 @@
   </url>
   <url>
     <loc>/reference/str_vec.html</loc>
+  </url>
+  <url>
+    <loc>/reference/timer_magic.html</loc>
   </url>
 </urlset>
