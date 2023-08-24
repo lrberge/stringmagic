@@ -87,6 +87,9 @@ As a regular end-user you shouldn't care! If your package uses \code{string_magi
 It is useful \strong{only} if your package uses 'custom' \code{string_magic} operations, set with
 \code{\link[=string_magic_register_fun]{string_magic_register_fun()}} or \code{\link[=string_magic_register_ops]{string_magic_register_ops()}}.}
 }
+\value{
+This function returns a function which will behave in the same way as \code{\link[=string_magic]{string_magic()}}
+}
 \description{
 Utility to easily create \code{string_magic} aliases with custom default
 }

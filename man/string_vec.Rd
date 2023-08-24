@@ -132,6 +132,12 @@ obtain equivalent results, use \code{.protect.vars = FALSE}.}
 evaluated using the environment from where the function is called or using the named
 arguments passed to the function.}
 }
+\value{
+By default this function returns a string vector, the length of which depends on the arguments.
+
+This result can be processed with the arguments \code{cmat}, \code{nmat} and \code{.df} which will
+try to coerce the result into a character matrix, a numeric matrix , or a data frame, respectively.
+}
 \description{
 Create string vectors in multiple ways: 1) add successive string elements (like in \code{c()}),
 or 2) write a character string that will be broken with respect to commas
@@ -140,6 +146,17 @@ character strings (\code{"x{1:2}"} becomes \code{c("x1", "x2")}) with full acces
 \code{\link[=string_magic]{string_magic()}} operations, or any combination of the three.
 }
 \details{
+The main objective of this function is to simplify the creation of small character vectors.
+By default, you can pass a character string of length 1 with values separated with commas
+and a character vector will be returned.
+
+You can use interpolation using curly brackets (see \code{string_magic()}). You can pass
+values for the interpolation directly in the arguments (this is why all
+arguments start with a dot).
+
+By default character values containing commas are split with respect to the commas
+to create vectors. To change this behavior, see the argument \code{.split}.
+
 The default of the argument \code{.protect.vars} is \code{FALSE} so as to avoid unwanted
 comma-splitting and interpolations. The main use case of this function is
 the creation of small string vectors, which can be written directly at

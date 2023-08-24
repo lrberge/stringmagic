@@ -32,6 +32,9 @@ be balanced so as to center the strings.}
 \item{na}{Character scalar or \code{NA}. Default is "NA" (a character string!). What happens to NAs: by default
 they are replaced by the character string "NA".}
 }
+\value{
+This functions returns a character vector of the same lenght as the vector in input.
+}
 \description{
 Fills a character string up to a size and handles multibyte encodings
 (differently from sprintf).

@@ -1514,12 +1514,29 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' are character strings.
 #' 
 #' @details 
+#' The main objective of this function is to simplify the creation of small character vectors.
+#' By default, you can pass a character string of length 1 with values separated with commas
+#' and a character vector will be returned. 
+#' 
+#' You can use interpolation using curly brackets (see `string_magic()`). You can pass
+#' values for the interpolation directly in the arguments (this is why all 
+#' arguments start with a dot).
+#' 
+#' By default character values containing commas are split with respect to the commas
+#' to create vectors. To change this behavior, see the argument `.split`.
+#' 
 #' The default of the argument `.protect.vars` is `FALSE` so as to avoid unwanted 
 #' comma-splitting and interpolations. The main use case of this function is
 #' the creation of small string vectors, which can be written directly at
 #' function call. 
 #' 
 #' Customize the default of this function with [string_vec_alias()].
+#' 
+#' @return 
+#' By default this function returns a string vector, the length of which depends on the arguments.
+#' 
+#' This result can be processed with the arguments `cmat`, `nmat` and `.df` which will 
+#' try to coerce the result into a character matrix, a numeric matrix , or a data frame, respectively.
 #' 
 #' @author 
 #' Laurent Berge
@@ -1785,6 +1802,9 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
 #' uses only base R functions to compensate this. It is slightly slower but, in general, safer. 
 #' 
 #' It also looks a bit like [base::format()], but slightly different (and a bit faster, but more restrictive).
+#' 
+#' @return 
+#' This functions returns a character vector of the same lenght as the vector in input.
 #' 
 #' @author 
 #' Laurent R. Berge

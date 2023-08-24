@@ -38,6 +38,11 @@ it can't be messed up by end users).}
 be of the form \code{"op1, 'arg'op2, etc"}. For example \code{"'80|-'fill"} fills the line
 with dashes up to 80 characters.}
 }
+\value{
+These function do not return anything. They register new operations to be used in the
+\code{string_magic} family of functions by placing them in the options (later fetched by
+\code{string_magic()} at run-time).
+}
 \description{
 Extends the capabilities of \code{\link[=string_magic]{string_magic()}} by adding any custom operation
 }

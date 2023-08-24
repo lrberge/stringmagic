@@ -78,6 +78,11 @@
 #' @author 
 #' Laurent R. Berge
 #' 
+#' @return 
+#' These function do not return anything. They register new operations to be used in the 
+#' `string_magic` family of functions by placing them in the options (later fetched by 
+#' `string_magic()` at run-time).
+#' 
 #' @family related to string_magic
 #' 
 #' @inherit string_clean seealso
@@ -331,6 +336,12 @@ save_user_fun = function(fun, alias, namespace){
 #' `cat_magic_alias` or `message_magic_alias` with the argument `.namespace = "myPackageName"` 
 #' (to avoid having to provide the `.namespace` argument repeatedly).
 #' 
+#' @return 
+#' The functions `cat_magic()` and `message_magic()` do not return anything, they simply print on the console. 
+#' 
+#' The function `cat_magic_alis()` returns a function behaving identically to [cat_magic()] but for which the
+#' default values have been altered.
+#' Same for `message_magic_alias()`.
 #' 
 #' @family tools with aliases
 #' 
@@ -451,8 +462,16 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 #' and modified with the `.timer`, `.timer_lap` and `.timer_total` variables within 
 #' [cat_magic()] or [message_magic()].
 #' 
-#' Note that the timer is precise at +/- 1ms, hence it should be used to time 
+#' Note that the timer is precise at +/- 1ms, hence it should **not** be used to time 
 #' algorithms with very short execution times. 
+#' 
+#' It works by saving the current system time in R options (`stringmagic_timer` and `stringmagic_timer_origin`).
+#' Hence, since it uses options, it should not be used in parallel processes.
+#' 
+#' @return 
+#' This function does not return anything and is only intended to be used in
+#' conjunction with future calls of [string_magic()]. 
+#' 
 #' 
 #' @author 
 #' Laurent Berge

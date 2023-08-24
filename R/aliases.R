@@ -24,6 +24,9 @@
 #' if you want the interpolation to be done with "{{}}" (instead of `{}`) or if you want the 
 #' default separation to be the space (instead of the empty string). See the example.
 #' 
+#' @return 
+#' This function returns a function which will behave in the same way as [string_magic()]
+#' 
 #' 
 #' @inheritSection string_magic_register_fun Writing a package using `string_magic`
 #' 

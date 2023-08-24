@@ -99,10 +99,7 @@ the opening and the closing delimiters for interpolation.
 
 If of length 1, it must be of the form: 1) the opening delimiter,
 2) a single space, 3) the closing delimiter. Ex: \code{".[ ]"} is equivalent to \code{c(".[", "]")}.
-The default value is equivalent to \code{"{ }"}.
-
-[ ]: R:\%20
-[", "]: R:\%22,\%20\%22}
+The default value is equivalent to \code{"{ }"}.}
 
 \item{.last}{Character scalar, a function, or \code{NULL} (default). If provided and character:
 it must be an \code{string_magic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
@@ -153,6 +150,13 @@ topic to read from the main documentation, with the possibility to search for ke
 navigate the help pages. If a character scalar, then a regex search is perfomed on the main
 documentation and any section containining a match is displayed. The user can easily
 navigate across matches.}
+}
+\value{
+The functions \code{cat_magic()} and \code{message_magic()} do not return anything, they simply print on the console.
+
+The function \code{cat_magic_alis()} returns a function behaving identically to \code{\link[=cat_magic]{cat_magic()}} but for which the
+default values have been altered.
+Same for \code{message_magic_alias()}.
 }
 \description{
 Utilities to display messages using \code{string_magic} interpolation and operations to generate the message.

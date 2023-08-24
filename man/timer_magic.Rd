@@ -6,6 +6,10 @@
 \usage{
 timer_magic()
 }
+\value{
+This function does not return anything and is only intended to be used in
+conjunction with future calls of \code{\link[=string_magic]{string_magic()}}.
+}
 \description{
 Sets up a timer which can later be summoned by \code{\link[=string_magic]{string_magic()}} functions via
 the \code{.timer}, \code{.timer_lap} and \code{.timer_total} variables. Useful to report
@@ -16,8 +20,11 @@ This functions sets up a timer with \code{\link[base:Sys.time]{base::Sys.time()}
 and modified with the \code{.timer}, \code{.timer_lap} and \code{.timer_total} variables within
 \code{\link[=cat_magic]{cat_magic()}} or \code{\link[=message_magic]{message_magic()}}.
 
-Note that the timer is precise at +/- 1ms, hence it should be used to time
+Note that the timer is precise at +/- 1ms, hence it should \strong{not} be used to time
 algorithms with very short execution times.
+
+It works by saving the current system time in R options (\code{stringmagic_timer} and \code{stringmagic_timer_origin}).
+Hence, since it uses options, it should not be used in parallel processes.
 }
 \examples{
 
