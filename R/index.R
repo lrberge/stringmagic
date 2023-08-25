@@ -21,11 +21,16 @@
 #' 
 #' See more in the [dedicated vignette](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html).
 #' 
+#' @author 
+#' Laurent Berge
 #' 
-#' @name _index_
-#' @rdname stringmagic
-#' @aliases stringmagic stringmagic-package
-#' @keywords internal
+#' For a few functions (e.g. string_split2df) I use internally an algorithm to turn vectors 
+#' into indexes (i.e. integer vectors of the same length ranging to 1 to the number of groups).
+#' This algorithm was inspired by Sebastian Krantz's [collapse](https://cran.r-project.org/package=collapse)
+#' (if you don't know about it, you should definitely check it out!) who uses an algorithm
+#' from Morgan Jacob's [kit](https://cran.r-project.org/package=kit) package.
 #' 
-NULL
+#' 
+#' 
+"_PACKAGE"
 

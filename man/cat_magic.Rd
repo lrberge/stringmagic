@@ -99,7 +99,10 @@ the opening and the closing delimiters for interpolation.
 
 If of length 1, it must be of the form: 1) the opening delimiter,
 2) a single space, 3) the closing delimiter. Ex: \code{".[ ]"} is equivalent to \code{c(".[", "]")}.
-The default value is equivalent to \code{"{ }"}.}
+The default value is equivalent to \code{"{ }"}.
+
+[ ]: R:\%20
+[", "]: R:\%22,\%20\%22}
 
 \item{.last}{Character scalar, a function, or \code{NULL} (default). If provided and character:
 it must be an \code{string_magic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
