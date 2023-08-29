@@ -46,3 +46,4 @@ This algorithm was inspired by Sebastian Krantz's \href{https://cran.r-project.o
 (if you don't know about it, you should definitely check it out!) who uses an algorithm
 from Morgan Jacob's \href{https://cran.r-project.org/package=kit}{kit} package.
 }
+\keyword{internal}

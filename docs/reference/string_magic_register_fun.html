@@ -130,6 +130,14 @@ be of the form <code>"op1, 'arg'op2, etc"</code>. For example <code>"'80|-'fill"
 with dashes up to 80 characters.</p></dd>
 
 </dl></div>
+    <div id="value">
+    <h2>Value</h2>
+    
+
+<p>These function do not return anything. They register new operations to be used in the
+<code>string_magic</code> family of functions by placing them in the options (later fetched by
+<code><a href="string_magic.html">string_magic()</a></code> at run-time).</p>
+    </div>
     <div id="details">
     <h2>Details</h2>
     <p>We try to strongly check the new operations since it's always better to find out problems

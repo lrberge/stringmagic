@@ -30,7 +30,7 @@
 #' (if you don't know about it, you should definitely check it out!) who uses an algorithm
 #' from Morgan Jacob's [kit](https://cran.r-project.org/package=kit) package.
 #' 
-#' 
+#' @keywords internal
 #' 
 "_PACKAGE"
 

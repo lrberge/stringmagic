@@ -18,6 +18,7 @@ articles:
     - ref_regex_logic
     
 reference:
+  - 
   - title: String interpolation and operations
     desc: Tools for string interpolation
     contents:
@@ -30,7 +31,6 @@ reference:
       - matches("^string_[^m]")
       - parse_regex_pattern
       - paste_conditional
-      - _index_
   - title: Functions builders
     desc: Alias generators to create tailor made functions
     contents:

@@ -92,13 +92,22 @@ timings within functions with the function <code><a href="cat_magic.html">cat_ma
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">timer_magic</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
     </div>
 
+    <div id="value">
+    <h2>Value</h2>
+    
+
+<p>This function does not return anything and is only intended to be used in
+conjunction with future calls of <code><a href="string_magic.html">string_magic()</a></code>.</p>
+    </div>
     <div id="details">
     <h2>Details</h2>
     <p>This functions sets up a timer with <code><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">base::Sys.time()</a></code>. This timer can then be tracked
 and modified with the <code>.timer</code>, <code>.timer_lap</code> and <code>.timer_total</code> variables within
 <code><a href="cat_magic.html">cat_magic()</a></code> or <code><a href="cat_magic.html">message_magic()</a></code>.</p>
-<p>Note that the timer is precise at +/- 1ms, hence it should be used to time
+<p>Note that the timer is precise at +/- 1ms, hence it should <strong>not</strong> be used to time
 algorithms with very short execution times.</p>
+<p>It works by saving the current system time in R options (<code>stringmagic_timer</code> and <code>stringmagic_timer_origin</code>).
+Hence, since it uses options, it should not be used in parallel processes.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -136,7 +145,7 @@ algorithms with very short execution times.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">rnorm_crossprod</span><span class="op">(</span><span class="fl">1e5</span>, <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 199016.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 200538.1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
