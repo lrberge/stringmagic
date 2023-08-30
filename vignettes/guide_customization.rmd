@@ -72,7 +72,7 @@ Now that we see that our builder works with `string_magic`, we create a dedicate
 fml_builder = string_magic_alias(.default = "' + 'collapse", .post = as.formula)
 ```
 
-The function `fml_builder` works as string_magic buut with different default values. 
+The function `fml_builder` works as `string_magic` but with different default values. 
 Now we can apply it directly.
 
 ```{r}
@@ -95,7 +95,7 @@ regular expression `pat1` and `pat2` into the `replacement`. The syntax is: i) a
 list of regular expressions, 2) a pipe (`" => "`), 3) the replacement. 
 If you are not happy with the fact that regexes are separated with commas, or of the look of the pipe, no problem!
 
-Let's change the default values, let's: i) use a semi-colon separation, ii) use ">>" instead of the regular pipe.
+Let's change the default values, let's: i) use a semi-colon separation, ii) use `">>"` instead of the regular pipe.
 ```{r}
 my_clean = string_clean_alias(split = "; ", pipe = " >> ")
 
@@ -131,13 +131,15 @@ num_mat("1, 2, 3
 
 You can add any arbitraty operation to `string_magic`. There are two main ways:
 
-- registering a custom sequence of regular string_magic operations (`string_magic_register_ops`) 
+- registering a custom sequence of regular `string_magic` operations (`string_magic_register_ops`) 
 - registering a custom function (`string_magic_register_fun`)
 
 ### New operations as a sequence of existing operations {#sec_reg_ops}
 
 Create new sequence of operations with `string_magic_register_ops`. It takes two arguments:
-1) the sequence of `string_magic` operations, and 2) the name of the new operation.
+
+1. the sequence of `string_magic` operations, 
+2. the name of the new operation.
 
 For example, let's create a new operation `h1` which formats a string into a header. 
 It adds an hypen before the text and adds hyphens after the text up to the 40th column.
@@ -152,11 +154,14 @@ string_magic("h1 ! That's my header", .nest = TRUE)
 
 ### New operations using a custom function
 
-To implement new operations using functions, you have two steps: 1) create the custom function,
-2) register the function an provide an alias to the operation.
+To implement new operations using functions, you have two steps: 
+1. create the custom function,
+2. register the function an provide an alias to the operation.
 
 First you need to create a function that will be applied to a character vector. 
+
 That function **must** have at least the arguments `x` and `...`. 
+
 Additionnaly, it can have the optional arguments: `argument`, `options`, `group`, `group_flag`.
 This function must return a vector. Optionnally, and only if relevant (see the last example),
 you can add an attribute `"group"` to the returned object which will be used in grouped operations.
@@ -177,7 +182,7 @@ string_magic_register_fun(fun_emph, "emph")
 
 # C) use it
 x = string_vec("right, now")
-string_magic("Take heed, {emph, collapse? x}.")
+string_magic("Take heed, {emph, collapse ? x}.")
 ```
 
 More generally, the function taken by `string_magic_register_fun` is called internally 
@@ -255,13 +260,17 @@ string_magic("Vars in each expr:\n",
 
 # Using `stringmagic` with custom operations as a dependency {#sec_package}
 
-This is section is only relevant if: 1) you use `stringmagic` as a dependency in your package,
-and 2) you use custom `stringmagic` operations. If you answer "no" to any of these 
+This is section is only relevant if: 
+
+1. you use `stringmagic` as a dependency in your package, and 
+2. you use custom `stringmagic` operations. 
+
+If you answer "no" to any of these 
 two points, do not read this section, it's only about details. *Otherwise it's a must read.*
 
 To use custom `stringmagic` operations within a package, you need to explicitly register
 the operations in a specific namespace, and, when using the `stringmagic` functions, 
-you need to add the argument .namespace telling where the new operations are located.
+you need to add the argument `.namespace` telling where the new operations are located.
 
 ## Why do I need a namespace?
 
