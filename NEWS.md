@@ -1,4 +1,12 @@
 
+# stringmagix 1.1.0
+
+## Improvements
+
+- `string_ops` now uses `...` to pass operations. This is backward compatible.
+
+- 
+
 # stringmagic 1.0.0
 
 First public release. The syntax should be stable.  

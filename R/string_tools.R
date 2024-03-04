@@ -13,9 +13,13 @@
 #'
 #' @param x A character vector. If not a character vector but atomistic (i.e. not a list), 
 #' it will be converted to a character vector.
-#' @param op Character **scalar**. Character scalar containing the comma separated values 
+#' @param ... Character **scalars**. Character scalar containing the comma separated values 
 #' of operations to perform to the vector. The 50+ operations are detailed in the help
 #' page of [string_magic()].
+#' @param op Character **vector** or `NULL` (default). Character scalar containing the comma separated values 
+#' of operations to perform to the vector. The 50+ operations are detailed in the help
+#' page of [string_magic()]. Note that if this argument is provided, then the values in 
+#' `...` are ignored.
 #' @param pre_unik Logical scalar, default is `NULL`. Whether to first unique the vector 
 #' before applying the possibly costly string operations, and merging back the result. 
 #' For very large vectors with repeated values the time gained can be substantial. By 
@@ -66,8 +70,12 @@
 #' # dsort: sorts in decreasing order
 #' # 3 first: keeps only the first three elements
 #' 
+#' # You can use several character vectors as operations:
+#' string_ops(cars, 
+#'            "'\\d+'x, rm, unik",
+#'            "num, dsort, 3 first")
 #' 
-string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.frame()){
+string_ops = function(x, ..., op = NULL, pre_unik = NULL, namespace = NULL, envir = parent.frame()){
 
   if(missing(x)){
     stop("Argument `x` must be provided. PROBLEM: it is currently missing.")
@@ -86,19 +94,29 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
   }
   
   set_pblm_hook()
-
-  check_character(op, mbt = TRUE, scalar = TRUE)
+  
+  check_character(op, null = TRUE, no_na = TRUE)
+  if(!is.null(op)){
+    all_ops = op
+  } else {
+    all_ops = check_set_dots(..., mbt = TRUE, scalar = TRUE, character = TRUE)
+    all_ops = unlist(all_ops)
+  }
+  
   check_logical(pre_unik, null = TRUE, scalar = TRUE)
 
   # For very large vectors, we unique
   n = length(x)
-  if(is.null(pre_unik)) pre_unik = n > 1e6
+  if(is.null(pre_unik)){
+    pre_unik = n > 1e6
+  }
 
   if(pre_unik){
     x_int = to_integer(x)
     x_small = x[!duplicated(x_int)]
 
-    res_small = string_ops(x_small, op, pre_unik = FALSE)
+    res_small = string_ops(x_small, op = all_ops, pre_unik = FALSE, 
+                           namespace = namespace, envir = envir)
     res = res_small[x_int]
   } else {
     
@@ -116,11 +134,15 @@ string_ops = function(x, op, pre_unik = NULL, namespace = NULL, envir = parent.f
       .valid_operators = getOption("string_magic_operations_default")
     }
     
-    group_flag = 1 * grepl("~", op, fixed = TRUE)
-    res = apply_simple_operations(x, "string_ops", op, .check = TRUE, .envir = envir,
+    res = x
+    for(op in all_ops){
+      group_flag = 1 * grepl("~", op, fixed = TRUE)
+      res = apply_simple_operations(res, "string_ops", op, .check = TRUE, .envir = envir,
                                     .data = list(), group_flag = group_flag, 
                                     .delim = c("{", "}"), .user_funs = .user_funs, 
-                                    .valid_operators = .valid_operators)
+                                    .valid_operators = .valid_operators)  
+    }
+    
   }
 
   if("group_index" %in% names(attributes(res))){

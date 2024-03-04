@@ -6,6 +6,23 @@
 
 chunk("tools")
 
+
+####
+#### string_ops ####
+####
+
+cars = row.names(mtcars)
+val = string_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
+test(val, c(914, 710, 450))
+
+val = string_ops(cars, "'\\d+'x, rm", "unik, num", "dsort, 3 first")
+test(val, c(914, 710, 450))
+
+all_months = month.name[airquality$Month]
+val = string_ops(all_months, "lower", "5 firstchar", pre_unik = TRUE)
+val_bis = tolower(substr(all_months, 1, 5))
+test(val, val_bis)
+
 ####
 #### string_is ####
 ####
@@ -117,6 +134,7 @@ test(val, c("Hornet", "Honda", "Mazda", "Merc", "Maserati"))
 ####
 #### string_clean ####
 ####
+
 
 x = c("hello world  ", "it's 5 am....")
 
