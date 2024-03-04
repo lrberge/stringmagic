@@ -320,3 +320,21 @@ cars = paste_conditional(carname ~ gear + carb, base_cars, sep = ", ")
 test(cars, c("Hornet 4 Drive, Valiant", "Hornet Sportabout", "Datsun 710", "Mazda RX4, Mazda RX4 Wag"))
 
 test(names(cars), c("gear: 3, carb: 1", "gear: 3, carb: 2", "gear: 4, carb: 1", "gear: 4, carb: 4"))
+
+
+####
+#### string_extract ####
+####
+
+cars = row.names(mtcars)
+val = string_extract(cars, "s/^\\w+")
+val_bis = gsub(" .+", "", cars)
+test(val, val_bis)
+
+val = unlist(string_extract(cars, "^\\w+"))
+test(val, val_bis)
+
+val = string_extract(cars, "^\\w+", unlist = TRUE)
+test(val, val_bis)
+
+

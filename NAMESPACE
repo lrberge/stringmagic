@@ -1,9 +1,15 @@
 useDynLib(stringmagic, .registration = TRUE)
 
+#
 # string_*
+#
+
 export(string_ops, string_is, string_any, string_all, string_which, string_get, 
        string_clean, string_split2df, string_split2dt, string_fill, string_vec, 
-       string_replace)
+       string_replace, string_extract)
+
+# ... aliases; the rule is underscore before vowels
+export(st_ops, st_is, st_any, st_all, st_extract, stwich, stget, stclean, stvec, streplace)
        
 export(string_ops_alias, string_vec_alias, string_clean_alias)
 
@@ -11,7 +17,10 @@ export(paste_conditional)
 
 export(parse_regex_pattern)
 
+#
 # string_magic
+#
+
 export(string_magic, .string_magic)
 export(string_magic_register_fun, string_magic_register_ops)
 export(string_magic_alias)
@@ -20,6 +29,9 @@ export(cat_magic, cat_magic_alias)
 export(message_magic, message_magic_alias)
 
 export(timer_magic)
+
+# ... aliases
+export(sma, catma, mema)
 
 #
 # imports

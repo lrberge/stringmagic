@@ -1027,6 +1027,7 @@ check_set_eval_fun = function(fun__, x__, ...){
 #### utilities ####
 ####
 
+
 suggest_item = function(x, items, write_msg = TRUE, newline = TRUE, info = "variable"){
   # typical use: x is not in items
   #              we want to suggest possible values

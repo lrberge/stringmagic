@@ -304,7 +304,7 @@ string_ops = function(x, ..., op = NULL, pre_unik = NULL, namespace = NULL, envi
 #'
 #'
 string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE, 
-                  or = FALSE, pattern = NULL, envir = parent.frame(), last = NULL){
+                     or = FALSE, pattern = NULL, envir = parent.frame(), last = NULL){
 
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
   if(length(x) == 0){
@@ -1895,9 +1895,80 @@ string_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = F
 
 
 
+
+
+#' string_extract
+#' 
+#' 
+#' @param x 
+#' @param pattern 
+#' @param single FALSE 
+#' @param simplify TRUE 
+#' @param fixed FALSE 
+#' @param ignore.case FALSE 
+#' @param word FALSE 
+#' @param unlist FALSE 
+#' @param envir parent.frame() 
+#' 
+#' @return 
+#' 
+#' 
+#' 
+string_extract = function(x, pattern, single = FALSE, simplify = TRUE, fixed = FALSE,
+                          ignore.case = FALSE, word = FALSE, unlist = FALSE, 
+                          envir = parent.frame()){
+  
+  x = check_set_character(x, mbt = TRUE, l0 = TRUE)
+  if(length(x) == 0){
+    return(character(0))
+  }
+
+  check_logical(single, scalar = TRUE)
+  check_logical(simplify, scalar = TRUE)
+  check_logical(fixed, scalar = TRUE)
+  check_logical(ignore.case, scalar = TRUE)
+  check_logical(word, scalar = TRUE)
+  check_logical(unlist, scalar = TRUE)
+  
+  pat_parsed = parse_regex_pattern(pattern, c("fixed", "word", "ignore", "magic", "single"),
+                                   envir = envir, parse_logical = FALSE)
+  
+  flags = pat_parsed$flags
+  
+  is_single = single || "single" %in% flags
+  is_fixed = fixed || "fixed" %in% flags
+  is_word = word || "word" %in% flags
+  is_ignore = ignore.case || "ignore" %in% flags
+  is_magic = "magic" %in% flags
+  
+  info = format_simple_regex_flags(pat_parsed$patterns, 
+                                   fixed = is_fixed, word = is_word, 
+                                   ignore = is_ignore, magic = is_magic, envir = .envir)
+  
+  pattern = info$pattern
+  is_fixed = info$fixed
+  
+  if(is_single){
+    x_pat = regexpr(pattern, x, fixed = is_fixed, perl = !is_fixed)
+    
+    res = substr(x, x_pat, x_pat - 1 + attr(x_pat, "match.length"))
+  } else {
+    res = regmatches(x, gregexpr(pattern, x, fixed = is_fixed, perl = !is_fixed))
+    
+    if(unlist || (simplify && length(x) == 1)){
+      res = unlist(res)
+    }
+  }
+  
+  res
+}
+
+
 ####
 #### dedicated utilities ####
 ####
+
+
 
 #' `stringmagic`'s regular expression parser
 #' 
@@ -1947,7 +2018,8 @@ parse_regex_pattern = function(pattern, authorized_flags, parse_flags = TRUE,
   # in: "fw/hey!, bonjour, a[i]"
   # common authorized_flags: c("fixed", "word", "ignore")
 
-  info_pattern = cpp_parse_regex_pattern(pattern, parse_flags = parse_flags, parse_logical = parse_logical)
+  info_pattern = cpp_parse_regex_pattern(pattern, parse_flags = parse_flags, 
+                                         parse_logical = parse_logical)
   
   if(!is.null(info_pattern$error)){
     main_msg = .sma("Problem found in the regex pattern {'50|..'k, Q ? pattern}.",
