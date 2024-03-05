@@ -314,8 +314,10 @@ enum_main = function(x, options){
   }
   
   oxford = opt_equal(options, "oxford")
+  comma = opt_equal(options, "comma")
   
-  enumerate_items(x, quote = quote, or = or, enum = enum, nmax = nmax, oxford = oxford)
+  enumerate_items(x, quote = quote, or = or, enum = enum, nmax = nmax, 
+                  oxford = oxford, comma = comma)
 }
 
 format_difftime = function(x, options = character()){
@@ -471,7 +473,7 @@ fsignif = function (x, s = 2, r = 0, commas = TRUE){
 
 
 enumerate_items = function (x, or = FALSE, quote = NULL,
-                            enum = FALSE, nmax = 7, oxford = FALSE){
+                            enum = FALSE, nmax = 7, oxford = FALSE, comma = FALSE){
   # function that enumerates items
   # in argument type, you can have a mix of the different arguments, all separated with a "."
 
@@ -536,9 +538,16 @@ enumerate_items = function (x, or = FALSE, quote = NULL,
     } else if(identical(or, "nor")){
       and_or = " nor "
     }
-
-    if(is_enum){
-      res = paste0(paste0(enum_all[-n], x[-n], collapse = ", "), enum_comma, and_or, enum_all[n], x[n])
+    
+    if(comma){
+      if(is_enum){
+        x = paste0(enum_all, x)
+      }
+      
+      res = paste0(x, collapse = ", ")
+    } else if(is_enum){
+      res = paste0(paste0(enum_all[-n], x[-n], collapse = ", "), 
+                   enum_comma, and_or, enum_all[n], x[n])
     } else {
       if(oxford){
         and_or = paste0(",", and_or)

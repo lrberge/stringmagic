@@ -444,6 +444,7 @@
 #'   You can add the following options by appending the letter to enum after a dot:
 #'   + q, Q, or bq: to quote the elements
 #'   + or, nor: to finish with an 'or' (or 'nor') instead of an 'and'
+#'   + comma: to finish the enumeration with ", " instead of ", and".
 #'   + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two
 #'   + a number: to tell the number of items to display
 #'   Ex.1: `x = c("Marv", "Nancy"); string_magic("The main characters are {enum ? x}.")` leads to 

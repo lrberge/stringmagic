@@ -1,11 +1,26 @@
 
 # stringmagix 1.1.0
 
+## New functions
+
+- add `string_extract` to extract patterns
+
+- add `string_split` to split character strings
+
 ## Improvements
 
 - `string_ops` now uses `...` to pass operations. This is backward compatible.
 
-- 
+- `string_clean`: now the magic flag also expands the replacements:
+```R
+x = "Hi Mary, how's John doing?"
+from = "John"
+to = "Kate"
+string_clean(x, "m/{from} => {to}")
+#> [1] "Hi Mary, how's Kate doing?"
+```
+
+- `string_magic`: add the `comma` flag to the `enum` operation. In that case, the enumeration ends with ", " instead of ", and ".
 
 # stringmagic 1.0.0
 

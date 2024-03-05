@@ -9,6 +9,7 @@
 #### User-level ####
 ####
 
+
 #' Register custom operations to apply them in string_magic
 #' 
 #' Extends the capabilities of [string_magic()] by adding any custom operation
@@ -510,6 +511,7 @@ timer_magic = function(){
 #### ... string_magic ####
 ####
 
+
 #' @describeIn string_magic String interpolation with operation chaining
 string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
                    .delim = c("{", "}"), .last = NULL, .post = NULL, .nest = FALSE,
@@ -601,6 +603,7 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
 ####
 #### Internal ####
 ####
+
 
 string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .data = list(),
                                .sep = "", .vectorize = FALSE,
