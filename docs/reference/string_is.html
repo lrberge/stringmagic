@@ -132,6 +132,51 @@ specific syntax, supports negation.</p>
 <span>  or <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">st_is</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  or <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  last <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">st_any</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  or <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">st_all</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  or <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">stwhich</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  or <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -216,6 +261,10 @@ just before returning it.</p></dd>
 <ul><li><p><code>string_any()</code>: Detects if at least one element of a vector matches a regex pattern</p></li>
 <li><p><code>string_all()</code>: Detects if all elements of a vector match a regex pattern</p></li>
 <li><p><code>string_which()</code>: Returns the indexes of the values in which a pattern is detected</p></li>
+<li><p><code>st_is()</code>: Alias to <code>string_is</code></p></li>
+<li><p><code>st_any()</code>: Alias to <code>string_any</code></p></li>
+<li><p><code>st_all()</code>: Alias to <code>string_all</code></p></li>
+<li><p><code>stwhich()</code>: Alias to <code>string_which</code></p></li>
 </ul></div>
     <div id="generic-regular-expression-flags">
     <h2>Generic regular expression flags</h2>

@@ -128,7 +128,41 @@
 <span>  .namespace <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">catma</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  .sep <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  .end <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  .width <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .leader <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  .envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  .vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .delim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"{"</span>, <span class="st">"}"</span><span class="op">)</span>,</span>
+<span>  .last <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .collapse <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .trigger <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  .check <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  .help <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .namespace <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">message_magic</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  .sep <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  .end <span class="op">=</span> <span class="st">"\n"</span>,</span>
+<span>  .width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .leader <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  .envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  .vectorize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .delim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"{"</span>, <span class="st">"}"</span><span class="op">)</span>,</span>
+<span>  .last <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .collapse <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .trigger <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  .check <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  .help <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .namespace <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">mema</span><span class="op">(</span></span>
 <span>  <span class="va">...</span>,</span>
 <span>  .sep <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  .end <span class="op">=</span> <span class="st">"\n"</span>,</span>
@@ -286,7 +320,9 @@ To access these operators in their specific namespaces, you must use an alias wi
     
 <ul><li><p><code>cat_magic_alias()</code>: Create an alias of <code>cat_magic</code> with custom defaults</p></li>
 <li><p><code>message_magic_alias()</code>: Create an alias of <code>message_magic</code> with custom defaults</p></li>
+<li><p><code>catma()</code>: Alias to <code>cat_magic</code></p></li>
 <li><p><code>message_magic()</code>: Display messages using interpolated strings</p></li>
+<li><p><code>mema()</code>: Alias to <code>message_magic</code></p></li>
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
@@ -304,7 +340,7 @@ To access these operators in their specific namespaces, you must use an alias wi
 <span class="r-in"><span><span class="va">start</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.05</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">message_magic</span><span class="op">(</span><span class="st">"This example has run in {difftime ? start}."</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This example has run in 81ms.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> This example has run in 67ms.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">cat_magic</span><span class="op">(</span><span class="st">"Let's write a very long message to illustrate how .width work."</span>, </span></span>
 <span class="r-in"><span>          .width <span class="op">=</span> <span class="fl">40</span><span class="op">)</span></span></span>

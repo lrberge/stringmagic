@@ -87,15 +87,32 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">string_ops_alias</span><span class="op">(</span>op <span class="op">=</span> <span class="cn">NULL</span>, pre_unik <span class="op">=</span> <span class="cn">NULL</span>, namespace <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">string_ops</span><span class="op">(</span><span class="va">x</span>, <span class="va">op</span>, pre_unik <span class="op">=</span> <span class="cn">NULL</span>, namespace <span class="op">=</span> <span class="cn">NULL</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">string_ops</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  op <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pre_unik <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  namespace <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">st_ops</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  op <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pre_unik <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  namespace <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>op</dt>
-<dd><p>Character <strong>scalar</strong>. Character scalar containing the comma separated values
+<dd><p>Character <strong>vector</strong> or <code>NULL</code> (default). Character scalar containing the comma separated values
 of operations to perform to the vector. The 50+ operations are detailed in the help
-page of <code><a href="string_magic.html">string_magic()</a></code>.</p></dd>
+page of <code><a href="string_magic.html">string_magic()</a></code>. Note that if this argument is provided, then the values in
+<code>...</code> are ignored.</p></dd>
 
 
 <dt>pre_unik</dt>
@@ -119,6 +136,12 @@ the new <code>string_magic</code> operations defined within your package.</p></d
 it will be converted to a character vector.</p></dd>
 
 
+<dt>...</dt>
+<dd><p>Character <strong>scalars</strong>. Character scalar containing the comma separated values
+of operations to perform to the vector. The 50+ operations are detailed in the help
+page of <code><a href="string_magic.html">string_magic()</a></code>.</p></dd>
+
+
 <dt>envir</dt>
 <dd><p>Environment in which to evaluate the interpolations if the flag <code>"magic"</code> is provided.
 Default is <code><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame()</a></code>.</p></dd>
@@ -140,6 +163,7 @@ is equivalent to <code>string_magic("{op1, op2 ? x}")</code>.</p>
     <h2>Functions</h2>
     
 <ul><li><p><code>string_ops_alias()</code>: <code>string_ops</code> alias with custom defaults</p></li>
+<li><p><code>st_ops()</code>: Alias to <code>string_ops</code></p></li>
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
@@ -188,6 +212,11 @@ is equivalent to <code>string_magic("{op1, op2 ? x}")</code>.</p>
 <span class="r-in"><span><span class="co"># dsort: sorts in decreasing order</span></span></span>
 <span class="r-in"><span><span class="co"># 3 first: keeps only the first three elements</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># You can use several character vectors as operations:</span></span></span>
+<span class="r-in"><span><span class="fu">string_ops</span><span class="op">(</span><span class="va">cars</span>, </span></span>
+<span class="r-in"><span>           <span class="st">"'\\d+'x, rm, unik"</span>,</span></span>
+<span class="r-in"><span>           <span class="st">"num, dsort, 3 first"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 914 710 450</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

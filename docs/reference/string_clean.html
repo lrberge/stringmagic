@@ -127,6 +127,34 @@ You can also apply all sorts of cleaning operations by summoning <code><a href="
 <span>  total <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  single <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">stclean</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  replacement <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  pipe <span class="op">=</span> <span class="st">" =&gt; "</span>,</span>
+<span>  split <span class="op">=</span> <span class="st">",[ \n\t]+"</span>,</span>
+<span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  total <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  single <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  namespace <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">streplace</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">pattern</span>,</span>
+<span>  replacement <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  pipe <span class="op">=</span> <span class="st">" =&gt; "</span>,</span>
+<span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  total <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  single <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -244,6 +272,8 @@ of the final vector may depend on those (if they are used).</p>
     
 <ul><li><p><code>string_clean_alias()</code>: Create a <code>string_clean</code> alias with custom defaults</p></li>
 <li><p><code>string_replace()</code>: Simplified version of <code>string_clean</code></p></li>
+<li><p><code>stclean()</code>: Alias to <code>string_clean</code></p></li>
+<li><p><code>streplace()</code>: Alias to <code>string_replace</code></p></li>
 </ul></div>
     <div id="regular-expression-flags-specific-to-replacement">
     <h2>Regular expression flags specific to replacement</h2>

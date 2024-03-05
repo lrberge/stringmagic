@@ -29,6 +29,7 @@ reference:
     desc: Pattern detection, operations chaining, string cleaning and more
     contents:
       - matches("^string_[^m]")
+      - matches("^st[^r]|streplace")
       - parse_regex_pattern
       - paste_conditional
   - title: Functions builders
