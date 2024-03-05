@@ -1319,10 +1319,10 @@ paste_conditional = function(x, id, sep = " ", names = TRUE, sort = TRUE){
 #' cbind(cars, new)
 #'
 #'
-string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\t]+", 
-                     ignore.case = FALSE, fixed = FALSE, word = FALSE, 
-                     total = FALSE, single = FALSE, envir = parent.frame(), 
-                     namespace = NULL){
+string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\t]+",
+                        ignore.case = FALSE, fixed = FALSE, word = FALSE, 
+                        total = FALSE, single = FALSE, envir = parent.frame(), 
+                        namespace = NULL){
 
   x = check_set_character(x, l0 = TRUE)
   if(length(x) == 0){
@@ -1366,9 +1366,11 @@ string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\
       res = string_ops(res, di, namespace = namespace)
       next
     }
-
+    
+    pattern_pipe = FALSE
     if(is_pipe && grepl(pipe, di)){
-      # application du pipe
+      # we apply the pipe to 
+      pattern_pipe = TRUE
       di_split = strsplit(di, pipe)[[1]]
       replacement = di_split[2]
       di = di_split[1]
@@ -1379,7 +1381,7 @@ string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\
     # we parse the special flags
     is_total = total
     di_parsed = parse_regex_pattern(di, c("ignore", "fixed", "word", "total", "single", "magic"), 
-                                     parse_logical = FALSE, envir = envir)
+                                    parse_logical = FALSE, envir = envir)
     flags = di_parsed$flags
     patterns = di_parsed$patterns
 
@@ -1388,6 +1390,25 @@ string_clean = function(x, ..., replacement = "", pipe = " => ", split = ",[ \n\
     is_ignore = ignore.case || "ignore" %in% flags
     is_word = word || "word" %in% flags
     is_single = single || "single" %in% flags
+    
+    if(pattern_pipe && "magic" %in% flags){
+      # we interpolate the replacement
+      replacement_new = try(string_magic(replacement, .envir = envir), silent = TRUE)
+      if(isError(replacement_new)){
+        stop_hook("CONTEXT: concerns the pattern {bq?replacement}",
+                  "\nINFO: The `magic` flag expands the pattern with `string_magic`.",
+                  "\nPROBLEM: the evaluation with `string_magic` failed, see error below:",
+                  "\n{'^[^\n]+\n'r?replacement_new}")
+      }
+      
+      if(length(replacement_new) != 1){
+        stop_hook("CONTEXT: concerns the pattern {bq?replacement}",
+                  "\nINFO: The `magic` flag expands the pattern with `string_magic`. It must return a vector of length 1.",
+                  "\nPROBLEM: the vector returned is of length {len?replacement_new}.")
+      }
+      
+      replacement = replacement_new
+    }
 
     if(is_split){
       all_patterns = strsplit(patterns, split = split)[[1]]
@@ -1529,7 +1550,8 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
   set_pblm_hook()
   
   string_clean(x, pattern, replacement = replacement, pipe = pipe, ignore.case = ignore.case,
-            fixed = fixed, word = word, total = total, single = single, envir = envir, split = "")
+               fixed = fixed, word = word, total = total, single = single, 
+               envir = envir, split = "")
   
 }
 

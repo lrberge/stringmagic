@@ -177,6 +177,10 @@ vowels_split = strsplit(vowels, "")[[1]]
 val = string_clean("bonjour les gens", "m/{'|'c?vowels_split} => _")
 test(val, "b_nj__r l_s g_ns")
 
+vowels = "aeiou"
+replace = "."
+val = string_clean(x, "m/[{vowels}] => {replace}")
+
 ####
 #### string_split2df ####
 ####
