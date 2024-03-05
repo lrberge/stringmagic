@@ -5,6 +5,10 @@
 \alias{string_any}
 \alias{string_all}
 \alias{string_which}
+\alias{st_is}
+\alias{st_any}
+\alias{st_all}
+\alias{stwhich}
 \title{Detects whether a pattern is in a character string}
 \usage{
 string_is(
@@ -42,6 +46,51 @@ string_all(
 )
 
 string_which(
+  x,
+  ...,
+  fixed = FALSE,
+  ignore.case = FALSE,
+  word = FALSE,
+  or = FALSE,
+  pattern = NULL,
+  envir = parent.frame()
+)
+
+st_is(
+  x,
+  ...,
+  fixed = FALSE,
+  ignore.case = FALSE,
+  word = FALSE,
+  or = FALSE,
+  pattern = NULL,
+  envir = parent.frame(),
+  last = NULL
+)
+
+st_any(
+  x,
+  ...,
+  fixed = FALSE,
+  ignore.case = FALSE,
+  word = FALSE,
+  or = FALSE,
+  pattern = NULL,
+  envir = parent.frame()
+)
+
+st_all(
+  x,
+  ...,
+  fixed = FALSE,
+  ignore.case = FALSE,
+  word = FALSE,
+  or = FALSE,
+  pattern = NULL,
+  envir = parent.frame()
+)
+
+stwhich(
   x,
   ...,
   fixed = FALSE,
@@ -115,6 +164,14 @@ The internal function used to find the patterns is \code{\link[base:grep]{base::
 \item \code{string_all()}: Detects if all elements of a vector match a regex pattern
 
 \item \code{string_which()}: Returns the indexes of the values in which a pattern is detected
+
+\item \code{st_is()}: Alias to \code{string_is}
+
+\item \code{st_any()}: Alias to \code{string_any}
+
+\item \code{st_all()}: Alias to \code{string_all}
+
+\item \code{stwhich()}: Alias to \code{string_which}
 
 }}
 \section{Generic regular expression flags}{

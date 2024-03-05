@@ -2,9 +2,21 @@
 % Please edit documentation in R/string_tools.R
 \name{string_split}
 \alias{string_split}
+\alias{stsplit}
 \title{Splits a character string wrt a pattern}
 \usage{
 string_split(
+  x,
+  split,
+  simplify = TRUE,
+  fixed = FALSE,
+  ignore.case = FALSE,
+  word = FALSE,
+  unlist = FALSE,
+  envir = parent.frame()
+)
+
+stsplit(
   x,
   split,
   simplify = TRUE,
@@ -53,6 +65,11 @@ If \code{simplify = FALSE}, the object returned is always a list.
 \description{
 Splits a character string with respect to pattern
 }
+\section{Functions}{
+\itemize{
+\item \code{stsplit()}: Alias to \code{string_split}
+
+}}
 \section{Generic regular expression flags}{
 
 

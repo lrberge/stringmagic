@@ -153,6 +153,9 @@ string_ops = function(x, ..., op = NULL, pre_unik = NULL, namespace = NULL, envi
 }
 
 
+
+
+
 #' Detects whether a pattern is in a character string
 #'
 #' Function that detects if one or more patterns are in a string. The patterns can be 
@@ -2391,22 +2394,43 @@ to_integer_single = function(x){
 }
 
 
+####
+#### Aliases ####
+####
 
 
+#' @describeIn string_ops Alias to `string_ops`
+st_ops = string_ops
 
+#' @describeIn string_is Alias to `string_is`
+st_is = string_is
 
+#' @describeIn string_is Alias to `string_any`
+st_any = string_any
 
+#' @describeIn string_is Alias to `string_all`
+st_all = string_all
 
+#' @describeIn string_is Alias to `string_which`
+stwhich = string_which
 
+#' @describeIn string_get Alias to `string_get`
+stget = string_get
 
+#' @describeIn string_split Alias to `string_split`
+stsplit = string_split
 
+#' @describeIn string_clean Alias to `string_clean`
+stclean = string_clean
 
+#' @describeIn string_clean Alias to `string_replace`
+streplace = string_replace
 
+#' @describeIn string_vec Alias to `string_vec`
+stvec = string_vec
 
-
-
-
-
+#' @describeIn string_extract Alias to `string_extract`
+stextract = string_extract
 
 
 

@@ -4,6 +4,8 @@
 \alias{string_clean_alias}
 \alias{string_clean}
 \alias{string_replace}
+\alias{stclean}
+\alias{streplace}
 \title{Cleans a character vector from multiple patterns}
 \usage{
 string_clean_alias(
@@ -34,6 +36,34 @@ string_clean(
 )
 
 string_replace(
+  x,
+  pattern,
+  replacement = "",
+  pipe = " => ",
+  ignore.case = FALSE,
+  fixed = FALSE,
+  word = FALSE,
+  total = FALSE,
+  single = FALSE,
+  envir = parent.frame()
+)
+
+stclean(
+  x,
+  ...,
+  replacement = "",
+  pipe = " => ",
+  split = ",[ \\n\\t]+",
+  ignore.case = FALSE,
+  fixed = FALSE,
+  word = FALSE,
+  total = FALSE,
+  single = FALSE,
+  envir = parent.frame(),
+  namespace = NULL
+)
+
+streplace(
   x,
   pattern,
   replacement = "",
@@ -143,6 +173,10 @@ You can also apply all sorts of cleaning operations by summoning \code{\link[=st
 \item \code{string_clean_alias()}: Create a \code{string_clean} alias with custom defaults
 
 \item \code{string_replace()}: Simplified version of \code{string_clean}
+
+\item \code{stclean()}: Alias to \code{string_clean}
+
+\item \code{streplace()}: Alias to \code{string_replace}
 
 }}
 \section{Regular expression flags specific to replacement}{

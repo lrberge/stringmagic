@@ -22,6 +22,10 @@ string_clean(x, "m/{from} => {to}")
 
 - `string_magic`: add the `comma` flag to the `enum` operation. In that case, the enumeration ends with ", " instead of ", and ".
 
+## Aliases
+
+- new battery of short aliases: `sma` for `string_magic`, `catma` for catmagic, `mema` for `message_magic`, etc.. (`st_ops`, `st_is`, `st_any`, `st_all`, `stextract`, `stwhich`, `stget`, `stclean`, `stvec`, `streplace`, `stsplit` -- short names with vowels after `st` have an underscore.)
+
 # stringmagic 1.0.0
 
 First public release. The syntax should be stable.  

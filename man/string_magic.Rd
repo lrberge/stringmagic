@@ -3,6 +3,7 @@
 \name{string_magic}
 \alias{string_magic}
 \alias{.string_magic}
+\alias{sma}
 \title{String interpolation with operation chaining}
 \usage{
 string_magic(
@@ -34,6 +35,25 @@ string_magic(
   .last = NULL,
   .nest = FALSE,
   .trigger = TRUE,
+  .namespace = NULL
+)
+
+sma(
+  ...,
+  .envir = parent.frame(),
+  .sep = "",
+  .vectorize = FALSE,
+  .delim = c("{", "}"),
+  .last = NULL,
+  .post = NULL,
+  .nest = FALSE,
+  .collapse = NULL,
+  .invisible = FALSE,
+  .default = NULL,
+  .trigger = TRUE,
+  .check = TRUE,
+  .class = NULL,
+  .help = NULL,
   .namespace = NULL
 )
 }
@@ -163,6 +183,8 @@ you can pass keywords or regular expressions and fecth select pieces from the ma
 \item \code{string_magic()}: String interpolation with operation chaining
 
 \item \code{.string_magic()}: A simpler version of \code{string_magic} without any error handling to save a few micro seconds
+
+\item \code{sma()}: Alias to \code{string_magic}
 
 }}
 \section{Interpolation and string operations}{
@@ -518,6 +540,7 @@ You can add the following options by appending the letter to enum after a dot:
 \itemize{
 \item q, Q, or bq: to quote the elements
 \item or, nor: to finish with an 'or' (or 'nor') instead of an 'and'
+\item comma: to finish the enumeration with ", " instead of ", and".
 \item i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two
 \item a number: to tell the number of items to display
 Ex.1: \verb{x = c("Marv", "Nancy"); string_magic("The main characters are \{enum ? x\}.")} leads to

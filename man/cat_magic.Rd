@@ -4,7 +4,9 @@
 \alias{cat_magic_alias}
 \alias{message_magic_alias}
 \alias{cat_magic}
+\alias{catma}
 \alias{message_magic}
+\alias{mema}
 \title{Display messages using interpolated strings}
 \usage{
 cat_magic_alias(
@@ -50,7 +52,41 @@ cat_magic(
   .namespace = NULL
 )
 
+catma(
+  ...,
+  .sep = "",
+  .end = "",
+  .width = FALSE,
+  .leader = "",
+  .envir = parent.frame(),
+  .vectorize = FALSE,
+  .delim = c("{", "}"),
+  .last = NULL,
+  .collapse = NULL,
+  .trigger = TRUE,
+  .check = TRUE,
+  .help = NULL,
+  .namespace = NULL
+)
+
 message_magic(
+  ...,
+  .sep = "",
+  .end = "\\n",
+  .width = NULL,
+  .leader = "",
+  .envir = parent.frame(),
+  .vectorize = FALSE,
+  .delim = c("{", "}"),
+  .last = NULL,
+  .collapse = NULL,
+  .trigger = TRUE,
+  .check = TRUE,
+  .help = NULL,
+  .namespace = NULL
+)
+
+mema(
   ...,
   .sep = "",
   .end = "\\n",
@@ -188,7 +224,11 @@ To access these operators in their specific namespaces, you must use an alias wi
 
 \item \code{message_magic_alias()}: Create an alias of \code{message_magic} with custom defaults
 
+\item \code{catma()}: Alias to \code{cat_magic}
+
 \item \code{message_magic()}: Display messages using interpolated strings
+
+\item \code{mema()}: Alias to \code{message_magic}
 
 }}
 \examples{

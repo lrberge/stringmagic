@@ -3,11 +3,21 @@
 \name{string_ops_alias}
 \alias{string_ops_alias}
 \alias{string_ops}
+\alias{st_ops}
 \title{Chains basic operations to character vectors}
 \usage{
 string_ops_alias(op = NULL, pre_unik = NULL, namespace = NULL)
 
 string_ops(
+  x,
+  ...,
+  op = NULL,
+  pre_unik = NULL,
+  namespace = NULL,
+  envir = parent.frame()
+)
+
+st_ops(
   x,
   ...,
   op = NULL,
@@ -59,6 +69,8 @@ is equivalent to \code{string_magic("{op1, op2 ? x}")}.
 \section{Functions}{
 \itemize{
 \item \code{string_ops_alias()}: \code{string_ops} alias with custom defaults
+
+\item \code{st_ops()}: Alias to \code{string_ops}
 
 }}
 \examples{

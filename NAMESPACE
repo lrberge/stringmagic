@@ -6,10 +6,11 @@ useDynLib(stringmagic, .registration = TRUE)
 
 export(string_ops, string_is, string_any, string_all, string_which, string_get, 
        string_clean, string_split2df, string_split2dt, string_fill, string_vec, 
-       string_replace, string_extract)
+       string_replace, string_extract, string_split)
 
-# ... aliases; the rule is underscore before vowels
-export(st_ops, st_is, st_any, st_all, st_extract, stwich, stget, stclean, stvec, streplace)
+# ... aliases; the rule is underscore before vowels unless long word follows
+export(st_ops, st_is, st_any, st_all, stextract, stwhich, stget, stclean, 
+       stvec, streplace, stsplit)
        
 export(string_ops_alias, string_vec_alias, string_clean_alias)
 

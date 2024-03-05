@@ -3,6 +3,7 @@
 \name{string_vec_alias}
 \alias{string_vec_alias}
 \alias{string_vec}
+\alias{stvec}
 \title{Efficient creation of string vectors with optional interpolation}
 \usage{
 string_vec_alias(
@@ -20,6 +21,22 @@ string_vec_alias(
 )
 
 string_vec(
+  ...,
+  .cmat = FALSE,
+  .nmat = FALSE,
+  .df = FALSE,
+  .df.convert = TRUE,
+  .delim = c("{", "}"),
+  .envir = parent.frame(),
+  .split = TRUE,
+  .protect.vars = TRUE,
+  .sep = NULL,
+  .last = NULL,
+  .collapse = NULL,
+  .namespace = NULL
+)
+
+stvec(
   ...,
   .cmat = FALSE,
   .nmat = FALSE,
@@ -167,6 +184,8 @@ Customize the default of this function with \code{\link[=string_vec_alias]{strin
 \section{Functions}{
 \itemize{
 \item \code{string_vec_alias()}: Create \code{string_vec} aliases with custom defaults
+
+\item \code{stvec()}: Alias to \code{string_vec}
 
 }}
 \examples{

@@ -1,4 +1,4 @@
-# 1692784330
+# 1709676394
 # DO NOT EDIT BY HAND: generated with generate_help_extensive() in help.R
 
 setup_help_extensive = function(){
@@ -75,6 +75,7 @@ txt = c("", "# Interpolation and string operations: Principle ----|",
 "", "# Other operations ----|", "", "+ num: converts to numeric. Options: \"warn\", \"soft\", \"rm\", \"clear\". By default, the conversion is performed silently and elements that failed to convert are turned into NA. Option \"warns\" displays a warning if the conversion to numeric fails. Option \"soft\" does not convert if the conversion of at least one element fails. Option \"rm\" converts and removes the elements that could not be converted. Option \"clear\" turns failed conversions into the empty string, and hence lead to a character vector. Example: `x = c(5, \"six\"); string_magic(\"Compare {num, C, q ? x} with {num.rm, C, q ? x}.\")` leads to \"Compare '5 and NA' with '5'.\", and `string_magic(\"Compare {num.soft, C, q ? x} with {clear, C, q ? x}.\")` leads to \"Compare '5 and six' with '5 and '.\".", 
 "  + enum: enumerates the elements. It creates a single string containing the comma separated list of elements. If there are more than 7 elements, only the first 6 are shown and the number of items left is written. For example `string_magic(\"enum ? 1:5\")` leads to \"1, 2, 3, 4, and 5\". You can add the following options by appending the letter to enum after a dot:", 
 "  + q, Q, or bq: to quote the elements", "  + or, nor: to finish with an 'or' (or 'nor') instead of an 'and'", 
+"  + comma: to finish the enumeration with \", \" instead of \", and\".", 
 "  + i, I, a, A, 1: to enumerate with this prefix, like in: i) one, and ii) two", 
 "  + a number: to tell the number of items to display Ex.1: `x = c(\"Marv\", \"Nancy\"); string_magic(\"The main characters are {enum ? x}.\")` leads to \"The main characters are Marv and Nancy.\". Ex.2: `x = c(\"orange\", \"milk\", \"rice\"); string_magic(\"Shopping list: {enum.i.q ? x}.\")` leads to \"Shopping list: i) 'orange', ii) 'milk', and iii) 'rice'.\"", 
 "  + len: gives the length of the vector. Options \"letter\", \"upper\", \"num\". Option \"letter\" writes the length in words (up to 100). Option \"upper\" is the same as letter but uppercases the first letter. By default, commas are added to separate thousands. Use uption \"num\" to preserve a regular numeric format. Example: `string_magic(\"Size = {len ? 1:5000}\")` leads to \"Size = 5,000\".", 

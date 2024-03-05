@@ -2,9 +2,23 @@
 % Please edit documentation in R/string_tools.R
 \name{string_get}
 \alias{string_get}
+\alias{stget}
 \title{Gets elements of a character vector}
 \usage{
 string_get(
+  x,
+  ...,
+  fixed = FALSE,
+  ignore.case = FALSE,
+  word = FALSE,
+  or = FALSE,
+  seq = FALSE,
+  seq.unik = FALSE,
+  pattern = NULL,
+  envir = parent.frame()
+)
+
+stget(
   x,
   ...,
   fixed = FALSE,
@@ -75,6 +89,11 @@ Convenient way to get elements from a character vector.
 \details{
 This function is a wrapper to \code{\link[=string_is]{string_is()}}.
 }
+\section{Functions}{
+\itemize{
+\item \code{stget()}: Alias to \code{string_get}
+
+}}
 \section{Caching}{
 
 

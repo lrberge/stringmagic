@@ -415,6 +415,9 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
   cat(txt)
 }
 
+#' @describeIn cat_magic Alias to `cat_magic`
+catma = cat_magic
+
 #' @describeIn cat_magic Display messages using interpolated strings
 message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "", 
                          .envir = parent.frame(), 
@@ -451,6 +454,9 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 
   message(txt, appendLF = FALSE)
 }
+
+#' @describeIn cat_magic Alias to `message_magic`
+mema = message_magic
 
 #' Sets up a timer that can be used within _magic functions
 #' 
@@ -599,6 +605,9 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
 
 # This is an internal alias (not exported)
 .sma = .string_magic
+
+#' @describeIn string_magic Alias to `string_magic`
+sma = string_magic
 
 ####
 #### Internal ####

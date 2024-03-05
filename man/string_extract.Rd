@@ -2,9 +2,22 @@
 % Please edit documentation in R/string_tools.R
 \name{string_extract}
 \alias{string_extract}
+\alias{stextract}
 \title{Extracts a pattern from a character vector}
 \usage{
 string_extract(
+  x,
+  pattern,
+  single = FALSE,
+  simplify = TRUE,
+  fixed = FALSE,
+  ignore.case = FALSE,
+  word = FALSE,
+  unlist = FALSE,
+  envir = parent.frame()
+)
+
+stextract(
   x,
   pattern,
   single = FALSE,
@@ -71,6 +84,11 @@ If \code{single = FALSE} (default) and \code{simplify = FALSE}, the object retur
 \description{
 Extracts the first, or several, patterns from a character vector.
 }
+\section{Functions}{
+\itemize{
+\item \code{stextract()}: Alias to \code{string_extract}
+
+}}
 \section{Generic regular expression flags}{
 
 
