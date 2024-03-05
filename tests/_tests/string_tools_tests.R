@@ -337,4 +337,8 @@ test(val, val_bis)
 val = string_extract(cars, "^\\w+", unlist = TRUE)
 test(val, val_bis)
 
+pat = "\\w+"
+val = string_extract(cars, "m/^{pat}", unlist = TRUE)
+test(val, val_bis)
+
 

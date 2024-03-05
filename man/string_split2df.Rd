@@ -42,7 +42,8 @@ contain the variables of the formula.}
 
 \item{split}{A character scalar. Used to split the character vectors. By default
 this is a regular expression. You can use flags in the pattern in the form \verb{flag1, flag2/pattern}.
-Available flags are \code{ignore} (case), \code{fixed} (no regex), word (add word boundaries). Example:
+Available flags are \code{ignore} (case), \code{fixed} (no regex), word (add word boundaries),
+magic (add interpolation with \code{"{}"}). Example:
 if "ignore/hello" and the text contains "Hello", it will be split at "Hello".
 Shortcut: use the first letters of the flags. Ex: "iw/one" will split at the word
 "one" (flags 'ignore' + 'word').}

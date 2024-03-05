@@ -663,7 +663,8 @@ string_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' contain the variables of the formula.
 #' @param split A character scalar. Used to split the character vectors. By default 
 #' this is a regular expression. You can use flags in the pattern in the form `flag1, flag2/pattern`.
-#' Available flags are `ignore` (case), `fixed` (no regex), word (add word boundaries). Example:
+#' Available flags are `ignore` (case), `fixed` (no regex), word (add word boundaries), 
+#' magic (add interpolation with `"{}"`). Example:
 #' if "ignore/hello" and the text contains "Hello", it will be split at "Hello". 
 #' Shortcut: use the first letters of the flags. Ex: "iw/one" will split at the word 
 #' "one" (flags 'ignore' + 'word').
@@ -722,8 +723,8 @@ string_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #'
 #'
 string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE,
-                        id_unik = TRUE, fixed = FALSE, ignore.case = FALSE,
-                        word = FALSE, dt = FALSE, ...){
+                           id_unik = TRUE, fixed = FALSE, ignore.case = FALSE,
+                           word = FALSE, dt = FALSE, ...){
 
   if(missing(x)){
     stop("Argument 'x' must be provied. PROBLEM: it is missing.")
@@ -1897,31 +1898,75 @@ string_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = F
 
 
 
-#' string_extract
+#' Extracts a pattern from a character vector
 #' 
+#' Extracts the first, or several, patterns from a character vector.
 #' 
-#' @param x 
-#' @param pattern 
-#' @param single FALSE 
-#' @param simplify TRUE 
-#' @param fixed FALSE 
-#' @param ignore.case FALSE 
-#' @param word FALSE 
-#' @param unlist FALSE 
-#' @param envir parent.frame() 
+#' @inheritParams string_is
+#' 
+#' @param x A character vector.
+#' @param pattern A character scalar. It represents the pattern
+#' to be extracted from `x`. By default 
+#' this is a regular expression. You can use flags in the pattern in 
+#' the form `flag1, flag2/pattern`.
+#' Available flags are `ignore` (case), `fixed` (no regex), word (add word boundaries), 
+#' single (select only the first element), and magic (add interpolation with `{}`) . Example:
+#' if `"ignore/hello"` and `x = "Hello world` extracted text is `"Hello"`.
+#' Shortcut: use the first letters of the flags. Ex: "iw/one" will extract the word 
+#' "one" (flags 'ignore' + 'word').
+#' @param single Logical scalar, default is `FALSE`. If `TRUE`, only the first pattern
+#' that is detected will be returned. Note that in that case, a character vector is returned
+#' of the same length as the vector in input. 
+#' @param simplify Logical scalar, default is `TRUE`. If `TRUE`, then when the vector input `x`
+#'  is of length 1, a character vector is returned instead of a list.
+#' @param unlist Logical scalar, default is `FALSE`. If `TRUE`, the function `unlist` is applied
+#' to the resulting list, leading to a character vector in output (instead of a list).
+#' 
+#' @inheritSection string_is Generic regular expression flags
 #' 
 #' @return 
+#' The object returned by this functions can be a list or a character vector. 
 #' 
+#' If `single = TRUE`, a character vector is returned, containing the value of the first match.
+#' If no match is found, an empty string is returned.
 #' 
+#' If `single = FALSE` (the default) and `simplify = TRUE` (default), the object returned is:
+#' + a character vector if `x`, the vector in input, is of length 1: the character vector contains
+#' all the matches and is of length 0 if no match is found.
+#' + a list of the same length as `x`. The ith element of the list is a character vector
+#' of the matches for the ith element of `x`.
+#' 
+#' If `single = FALSE` (default) and `simplify = FALSE`, the object returned is always a list.
+#' 
+#' @examples 
+#' 
+#' cars = head(row.names(mtcars))
+#' 
+#' # Let's extract the first word:
+#' string_extract(cars, "\\w+", single = TRUE)
+#' 
+#' # same using flags
+#' string_extract(cars, "s/\\w+")
+#' 
+#' # extract all words composed on only letters
+#' # NOTE: we use the flag word (`w/`)
+#' string_extract(cars, "w/[[:alpha:]]+")
+#' 
+#' # version without flag:
+#' string_extract(cars, "\\b[[:alpha:]]+\\b")
+#' 
+#' # If a vector of length 1 => a vector is returned
+#' greet = "Hi Tom, how's Mary doing?"
+#' string_extract(greet, "w/[[:upper:]]\\w+")
+#' 
+#' # version with simplify = FALSE => a list is returned
+#' string_extract(greet, "w/[[:upper:]]\\w+", simplify = FALSE)
 #' 
 string_extract = function(x, pattern, single = FALSE, simplify = TRUE, fixed = FALSE,
                           ignore.case = FALSE, word = FALSE, unlist = FALSE, 
                           envir = parent.frame()){
   
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
-  if(length(x) == 0){
-    return(character(0))
-  }
 
   check_logical(single, scalar = TRUE)
   check_logical(simplify, scalar = TRUE)
@@ -1947,6 +1992,15 @@ string_extract = function(x, pattern, single = FALSE, simplify = TRUE, fixed = F
   
   pattern = info$pattern
   is_fixed = info$fixed
+  
+  if(length(x) == 0){
+    if(is_single || simplify){
+      return(character(0))
+    } else {
+      # simplify = FALSE and single = FALSE always return a list
+      return(list())
+    }    
+  }
   
   if(is_single){
     x_pat = regexpr(pattern, x, fixed = is_fixed, perl = !is_fixed)
