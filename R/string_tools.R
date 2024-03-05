@@ -647,6 +647,79 @@ string_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 }
 
 
+
+
+#' Splits a character string wrt a pattern
+#' 
+#' Splits a character string with respect to pattern
+#' 
+#' @inheritParams string_split2df
+#' 
+#' @param x A character vector.
+#' @param simplify Logical scalar, default is `TRUE`. If `TRUE`, then when the vector input `x`
+#'  is of length 1, a character vector is returned instead of a list.
+#' 
+#' @inheritSection string_is Generic regular expression flags
+#' 
+#' @return 
+#' If `simplify = TRUE` (default), the object returned is:
+#' + a character vector if `x`, the vector in input, is of length 1: the character vector contains
+#' the result of the split.
+#' + a list of the same length as `x`. The ith element of the list is a character vector
+#' containing the result of the split of the ith element of `x`.
+#' 
+#' If `simplify = FALSE`, the object returned is always a list.
+#' 
+#' @examples 
+#' 
+#' time = "This is the year 2024."
+#' 
+#' # we break the sentence
+#' string_split(time, " ")
+#' 
+#' # simplify = FALSE leads to a list
+#' string_split(time, " ", simplify = FALSE)
+#' 
+#' # let's break at "is"
+#' string_split(time, "is")
+#' 
+#' # now breaking at the word "is"
+#' # NOTE: we use the flag `word` (`w/`)
+#' string_split(time, "w/is")
+#' 
+#' # same but using a pattern from a variable
+#' # NOTE: we use the `magic` flag
+#' pat = "is"
+#' string_split(time, "mw/{pat}")
+#' 
+#' 
+string_split = function(x, split, simplify = TRUE, fixed = FALSE,
+                        ignore.case = FALSE, word = FALSE, unlist = FALSE, 
+                        envir = parent.frame()){
+  
+  x = check_set_character(x, mbt = TRUE, l0 = TRUE)
+
+  check_logical(simplify, scalar = TRUE)
+  check_logical(fixed, scalar = TRUE)
+  check_logical(ignore.case, scalar = TRUE)
+  check_logical(word, scalar = TRUE)
+  
+  pat_parsed = format_simple_regex_flags(split, ignore = ignore.case, 
+                                         fixed = fixed, word = word, 
+                                         magic = TRUE, envir = envir)
+  split = pat_parsed$pattern
+  is_fixed = pat_parsed$fixed
+
+  x_split = strsplit(x, split, fixed = is_fixed, perl = !is_fixed)
+  
+  if(simplify && length(x) == 1){
+    x_split = x_split[[1]]
+  }
+  
+  x_split
+}
+
+
 #' Splits a character vector into a data frame
 #'
 #' Splits a character vector and formats the resulting substrings into a data.frame

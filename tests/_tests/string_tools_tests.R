@@ -342,3 +342,25 @@ val = string_extract(cars, "m/^{pat}", unlist = TRUE)
 test(val, val_bis)
 
 
+####
+#### string_split ####
+####
+
+time = "This is the year 2024."
+
+val = string_split(time, " ")
+test(val, c("This", "is", "the", "year", "2024."))
+
+val = string_split(time, " ", simplify = FALSE)
+test(val, list(c("This", "is", "the", "year", "2024.")))
+
+val = string_split(time, "is")
+test(val, c("Th", " ", " the year 2024."))
+
+val = string_split(time, "w/is")
+test(val, c("This ", " the year 2024."))
+
+pat = "is"
+val = string_split(time, "wm/{pat}")
+test(val, c("This ", " the year 2024."))
+
