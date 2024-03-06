@@ -10,7 +10,7 @@
 ####
 
 
-#' Register custom operations to apply them in string_magic
+#' Register custom operations to apply them in `string_magic`
 #' 
 #' Extends the capabilities of [string_magic()] by adding any custom operation
 #' 
@@ -458,7 +458,7 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 #' @describeIn cat_magic Alias to `message_magic`
 mema = message_magic
 
-#' Sets up a timer that can be used within _magic functions
+#' Sets up a timer that can be used within `_magic` functions
 #' 
 #' Sets up a timer which can later be summoned by [string_magic()] functions via
 #' the `.timer`, `.timer_lap` and `.timer_total` variables. Useful to report 
@@ -614,7 +614,8 @@ sma = string_magic
 ####
 
 
-string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .data = list(),
+string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), 
+                                 .data = list(),
                                  .sep = "", .vectorize = FALSE,
                                  .collapse = NULL, .last = NULL, .nest = FALSE,
                                  .help = NULL, .is_root = FALSE, 

@@ -3,7 +3,7 @@
 \name{string_magic_register_fun}
 \alias{string_magic_register_fun}
 \alias{string_magic_register_ops}
-\title{Register custom operations to apply them in string_magic}
+\title{Register custom operations to apply them in \code{string_magic}}
 \usage{
 string_magic_register_fun(fun, alias, valid_options = NULL, namespace = NULL)
 

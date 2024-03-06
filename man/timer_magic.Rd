@@ -2,7 +2,7 @@
 % Please edit documentation in R/string_magic_main.R
 \name{timer_magic}
 \alias{timer_magic}
-\title{Sets up a timer that can be used within _magic functions}
+\title{Sets up a timer that can be used within \verb{_magic} functions}
 \usage{
 timer_magic()
 }
