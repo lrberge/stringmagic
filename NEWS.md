@@ -31,6 +31,8 @@ string_magic("The values are{& length(data$y) < 5 ; : {enum ? .} ;  too many}.")
 # [1] "The values are too many."
 ```
 
+- improve error messages
+
 ## Aliases
 
 - new battery of short aliases: `sma` for `string_magic`, `catma` for catmagic, `mema` for `message_magic`, etc.. (`st_ops`, `st_is`, `st_any`, `st_all`, `stextract`, `stwhich`, `stget`, `stclean`, `stvec`, `streplace`, `stsplit` -- short names with vowels after `st` have an underscore.)

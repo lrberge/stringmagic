@@ -527,7 +527,7 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
                         .namespace = NULL){
   
   if(!isTRUE(.trigger)) return(invisible(NULL))
-
+  
   if(.check){
     set_pblm_hook()
     

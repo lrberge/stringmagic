@@ -259,8 +259,15 @@ check_envir = function(x){
 
   if(!inherits(x, "environment")){
     x_dp = deparse_short(substitute(x))
-    stop_up("The argument `", x_dp, "` must be an environment (ex: parent.frame()). ",
-            "PROBLEM: it is not an environment, it is of class {enum?class(x)}.")
+    if(is.list(x)){
+      stop_up("The argument `", x_dp, "` must be an environment (ex: parent.frame()). ",
+              "\nPROBLEM: it is not an environment, ",
+              "it is a {&is.data.frame(x) ; data.frame ; list}.",
+              "\nUse the argument `.data` instead.")
+    } else {
+      stop_up("The argument `", x_dp, "` must be an environment (ex: parent.frame()). ",
+              "PROBLEM: it is not an environment, it is of class {enum?class(x)}.")
+    }
   }
 
 }
