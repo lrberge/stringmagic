@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">stringmagic</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
@@ -80,7 +80,42 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.0.0" id="stringmagic-100">stringmagic 1.0.0<a class="anchor" aria-label="anchor" href="#stringmagic-100"></a></h2>
+<h2 class="page-header" data-toc-text="1.1.0" id="stringmagic-110">stringmagic 1.1.0<a class="anchor" aria-label="anchor" href="#stringmagic-110"></a></h2>
+<div class="section level3">
+<h3 id="new-functions-1-1-0">New functions<a class="anchor" aria-label="anchor" href="#new-functions-1-1-0"></a></h3>
+<ul><li><p>add <code>string_extract</code> to extract patterns</p></li>
+<li><p>add <code>string_split</code> to split character strings</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-1-1-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-1-1-0"></a></h3>
+<ul><li><p><code>string_ops</code> now uses <code>...</code> to pass operations. This is backward compatible.</p></li>
+<li><p><code>string_clean</code>: now the magic flag also expands the replacements:</p></li>
+</ul><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="st">"Hi Mary, how's John doing?"</span></span>
+<span><span class="va">from</span> <span class="op">=</span> <span class="st">"John"</span></span>
+<span><span class="va">to</span> <span class="op">=</span> <span class="st">"Kate"</span></span>
+<span><span class="fu"><a href="../reference/string_clean.html">string_clean</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"m/{from} =&gt; {to}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Hi Mary, how's Kate doing?"</span></span></code></pre></div>
+<ul><li><p><code>string_magic</code>: add the <code>comma</code> flag to the <code>enum</code> operation. In that case, the enumeration ends with “,” instead of “, and”.</p></li>
+<li><p><code>string_magic</code>: the if-else operation <code>&amp;</code> now keeps memory of variables accessed within data sets:</p></li>
+</ul><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">15</span>, <span class="fl">25</span>, <span class="fl">550</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The values are{&amp; length(data$x) &lt; 5 ; : {enum ? .} ;  too many}."</span><span class="op">)</span></span>
+<span><span class="co"># [1] "The values are: 15, 25 and 550."</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The values are{&amp; length(data$y) &lt; 5 ; : {enum ? .} ;  too many}."</span><span class="op">)</span></span>
+<span><span class="co"># [1] "The values are too many."</span></span></code></pre></div>
+<ul><li><p><code>string_magic</code>: new operation <code>deparse</code> (alias: <code>dp</code>) to deparse an object and keep only the first characters of the deparsed string.</p></li>
+<li><p>improve error messages.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="aliases-1-1-0">Aliases<a class="anchor" aria-label="anchor" href="#aliases-1-1-0"></a></h3>
+<ul><li>new battery of short aliases: <code>sma</code> for <code>string_magic</code>, <code>catma</code> for catmagic, <code>mema</code> for <code>message_magic</code>, etc.. (<code>st_ops</code>, <code>st_is</code>, <code>st_any</code>, <code>st_all</code>, <code>stextract</code>, <code>stwhich</code>, <code>stget</code>, <code>stclean</code>, <code>stvec</code>, <code>streplace</code>, <code>stsplit</code> – short names with vowels after <code>st</code> have an underscore.)</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="1.0.0" id="stringmagic-100">stringmagic 1.0.0<small>2023-08-28</small><a class="anchor" aria-label="anchor" href="#stringmagic-100"></a></h2>
 <p>First public release. The syntax should be stable.</p>
 <p>This package is a spinoff from <a href="https://lrberge.github.io/fixest/reference/xpd.html" class="external-link">fixest’s formula syntax interpolation</a>.</p>
 <p>Many thanks to Achim Zeileis, Vincent Arel-Bundock and Kyle Butts who provided insightful comments during the development.</p>

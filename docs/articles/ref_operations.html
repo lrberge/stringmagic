@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">stringmagic</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@ reference</h1>
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2024-03-05</h4>
+            <h4 data-toc-skip class="date">2024-03-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/ref_operations.rmd" class="external-link"><code>vignettes/ref_operations.rmd</code></a></small>
       <div class="hidden name"><code>ref_operations.rmd</code></div>
@@ -568,6 +568,22 @@ on the two sides of the vector.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{'3'insert.right, ' + 'collapse ? 1:2}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "1 + 2 + 3"</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="deparse-an-object-dp-deparse">Deparse an object: dp, deparse<a class="anchor" aria-label="anchor" href="#deparse-an-object-dp-deparse"></a>
+</h3>
+<p>Deparses an object and keeps only the first characters of the
+deparsed string. Accepts a number as argument. In that case only the
+first <code>n</code> characters are kept. Accepts option
+<code>long</code>: in that case all the lines of the deparsed object are
+first collapsed.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fml</span> <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The estimated model is {dp ? fml}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "The estimated model is y ~ x1 + x2."</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The estimated model is {10 dp ? fml}."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "The estimated model is y ~ x1 +...."</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="sec_format">Formatting operations<a class="anchor" aria-label="anchor" href="#sec_format"></a>
@@ -576,7 +592,7 @@ on the two sides of the vector.</p>
 <h3 id="change-the-case-lower">Change the case: lower<a class="anchor" aria-label="anchor" href="#change-the-case-lower"></a>
 </h3>
 <p>Lower cases the full string.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"MesSeD uP CaSe"</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"from a {x} to {lower?x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "from a MesSeD uP CaSe to messed up case"</span></span></code></pre></div>
@@ -588,7 +604,7 @@ on the two sides of the vector.</p>
 <code>"sentence"</code>. Option <code>"first"</code> upper cases only
 the first character. Option <code>"sentence"</code> upper cases the
 first letter after punctuation.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"hi. how are you? fine."</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{upper.sentence ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Hi. How are you? Fine."</span></span></code></pre></div>
@@ -601,7 +617,7 @@ first letter after punctuation.</p>
 to lowercase before applying the title case. Option
 <code>"ignore"</code> ignores a few small prepositions (“a”, “the”,
 “of”, etc).</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"bryan is in the KITCHEN"</span></span>
 <span></span>
 <span><span class="co"># default: respects upper cases</span></span>
@@ -630,7 +646,7 @@ options. <strong>Important note:</strong> punctuation (or digits) are
 replaced with WS and <strong>not</strong> the empty string. This means
 that <code>string_magic("ws.punct ! Meg's car")</code> will become
 <code>"Meg s car"</code>.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"   I    should? review 85 4 this text!!"</span></span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"v0: {x}"</span>, </span>
 <span>          <span class="st">"v1: {ws ? x}"</span>,</span>
@@ -647,7 +663,7 @@ that <code>string_magic("ws.punct ! Meg's car")</code> will become
 <h3 id="trim-white-spaces-tws">Trim white spaces: tws<a class="anchor" aria-label="anchor" href="#trim-white-spaces-tws"></a>
 </h3>
 <p>Trims the white spaces on both ends of the strings.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"  too much space \t\n"</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"With trim: {tws, Q ? x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "With trim: \"too much space\""</span></span></code></pre></div>
@@ -657,7 +673,7 @@ that <code>string_magic("ws.punct ! Meg's car")</code> will become
 </h3>
 <p>To add quotes to the strings. q: single quotes, Q: double quotes, bq:
 back quotes.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Mark"</span>, <span class="st">"Pam"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Hello {q, enum ? x}!"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Hello 'Mark' and 'Pam'!"</span></span></code></pre></div>
@@ -675,7 +691,7 @@ case command (<code>Format</code>) applies right alignment. Options:
 fills the blanks with 0s: useful to format numbers. Option
 <code>"right"</code> right aligns, and <code>"center"</code> centers the
 strings.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">12345</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"left  : {format, q, enum ? x}"</span>, </span>
 <span>          <span class="st">"right : {Format, q, enum ? x}"</span>,</span>
@@ -692,7 +708,7 @@ strings.</p>
 <p>Applies <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">base::sprintf()</a></code> formatting. The syntax is
 <code>'arg'%</code> with arg an sprintf formatting, or directly the
 sprint formatting.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"pi = {%.3f ? pi}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "pi = 3.142"</span></span></code></pre></div>
 </div>
@@ -703,7 +719,7 @@ sprint formatting.</p>
 stopwords are replaced with an empty space but the left and right WS are
 untouched. So WS normalization may be needed (see operation
 <code>ws</code>).</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"He is tall"</span>, <span class="st">"He isn't young"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Is he {stop, ws, enum ? x}?"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Is he tall and young?"</span></span></code></pre></div>
@@ -719,7 +735,7 @@ disables the warning in case of failed conversion. The conversion is
 done with <code><a href="https://rdrr.io/r/base/iconv.html" class="external-link">base::iconv()</a></code>, option <code>"utf8"</code>
 indicates that the source endocing is UTF-8, can be useful in some
 cases.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">author</span> <span class="op">=</span> <span class="st">"Laurent Bergé"</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"This package has been developped by {ascii ? author}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "This package has been developped by Laurent Berge."</span></span></code></pre></div>
@@ -738,7 +754,7 @@ option <code>"letter"</code> but uppercases the first letter. Options
 integer in Roman with <code><a href="https://rdrr.io/r/utils/roman.html" class="external-link">utils::as.roman</a></code>. The lower case
 version writes them in lower case. The upper case command
 (<code>N</code>) adds the option <code>"letter"</code>.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">12</span>, <span class="fl">52123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"She owes {n, '$'paste, enum ? x}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "She owes $5, $12 and $52,123."</span></span>
@@ -770,7 +786,7 @@ version writes them in lower case. The upper case command
 <p>When applied to a number, this operator writes them as a rank.
 Options: <code>"letter"</code>, <code>"upper"</code>,
 <code>"compact"</code>.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"They finished {nth, enum ? n}!"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "They finished 3rd and 7th!"</span></span></code></pre></div>
@@ -779,12 +795,12 @@ but note that it stops at 20. Option <code>"upper"</code> is the same as
 <code>"letter"</code> but uppercases the first letter. Option
 <code>"compact"</code> aggregates consecutive sequences in the form
 <code>"start_n_th to end_n_th"</code>.</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"They arrived {nth.compact ? 5:20}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "They arrived 5th to 20th."</span></span></code></pre></div>
 <p>The upper case command (<code>Nth</code>) adds the option
 <code>"letter"</code>.</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"They finished {Nth, enum ? n}!"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "They finished third and seventh!"</span></span></code></pre></div>
@@ -797,12 +813,12 @@ but note that it stops at 20. Option <code>"upper"</code> is the same as
 <code>"letter"</code> writes the number in letters (up to 100). Option
 <code>"upper"</code> does the same as <code>"letter"</code> and
 uppercases the first letter.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"They lost {enum ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "They lost once against Real and 12 times against Barcelona."</span></span></code></pre></div>
 <p>The upper case command (<code>Ntimes</code>) adds the option
 <code>"letter"</code>.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"This paper was rejected {Ntimes ? x}..."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "This paper was rejected five times..."</span></span></code></pre></div>
@@ -812,7 +828,7 @@ uppercases the first letter.</p>
 </h3>
 <p>To select the first/last characters of each element. Negative numbers
 remove the first/last characters.</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{19 firstchar, 9 lastchar ! This is a very long sentence}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "very long"</span></span>
 <span></span>
@@ -847,7 +863,7 @@ are appended. For example if <code>n = 3</code>, then “hello” becomes
 <p>Note that another way to add the option <code>"include"</code> is to
 use a double pipe for the argument <code>s</code>, like in
 <code>'n||s'</code>.</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"long sentence"</span></span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"v0: {x}"</span>, </span>
 <span>          <span class="st">"v1: {4 shorten ? x}"</span>, </span>
@@ -876,7 +892,7 @@ space.</p>
 centers the strings.</p>
 <p>See help for <a href="https://lrberge.github.io/stringmagic/reference/string_fill.html" class="external-link"><code>string_fill()</code></a>
 for more information.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">life</span> <span class="op">=</span> <span class="st">"full of sound and fury, Signifying nothing"</span></span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"{'[ ,]+'split, upper.first, fill.center, q, '\n'collapse ? life}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; '   Full   '</span></span>
@@ -904,14 +920,14 @@ pastes on both sides. Option <code>"front"</code> only pastes on the
 first element while option <code>"back"</code> only pastes on the last
 element. Option <code>"delete"</code> first replaces all elements with
 the empty string.</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {'x'paste, ' + 'collapse ? 1:3}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "y = x1 + x2 + x3"</span></span></code></pre></div>
 <p>The argument can be of the form <code>s1</code> or
 <code>s1|s2</code>. If of the second form, this is equivalent to
 chaining two <code>paste</code> operations, once on the left and once on
 the right: <code>'s1'paste, 's2'paste.right</code>.</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {'x|0'paste, ' + 'collapse ? 1:3}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "y = x10 + x20 + x30"</span></span></code></pre></div>
 </div>
@@ -919,7 +935,7 @@ the right: <code>'s1'paste, 's2'paste.right</code>.</p>
 <h3 id="join-lines-join">Join lines: join<a class="anchor" aria-label="anchor" href="#join-lines-join"></a>
 </h3>
 <p>Joins lines ending with a double backslash.</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sun</span> <span class="op">=</span> <span class="st">"The sun \\</span></span>
 <span><span class="st">is shining."</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"How is the sun? {join ? sun}"</span><span class="op">)</span></span>
@@ -935,7 +951,7 @@ the newlines (<code>\n</code>), leading them to be displayed as
 (<code>"\t"</code>). This is useful to make the value free of space
 formatters. The default behavior is to escape both newlines and
 tabs.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">input</span> <span class="op">=</span> <span class="st">"yes \n\n no"</span></span>
 <span><span class="va">msg</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Your input, equal to {escape, bq ? input} is incorrect."</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">msg</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
@@ -958,7 +974,7 @@ leading to a character vector. Option <code>"rm"</code> converts and
 removes the elements that could not be converted. Option
 <code>"clear"</code> turns failed conversions into the empty string, and
 hence lead to a character vector.</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="st">"six"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"   origin: {enum, q ? x}"</span>, </span>
 <span>          <span class="st">"      num: {num, enum, q ? x}"</span>, </span>
@@ -977,7 +993,7 @@ hence lead to a character vector.</p>
 <p>Enumerates the elements. It creates a single string containing the
 comma separated list of elements. If there are more than 7 elements,
 only the first 6 are shown and the number of items left is written.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{enum ? 1:5}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "1, 2, 3, 4 and 5"</span></span></code></pre></div>
 <p>You can add the following options:</p>
@@ -997,7 +1013,7 @@ and”.</li>
 two</li>
 <li>a number: to tell the number of items to display</li>
 </ul>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Marv"</span>, <span class="st">"Nancy"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The murderer must be {enum.or ? x}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "The murderer must be Marv or Nancy."</span></span>
@@ -1010,11 +1026,11 @@ two</li>
 <span><span class="co"># default is at 7</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{sample(100, 30)}"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum ? x}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "The problematic variables are x3, x4, x7, x11, x12, x16 and 24 others."</span></span>
+<span><span class="co">#&gt; [1] "The problematic variables are x3, x6, x9, x10, x11, x13 and 24 others."</span></span>
 <span></span>
 <span><span class="co"># you can augment or reduce the numbers to display with an option</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum.3 ? x}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "The problematic variables are x3, x4 and 28 others."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "The problematic variables are x3, x6 and 28 others."</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="formatted-length-len-len">Formatted length: len, Len<a class="anchor" aria-label="anchor" href="#formatted-length-len-len"></a>
@@ -1024,7 +1040,7 @@ two</li>
 writes the length in words (up to 100). Option <code>"upper"</code> is
 the same as letter but uppercases the first letter. By default, the
 number is formatted: commas are inserted to separate thousands.</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"The length of 1:5000:"</span>, </span>
 <span>          <span class="st">" - len     = {len ? 1:5000}"</span>, </span>
 <span>          <span class="st">" - len.num = {len.num ? 1:5000}"</span>, .sep <span class="op">=</span> <span class="st">" \n"</span><span class="op">)</span></span>
@@ -1033,7 +1049,7 @@ number is formatted: commas are inserted to separate thousands.</p>
 <span><span class="co">#&gt;  - len.num = 5000</span></span></code></pre></div>
 <p>The upper case command (<code>Len</code>) adds the option
 <code>"letter"</code> (only for small numbers).</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Its size is {Len ? 1:8}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Its size is eight"</span></span></code></pre></div>
 </div>
@@ -1052,7 +1068,7 @@ behavior, add an underscore at the end of it. The argument
 fraction of the current screen. Finally it can be an expression that
 uses the variable <code>.sw</code> which will capture the value of the
 current screen width.</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"this is a long sentence"</span></span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"------ version 0 ------\n{x}"</span>, </span>
 <span>          <span class="st">"------ version 1 ------\n{15 width ? x}"</span>, </span>
@@ -1077,11 +1093,11 @@ current screen width.</p>
 <p>Displays a formatted time difference. Option <code>"silent"</code>
 does not report a warning if the operation fails. It accepts either
 objects of class <code>POSIXt</code> or <code>difftime</code>.</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.15</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Time: {difftime ? x}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Time: 172ms"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Time: 155ms"</span></span></code></pre></div>
 </div>
 </div>
   </div>

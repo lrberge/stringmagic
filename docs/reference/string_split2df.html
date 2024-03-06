@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">stringmagic</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
@@ -95,6 +95,7 @@
 <span>  fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ignore.case <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  word <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  dt <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
@@ -165,6 +166,11 @@ as fixed (and not as a regular expression).</p></dd>
 and b) patterns can be chained by separating them with a comma, they are combined with an OR logical operation.
 Example: if <code>word = TRUE</code>, then pattern = "The, mountain" will select strings containing either the word
 'The' or the word 'mountain'.</p></dd>
+
+
+<dt>envir</dt>
+<dd><p>Environment in which to evaluate the interpolations if the flag <code>"magic"</code> is provided.
+Default is <code><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame()</a></code>.</p></dd>
 
 
 <dt>dt</dt>

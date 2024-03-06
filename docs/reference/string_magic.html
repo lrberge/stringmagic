@@ -18,7 +18,7 @@ basic string operations to the interpolated variables. Advanced support for plur
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">stringmagic</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
@@ -295,7 +295,8 @@ you can pass keywords or regular expressions and fecth select pieces from the ma
 to "hello world".</p>
 <p>To any interpolation you can add operations. Taking the previous example, say we want to display
 "hello W O R L D". This means upper casing all letters of the interpolated variable and adding a space between
-each of them. Do you think we can do that? Of course yes: string_magic("hello upper, ''s, c ? x"). And that's it.</p>
+each of them. Do you think we can do that? Of course yes:
+<code>string_magic("hello {upper, ''s, c ? x}")</code>. And that's it.</p>
 <p>Now let's explain what happened. Within the <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code> <em>box</em>, we first write a set of
 operations, here "upper, ''s, c", then add "?" and finally write
 the variable to interpolate, "x".  The operations (explained in more details
@@ -303,7 +304,7 @@ below) are <code>upper</code>, upper-casing all letters, ''s: splitting
 with the empty string, 'c': concatenating with spaces the vector of string that was just split.
 The question mark means that the expression coming after it is to be evaluated
 (this is opposed to the exclamation mark presented next).</p>
-<p>The syntax is always the same: operations ? expression, where the operations section
+<p>The syntax is always the same: <code>{operations ? expression}</code>, where the operations section
 is a <em>comma separated</em> list of operations.
 These operations are of the form <code>'arg'op</code>, with <code>arg</code> the argument to the operator
 code <code>op</code>. These operations are performed sequantially from left to right.</p>
@@ -325,7 +326,7 @@ bit disappointing, right? What's the point of doing that? Wait until the next tw
 <code>string_magic("hello {upper, ''s, c ! world}")</code> leads to "hello W O R L D".</p>
 <p>(A note in passing. The spaces surrounding the exclamation mark are non necessary,
 but when one space is present on both sides of the <code>!</code>, then the verbatim
-expression only begins after it. Ex: "upper! hi" leads to " HI" while <code>"{upper ! hi}"</code>
+expression only begins after it. Ex: <code>"{upper! hi}"</code> leads to " HI" while <code>"{upper ! hi}"</code>
 leads to "HI" and <code>"{upper !  hi}"</code> leads to " HI".)</p>
 <p>The second advantage of verbatim evaluations is <em>nesting</em>. Anything in a verbatim
 expression is evaluated with the function <code>string_magic</code>.
@@ -493,6 +494,11 @@ to "Small numbers only: 5 and 7";</p></li>
 <li><p>insert: inserts a new element to the vector. Options: "right" and "both". Option "right" adds
 the new element to the right. Option "both" inserts the new element on the two sides of the vector.
 Example: <code>string_magic("{'3'insert.right, ' + 'c ? 1:2}")</code> leads to "1 + 2 + 3".</p></li>
+<li><p><code>dp</code> or <code>deparse</code>: Deparses an object and keeps only the first characters of
+the deparsed string. Accepts a number as argument. In that case only the first <code>n</code>
+characters are kept. Accepts option <code>long</code>: in that case all the
+lines of the deparsed object are first collapsed.
+Example: <code>fml = y ~ x1 + x2; string_magic("The estimated model is {dp ? fml}.")</code></p></li>
 </ul></div>
     <div id="formatting-operations">
     <h2>Formatting operations</h2>
@@ -799,7 +805,7 @@ Ex.2: <code>string_magic("many {5 times.c ! \\\\}}")</code> leads to <code>many 
 As you can see, you don't need to escape the closing bracket in Ex.1 since no box
 was open. On the other hand, you need to escape it in Ex.2.</p>
 <p>Alternatively, use the argument <code>.delim</code> to set custom delimiters.</p>
-<p>Ex.3: string_magic("I 'can write what I want'") leads to <code>"I can {write} {{what}} I want"</code>.</p>
+<p>Ex.3: <code>string_magic("I {'can {write} {{what}} I want'}")</code> leads to <code>"I can {write} {{what}} I want"</code>.</p>
 <p>Since <code>{expr}</code> evaluates <code>expr</code>, the stuff inside the <em>box</em>, you can pass a
 character string and it will stay untouched.</p>
 <p>In the few operations expecting a semi-colon (if-else and pluralization), it can also be
@@ -1284,7 +1290,7 @@ leads to <code>"My greet geese!"</code></p></li>
 <span class="r-in"><span><span class="va">rhs</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hp"</span>, <span class="st">"drat"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">fml</span><span class="op">(</span><span class="st">"{lhs} ~ {add?rhs} + am"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> mpg ~ hp + drat + am</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000002265aae3750&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001acc8110728&gt;</span>
 <span class="r-in"><span>   </span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

@@ -1,5 +1,5 @@
 
-# stringmagix 1.1.0
+# stringmagic 1.1.0
 
 ## New functions
 
