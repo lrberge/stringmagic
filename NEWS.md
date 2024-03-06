@@ -22,6 +22,15 @@ string_clean(x, "m/{from} => {to}")
 
 - `string_magic`: add the `comma` flag to the `enum` operation. In that case, the enumeration ends with ", " instead of ", and ".
 
+- `string_magic`: the if-else operation `&` now keeps memory of variables accessed within data sets:
+```R
+data = list(x = c(15, 25, 550), y = rnorm(1000))
+string_magic("The values are{& length(data$x) < 5 ; : {enum ? .} ;  too many}.")
+# [1] "The values are: 15, 25 and 550."
+string_magic("The values are{& length(data$y) < 5 ; : {enum ? .} ;  too many}.")
+# [1] "The values are too many."
+```
+
 ## Aliases
 
 - new battery of short aliases: `sma` for `string_magic`, `catma` for catmagic, `mema` for `message_magic`, etc.. (`st_ops`, `st_is`, `st_any`, `st_all`, `stextract`, `stwhich`, `stget`, `stclean`, `stvec`, `streplace`, `stsplit` -- short names with vowels after `st` have an underscore.)

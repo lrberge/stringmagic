@@ -10,6 +10,7 @@
 #### string manipulation ####
 ####
 
+
 string_to_ascii = function(x, options){
   # force to ASCII using iconv. Keeps track of encoding error
 
@@ -64,6 +65,7 @@ string_to_ascii = function(x, options){
 ####
 #### internal ####
 ####
+
 
 is_numeric_in_char = function(x){
   res = tryCatch(as.numeric(x), warning = function(x) "not numeric")
@@ -690,7 +692,7 @@ is_operator = function(x, op){
   if(length(x) <= 1){
     res = FALSE
   } else {
-    res = as.character(x[[1]]) %in% op
+    res = as.character(x[[1]])[1] %in% op
   }
 
   res
@@ -730,6 +732,36 @@ fml_extract_elements = function(fml){
   res = rev(main_elements)
 
   res
+}
+
+is_any_variable = function(x){
+  # x: must be an expression
+  length(all.vars(x, max.names = 1)) == 1
+}
+
+extract_first_variable = function(expr){
+  # this function returns an expression
+  # what is considered a variable is either a name (x), either a name subsetted (data$value)
+  
+  if(!is_any_variable(expr)){
+    return(NULL)
+  }
+  
+  if(length(expr) == 1){
+    return(expr)
+  }
+  
+  if(is_operator(expr, c("[", "[[", "$"))){
+    return(expr)
+  } else {
+    for(i in 2:length(expr)){
+      if(is_any_variable(expr[[i]])){
+        return(extract_first_variable(expr[[i]]))
+      }
+    }
+  }
+  
+  return(NULL)
 }
 
 insert = function(x, y, i, replace = FALSE){
@@ -1102,6 +1134,7 @@ fix_pkgwdown_path = function(){
 ####
 #### timer ####
 ####
+
 
 timer = function(type = "simple"){
   

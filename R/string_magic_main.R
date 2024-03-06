@@ -1060,7 +1060,8 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
         } else if(is_ifelse){
 
           xi_val = NULL
-          vars = all.vars(str2lang(xi_raw))
+          xi_expr = str2lang(xi_raw)
+          vars = all.vars(xi_expr)
 
           if(length(vars) == 0){
             if(operators[1] == "&&"){
@@ -1083,7 +1084,7 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
             }
             
             if(do_eval){
-              xi_call = str2lang(vars[1])
+              xi_call = extract_first_variable(xi_expr)
               xi_val = check_set_string_magic_eval(xi_call, .data, .envir, .check)
             }
             
