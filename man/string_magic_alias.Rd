@@ -95,7 +95,7 @@ Utility to easily create \code{string_magic} aliases with custom default
 }
 \details{
 Use this function if you want to change \code{string_magic} default values. For example,
-if you want the interpolation to be done with "{{}}" (instead of \code{{}}) or if you want the
+if you want the interpolation to be done with \code{"{{}}"} (instead of \code{{}}) or if you want the
 default separation to be the space (instead of the empty string). See the example.
 }
 \section{Writing a package using \code{string_magic}}{

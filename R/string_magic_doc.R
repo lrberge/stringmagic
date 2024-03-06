@@ -114,7 +114,8 @@
 #' 
 #' To any interpolation you can add operations. Taking the previous example, say we want to display
 #'  "hello W O R L D". This means upper casing all letters of the interpolated variable and adding a space between 
-#' each of them. Do you think we can do that? Of course yes: string_magic("hello {upper, ''s, c ? x}"). And that's it.
+#' each of them. Do you think we can do that? Of course yes: 
+#' `string_magic("hello {upper, ''s, c ? x}")`. And that's it.
 #' 
 #' Now let's explain what happened. Within the `{}` *box*, we first write a set of 
 #' operations, here "upper, ''s, c", then add "?" and finally write 
@@ -124,7 +125,7 @@
 #' The question mark means that the expression coming after it is to be evaluated 
 #' (this is opposed to the exclamation mark presented next).
 #' 
-#' The syntax is always the same: {operations ? expression}, where the operations section
+#' The syntax is always the same: `{operations ? expression}`, where the operations section
 #' is a *comma separated* list of operations.
 #' These operations are of the form `'arg'op`, with `arg` the argument to the operator 
 #' code `op`. These operations are performed sequantially from left to right.
@@ -149,7 +150,7 @@
 #' 
 #' (A note in passing. The spaces surrounding the exclamation mark are non necessary,
 #'  but when one space is present on both sides of the `!`, then the verbatim
-#' expression only begins after it. Ex: "{upper! hi}" leads to " HI" while `"{upper ! hi}"` 
+#' expression only begins after it. Ex: `"{upper! hi}"` leads to " HI" while `"{upper ! hi}"` 
 #' leads to "HI" and `"{upper !  hi}"` leads to " HI".)
 #' 
 #' The second advantage of verbatim evaluations is *nesting*. Anything in a verbatim 
@@ -664,7 +665,7 @@
 #' 
 #' Alternatively, use the argument `.delim` to set custom delimiters.
 #' 
-#' Ex.3: string_magic("I {'can {write} {{what}} I want'}") leads to `"I can {write} {{what}} I want"`.
+#' Ex.3: `string_magic("I {'can {write} {{what}} I want'}")` leads to `"I can {write} {{what}} I want"`.
 #' 
 #' Since `{expr}` evaluates `expr`, the stuff inside the *box*, you can pass a 
 #' character string and it will stay untouched.

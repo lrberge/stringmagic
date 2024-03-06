@@ -21,7 +21,7 @@
 #' @details 
 #' 
 #' Use this function if you want to change `string_magic` default values. For example,
-#' if you want the interpolation to be done with "{{}}" (instead of `{}`) or if you want the 
+#' if you want the interpolation to be done with `"{{}}"` (instead of `{}`) or if you want the 
 #' default separation to be the space (instead of the empty string). See the example.
 #' 
 #' @return 

@@ -195,7 +195,8 @@ to "hello world".
 
 To any interpolation you can add operations. Taking the previous example, say we want to display
 "hello W O R L D". This means upper casing all letters of the interpolated variable and adding a space between
-each of them. Do you think we can do that? Of course yes: string_magic("hello {upper, ''s, c ? x}"). And that's it.
+each of them. Do you think we can do that? Of course yes:
+\code{string_magic("hello {upper, ''s, c ? x}")}. And that's it.
 
 Now let's explain what happened. Within the \code{{}} \emph{box}, we first write a set of
 operations, here "upper, ''s, c", then add "?" and finally write
@@ -205,7 +206,7 @@ with the empty string, 'c': concatenating with spaces the vector of string that 
 The question mark means that the expression coming after it is to be evaluated
 (this is opposed to the exclamation mark presented next).
 
-The syntax is always the same: {operations ? expression}, where the operations section
+The syntax is always the same: \code{{operations ? expression}}, where the operations section
 is a \emph{comma separated} list of operations.
 These operations are of the form \verb{'arg'op}, with \code{arg} the argument to the operator
 code \code{op}. These operations are performed sequantially from left to right.
@@ -232,7 +233,7 @@ Verbatim evaluation is a powerful way to apply operations to plain text. For exa
 
 (A note in passing. The spaces surrounding the exclamation mark are non necessary,
 but when one space is present on both sides of the \code{!}, then the verbatim
-expression only begins after it. Ex: "{upper! hi}" leads to " HI" while \code{"{upper ! hi}"}
+expression only begins after it. Ex: \code{"{upper! hi}"} leads to " HI" while \code{"{upper ! hi}"}
 leads to "HI" and \code{"{upper !  hi}"} leads to " HI".)
 
 The second advantage of verbatim evaluations is \emph{nesting}. Anything in a verbatim
@@ -776,7 +777,7 @@ was open. On the other hand, you need to escape it in Ex.2.
 
 Alternatively, use the argument \code{.delim} to set custom delimiters.
 
-Ex.3: string_magic("I {'can {write} {{what}} I want'}") leads to \code{"I can {write} {{what}} I want"}.
+Ex.3: \code{string_magic("I {'can {write} {{what}} I want'}")} leads to \code{"I can {write} {{what}} I want"}.
 
 Since \code{{expr}} evaluates \code{expr}, the stuff inside the \emph{box}, you can pass a
 character string and it will stay untouched.

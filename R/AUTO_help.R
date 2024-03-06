@@ -1,18 +1,18 @@
-# 1709719813
+# 1709732654
 # DO NOT EDIT BY HAND: generated with generate_help_extensive() in help.R
 
 setup_help_extensive = function(){
 txt = c("", "# Interpolation and string operations: Principle ----|", 
 "", "To interpolate a variable, say `x`, simply use `{x}`. For example `x = \"world\"; string_magic(\"hello {x}\")` leads to \"hello world\".", 
-"", "To any interpolation you can add operations. Taking the previous example, say we want to display \"hello W O R L D\". This means upper casing all letters of the interpolated variable and adding a space between each of them. Do you think we can do that? Of course yes: string_magic(\"hello {upper, ''s, c ? x}\"). And that's it.", 
+"", "To any interpolation you can add operations. Taking the previous example, say we want to display \"hello W O R L D\". This means upper casing all letters of the interpolated variable and adding a space between each of them. Do you think we can do that? Of course yes: `string_magic(\"hello {upper, ''s, c ? x}\")`. And that's it.", 
 "", "Now let's explain what happened. Within the `{}` *box*, we first write a set of operations, here \"upper, ''s, c\", then add \"?\" and finally write the variable to interpolate, \"x\".  The operations (explained in more details below) are `upper`, upper-casing all letters, ''s: splitting with the empty string, 'c': concatenating with spaces the vector of string that was just split. The question mark means that the expression coming after it is to be evaluated (this is opposed to the exclamation mark presented next).", 
-"", "The syntax is always the same: {operations ? expression}, where the operations section is a *comma separated* list of operations. These operations are of the form `'arg'op`, with `arg` the argument to the operator code `op`. These operations are performed sequantially from left to right.", 
+"", "The syntax is always the same: `{operations ? expression}`, where the operations section is a *comma separated* list of operations. These operations are of the form `'arg'op`, with `arg` the argument to the operator code `op`. These operations are performed sequantially from left to right.", 
 "", "Some operations, like `upper`, accept options. You attach options to an operation with a dot followed by the option name. Formally: `op.option1.option2`, etc. Example: `x = \"hi there. what's up? fine.\" ; string_magic(\"He said: {upper.sentence, Q ? x}\")`. Leads to: `He said: \"Hi there. What's up? Fine.\"`.", 
 "", "Both operators and options are partially matched. So `string_magic(\"He said: {up.s, Q ? x}\")` would also work.", 
 "", "# Verbatim interpolation and nesting: Principle ----|", 
 "", "Instead of interpolating a variable, say `x`, with `{x}`, you can use an exclamation mark to trigger varbatim evaluation. For example `string_magic(\"hello {!x}\")` would lead to \"hello x\". It's a bit disappointing, right? What's the point of doing that? Wait until the next two paragraphs.", 
 "", "Verbatim evaluation is a powerful way to apply operations to plain text. For example: `string_magic(\"hello {upper, ''s, c ! world}\")` leads to \"hello W O R L D\".", 
-"", "(A note in passing. The spaces surrounding the exclamation mark are non necessary, but when one space is present on both sides of the `!`, then the verbatim expression only begins after it. Ex: \"{upper! hi}\" leads to \" HI\" while `\"{upper ! hi}\"` leads to \"HI\" and `\"{upper !  hi}\"` leads to \" HI\".)", 
+"", "(A note in passing. The spaces surrounding the exclamation mark are non necessary, but when one space is present on both sides of the `!`, then the verbatim expression only begins after it. Ex: `\"{upper! hi}\"` leads to \" HI\" while `\"{upper ! hi}\"` leads to \"HI\" and `\"{upper !  hi}\"` leads to \" HI\".)", 
 "", "The second advantage of verbatim evaluations is *nesting*. Anything in a verbatim expression is evaluated with the function `string_magic`. This means that any *box* will be evaluated as previously described. Let's give an example. You want to write the expression of a polynomial of order n: a + bx + cx^2 + etc. You can do that with nesting. Assume we have `n = 2`.", 
 "", "Then `string_magic(\"poly({n}): {' + 'c ! {letters[1 + 0:n]}x^{0:n}}\")` leads to \"poly(2): ax^0 + bx^1 + cx^2\".", 
 "", "How does it work? The verbatim expression (the one following the exclamation mark), here `\"{letters[1 + 0:n]}x^{0:n}\"`, is evaluated with `string_magic`. `string_magic(\"{letters[1 + 0:n]}x^{0:n}\")` leads to the vector c(\"ax^0\", \"bx^1\", \"cx^2\").", 
@@ -131,7 +131,7 @@ txt = c("", "# Interpolation and string operations: Principle ----|",
 "", "Ex.1: `string_magic(\"open = \\\\\\\\{, close = }\")` leads to `\"open = {, close = }\"`. Ex.2: `string_magic(\"many {5 times.c ! \\\\\\\\}}\")` leads to `many }}}}}`.", 
 "", "You only need to escape the special delimiters which the algorithm is currently looking for. As you can see, you don't need to escape the closing bracket in Ex.1 since no box was open. On the other hand, you need to escape it in Ex.2.", 
 "", "Alternatively, use the argument `.delim` to set custom delimiters.", 
-"", "Ex.3: string_magic(\"I {'can {write} {{what}} I want'}\") leads to `\"I can {write} {{what}} I want\"`.", 
+"", "Ex.3: `string_magic(\"I {'can {write} {{what}} I want'}\")` leads to `\"I can {write} {{what}} I want\"`.", 
 "", "Since `{expr}` evaluates `expr`, the stuff inside the *box*, you can pass a character string and it will stay untouched.", 
 "", "In the few operations expecting a semi-colon (if-else and pluralization), it can also be escaped with a double backslash.", 
 "", "In interpolations, the exclamation mark (`!`) signals a verbatim expression. But what if you use it to mean the logical operation *not* in an operation-free interpolation? In that case, you need a hack: use a question mark (`?`) first to indicate to the algorithm that you want to evaluate the expression.", 
