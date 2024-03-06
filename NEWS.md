@@ -31,7 +31,9 @@ string_magic("The values are{& length(data$y) < 5 ; : {enum ? .} ;  too many}.")
 # [1] "The values are too many."
 ```
 
-- improve error messages
+- `string_magic`: new operation `deparse` (alias: `dp`) to deparse an object and keep only the first characters of the deparsed string.
+
+- improve error messages.
 
 ## Aliases
 

@@ -1818,6 +1818,30 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
         }
       }
     }
+  } else if(op %in% c("dp", "deparse")){
+    
+    options = check_set_options(options, "long")
+    
+    if(nchar(argument) > 0){
+      argument = as.numeric(argument)
+    } else {
+      argument = 35
+    }
+    
+    if("long" %in% options){
+      x_dp = paste0(deparse(x, nlines = 100), collapse = " ")
+    } else {
+      x_dp = deparse(x, nlines = 1)
+    }
+    
+    
+    if(nchar(x_dp) > argument){
+      x_dp = substr(x_dp, 1, argument - 2)
+      x_dp = gsub(" *$", "...", x_dp)
+    }
+    
+    res = x_dp
+    
   } else if(op == "enum"){
     # enum ####
     # NOTE:
@@ -3208,6 +3232,11 @@ setup_operations = function(){
                 "stopwords", "nth", "Nth", "ntimes", "Ntimes")
                 
   options("string_magic_operations_v1.0.0" = sort(OPERATORS))
+  
+  # dp: v1.1.0
+  OPERATORS = c(OPERATORS, "dp", "deparse")
+  
   options("string_magic_operations_default" = sort(OPERATORS))
+  
   options("string_magic_user_ops" = NULL)
 }

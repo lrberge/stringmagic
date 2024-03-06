@@ -416,6 +416,11 @@ to "Small numbers only: 5 and 7";
 \item insert: inserts a new element to the vector. Options: "right" and "both". Option "right" adds
 the new element to the right. Option "both" inserts the new element on the two sides of the vector.
 Example: \code{string_magic("{'3'insert.right, ' + 'c ? 1:2}")} leads to "1 + 2 + 3".
+\item \code{dp} or \code{deparse}: Deparses an object and keeps only the first characters of
+the deparsed string. Accepts a number as argument. In that case only the first \code{n}
+characters are kept. Accepts option \code{long}: in that case all the
+lines of the deparsed object are first collapsed.
+Example: \verb{fml = y ~ x1 + x2; string_magic("The estimated model is \{dp ? fml\}.")}
 }
 }
 
