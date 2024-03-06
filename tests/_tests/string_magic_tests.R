@@ -16,6 +16,7 @@ dsb = string_magic_alias(.delim = ".[ ]")
 # collapse ####
 #
 
+
 # regular
 x = 1:3
 test(string_magic("win = {'-'c ? x}"), "win = 1-2-3")
@@ -42,6 +43,7 @@ test(txt, c("bon.les.gen", "com.ca.va?", "bie", "bie"))
 # split ####
 #
 
+
 x = "Cogito...Ergo...Sum"
 txt = string_magic("He said: {'f/...'s ? x}")
 test(txt, c("He said: Cogito", "He said: Ergo", "He said: Sum"))
@@ -54,6 +56,7 @@ test(txt, c("He said: ", "He said: ogito...Ergo...", "He said: um"))
 #
 # replace ####
 #
+
 
 x = c("Blanche dit 'Bla bla blanc'.")
 txt = string_magic("She said: {'bla'r, ws ? x}")
@@ -131,6 +134,7 @@ test(txt, c("Stare at the []", "Stare at the Poon", "Stare at the Pun"))
 # x: single extraction ####
 #
 
+
 x = c("Blanche dit", " 'Bla bla blanc'.")
 txt = string_magic("mots: {'bla'x ? x}")
 test(txt, c("mots: ", "mots: bla"))
@@ -160,6 +164,7 @@ test(string_magic("mots: {'iw/bla'extract.first ? x}"),
 # X: multiple extractions ####
 #
 
+
 x = c("Blanche dit", " 'Bla bla blanc'.")
 txt = string_magic("{'bla'X ? x}")
 test(txt, c("bla", "bla"))
@@ -185,6 +190,7 @@ test(txt, "info: 57-26, 32-7, 29-8 and 55")
 # is, get, which ####
 #
 
+
 x = c("Hi Mary.", "Hi Charles!", "Are you OK?", "I think so Charles.", "Great to hear, Mary!")
 txt = string_magic("A few quotes:\n{Q, 'mary | charles & \\!'get.ignore, '  'paste, '\n'c ? x}")
 test(txt, "A few quotes:\n  \"Hi Charles!\"\n  \"Great to hear, Mary!\"")
@@ -209,6 +215,7 @@ test(txt, "info: laura-and, charles-and, charly-and and june")
 # each/times ####
 #
 
+
 test(string_magic("I like {5 times.c ! ?} marks!"), "I like ????? marks!")
 
 x = c("mary", "richard")
@@ -221,6 +228,7 @@ test(string_magic("values: {2 each.c ? c('a', 'b')}"), "values: aabb")
 #
 # case ####
 #
+
 
 x = "where is bryan? Bryan is in the KITCHEN."
 
@@ -253,6 +261,7 @@ test(txt, "Results From a New Estimator: A New Hope")
 # quotes ####
 #
 
+
 x = "siren"
 txt = string_magic("Is it the song of the {q ? x}, of the {Q ? x} or of the {bq ? x}?")
 test(txt, "Is it the song of the 'siren', of the \"siren\" or of the `siren`?")
@@ -260,6 +269,7 @@ test(txt, "Is it the song of the 'siren', of the \"siren\" or of the `siren`?")
 #
 # format ####
 #
+
 
 x = c(1, 123, 123456)
 txt = string_magic("The numbers are:\n{'\n'c ! - {format ? x} | {rev, Format ? x}}")
@@ -285,6 +295,7 @@ test_contains(txt, "\\d:\\d & \\d{4}")
 # sprintf ####
 #
 
+
 txt = string_magic("pi = {%.3f ? pi}")
 test(txt, "pi = 3.142")
 
@@ -301,6 +312,7 @@ test(txt, "The winners are:\n- michael   !\n- ana       !")
 #
 # ws ####
 #
+
 
 x = " &Hej! Welcome!! A\t\n 6-feet wide bed awaits!\t."
 
@@ -332,6 +344,7 @@ test(txt, "Hej Welcome feet wide bed awaits")
 # tws ####
 #
 
+
 x = c("  bonjour les gens", "ahem \n  ", NA)
 txt = dsb(".[tws ? x]")
 test(txt, c("bonjour les gens", "ahem", NA))
@@ -339,6 +352,7 @@ test(txt, c("bonjour les gens", "ahem", NA))
 #
 # trim ####
 #
+
 
 x = c("bonjour", "ahem")
 txt = dsb(".[4 trim ? x]")
@@ -356,6 +370,7 @@ test(txt, c("onjou", "he"))
 #
 # k, keep char ####
 #
+
 
 x = c("this is a long sentence", "a short one")
 txt = string_magic("{11k, ' and 'c ? x}")
@@ -385,6 +400,7 @@ test(txt, "this is a .. and a short one")
 #
 # K, keep elements ####
 #
+
 
 x = 1:5
 
@@ -417,9 +433,13 @@ test(string_magic("info: {' 'S, ~(2Ko), C ? x}"), "err")
 # enum ####
 #
 
+
 x = 1:5
 txt = string_magic("{enum.q.3.oxf ? x}")
 test(txt, "'1', '2', and 3 others")
+
+txt = string_magic("{enum.q.3.comm ? x}")
+test(txt, "'1', '2', 3 others")
 
 txt = string_magic("{enum.bq.or ! x{1:3}}")
 test(txt, "`x1`, `x2` or `x3`")
@@ -441,6 +461,7 @@ test(txt, "1, 2 and 3 ; a, b and c ; a, 1, b and 2")
 #
 # first and last ###
 #
+
 
 x = 1:5
 txt = string_magic("{2 first, ''c ? x}")
@@ -471,6 +492,7 @@ test(txt, "3 ; c ; 2")
 # firstchar, lastchar ####
 #
 
+
 x = c("bonjour", "les", "gens")
 a = 2
 txt = string_magic("{3 firstchar, `a`lastchar ? x}")
@@ -479,6 +501,7 @@ test(txt, c("on", "es", "en"))
 #
 # rev ####
 #
+
 
 test(string_magic("{rev ? 1:3}"), 3:1)
 
@@ -490,6 +513,7 @@ test(txt, "321 ; cba ; 2b1a")
 #
 # sort, dsort ####
 #
+
 
 x = c(5, 3, 8, 1)
 test(string_magic("{sort ? x}"), c(1, 3, 5, 8))
@@ -516,6 +540,7 @@ test(txt, "521 ; ecba")
 # paste ####
 #
 
+
 x = 1:2
 txt = string_magic("{'x'paste, ', 'c ? x}")
 test(txt, "x1, x2")
@@ -538,6 +563,7 @@ test(txt, "The number is 5.")
 # insert ####
 #
 
+
 x = 1:2
 txt = string_magic("{'0'insert, ''c ? x}")
 test(txt, "012")
@@ -555,6 +581,7 @@ test(string_magic("{''S, ~('0'insert, ''c), ' ; 'c ? x}"), "err")
 #
 # fill ####
 #
+
 
 x = c("bon", "bonjour les gens")
 txt = string_magic("{fill, q, C ? x}")
@@ -580,6 +607,7 @@ test(txt, "'005' and '015'")
 # join ####
 #
 
+
 x = "\n    bonjour \\\n   les gens\n est-ce que ca va?"
 txt = string_magic("Text: {tws, join ? x}")
 test(txt, "Text: bonjour les gens\n est-ce que ca va?")
@@ -588,6 +616,7 @@ test(txt, "Text: bonjour les gens\n est-ce que ca va?")
 # escape ####
 #
 
+
 x = "bon\njour \t les \t gens"
 txt = string_magic(x, .last = "escape")
 test(txt, "bon\\njour \\t les \\t gens")
@@ -595,6 +624,7 @@ test(txt, "bon\\njour \\t les \\t gens")
 #
 # unik ####
 #
+
 
 x = c(1, 1, 2, 3, 3, 3) 
 test(string_magic("{unik ? x}"), 1:3)
@@ -608,6 +638,7 @@ test(txt, "12564 ; agfs")
 # nth ####
 #
 
+
 x = c(1, 6)
 txt = string_magic("They arrived {nth, C ? x}.")
 test(txt, "They arrived 1st and 6th.")
@@ -619,6 +650,7 @@ test(txt, "They arrived first and sixth.")
 # ntimes ####
 #
 
+
 x = c(1, 6)
 txt = string_magic("They won {ntimes, C ? x}.")
 test(txt, "They won once and 6 times.")
@@ -629,6 +661,7 @@ test(txt, "They won once and six times.")
 #
 # n ####
 #
+
 
 x = c(45546, "bonjour")
 txt = string_magic("A = {n ? x} ; B = {n.l ? 55}")
@@ -647,6 +680,7 @@ test(txt, "This test was written in mmxxiii.")
 #
 # len ####
 #
+
 
 x = 1:5
 txt = string_magic("{Len.up ? x} numbers.")
@@ -672,6 +706,7 @@ test(num, c(3, 2, 4))
 # width ####
 #
 
+
 x = "Rome, l'unique objet de mon ressentiment, Rome a qui vient ton bras d'immoler mon amant"
 txt = string_magic("Voici le texte a apprendre:\n{'40|>'width ? x}.")
 test(txt, c("Voici le texte a apprendre:\n> Rome, l'unique objet de mon\n> ressentiment, Rome a qui vient ton\n> bras d'immoler mon amant."))
@@ -679,6 +714,7 @@ test(txt, c("Voici le texte a apprendre:\n> Rome, l'unique objet de mon\n> resse
 #
 # difftime ####
 #
+
 
 x = 3654
 txt = string_magic("Time since last check: {difftime ? x}.")
@@ -692,6 +728,7 @@ test(txt, "Time since last check: 41 min 42 sec.")
 # erase ####
 #
 
+
 x = 1:5
 txt = string_magic("{if(. <= 3 ; erase), '.'c ? x}")
 test(txt, "...4.5")
@@ -700,6 +737,7 @@ test(txt, "...4.5")
 # nuke ####
 #
 
+
 x = 1:5
 txt = string_magic("nothing = {nuke ? x}")
 test(txt, "nothing = ")
@@ -707,6 +745,7 @@ test(txt, "nothing = ")
 #
 # rm ####
 #
+
 
 x = c("", "    ", "556", ":!", "pour qui sont ces", "serpents qui sifflent sur nos tetes?")
 txt = string_magic("{5 firstchar, rm, ', 'c ? x}")
@@ -735,6 +774,7 @@ test(txt, "laura-and, charles-and, charly-and and june")
 #
 # num ####
 #
+
 
 x = "parse55this"
 txt = string_ops(x, "'\\d+'x, num")
@@ -768,6 +808,7 @@ test(txt, "57-26, 32-7, 29-8 and 55")
 # stop ####
 #
 
+
 x = "Hi I'm Laurent and I'm trying to remove stop-words."
 txt = string_magic("Before: {x}\nAfter: {stop, ws ? x}")
 test(txt, "Before: Hi I'm Laurent and I'm trying to remove stop-words.\nAfter: Hi Laurent trying remove stop-words.")
@@ -775,6 +816,7 @@ test(txt, "Before: Hi I'm Laurent and I'm trying to remove stop-words.\nAfter: H
 #
 # if-else ####
 #
+
 
 # elementwise
 x = c(15, 550)
@@ -825,6 +867,7 @@ test(txt, "`x`,  b and `z`")
 # if ####
 #
 
+
 # special values: ., .len (or .N), .nchar (or .C)
 
 x = c(5, 25, 30, 7)
@@ -855,6 +898,7 @@ test(txt, "Example: x5, 2/5 and 3/0.")
 #
 # vif ####
 #
+
 
 x = c(5, 25, 30, 7)
 txt = string_magic("There are {vif(.len<3 ; not many ; many), C ? x} numbers.")
@@ -887,6 +931,7 @@ test(txt, "y = 5 + 12 + 20")
 # escaping ####
 #
 
+
 txt = string_magic("\\{} it's some braces")
 test(txt, "{} it's some braces")
 
@@ -902,6 +947,7 @@ test(txt, "I'm saying 'ha ] ha'!")
 #
 # user-defined ops ####
 #
+
 
 # without scope
 xplode = function(x, argument, options, ...){
@@ -965,6 +1011,7 @@ test_err_contains(string_vec("hi, {there"), "bracket & matched & escape")
 # multi line expressions ####
 #
 
+
 txt = string_magic("The solution to x + 32 = 5 is {
      y = 32
      z = 5
@@ -984,6 +1031,7 @@ test(txt, "First letters: abcdef")
 #
 # variables as arguments ####
 #
+
 
 txt = string_magic("Hi {you}!", you = "Omer")
 test(txt, "Hi Omer!")
@@ -1013,6 +1061,7 @@ test(txt, "The number is error")
 # default options ####
 #
 
+
 sma2 = string_magic_alias(.delim = "$[ ]")
 txt = sma2("x$[1:2]", .last = "C")
 test(txt, "x1 and x2")
@@ -1021,12 +1070,14 @@ test(txt, "x1 and x2")
 # .post + .last ####
 #
 
+
 x = string_magic("{1:5}0", .last = "num", .post = sum)
 test(x, 150)
 
 #
 # .default ####
 #
+
 
 x = string_magic("{1:5}0", .default = "'1|1'first, enum")
 test(x, "1 and 50")
