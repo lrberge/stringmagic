@@ -697,7 +697,7 @@ string_get = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
 #' 
 #' 
 string_split = function(x, split, simplify = TRUE, fixed = FALSE,
-                        ignore.case = FALSE, word = FALSE, unlist = FALSE, 
+                        ignore.case = FALSE, word = FALSE, 
                         envir = parent.frame()){
   
   x = check_set_character(x, mbt = TRUE, l0 = TRUE)
@@ -800,7 +800,7 @@ string_split = function(x, split, simplify = TRUE, fixed = FALSE,
 #'
 string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FALSE,
                            id_unik = TRUE, fixed = FALSE, ignore.case = FALSE,
-                           word = FALSE, dt = FALSE, ...){
+                           word = FALSE, envir = parent.frame(), dt = FALSE, ...){
 
   if(missing(x)){
     stop("Argument 'x' must be provied. PROBLEM: it is missing.")
@@ -2086,7 +2086,7 @@ string_extract = function(x, pattern, single = FALSE, simplify = TRUE, fixed = F
   
   info = format_simple_regex_flags(pat_parsed$patterns, 
                                    fixed = is_fixed, word = is_word, 
-                                   ignore = is_ignore, magic = is_magic, envir = .envir)
+                                   ignore = is_ignore, magic = is_magic, envir = envir)
   
   pattern = info$pattern
   is_fixed = info$fixed

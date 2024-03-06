@@ -15,6 +15,7 @@ string_split2df(
   fixed = FALSE,
   ignore.case = FALSE,
   word = FALSE,
+  envir = parent.frame(),
   dt = FALSE,
   ...
 )
@@ -66,6 +67,9 @@ as fixed (and not as a regular expression).}
 and b) patterns can be chained by separating them with a comma, they are combined with an OR logical operation.
 Example: if \code{word = TRUE}, then pattern = "The, mountain" will select strings containing either the word
 'The' or the word 'mountain'.}
+
+\item{envir}{Environment in which to evaluate the interpolations if the flag \code{"magic"} is provided.
+Default is \code{parent.frame()}.}
 
 \item{dt}{Logical, default is \code{FALSE}. Whether to return a \code{data.table}. See also the function \code{string_split2dt}.}
 
