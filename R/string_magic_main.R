@@ -380,19 +380,19 @@ save_user_fun = function(fun, alias, namespace){
 #' cat_column("code string_magic", "write the docs", "write the vignettes")
 #' 
 cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "", 
-                         .envir = parent.frame(), 
-                         .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
-                         .collapse = NULL, .trigger = TRUE, 
-                         .check = TRUE, .help = NULL, 
-                         .namespace = NULL){
+                     .envir = parent.frame(), 
+                     .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
+                     .collapse = NULL, .trigger = TRUE, 
+                     .check = TRUE, .help = NULL, 
+                     .namespace = NULL){
   
   if(!isTRUE(.trigger)) return(invisible(NULL))
   
   set_pblm_hook()
   txt = string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
-            .delim = .delim, .last = .last, .collapse = .collapse,
-            .check = .check, .help = .help,
-            .namespace = .namespace)
+                     .delim = .delim, .last = .last, .collapse = .collapse,
+                     .check = .check, .help = .help,
+                     .namespace = .namespace)
             
   check_character(.end, scalar = TRUE)
   
@@ -430,9 +430,9 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
   
   set_pblm_hook()
   txt = string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
-            .delim = .delim, .last = .last, .collapse = .collapse,
-            .check = .check, .help = .help,
-            .namespace = .namespace)
+                     .delim = .delim, .last = .last, .collapse = .collapse,
+                     .check = .check, .help = .help,
+                     .namespace = .namespace)
 
 
   check_character(.end, scalar = TRUE)
@@ -520,11 +520,11 @@ timer_magic = function(){
 
 #' @describeIn string_magic String interpolation with operation chaining
 string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
-                   .delim = c("{", "}"), .last = NULL, .post = NULL, .nest = FALSE,
-                   .collapse = NULL, .invisible = FALSE, .default = NULL,
-                   .trigger = TRUE, 
-                   .check = TRUE, .class = NULL, .help = NULL, 
-                   .namespace = NULL){
+                        .delim = c("{", "}"), .last = NULL, .post = NULL, .nest = FALSE,
+                        .collapse = NULL, .invisible = FALSE, .default = NULL,
+                        .trigger = TRUE, 
+                        .check = TRUE, .class = NULL, .help = NULL, 
+                        .namespace = NULL){
   
   if(!isTRUE(.trigger)) return(invisible(NULL))
 
@@ -558,10 +558,10 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
   } 
   
   res = string_magic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
-                            .vectorize = .vectorize, .help = .help, .nest = .nest,
-                            .collapse = .collapse, .is_root = TRUE, 
-                            .namespace = .namespace, .default = .default,
-                            .check = .check, .last = .last)
+                              .vectorize = .vectorize, .help = .help, .nest = .nest,
+                              .collapse = .collapse, .is_root = TRUE, 
+                              .namespace = .namespace, .default = .default,
+                              .check = .check, .last = .last)
   
   if(!is.null(attr(res, "group_index"))){
     # cleaning artifacts
@@ -587,8 +587,8 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
 
 #' @describeIn string_magic A simpler version of `string_magic` without any error handling to save a few micro seconds
 .string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
-                    .delim = c("{", "}"), .collapse = NULL, .last = NULL, .nest = FALSE,
-                    .trigger = TRUE, .namespace = NULL){
+                         .delim = c("{", "}"), .collapse = NULL, .last = NULL, .nest = FALSE,
+                         .trigger = TRUE, .namespace = NULL){
   
   if(!.trigger) return(invisible(NULL))
   
@@ -597,10 +597,10 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
   }
 
   string_magic_internal(..., .delim = .delim, .envir = .envir, 
-                      .sep = .sep, .namespace = .namespace, .nest = .nest,
-                      .vectorize = .vectorize, .is_root = TRUE, 
-                      .collapse = .collapse,
-                      .check = FALSE, .last = .last)
+                        .sep = .sep, .namespace = .namespace, .nest = .nest,
+                        .vectorize = .vectorize, .is_root = TRUE, 
+                        .collapse = .collapse,
+                        .check = FALSE, .last = .last)
 }
 
 # This is an internal alias (not exported)
@@ -615,12 +615,12 @@ sma = string_magic
 
 
 string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.frame(), .data = list(),
-                               .sep = "", .vectorize = FALSE,
-                               .collapse = NULL, .last = NULL, .nest = FALSE,
-                               .help = NULL, .is_root = FALSE, 
-                               .namespace = NULL, .user_funs = NULL,
-                               .valid_operators = NULL, .default = NULL,
-                               .check = FALSE, .plural_value = NULL){
+                                 .sep = "", .vectorize = FALSE,
+                                 .collapse = NULL, .last = NULL, .nest = FALSE,
+                                 .help = NULL, .is_root = FALSE, 
+                                 .namespace = NULL, .user_funs = NULL,
+                                 .valid_operators = NULL, .default = NULL,
+                                 .check = FALSE, .plural_value = NULL){
   
   # flag useful to easily identify this environment (used in error messages)
   is_string_magic_internal = TRUE
@@ -754,8 +754,9 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
         }
         
         res[[i]] = string_magic_internal(dots[[i]], .delim = .delim, .envir = .envir, 
-                                    .data = .data, .check = .check,
-                                    .user_funs = .user_funs, .valid_operators = .valid_operators)
+                                         .data = .data, .check = .check,
+                                         .user_funs = .user_funs, 
+                                         .valid_operators = .valid_operators)
       }
       
       res = unlist(res)
@@ -907,9 +908,9 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
         if(!is.null(.default)){
           # We apply the default operations
           xi = apply_simple_operations(xi, ".default", .default, .check, .envir, .data,
-                                    group_flag = 1 * grepl("~", .default, fixed = TRUE), 
-                                    .delim, .user_funs = .user_funs, 
-                                    .valid_operators = .valid_operators)
+                                       group_flag = 1 * grepl("~", .default, fixed = TRUE), 
+                                       .delim, .user_funs = .user_funs, 
+                                       .valid_operators = .valid_operators)
         }
 
       } else {
@@ -1030,8 +1031,9 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
           if(verbatim){
             if(grepl(BOX_OPEN, xi, fixed = TRUE)){
               xi = string_magic_internal(xi, .delim = .delim, .envir = .envir, .data = .data, 
-                                   .vectorize = concat_nested, .check = .check, 
-                                   .user_funs = .user_funs, .valid_operators = .valid_operators)
+                                         .vectorize = concat_nested, .check = .check, 
+                                         .user_funs = .user_funs, 
+                                         .valid_operators = .valid_operators)
             }
           } else if(!verbatim){
             # evaluation
@@ -1132,12 +1134,12 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
 
             if(.check){
               xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument,
-                                              .check = .check, .envir = .envir, 
-                                              group_flag = group_flag,
-                                              .delim = .delim, .user_funs = .user_funs, 
-                                              .valid_operators = .valid_operators),
-                                get_string_magic_context(), " See error below:",
-                                verbatim = TRUE, up = 1)
+                                            .check = .check, .envir = .envir, 
+                                            group_flag = group_flag,
+                                            .delim = .delim, .user_funs = .user_funs, 
+                                            .valid_operators = .valid_operators),
+                              get_string_magic_context(), " See error below:",
+                              verbatim = TRUE, up = 1)
             } else {
               xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
                                  .check = .check,
@@ -2923,8 +2925,9 @@ sma_pluralize = function(operators, xi, .delim, .envir, .data, .check,
          (op == "plural" && IS_PLURAL)){
           
           value = string_magic_internal(argument, .delim = .delim, .envir = .envir, .data = .data,
-                                  .check = .check, .plural_value = xi, 
-                                  .user_funs = .user_funs, .valid_operators = .valid_operators)
+                                        .check = .check, .plural_value = xi, 
+                                        .user_funs = .user_funs, 
+                                        .valid_operators = .valid_operators)
         if(value != ""){
           res[i] = value
         }        
@@ -3021,8 +3024,9 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
         }
         
         log_op_eval = string_magic_internal(log_op, .delim = .delim, .envir = .envir, .data = .data,
-                                      .check = .check, .plural_value = xi_val, 
-                                      .user_funs = .user_funs, .valid_operators = .valid_operators)
+                                            .check = .check, .plural_value = xi_val, 
+                                            .user_funs = .user_funs, 
+                                            .valid_operators = .valid_operators)
         
         if(!length(log_op) %in% c(1, n_x)){
           form = "{&cond ; true ; false}"
@@ -3091,8 +3095,8 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
         .data[[".len"]] = length(xi_val)
       }
     res = string_magic_internal(res, .delim = .delim, .envir = .envir, .data = .data,
-                           .check = .check, .plural_value = xi_val, 
-                           .user_funs = .user_funs, .valid_operators = .valid_operators)
+                                .check = .check, .plural_value = xi_val, 
+                                .user_funs = .user_funs, .valid_operators = .valid_operators)
   }
 
   res
@@ -3170,12 +3174,12 @@ apply_simple_operations = function(x, op, operations_string, .check = FALSE, .en
 
     if(.check){
       xi = check_expr(sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
-                                      group_flag = group_flag, .delim = .delim, .envir = .envir,
-                                      .user_funs = .user_funs, .valid_operators = .valid_operators),
-                                     "In the operation `{op}()`, the ",
-                                     "{&length(op_all) == 1 ; operation ; chain of operations} ",
-                                     " {bq?operations_string} led to a problem.", 
-                                     "\nPROBLEM: the operation {opi} failed. Look up the doc?")
+                                    group_flag = group_flag, .delim = .delim, .envir = .envir,
+                                    .user_funs = .user_funs, .valid_operators = .valid_operators),
+                      "In the operation `{op}()`, the ",
+                      "{&length(op_all) == 1 ; operation ; chain of operations} ",
+                      " {bq?operations_string} led to a problem.", 
+                      "\nPROBLEM: the operation {opi} failed. Look up the doc?")
     } else {
       xi = sma_operators(xi, op_parsed$operator, op_parsed$options, argument, 
                          group_flag = group_flag, .delim = .delim, .envir = .envir,
