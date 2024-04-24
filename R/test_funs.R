@@ -4,8 +4,23 @@
 # ~: basic test function
 #----------------------------------------------#
 
+update_test_counter = function(reset = FALSE){
+  n = getOption("TEST_COUNTER", default = 0)
+  if(reset){
+    options(TEST_COUNTER = 0)
+  } else {
+    options(TEST_COUNTER = n + 1)
+  }  
+}
+
+get_test_counter = function(){
+  getOption("TEST_COUNTER", default = 0)
+}
 
 test = function(x, y, type = "=", tol = 1e-6){
+  
+  update_test_counter()
+  
   mc = match.call()
   IS_Y = TRUE
   if(missing(type) && length(y) == 1 && is.character(y) && y %in% c("err", "=", "~")){
@@ -279,32 +294,32 @@ run_tests = function(chunk, from = 1, source = FALSE){
   
   location = "tests"
   if(grepl("/tests$", wd)){
-  location = "."
+    location = "."
   }
   
   dir_tests = list.dirs(location, recursive = FALSE)
   if(length(dir_tests) > 0){
-  # either all files in the dirs
-  all_files = list.files(dir_tests, pattern = ".R$", full.names = TRUE)
+    # either all files in the dirs
+    all_files = list.files(dir_tests, pattern = ".R$", full.names = TRUE)
   } else {
-  # either the files in the main test dir
-  all_files = list.files(location, pattern = ".R$", full.names = TRUE)
+    # either the files in the main test dir
+    all_files = list.files(location, pattern = ".R$", full.names = TRUE)
   }
   
   if(length(all_files) == 0){
-  stop("No test file was found in the folder './tests/'.")
+    stop("No test file was found in the folder './tests/'.")
   }
   
   if(isTRUE(source)){
-  assign("chunk", get("chunk", mode = "function"), parent.frame())
-  assign("test", get("test", mode = "function"), parent.frame())
-  assign("test_contains", get("test_contains", mode = "function"), parent.frame())
-  assign("test_err_contains", test_err_contains, parent.frame())
-  
-  for(f in all_files){
-    source(f)
-  }
-  return(NULL)
+    assign("chunk", get("chunk", mode = "function"), parent.frame())
+    assign("test", get("test", mode = "function"), parent.frame())
+    assign("test_contains", get("test_contains", mode = "function"), parent.frame())
+    assign("test_err_contains", test_err_contains, parent.frame())
+    
+    for(f in all_files){
+      source(f)
+    }
+    return(NULL)
   }  
 
   test_code = c()
@@ -312,12 +327,12 @@ run_tests = function(chunk, from = 1, source = FALSE){
   file_names = c()
   offset = 2
   for(f in all_files){
-  file_names = c(file_names, f)
-  f_open = file(f, encoding = "UTF-8")
-  new_code = readLines(f_open)
-  close(f_open)
-  test_code = c(test_code, new_code)
-  lines_per_file = c(lines_per_file, length(new_code))
+    file_names = c(file_names, f)
+    f_open = file(f, encoding = "UTF-8")
+    new_code = readLines(f_open)
+    close(f_open)
+    test_code = c(test_code, new_code)
+    lines_per_file = c(lines_per_file, length(new_code))
   }
 
   pkg = gsub(".+/", "", normalizePath(".", "/"))
@@ -493,14 +508,16 @@ run_tests = function(chunk, from = 1, source = FALSE){
       assign(var, get(var, env), parent.frame())
     }
     
-    command = .sma("rstudioapi::navigateToFile({Q?my_file_full}, {line_in_file})")
-    command = str2lang(command)
-    
-    eval(command)
+    if(interactive()){
+      command = .sma("rstudioapi::navigateToFile({Q?my_file_full}, {line_in_file})")
+      command = str2lang(command)
+      
+      eval(command)
+    }
 
   } else {
-  n_tests = sum(grepl("^test\\(", test_code))
-  print(paste0("tests performed successfully (", n_tests, ")"))
+    n_tests = get_test_counter()
+    message("tests performed successfully (", n_tests, ")")
   }
 }
 
@@ -515,8 +532,6 @@ non_ascii = function(folder = "R"){
   n = length(i_non_ascii)
 
   if(n == 0) return("No non-ASCII character found.")
-
-  cat("Tip: Type, e.g., 1750G to go to the line in VIM\n\n")
 
   for(id in seq(n)){
     i = i_non_ascii[id]
