@@ -312,7 +312,12 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
   }
 
   dots = vector("list", n)
-  dots_nm = ...names()
+  
+  if(getRversion() >= "4.1.0"){
+    dots_nm = ...names()
+  } else {
+    dots_nm = names(mc[["..."]])
+  }  
 
   # We first catch evaluation problems
   for(i in 1:n){
