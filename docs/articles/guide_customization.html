@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tailor-made functions and operations • stringmagic</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">stringmagic</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.2</span>
       </span>
     </div>
 
@@ -106,7 +106,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2023-08-23</h4>
+            <h4 data-toc-skip class="date">2024-04-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/guide_customization.rmd" class="external-link"><code>vignettes/guide_customization.rmd</code></a></small>
       <div class="hidden name"><code>guide_customization.rmd</code></div>
@@ -163,18 +163,19 @@ passing <code>as.formula</code> in the <code>.post</code> argument.</p>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span>, <span class="st">"Species"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{y} ~ {x}"</span>, .default <span class="op">=</span> <span class="st">"' + 'collapse"</span>, .post <span class="op">=</span> <span class="va">as.formula</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x000001a460b34058&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x0000011ee98bf220&gt;</span></span></code></pre></div>
 <p>Now that we see that our builder works with
 <code>string_magic</code>, we create a dedicated function with an
 alias.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fml_builder</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic_alias.html">string_magic_alias</a></span><span class="op">(</span>.default <span class="op">=</span> <span class="st">"' + 'collapse"</span>, .post <span class="op">=</span> <span class="va">as.formula</span><span class="op">)</span></span></code></pre></div>
-<p>The function <code>fml_builder</code> works as string_magic buut with
-different default values. Now we can apply it directly.</p>
+<p>The function <code>fml_builder</code> works as
+<code>string_magic</code> but with different default values. Now we can
+apply it directly.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x000001a45ff23798&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x0000011ee9d5add8&gt;</span></span></code></pre></div>
 <p>Since this function is just a call to <code>string_magic</code>, you
 can apply anything you want. Let’s scale the variables on the
 right-hand-side by using nesting:</p>
@@ -182,7 +183,7 @@ right-hand-side by using nesting:</p>
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span><span class="op">)</span></span>
 <span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {'+'collapse ! scale({x})}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ scale(Sepal.Length) + scale(Petal.Width)</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x000001a461fdc9d0&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x0000011eea23bb50&gt;</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="changing-str_clean">Changing <code>str_clean</code><a class="anchor" aria-label="anchor" href="#changing-str_clean"></a>
@@ -197,7 +198,8 @@ regular expressions, 2) a pipe (<code>" =&gt; "</code>), 3) the
 replacement. If you are not happy with the fact that regexes are
 separated with commas, or of the look of the pipe, no problem!</p>
 <p>Let’s change the default values, let’s: i) use a semi-colon
-separation, ii) use “&gt;&gt;” instead of the regular pipe.</p>
+separation, ii) use <code>"&gt;&gt;"</code> instead of the regular
+pipe.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_clean</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_clean.html">string_clean_alias</a></span><span class="op">(</span>split <span class="op">=</span> <span class="st">"; "</span>, pipe <span class="op">=</span> <span class="st">" &gt;&gt; "</span><span class="op">)</span></span>
 <span></span>
@@ -246,8 +248,8 @@ by any succession of these</li>
 <p>You can add any arbitraty operation to <code>string_magic</code>.
 There are two main ways:</p>
 <ul>
-<li>registering a custom sequence of regular string_magic operations
-(<code>string_magic_register_ops</code>)</li>
+<li>registering a custom sequence of regular <code>string_magic</code>
+operations (<code>string_magic_register_ops</code>)</li>
 <li>registering a custom function
 (<code>string_magic_register_fun</code>)</li>
 </ul>
@@ -255,9 +257,11 @@ There are two main ways:</p>
 <h4 id="sec_reg_ops">New operations as a sequence of existing operations<a class="anchor" aria-label="anchor" href="#sec_reg_ops"></a>
 </h4>
 <p>Create new sequence of operations with
-<code>string_magic_register_ops</code>. It takes two arguments: 1) the
-sequence of <code>string_magic</code> operations, and 2) the name of the
-new operation.</p>
+<code>string_magic_register_ops</code>. It takes two arguments:</p>
+<ol style="list-style-type: decimal">
+<li>the sequence of <code>string_magic</code> operations,</li>
+<li>the name of the new operation.</li>
+</ol>
 <p>For example, let’s create a new operation <code>h1</code> which
 formats a string into a header. It adds an hypen before the text and
 adds hyphens after the text up to the 40th column.</p>
@@ -272,17 +276,19 @@ adds hyphens after the text up to the 40th column.</p>
 <div class="section level4">
 <h4 id="new-operations-using-a-custom-function">New operations using a custom function<a class="anchor" aria-label="anchor" href="#new-operations-using-a-custom-function"></a>
 </h4>
-<p>To implement new operations using functions, you have two steps: 1)
-create the custom function, 2) register the function an provide an alias
+<p>To implement new operations using functions, you have two steps: 1.
+create the custom function, 2. register the function an provide an alias
 to the operation.</p>
 <p>First you need to create a function that will be applied to a
-character vector. That function <strong>must</strong> have at least the
-arguments <code>x</code> and <code>...</code>. Additionnaly, it can have
-the optional arguments: <code>argument</code>, <code>options</code>,
-<code>group</code>, <code>group_flag</code>. This function must return a
-vector. Optionnally, and only if relevant (see the last example), you
-can add an attribute <code>"group"</code> to the returned object which
-will be used in grouped operations.</p>
+character vector.</p>
+<p>That function <strong>must</strong> have at least the arguments
+<code>x</code> and <code>...</code>.</p>
+<p>Additionnaly, it can have the optional arguments:
+<code>argument</code>, <code>options</code>, <code>group</code>,
+<code>group_flag</code>. This function must return a vector.
+Optionnally, and only if relevant (see the last example), you can add an
+attribute <code>"group"</code> to the returned object which will be used
+in grouped operations.</p>
 <p>Second, you need to register the function with
 <code>string_magic_register_fun</code> and assign an alias to it.
 Optionnally, you can provide a list of valid options.</p>
@@ -299,7 +305,7 @@ words.</p>
 <span></span>
 <span><span class="co"># C) use it</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_vec.html">string_vec</a></span><span class="op">(</span><span class="st">"right, now"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Take heed, {emph, collapse? x}."</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Take heed, {emph, collapse ? x}."</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Take heed, *right* *now*."</span></span></code></pre></div>
 <p>More generally, the function taken by
 <code>string_magic_register_fun</code> is called internally by
@@ -400,16 +406,20 @@ is_num, etc).</p>
 <h2 id="sec_package">Using <code>stringmagic</code> with custom operations as a
 dependency<a class="anchor" aria-label="anchor" href="#sec_package"></a>
 </h2>
-<p>This is section is only relevant if: 1) you use
-<code>stringmagic</code> as a dependency in your package, and 2) you use
-custom <code>stringmagic</code> operations. If you answer “no” to any of
-these two points, do not read this section, it’s only about details.
-<em>Otherwise it’s a must read.</em></p>
+<p>This is section is only relevant if:</p>
+<ol style="list-style-type: decimal">
+<li>you use <code>stringmagic</code> as a dependency in your package,
+and</li>
+<li>you use custom <code>stringmagic</code> operations.</li>
+</ol>
+<p>If you answer “no” to any of these two points, do not read this
+section, it’s only about details. <em>Otherwise it’s a must
+read.</em></p>
 <p>To use custom <code>stringmagic</code> operations within a package,
 you need to explicitly register the operations in a specific namespace,
 and, when using the <code>stringmagic</code> functions, you need to add
-the argument .namespace telling where the new operations are
-located.</p>
+the argument <code>.namespace</code> telling where the new operations
+are located.</p>
 <div class="section level3">
 <h3 id="why-do-i-need-a-namespace">Why do I need a namespace?<a class="anchor" aria-label="anchor" href="#why-do-i-need-a-namespace"></a>
 </h3>
@@ -530,7 +540,7 @@ error:</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
       </footer>

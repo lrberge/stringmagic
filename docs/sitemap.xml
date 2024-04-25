@@ -82,6 +82,9 @@
     <loc>/reference/smagic_register_fun.html</loc>
   </url>
   <url>
+    <loc>/reference/stringmagic-package.html</loc>
+  </url>
+  <url>
     <loc>/reference/stringmagic.html</loc>
   </url>
   <url>
@@ -89,6 +92,9 @@
   </url>
   <url>
     <loc>/reference/string_clean.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_extract.html</loc>
   </url>
   <url>
     <loc>/reference/string_fill.html</loc>
@@ -110,6 +116,9 @@
   </url>
   <url>
     <loc>/reference/string_ops.html</loc>
+  </url>
+  <url>
+    <loc>/reference/string_split.html</loc>
   </url>
   <url>
     <loc>/reference/string_split2df.html</loc>
