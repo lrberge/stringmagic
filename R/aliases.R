@@ -159,7 +159,8 @@ string_magic_alias = function(.sep = "", .vectorize = FALSE,
 #' @describeIn cat_magic Create an alias of `cat_magic` with custom defaults
 cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "", 
                            .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
-                           .collapse = NULL, .check = TRUE, .namespace = NULL){
+                           .collapse = NULL, .trigger = TRUE, .check = TRUE, 
+                           .namespace = NULL){
   
   # checks
   check_character(.sep, scalar = TRUE)
@@ -169,6 +170,7 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
   .delim = check_set_delimiters(.delim)
   check_character(.last, scalar = TRUE, null = TRUE)
   check_character(.collapse, scalar = TRUE, null = TRUE)
+  check_logical(.trigger, scalar = TRUE)
   check_logical(.check, scalar = TRUE)
   check_character(.namespace, scalar = TRUE, null = TRUE)
   
@@ -187,6 +189,7 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
   vectorize = .vectorize
   last = .last
   collapse = .collapse
+  trigger = .trigger
   check = .check
   namespace = .namespace
   width = .width
@@ -195,13 +198,13 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
   res = function(..., .sep = sep, .end = end, .width = width, .leader = leader, 
                   .envir = parent.frame(), 
                   .vectorize = vectorize, .delim = delim, .last = last, 
-                  .collapse = collapse, 
+                  .collapse = collapse, .trigger = trigger,
                   .check = check, .help = NULL, 
                   .namespace = namespace){
     cat_magic(..., .sep = .sep, .end = .end, .width = .width, .leader = .leader, 
                   .envir = .envir, 
                   .vectorize = .vectorize, .delim = .delim, .last = .last, 
-                  .collapse = .collapse, 
+                  .collapse = .collapse, .trigger = .trigger,
                   .check = .check, .help = .help, 
                   .namespace = .namespace)
   }
@@ -212,7 +215,8 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
 #' @describeIn cat_magic Create an alias of `message_magic` with custom defaults
 message_magic_alias = function(.sep = "", .end = "\n", .width = FALSE, .leader = "", 
                            .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
-                           .collapse = NULL, .check = TRUE, .namespace = NULL){
+                           .collapse = NULL, .trigger = TRUE, 
+                           .check = TRUE, .namespace = NULL){
   
   # checks
   check_character(.sep, scalar = TRUE)
@@ -223,6 +227,7 @@ message_magic_alias = function(.sep = "", .end = "\n", .width = FALSE, .leader =
   check_character(.last, scalar = TRUE, null = TRUE)
   check_character(.collapse, scalar = TRUE, null = TRUE)
   check_logical(.check, scalar = TRUE)
+  check_logical(.trigger, scalar = TRUE)
   check_character(.namespace, scalar = TRUE, null = TRUE)
   
   # width is special
@@ -241,6 +246,7 @@ message_magic_alias = function(.sep = "", .end = "\n", .width = FALSE, .leader =
   vectorize = .vectorize
   last = .last
   collapse = .collapse
+  trigger = .trigger
   check = .check
   namespace = .namespace
   width = .width
@@ -249,14 +255,14 @@ message_magic_alias = function(.sep = "", .end = "\n", .width = FALSE, .leader =
   res = function(..., .sep = sep, .end = end, .width = width, .leader = leader, 
                   .envir = parent.frame(), 
                   .vectorize = vectorize, .delim = delim, .last = last, 
-                  .collapse = collapse, 
+                  .collapse = collapse, .trigger = trigger,
                   .check = check, .help = NULL, 
                   .namespace = namespace){
 
     message_magic(..., .sep = .sep, .end = .end, .width = .width, .leader = .leader, 
                   .envir = .envir, 
                   .vectorize = .vectorize, .delim = .delim, .last = .last, 
-                  .collapse = .collapse, 
+                  .collapse = .collapse, .trigger = .trigger,
                   .check = .check, .help = .help, 
                   .namespace = .namespace)
   }

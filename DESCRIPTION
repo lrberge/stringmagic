@@ -1,7 +1,7 @@
 Package: stringmagic
 Type: Package
 Title: Character String Operations and Interpolation, Magic Edition
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: 
   c(person(given = "Laurent R", family = "Berge", role = c("aut", "cre"), email = "laurent.berge@u-bordeaux.fr",
          comment = c(ORCID = "0000-0003-2736-1917")),
@@ -15,5 +15,5 @@ Encoding: UTF-8
 BugReports: https://github.com/lrberge/stringmagic/issues
 URL: https://lrberge.github.io/stringmagic/, https://github.com/lrberge/stringmagic
 VignetteBuilder: knitr
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)

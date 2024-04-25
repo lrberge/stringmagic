@@ -18,6 +18,7 @@ cat_magic_alias(
   .delim = c("{", "}"),
   .last = NULL,
   .collapse = NULL,
+  .trigger = TRUE,
   .check = TRUE,
   .namespace = NULL
 )
@@ -31,6 +32,7 @@ message_magic_alias(
   .delim = c("{", "}"),
   .last = NULL,
   .collapse = NULL,
+  .trigger = TRUE,
   .check = TRUE,
   .namespace = NULL
 )
@@ -149,6 +151,9 @@ it will be applied to the resulting vector.}
 that should be returned is collapsed with the value of this argument. This leads
 to return a string of length 1.}
 
+\item{.trigger}{Logical, default is \code{TRUE}. If \code{FALSE}, this function is not run. Can be
+useful in debugging situations where we want conditional evaluations.}
+
 \item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling (i.e.
 human readable error messages).
 Without error-handling you can save something of the order of 40us. Useful only
@@ -179,9 +184,6 @@ format the time. Ex: \code{.now('\%Y-\%m \%H:\%m')}.}
 \item{.envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
 evaluated using the environment from where the function is called or using the named
 arguments passed to the function.}
-
-\item{.trigger}{Logical, default is \code{TRUE}. If \code{FALSE}, this function is not run. Can be
-useful in debugging situations where we want conditional evaluations.}
 
 \item{.help}{Character scalar or \code{TRUE}, default is \code{NULL}. This argument
 is used to generate a dynamic help on the console. If \code{TRUE}, the user can select which
@@ -266,8 +268,8 @@ cat_column("code string_magic", "write the docs", "write the vignettes")
 \seealso{
 Other tools with aliases: 
 \code{\link{string_clean_alias}()},
-\code{\link{string_magic_alias}()},
 \code{\link{string_magic}()},
+\code{\link{string_magic_alias}()},
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }

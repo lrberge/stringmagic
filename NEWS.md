@@ -1,6 +1,13 @@
 
 # stringmagic 1.1.1
 
+# New features
+
+- add argument `.trigger` to `cat/message_magic_alias`
+
+
+# stringmagic 1.1.1
+
 ## Hot fix
 
 - make `stringmagic` compatible with `R` < 4.1.0 by removing calls to `...names()`.

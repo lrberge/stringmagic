@@ -286,8 +286,8 @@ Display messages while benefiting from \code{string_magic} interpolation with \c
 
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
-\code{\link{string_magic_alias}()},
 \code{\link{string_magic}()},
+\code{\link{string_magic_alias}()},
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }
