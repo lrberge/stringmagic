@@ -313,11 +313,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
 
   dots = vector("list", n)
   
-  if(getRversion() >= "4.1.0"){
-    dots_nm = ...names()
-  } else {
-    dots_nm = names(mc[["..."]])
-  }  
+  dots_nm = names(mc[["..."]]) 
 
   # We first catch evaluation problems
   for(i in 1:n){
@@ -1052,7 +1048,10 @@ suggest_item = function(x, items, write_msg = TRUE, newline = TRUE, info = "vari
   items_nx = substr(items, 1, nx)
 
   qui = items_nx == x
-  if(any(qui)){
+  if(length(x) == 0){
+    res = character(0)
+    
+  } else if(any(qui)){
     res = items[qui]
 
   } else {
@@ -1098,7 +1097,7 @@ suggest_item = function(x, items, write_msg = TRUE, newline = TRUE, info = "vari
         res = items[score > (nx * 0.65)]
       }
     }
-  }  
+  }
 
   if(write_msg){
     if(length(res) == 0){

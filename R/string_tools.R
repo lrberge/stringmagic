@@ -313,7 +313,7 @@ string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   if(length(x) == 0){
     return(logical(0))
   }
-
+  
   check_logical(ignore.case, scalar = TRUE)
   check_logical(fixed, scalar = TRUE)
   check_logical(word, scalar = TRUE)
@@ -351,7 +351,7 @@ string_is = function(x, ..., fixed = FALSE, ignore.case = FALSE, word = FALSE,
   for(i in seq_along(pattern)){
     pat = pattern[i]
     first_char = substr(pat, 1, 1)
-        
+    
     pat_parsed = parse_regex_pattern(pat, c("fixed", "word", "ignore", "magic"), 
                                      envir = envir)
     is_or = pat_parsed$is_or
