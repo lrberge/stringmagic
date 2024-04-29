@@ -106,7 +106,7 @@
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2024-04-25</h4>
+            <h4 data-toc-skip class="date">2024-04-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/guide_customization.rmd" class="external-link"><code>vignettes/guide_customization.rmd</code></a></small>
       <div class="hidden name"><code>guide_customization.rmd</code></div>
@@ -163,7 +163,7 @@ passing <code>as.formula</code> in the <code>.post</code> argument.</p>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span>, <span class="st">"Species"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{y} ~ {x}"</span>, .default <span class="op">=</span> <span class="st">"' + 'collapse"</span>, .post <span class="op">=</span> <span class="va">as.formula</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x0000011ee98bf220&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x000001d3e4d41910&gt;</span></span></code></pre></div>
 <p>Now that we see that our builder works with
 <code>string_magic</code>, we create a dedicated function with an
 alias.</p>
@@ -175,7 +175,7 @@ apply it directly.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {x}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ Sepal.Length + Petal.Width + Species</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x0000011ee9d5add8&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x000001d3e51ac440&gt;</span></span></code></pre></div>
 <p>Since this function is just a call to <code>string_magic</code>, you
 can apply anything you want. Let’s scale the variables on the
 right-hand-side by using nesting:</p>
@@ -183,7 +183,7 @@ right-hand-side by using nesting:</p>
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Petal.Width"</span><span class="op">)</span></span>
 <span><span class="fu">fml_builder</span><span class="op">(</span><span class="st">"{y} ~ {'+'collapse ! scale({x})}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Petal.Length ~ scale(Sepal.Length) + scale(Petal.Width)</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x0000011eea23bb50&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;environment: 0x000001d3e5635c40&gt;</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="changing-str_clean">Changing <code>str_clean</code><a class="anchor" aria-label="anchor" href="#changing-str_clean"></a>
