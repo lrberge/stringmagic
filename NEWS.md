@@ -1,7 +1,11 @@
 
-# stringmagic 1.1.1
+# stringmagic 1.1.2
 
-# New features
+## Hot fix
+
+- make `stringmagic` compatible with `R` in [4.1.0; 4.1.2].
+
+## New features
 
 - add argument `.trigger` to `cat/message_magic_alias`
 

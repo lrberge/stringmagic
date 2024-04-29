@@ -652,13 +652,12 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
 
   if(...length() == 1){
     
-    if(getRversion() >= "4.1.0"){
-      dots_nm = ...names()
-    } else {
-      dots_nm = names(list(...))
-    }  
+    # Note: using ...names() conditionnally adds 110us!!!! (getRversion() >= "4.1.3" is slow)
+    # otherwise the line below is about half a micro second
+    dots_nm = names(list(...))
+    is_no_names = !is.null(dots_nm)
     
-    if(!is.null(dots_nm)){
+    if(is_no_names){
       stop_hook("`string_magic` requires at least one character scalar to work.",
                 "\nNamed arguments are only used as variables on which to apply interpolation.",
                 "\nFIX: please provide at least one non-named argument.")
