@@ -1,4 +1,10 @@
 
+# stringmagic 1.1.3
+
+## Compatibility with old R versions
+
+- now `stringmagic` is compatible with at least R v3.5.0
+
 # stringmagic 1.1.2
 
 ## Hot fix
