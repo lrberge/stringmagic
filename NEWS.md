@@ -3,7 +3,7 @@
 
 ## Compatibility with old R versions
 
-- now `stringmagic` is compatible with at least R v3.5.0
+- `stringmagic` is now fully compatible with R v3.5.0 (at least)
 
 # stringmagic 1.1.2
 
