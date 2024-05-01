@@ -747,6 +747,11 @@ extract_first_variable = function(expr){
     return(NULL)
   }
   
+  # Needed to fix ensure compatibility with old R versions
+  if(is.expression(expr)){
+    expr = expr[[1]]
+  }
+  
   if(length(expr) == 1){
     return(expr)
   }
