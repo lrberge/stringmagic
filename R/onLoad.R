@@ -11,14 +11,50 @@ if(!exists("str2lang", asNamespace("base"))){
   }
 }
 
-if(is.factor(data.frame(x = "bonjour")$x)){
-  data.frame = function(..., stringsAsFactors = FALSE){
-    base::data.frame(..., stringsAsFactors = stringsAsFactors)
+change_defaults = function(fun_name, ...){
+  # I don't rewrite the function by attaching the body of the fun_name
+  # because I'm a bit wary of namespaces
+  #
+  # it would work for base R stuff but would be dangerous if extended to
+  # functions from imported packages
+  # it would also be a problem if some functions I use are conflicted with internal base R funs
+  # (although I think they're all exposed)
+  #
+  # So here it's pretty innocuous, it's a simple rewrite of the call
+  # but a bit less efficient
+  # 
+  
+  defaults = list(...)
+  for(i in seq_along(defaults)){
+    arg_val = parse(text = deparse(defaults[[i]], width.cutoff = 500), keep.source = FALSE)
+    if(is.expression(arg_val)){
+      arg_val = arg_val[[1]]
+    }
+    defaults[[i]] = arg_val
   }
   
-  as.data.frame = function(..., stringsAsFactors = FALSE){
-    base::as.data.frame(..., stringsAsFactors = stringsAsFactors)
+  fun = parse(text = fun_name, keep.source = FALSE)
+  if(is.expression(fun)){
+    fun = fun[[1]]
   }
+  
+  function(...){
+    mc = match.call()
+    mc_names = names(mc)
+    for(arg_name in setdiff(names(defaults), mc_names)){
+      mc[[arg_name]] = defaults[[i]]
+    }
+    
+    mc[[1]] = fun
+    eval(mc, parent.frame())
+  }
+  
+}
+
+if(is.factor(data.frame(x = "bonjour")$x)){
+  data.frame = change_defaults("base::data.frame", stringsAsFactors = FALSE)
+  
+  as.data.frame = change_defaults("base::as.data.frame", stringsAsFactors = FALSE)
 }
 
 
