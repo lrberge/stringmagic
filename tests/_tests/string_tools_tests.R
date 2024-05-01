@@ -303,6 +303,7 @@ target = data.frame(V1 = c(1, 3, 5), V2 = c("john", "marie", "harry"),
 test(df, target)
 
 df = string_vec("1, john,\n 3, marie,\n 5, harry", .df = "id, name")
+names(target) = c("id", "name")
 test(df, target)
 test(names(df), c("id", "name"))
 
