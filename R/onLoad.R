@@ -3,6 +3,10 @@
 # compatibility issues
 #
 
+# Nota:
+# - gregexec, used only in format_help(), does not exist in R 3.5.0
+#   => we can live without it
+#   
 
 
 if(!exists("str2lang", asNamespace("base"))){
