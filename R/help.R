@@ -22,7 +22,7 @@ generate_help_extensive = function(){
     
   if(mtime_origin <= mtime_destination){
     return(NULL)
-  }  
+  }
   
   # we check if browser is used
   for(f in list.files("R", full.names = TRUE)){

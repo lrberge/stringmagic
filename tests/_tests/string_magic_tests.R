@@ -848,7 +848,7 @@ x = c(15, 550)
 txt = string_magic("The values are{& length(x) < 5 ; ': {C ? .}' ; ' too many'}.")
 test(txt, "The values are: 15 and 550.")
 
-data = data.frame(x = x)
+data = data.frame(x = x, stringsAsFactors = FALSE)
 txt = string_magic("The values are{& length(data$x) < 5 ; ': {C ? .}' ; ' too many'}.")
 test(txt, "The values are: 15 and 550.")
 

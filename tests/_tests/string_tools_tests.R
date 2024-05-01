@@ -298,10 +298,12 @@ mat = string_vec("1, john,\n 3, marie,\n 5, harry", .cmat = TRUE)
 test(mat, structure(c("1", "3", "5", "john", "marie", "harry"), dim = 3:2))
 
 df = string_vec("1, john,\n 3, marie,\n 5, harry", .df = TRUE)
-test(df, data.frame(V1 = c(1, 3, 5), V2 = c("john", "marie", "harry")))
+target = data.frame(V1 = c(1, 3, 5), V2 = c("john", "marie", "harry"), 
+                    stringsAsFactors = FALSE)
+test(df, target)
 
 df = string_vec("1, john,\n 3, marie,\n 5, harry", .df = "id, name")
-test(df, data.frame(id = c(1, 3, 5), name = c("john", "marie", "harry")))
+test(df, target)
 test(names(df), c("id", "name"))
 
 df = string_vec("1, john,\n 3, marie,\n 5, harry", .df = c("id", "name"))
