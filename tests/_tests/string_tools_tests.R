@@ -198,13 +198,13 @@ test(val$x, c("Nor", "rain", "wind", "When", "my", "information"))
 test(val$obs, c(1L, 1L, 1L, 2L, 2L, 2L))
 test(val$id, c("ws", "ws", "ws", "jmk", "jmk", "jmk"))
 
-base = data.frame(text = x, my_id = id)
+base = data.frame(text = x, my_id = id, stringsAsFactors = FALSE)
 val = string_split2df(text ~ my_id, base, "[[:punct:] ]+")
 test(val$text, c("Nor", "rain", "wind", "When", "my", "information"))
 test(val$obs, c(1L, 1L, 1L, 2L, 2L, 2L))
 test(val$my_id, c("ws", "ws", "ws", "jmk", "jmk", "jmk"))
 
-base = data.frame(text = x, my_id = id)
+base = data.frame(text = x, my_id = id, stringsAsFactors = FALSE)
 val = string_split2df(text ~ my_id, base, "[[:punct:] ]+", add.pos = TRUE)
 test(val$pos, c(1L, 2L, 3L, 1L, 2L, 3L))
 
@@ -349,6 +349,7 @@ test(val, val_bis)
 ####
 #### string_split ####
 ####
+
 
 time = "This is the year 2024."
 
