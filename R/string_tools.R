@@ -909,12 +909,16 @@ string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
 
       id[[id_name]] = val
     }
+    
+    if(!is.character(x)){
+      x = as.character(x)
+    }
 
     x_name = deparse_short(fml[[2]])
     id_names = names(id)
 
   } else {
-    check_character(x)
+    check_set_character(x)
     x_name = "x"
   }
 
