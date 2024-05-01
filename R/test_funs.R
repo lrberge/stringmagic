@@ -143,21 +143,54 @@ test = function(x, y, type = "=", tol = 1e-6){
                "\n..ACTUAL: ", paste0(class(x), collapse = ", "))
         }
         
-        format_dp = function(expr){
-          expr_dp = deparse(expr, nlines = 4)
-          if(length(expr_dp) > 1){
-            etc = if(length(expr_dp) == 4) "... etc..." else ""
-            expr_dp = paste0("\n", paste0(head(expr_dp, 3), collapse = "\n"), etc)
+        if(identical(class(x), "data.frame")){
+          if(NCOL(x) != NCOL(y)){
+            stop("The lengths of two objects differ:",
+               "\nEXPECTED: ", NCOL(y), " variables",
+               "\n..ACTUAL: ", NCOL(x), " variables")
           }
-          expr_dp
+          
+          same_name = names(x) == names(y)
+          if(!all(same_name)){
+            i = which(!same_name)
+            stop("The names of two objects differ:",
+               "\nEXPECTED: ", paste0(i, ': ', names(y)[i], collapse = ", "),
+               "\n..ACTUAL: ", paste0(i, ': ', names(x)[i], collapse = ", "))
+          }
+          
+          same_values = sapply(1:NCOL(x), function(i) identical(x[[i]] == y[[i]]))
+          if(!all(same_values)){
+            i_pblm = which(!same_name)
+            text = c()
+            for(i in i_pblm){
+              pblm_out = capture.output(print(identical(y[[i]], x[[i]])))
+              pblm_out = paste(pblm_out, collapse = "\n")
+              text = c(text, pblm_out)
+            }
+            
+            text = paste0(names(x)[i_pblm], ": see problem below\n", text, collapse = "\n\n")
+            
+            stop("Some variables in the two objects differ:", text)
+          }
+          
+        } else {
+          format_dp = function(expr){
+            expr_dp = deparse(expr, nlines = 4)
+            if(length(expr_dp) > 1){
+              etc = if(length(expr_dp) == 4) "... etc..." else ""
+              expr_dp = paste0("\n", paste0(head(expr_dp, 3), collapse = "\n"), etc)
+            }
+            expr_dp
+          }
+          
+          y_dp = format_dp(y)
+          x_dp = format_dp(x)
+          
+          stop("The two objects differ:",
+              "\nEXPECTED: ", y_dp,
+              "\n..ACTUAL: ", x_dp)
         }
         
-        y_dp = format_dp(y)
-        x_dp = format_dp(x)
-        
-        stop("The two objects differ:",
-             "\nEXPECTED: ", y_dp,
-             "\n..ACTUAL: ", x_dp)
       }
     } else if(anyNA(x)){
       if(!all(is.na(x) == is.na(y))){
