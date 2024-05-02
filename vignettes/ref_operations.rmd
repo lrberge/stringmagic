@@ -639,9 +639,9 @@ cat_magic("v0: {x}",
           "v4: {4 shorten.dots ? x}", .sep = "\n")
 ```
 
-## Fill character strings: fill, align
+## Fill character strings: fill, align, width
 
-Fills the character strings up to a size. `align` is an alias to `fill`. 
+Fills the character strings up to a size in order to fit a given width. `align` and `width` are aliases to `fill`. 
 Options: `"right"` or `"center"`. Default is left-alignment of the strings. 
 
 The argument is optional and can be of the form `'n'` or `'n|s'`. By default if no argument
@@ -773,9 +773,9 @@ The upper case command (`Len`) adds the option `"letter"` (only for small number
 string_magic("Its size is {Len ? 1:8}")
 ```
 
-## Add newlines to force the string to fit a given width: width
+## Add newlines to force the string to fit a given width: swidth
 
-Formats the string to fit a given width by cutting at word boundaries. 
+Thie operation stands for "screen width". It formats the string to fit a given width by cutting at word boundaries and adding newlines appropriately. 
 Accepts arguments of the form `'n'` or `'n|s'`, with `n` a number and `s` a string. 
 An argument of the form `'n|s'` will add `s` at the beginning of each line. Further,
 by default a trailing white space is added to `s`; to remove this 
@@ -787,9 +787,9 @@ uses the variable `.sw` which will capture the value of the current screen width
 ```{r}
 x = "this is a long sentence"
 cat_magic("------ version 0 ------\n{x}", 
-          "------ version 1 ------\n{15 width ? x}", 
-          "------ version 2 ------\n{'15|#>'width ? x}",
-          "------ version 3 ------\n{'15|#>_'width ? x}", .sep = "\n")
+          "------ version 1 ------\n{15 swidth ? x}", 
+          "------ version 2 ------\n{'15|#>'swidth ? x}",
+          "------ version 3 ------\n{'15|#>_'swidth ? x}", .sep = "\n")
 ```
 
 ## Formatted time difference: difftime

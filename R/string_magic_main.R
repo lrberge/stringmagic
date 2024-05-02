@@ -421,7 +421,8 @@ catma = cat_magic
 #' @describeIn cat_magic Display messages using interpolated strings
 message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "", 
                          .envir = parent.frame(), 
-                         .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
+                         .vectorize = FALSE, .delim = c("{", "}"), 
+                         .last = "'min(100, .sw)'swidth", 
                          .collapse = NULL, .trigger = TRUE,
                          .check = TRUE, .help = NULL, 
                          .namespace = NULL){
@@ -2194,8 +2195,10 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     # END: paste/insert
 
-  } else if(op %in% c("fill", "align")){
+  } else if(op %in% c("fill", "align", "width")){
     # fill, align ####
+    
+    # all are equivalent
     
     valid_options = c("right", "center")
     options = check_set_options(options, valid_options, op = op)
@@ -2382,7 +2385,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     if("upper" %in% options){
       res = gsub("^(.)", "\\U\\1", res, perl = TRUE)
     }
-  } else if(op == "width"){
+  } else if(op == "swidth"){
     # width, difftime ####
     
     sw = getOption("width")
@@ -3240,7 +3243,8 @@ setup_operations = function(){
   options("string_magic_operations_v1.0.0" = sort(OPERATORS))
   
   # dp: v1.1.0
-  OPERATORS = c(OPERATORS, "dp", "deparse")
+  # swidth: v1.1.3
+  OPERATORS = c(OPERATORS, "dp", "deparse", "swidth")
   
   options("string_magic_operations_default" = sort(OPERATORS))
   
