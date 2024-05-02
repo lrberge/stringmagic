@@ -302,8 +302,9 @@ save_user_fun = function(fun, alias, namespace){
 #' 
 #' @inheritParams string_magic
 #' 
-#' @param .end Character scalar, default is `""` (the empty string). This string 
-#' will be collated at the end of the message (a common alternative is `"\n"`).
+#' @param .end Character scalar, default is `""` (the empty string) for `cat_magic`, 
+#' and `"\n"` (a newline) for `message_magic`. 
+#' This string will be collated at the end of the message (a common alternative is `"\n"`).
 #' @param .width Can be 1) a positive integer, 2) a number in (0;1), 3) `FALSE` (default 
 #' for `cat_magic`), or 4) `NULL` (default for `message_magic`). It represents the target 
 #' width of the message on the user console. Newlines will be added *between words* to fit the
@@ -312,10 +313,10 @@ save_user_fun = function(fun, alias, namespace){
 #' 1. positive integer: number of characters
 #' 2. number (0;1): fraction of the screen
 #' 3. `FALSE`: does not add newlines
-#' 4. `NULL`: the min between 120 characters and 90% of the screen width
+#' 4. `NULL`: the min between 100 characters and 90% of the screen width
 #' 
 #' Note that you can use the special variable `.sw` to refer to the screen width. Hence the value
-#' `NULL` is equivalent to using `min(120, 0.9*.sw)`.
+#' `NULL` is equivalent to using `min(100, 0.9*.sw)`.
 #' @param .leader Character scalar, default is `TRUE`. Only used if argument `.width` is not `FALSE`. 
 #' Whether to add a leading character string right after the extra new lines.
 #' 
@@ -397,6 +398,9 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
   check_character(.end, scalar = TRUE)
   
   # all this is needed to implement lazy default values with  yet to be evaluated expressions (.sw)
+  if(is.character(.width)){
+    .width = str2lang(.width)
+  }
   is_call = isTRUE(try(is.call(.width), silent = TRUE))
   .width = if(is_call) .width else substitute(.width)
   .width = check_set_width(.width)
@@ -419,10 +423,11 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
 catma = cat_magic
 
 #' @describeIn cat_magic Display messages using interpolated strings
-message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "", 
+message_magic = function(..., .sep = "", .end = "\n", .width = "min(100, .sw)", 
+                         .leader = "", 
                          .envir = parent.frame(), 
                          .vectorize = FALSE, .delim = c("{", "}"), 
-                         .last = "'min(100, .sw)'swidth", 
+                         .last = NULL, 
                          .collapse = NULL, .trigger = TRUE,
                          .check = TRUE, .help = NULL, 
                          .namespace = NULL){
@@ -438,6 +443,9 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL, .leader = "
 
   check_character(.end, scalar = TRUE)
   
+  if(is.character(.width)){
+    .width = str2lang(.width)
+  }
   is_call = isTRUE(try(is.call(.width), silent = TRUE))
   .width = if(is_call) .width else substitute(.width)
   .width = check_set_width(.width)

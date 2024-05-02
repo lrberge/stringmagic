@@ -708,7 +708,7 @@ test(num, c(3, 2, 4))
 
 
 x = "Rome, l'unique objet de mon ressentiment, Rome a qui vient ton bras d'immoler mon amant"
-txt = string_magic("Voici le texte a apprendre:\n{'40|>'width ? x}.")
+txt = string_magic("Voici le texte a apprendre:\n{'40|>'swidth ? x}.")
 test(txt, c("Voici le texte a apprendre:\n> Rome, l'unique objet de mon\n> ressentiment, Rome a qui vient ton\n> bras d'immoler mon amant."))
 
 #

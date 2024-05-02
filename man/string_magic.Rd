@@ -500,7 +500,8 @@ The difference between 'n|s' and 'n||s' is that in the second case the strings
 will always be of maximum size \code{n}, while in the first case they can be of length \code{n + nchar(s)}.
 Ex: \code{string_magic("{4k ! long sentence}")} leads to "long",  \code{string_magic("{'4|..'k ! long sentence}") }
 leads to "long..", \code{string_magic("{'4||..'k ! long sentence}")} leads to "lo..".
-\item fill: fills the character strings up to a size. Options: "right", "center".
+\item fill, align (alias), width (alias): fills the character strings up to a size in order
+to fit a given width. Options: "right", "center".
 Accepts arguments of the form \code{'n'} or \code{'n|s'}, with \code{n} a number and \code{s} a symbol.
 Default is left-alignment of the strings.
 Option "right" right aligns and "center" centers the strings. When using \code{'n|s'}, the symbol \code{s}
@@ -560,17 +561,18 @@ as letter but uppercases the first letter.
 By default, commas are added to separate thousands. Use uption "num" to preserve
 a regular numeric format.
 Example: \code{string_magic("Size = {len ? 1:5000}")} leads to "Size = 5,000".
-\item width: formats the string to fit a given width by cutting at word boundaries.
+\item swidth: stands for screen width. Formats the string to fit a given width
+by cutting at word boundaries and adding newlines appropriately.
 Accepts arguments of the form \code{'n'} or \code{'n|s'}, with \code{n} a number and \code{s} a string.
 An argument of the form \code{'n|s'} will add \code{s} at the beginning of each line. Further,
 by default a trailing white space is added to \code{s}; to remove this
 behavior, add an underscore at the end of it.
-The argument \code{n} is either
-an integer giving the target character width (minimum is 15), or it can be a fraction expressing the
+The argument \code{n} is either an integer giving the target character
+width (minimum is 15), or it can be a fraction expressing the
 target size as a fraction of the current screen. Finally it can be an expression that
 uses the variable \code{.sw} which will capture the value of the current screen width.
-Ex.1: \code{string_magic("{15 width ! this is a long sentence}")} leads to "this is a long\\nsentence".
-Ex.2: \code{string_magic("{15 width.#> ! this is a long sentence}")} leads to "#> this is a long\\n#> sentence".
+Ex.1: \code{string_magic("{15 swidth ! this is a long sentence}")} leads to "this is a long\\nsentence".
+Ex.2: \code{string_magic("{15 swidth.#> ! this is a long sentence}")} leads to "#> this is a long\\n#> sentence".
 \item difftime: displays a formatted time difference. Option "silent" does not report a warning if the
 operation fails. It accepts either objects of class \code{POSIXt} or \code{difftime}.
 Example: \verb{x = Sys.time() ; Sys.sleep(0.5) ; string_magic("Time: \{difftime ? x\}")} leads to something

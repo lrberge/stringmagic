@@ -213,9 +213,9 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
 }
 
 #' @describeIn cat_magic Create an alias of `message_magic` with custom defaults
-message_magic_alias = function(.sep = "", .end = "\n", .width = FALSE, .leader = "", 
+message_magic_alias = function(.sep = "", .end = "\n", .width = "min(100, .sw)", .leader = "", 
                            .vectorize = FALSE, .delim = c("{", "}"), 
-                           .last = "'min(100, .sw)'swidth", 
+                           .last = NULL, 
                            .collapse = NULL, .trigger = TRUE, 
                            .check = TRUE, .namespace = NULL){
   
