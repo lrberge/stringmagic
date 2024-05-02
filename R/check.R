@@ -505,7 +505,7 @@ check_set_width = function(width_expr){
   }
   
   if(is.null(width)){
-    width = min(120, 0.9 * sw)
+    width = min(100, 0.9 * sw)
   }
   
   width

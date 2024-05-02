@@ -316,7 +316,7 @@ save_user_fun = function(fun, alias, namespace){
 #' 4. `NULL`: the min between 100 characters and 90% of the screen width
 #' 
 #' Note that you can use the special variable `.sw` to refer to the screen width. Hence the value
-#' `NULL` is equivalent to using `min(100, 0.9*.sw)`.
+#' `NULL` is equivalent to using `min(100, 0.9*.sw)` (which can be passed as a character string).
 #' @param .leader Character scalar, default is `TRUE`. Only used if argument `.width` is not `FALSE`. 
 #' Whether to add a leading character string right after the extra new lines.
 #' 
@@ -325,7 +325,7 @@ save_user_fun = function(fun, alias, namespace){
 #' with respect to `cat`/`message`. It's the ability to add newlines after words for 
 #' the message to fit a target width. This is controlled with the argument `.width`. This is 
 #' active by default for `message_magic` (default is `.width = NULL` which leads to the 
-#' minimum betwen 120 characters and 90% of the screen width).
+#' minimum betwen 100 characters and 90% of the screen width).
 #' 
 #' You can very easily change the default values with the alias generators `cat_magic_alias` and 
 #' `message_magic_alias`.
@@ -423,7 +423,7 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
 catma = cat_magic
 
 #' @describeIn cat_magic Display messages using interpolated strings
-message_magic = function(..., .sep = "", .end = "\n", .width = "min(100, .sw)", 
+message_magic = function(..., .sep = "", .end = "\n", .width = NULL, 
                          .leader = "", 
                          .envir = parent.frame(), 
                          .vectorize = FALSE, .delim = c("{", "}"), 

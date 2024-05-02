@@ -26,11 +26,11 @@ cat_magic_alias(
 message_magic_alias(
   .sep = "",
   .end = "\\n",
-  .width = FALSE,
+  .width = "min(100, .sw)",
   .leader = "",
   .vectorize = FALSE,
   .delim = c("{", "}"),
-  .last = "'min(100, .sw)'swidth",
+  .last = NULL,
   .collapse = NULL,
   .trigger = TRUE,
   .check = TRUE,
@@ -80,7 +80,7 @@ message_magic(
   .envir = parent.frame(),
   .vectorize = FALSE,
   .delim = c("{", "}"),
-  .last = "'min(100, .sw)'swidth",
+  .last = NULL,
   .collapse = NULL,
   .trigger = TRUE,
   .check = TRUE,
@@ -97,7 +97,7 @@ mema(
   .envir = parent.frame(),
   .vectorize = FALSE,
   .delim = c("{", "}"),
-  .last = "'min(100, .sw)'swidth",
+  .last = NULL,
   .collapse = NULL,
   .trigger = TRUE,
   .check = TRUE,
@@ -109,8 +109,9 @@ mema(
 \item{.sep}{Character scalar, default is the empty string \code{""}. It is used to collapse all
 the elements in \code{...} before applying any operation.}
 
-\item{.end}{Character scalar, default is \code{""} (the empty string). This string
-will be collated at the end of the message (a common alternative is \code{"\\n"}).}
+\item{.end}{Character scalar, default is \code{""} (the empty string) for \code{cat_magic},
+and \code{"\\n"} (a newline) for \code{message_magic}.
+This string will be collated at the end of the message (a common alternative is \code{"\\n"}).}
 
 \item{.width}{Can be 1) a positive integer, 2) a number in (0;1), 3) \code{FALSE} (default
 for \code{cat_magic}), or 4) \code{NULL} (default for \code{message_magic}). It represents the target
@@ -120,11 +121,11 @@ target width.
 \item positive integer: number of characters
 \item number (0;1): fraction of the screen
 \item \code{FALSE}: does not add newlines
-\item \code{NULL}: the min between 120 characters and 90\% of the screen width
+\item \code{NULL}: the min between 100 characters and 90\% of the screen width
 }
 
 Note that you can use the special variable \code{.sw} to refer to the screen width. Hence the value
-\code{NULL} is equivalent to using \code{min(120, 0.9*.sw)}.}
+\code{NULL} is equivalent to using \code{min(100, 0.9*.sw)} (which can be passed as a character string).}
 
 \item{.leader}{Character scalar, default is \code{TRUE}. Only used if argument \code{.width} is not \code{FALSE}.
 Whether to add a leading character string right after the extra new lines.}
@@ -207,7 +208,7 @@ These functions are \code{\link[base:cat]{base::cat()}}/\code{\link[=message]{me
 with respect to \code{cat}/\code{message}. It's the ability to add newlines after words for
 the message to fit a target width. This is controlled with the argument \code{.width}. This is
 active by default for \code{message_magic} (default is \code{.width = NULL} which leads to the
-minimum betwen 120 characters and 90\% of the screen width).
+minimum betwen 100 characters and 90\% of the screen width).
 
 You can very easily change the default values with the alias generators \code{cat_magic_alias} and
 \code{message_magic_alias}.

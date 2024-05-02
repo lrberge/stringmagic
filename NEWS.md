@@ -5,6 +5,12 @@
 
 - `stringmagic` is now fully compatible with R v3.5.0 (at least)
 
+## Minor changes
+
+- the new operator `swidth` (screen width) replaces the operator `width`. The operator width becomes an alias for `fill`.
+
+- the default screen width for `message_magic` becomes the minimum between 100 characters and 90% of the current screen size (actually the console size).
+
 # stringmagic 1.1.2
 
 ## Hot fix
