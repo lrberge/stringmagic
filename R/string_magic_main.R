@@ -698,7 +698,7 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
         }
         dots[is_var] = NULL      
       }
-    }    
+    }
     
     if(length(dots) == 0){
       stop_hook("`string_magic` requires at least one character scalar to work.",
@@ -3100,9 +3100,10 @@ sma_ifelse = function(operators, xi, xi_val, .envir, .data, .delim, .check,
        if(true_long){
         res = true
         if(false_long){
-          res[xi] = false[xi]
+          index_false = which(!xi)
+          res[index_false] = false[index_false]
         } else {
-          res[xi] = false
+          res[!xi] = false
         }
        } else {
         res = false

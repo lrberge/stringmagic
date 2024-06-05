@@ -5,6 +5,10 @@
 
 - `stringmagic` is now fully compatible with R v3.5.0 (at least)
 
+## Bugs
+
+- fix major bug in the if-else operator (`&`) leading to opposite operations
+
 ## Minor changes
 
 - the new operator `swidth` (screen width) replaces the operator `width`. The operator width becomes an alias for `fill`.
