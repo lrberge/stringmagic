@@ -9,6 +9,10 @@
 
 - fix major bug in the if-else operator (`&`) leading to opposite operations
 
+## New features
+
+- add the argument `.data` to `string_magic()`, used to evaluate variables in the interpolations
+
 ## Minor changes
 
 - the new operator `swidth` (screen width) replaces the operator `width`. The operator width becomes an alias for `fill`.

@@ -27,6 +27,9 @@
 #' @param .envir An environment used to evaluate the variables in `"{}"`. By default the variables are
 #' evaluated using the environment from where the function is called or using the named 
 #' arguments passed to the function.
+#' @param .data A list used to evaluate the variables in `"{}"`. Default is the empty list.
+#' By default the variables are evaluated using the environment from where the 
+#' function is called or using the named arguments passed to the function.
 #' @param .sep Character scalar, default is the empty string `""`. It is used to collapse all
 #'  the elements in `...` before applying any operation.
 #' @param .vectorize Logical scalar, default is `FALSE`. If `TRUE`, Further, elements in `...` are 

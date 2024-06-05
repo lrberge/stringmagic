@@ -528,7 +528,8 @@ timer_magic = function(){
 
 
 #' @describeIn string_magic String interpolation with operation chaining
-string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE, 
+string_magic = function(..., .envir = parent.frame(), .data = list(), 
+                        .sep = "", .vectorize = FALSE, 
                         .delim = c("{", "}"), .last = NULL, .post = NULL, .nest = FALSE,
                         .collapse = NULL, .invisible = FALSE, .default = NULL,
                         .trigger = TRUE, 
@@ -541,6 +542,11 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
     set_pblm_hook()
     
     if(!missing(.envir)) check_envir(.envir)
+    if(!missing(.data)){
+      if(!is.list(.data)){
+        stop("The argument `.data` must be a list or a data.frame.")
+      }
+    }
     if(!missing(.sep)) check_character(.sep, scalar = TRUE)
     if(!missing(.vectorize)) check_logical(.vectorize, scalar = TRUE)
     if(!missing(.nest)) check_logical(.nest, scalar = TRUE)
@@ -566,7 +572,8 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
     }
   } 
   
-  res = string_magic_internal(..., .delim = .delim, .envir = .envir, .sep = .sep,
+  res = string_magic_internal(..., .delim = .delim, 
+                              .envir = .envir, .data = .data, .sep = .sep,
                               .vectorize = .vectorize, .help = .help, .nest = .nest,
                               .collapse = .collapse, .is_root = TRUE, 
                               .namespace = .namespace, .default = .default,
@@ -595,7 +602,8 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
 }
 
 #' @describeIn string_magic A simpler version of `string_magic` without any error handling to save a few micro seconds
-.string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FALSE,
+.string_magic = function(..., .envir = parent.frame(), .data = list(), 
+                         .sep = "", .vectorize = FALSE,
                          .delim = c("{", "}"), .collapse = NULL, .last = NULL, .nest = FALSE,
                          .trigger = TRUE, .namespace = NULL){
   
@@ -605,7 +613,8 @@ string_magic = function(..., .envir = parent.frame(), .sep = "", .vectorize = FA
     .delim = strsplit(.delim, " ", fixed = TRUE)[[1]]
   }
 
-  string_magic_internal(..., .delim = .delim, .envir = .envir, 
+  string_magic_internal(..., .delim = .delim, 
+                        .envir = .envir, .data = .data,
                         .sep = .sep, .namespace = .namespace, .nest = .nest,
                         .vectorize = .vectorize, .is_root = TRUE, 
                         .collapse = .collapse,

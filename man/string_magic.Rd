@@ -9,6 +9,7 @@
 string_magic(
   ...,
   .envir = parent.frame(),
+  .data = list(),
   .sep = "",
   .vectorize = FALSE,
   .delim = c("{", "}"),
@@ -28,6 +29,7 @@ string_magic(
 .string_magic(
   ...,
   .envir = parent.frame(),
+  .data = list(),
   .sep = "",
   .vectorize = FALSE,
   .delim = c("{", "}"),
@@ -41,6 +43,7 @@ string_magic(
 sma(
   ...,
   .envir = parent.frame(),
+  .data = list(),
   .sep = "",
   .vectorize = FALSE,
   .delim = c("{", "}"),
@@ -78,6 +81,10 @@ format the time. Ex: \code{.now('\%Y-\%m \%H:\%m')}.}
 \item{.envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
 evaluated using the environment from where the function is called or using the named
 arguments passed to the function.}
+
+\item{.data}{A list used to evaluate the variables in \code{"{}"}. Default is the empty list.
+By default the variables are evaluated using the environment from where the
+function is called or using the named arguments passed to the function.}
 
 \item{.sep}{Character scalar, default is the empty string \code{""}. It is used to collapse all
 the elements in \code{...} before applying any operation.}
