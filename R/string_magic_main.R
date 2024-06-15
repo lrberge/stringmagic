@@ -666,6 +666,9 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
     } else {
       .valid_operators = getOption("string_magic_operations_default")
     }
+    if(length(.data) > 0){
+      .data = unclass(.data)
+    }
   }
 
   if(...length() == 1){
