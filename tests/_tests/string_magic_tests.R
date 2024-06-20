@@ -864,8 +864,8 @@ txt = string_magic("{C ! {&&x %% 2 == 1;{y}}}")
 test(txt, "a, 2 and c")
 
 z = tail(letters, 3)
-txt = string_magic("{C ! {&x %% 2 == 1; {y} ; {bq?z}}}")
-test(txt, "`x`,  b and `z`")
+txt = string_magic("{C ! {&x %% 2 == 1 ; {y} ; {bq?z}}}")
+test(txt, "a, `y` and c")
 
 #
 # if ####
