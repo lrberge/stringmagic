@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>`string_magic`'s operations: The reference • stringmagic</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">stringmagic</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.3</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@ reference</h1>
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2024-04-29</h4>
+            <h4 data-toc-skip class="date">2024-06-20</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/ref_operations.rmd" class="external-link"><code>vignettes/ref_operations.rmd</code></a></small>
       <div class="hidden name"><code>ref_operations.rmd</code></div>
@@ -686,11 +686,11 @@ Format<a class="anchor" aria-label="anchor" href="#format-the-values-with-basefo
 string. By default, the values are left aligned, <em>even numbers</em>
 (differently from <code><a href="https://rdrr.io/r/base/format.html" class="external-link">base::format()</a></code>’s behavior). The upper
 case command (<code>Format</code>) applies right alignment. Options:
-<code>"0"</code>, <code>"zero"</code>, <code>"right"</code>,
-<code>"center"</code>. Options <code>"0"</code> or <code>"zero"</code>
-fills the blanks with 0s: useful to format numbers. Option
-<code>"right"</code> right aligns, and <code>"center"</code> centers the
-strings.</p>
+<code>"0"</code>, <code>"left"</code>, <code>"zero"</code>,
+<code>"right"</code>, <code>"center"</code>. Options <code>"0"</code> or
+<code>"zero"</code> fills the blanks with 0s: useful to format numbers.
+Option <code>"right"</code> right aligns, and <code>"center"</code>
+centers the strings.</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">12345</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"left  : {format, q, enum ? x}"</span>, </span>
@@ -877,10 +877,11 @@ use a double pipe for the argument <code>s</code>, like in
 <span><span class="co">#&gt; v4: lon..</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="fill-character-strings-fill-align">Fill character strings: fill, align<a class="anchor" aria-label="anchor" href="#fill-character-strings-fill-align"></a>
+<h3 id="fill-character-strings-fill-align-width">Fill character strings: fill, align, width<a class="anchor" aria-label="anchor" href="#fill-character-strings-fill-align-width"></a>
 </h3>
-<p>Fills the character strings up to a size. <code>align</code> is an
-alias to <code>fill</code>. Options: <code>"right"</code> or
+<p>Fills the character strings up to a size in order to fit a given
+width. <code>align</code> and <code>width</code> are aliases to
+<code>fill</code>. Options: <code>"right"</code> or
 <code>"center"</code>. Default is left-alignment of the strings.</p>
 <p>The argument is optional and can be of the form <code>'n'</code> or
 <code>'n|s'</code>. By default if no argument is provided, of if
@@ -912,14 +913,14 @@ for more information.</p>
 </h3>
 <p>Pastes a custom character string to all elements of the string. The
 operations <code>paste</code> and <code>append</code> are equivalent.
-This operation has no default. Options: <code>"both"</code>,
-<code>"right"</code>, <code>"front"</code>, <code>"back"</code>,
-<code>"delete"</code>. By default, a string is pasted on the left.
-Option <code>"right"</code> pastes on the right and <code>"both"</code>
-pastes on both sides. Option <code>"front"</code> only pastes on the
-first element while option <code>"back"</code> only pastes on the last
-element. Option <code>"delete"</code> first replaces all elements with
-the empty string.</p>
+This operation has no default. Options: <code>"left"</code>,
+<code>"both"</code>, <code>"right"</code>, <code>"front"</code>,
+<code>"back"</code>, <code>"delete"</code>. By default, a string is
+pasted on the left. Option <code>"right"</code> pastes on the right and
+<code>"both"</code> pastes on both sides. Option <code>"front"</code>
+only pastes on the first element while option <code>"back"</code> only
+pastes on the last element. Option <code>"delete"</code> first replaces
+all elements with the empty string.</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"y = {'x'paste, ' + 'collapse ? 1:3}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "y = x1 + x2 + x3"</span></span></code></pre></div>
@@ -1026,7 +1027,7 @@ two</li>
 <span><span class="co"># default is at 7</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{sample(100, 30)}"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum ? x}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "The problematic variables are x2, x4, x5, x7, x23, x24 and 24 others."</span></span>
+<span><span class="co">#&gt; [1] "The problematic variables are x2, x4, x10, x13, x15, x17 and 24 others."</span></span>
 <span></span>
 <span><span class="co"># you can augment or reduce the numbers to display with an option</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum.3 ? x}."</span><span class="op">)</span></span>
@@ -1054,10 +1055,11 @@ number is formatted: commas are inserted to separate thousands.</p>
 <span><span class="co">#&gt; [1] "Its size is eight"</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="add-newlines-to-force-the-string-to-fit-a-given-width-width">Add newlines to force the string to fit a given width: width<a class="anchor" aria-label="anchor" href="#add-newlines-to-force-the-string-to-fit-a-given-width-width"></a>
+<h3 id="add-newlines-to-force-the-string-to-fit-a-given-width-swidth">Add newlines to force the string to fit a given width: swidth<a class="anchor" aria-label="anchor" href="#add-newlines-to-force-the-string-to-fit-a-given-width-swidth"></a>
 </h3>
-<p>Formats the string to fit a given width by cutting at word
-boundaries. Accepts arguments of the form <code>'n'</code> or
+<p>Thie operation stands for “screen width”. It formats the string to
+fit a given width by cutting at word boundaries and adding newlines
+appropriately. Accepts arguments of the form <code>'n'</code> or
 <code>'n|s'</code>, with <code>n</code> a number and <code>s</code> a
 string. An argument of the form <code>'n|s'</code> will add
 <code>s</code> at the beginning of each line. Further, by default a
@@ -1071,9 +1073,9 @@ current screen width.</p>
 <div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="st">"this is a long sentence"</span></span>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"------ version 0 ------\n{x}"</span>, </span>
-<span>          <span class="st">"------ version 1 ------\n{15 width ? x}"</span>, </span>
-<span>          <span class="st">"------ version 2 ------\n{'15|#&gt;'width ? x}"</span>,</span>
-<span>          <span class="st">"------ version 3 ------\n{'15|#&gt;_'width ? x}"</span>, .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
+<span>          <span class="st">"------ version 1 ------\n{15 swidth ? x}"</span>, </span>
+<span>          <span class="st">"------ version 2 ------\n{'15|#&gt;'swidth ? x}"</span>,</span>
+<span>          <span class="st">"------ version 3 ------\n{'15|#&gt;_'swidth ? x}"</span>, .sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ------ version 0 ------</span></span>
 <span><span class="co">#&gt; this is a long sentence</span></span>
 <span><span class="co">#&gt; ------ version 1 ------</span></span>
@@ -1097,7 +1099,7 @@ objects of class <code>POSIXt</code> or <code>difftime</code>.</p>
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.15</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"Time: {difftime ? x}"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Time: 168ms"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Time: 162ms"</span></span></code></pre></div>
 </div>
 </div>
   </div>
@@ -1119,7 +1121,7 @@ objects of class <code>POSIXt</code> or <code>difftime</code>.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

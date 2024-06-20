@@ -1,5 +1,5 @@
-pandoc: '3.1'
-pkgdown: 2.0.8
+pandoc: 3.1.3
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   guide_customization: guide_customization.html
@@ -9,5 +9,5 @@ articles:
   ref_regex_flags: ref_regex_flags.html
   ref_regex_logic: ref_regex_logic.html
   ref_string_magic_special_operations: ref_string_magic_special_operations.html
-last_built: 2024-04-29T20:51Z
+last_built: 2024-06-20T09:19Z
 
