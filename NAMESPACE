@@ -9,7 +9,7 @@ export(string_ops, string_is, string_any, string_all, string_which, string_get,
        string_replace, string_extract, string_split)
 
 # ... aliases; the rule is underscore before vowels unless long word follows
-export(st_ops, st_is, st_any, st_all, stextract, stwhich, stget, stclean, 
+export(stops, stis, stany, stall, stextract, stwhich, stget, stclean, 
        stvec, streplace, stsplit)
        
 export(string_ops_alias, string_vec_alias, string_clean_alias)

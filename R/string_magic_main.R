@@ -544,7 +544,8 @@ string_magic = function(..., .envir = parent.frame(), .data = list(),
     if(!missing(.envir)) check_envir(.envir)
     if(!missing(.data)){
       if(!is.list(.data)){
-        stop("The argument `.data` must be a list or a data.frame.")
+        stop("The argument `.data` must be a list or a data.frame.",
+             "PROBLEM: instead it is of class ", class(.data)[1], ".")
       }
     }
     if(!missing(.sep)) check_character(.sep, scalar = TRUE)
@@ -684,7 +685,13 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
                 "\nFIX: please provide at least one non-named argument.")
     }
     
-    x = as.character(..1)
+    if(.check){
+      x = as.character(..1)
+    } else {
+      x = check_expr(as.character(..1), 
+                     "In `string_magic`, the argument could not be evaluated.")
+    }
+    
     
     if(length(x) > 1){
       stop_hook("`string_magic` can only be applied to character scalars. ",

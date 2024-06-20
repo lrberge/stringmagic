@@ -2404,16 +2404,16 @@ to_integer_single = function(x){
 
 
 #' @describeIn string_ops Alias to `string_ops`
-st_ops = string_ops
+stops = string_ops
 
 #' @describeIn string_is Alias to `string_is`
-st_is = string_is
+stis = string_is
 
 #' @describeIn string_is Alias to `string_any`
-st_any = string_any
+stany = string_any
 
 #' @describeIn string_is Alias to `string_all`
-st_all = string_all
+stall = string_all
 
 #' @describeIn string_is Alias to `string_which`
 stwhich = string_which
