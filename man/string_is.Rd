@@ -5,9 +5,9 @@
 \alias{string_any}
 \alias{string_all}
 \alias{string_which}
-\alias{st_is}
-\alias{st_any}
-\alias{st_all}
+\alias{stis}
+\alias{stany}
+\alias{stall}
 \alias{stwhich}
 \title{Detects whether a pattern is in a character string}
 \usage{
@@ -56,7 +56,7 @@ string_which(
   envir = parent.frame()
 )
 
-st_is(
+stis(
   x,
   ...,
   fixed = FALSE,
@@ -68,7 +68,7 @@ st_is(
   last = NULL
 )
 
-st_any(
+stany(
   x,
   ...,
   fixed = FALSE,
@@ -79,7 +79,7 @@ st_any(
   envir = parent.frame()
 )
 
-st_all(
+stall(
   x,
   ...,
   fixed = FALSE,
@@ -165,11 +165,11 @@ The internal function used to find the patterns is \code{\link[base:grep]{base::
 
 \item \code{string_which()}: Returns the indexes of the values in which a pattern is detected
 
-\item \code{st_is()}: Alias to \code{string_is}
+\item \code{stis()}: Alias to \code{string_is}
 
-\item \code{st_any()}: Alias to \code{string_any}
+\item \code{stany()}: Alias to \code{string_any}
 
-\item \code{st_all()}: Alias to \code{string_all}
+\item \code{stall()}: Alias to \code{string_all}
 
 \item \code{stwhich()}: Alias to \code{string_which}
 
@@ -286,8 +286,8 @@ Display messages while benefiting from \code{string_magic} interpolation with \c
 
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
-\code{\link{string_magic}()},
 \code{\link{string_magic_alias}()},
+\code{\link{string_magic}()},
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }

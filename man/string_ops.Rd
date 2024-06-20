@@ -3,7 +3,7 @@
 \name{string_ops_alias}
 \alias{string_ops_alias}
 \alias{string_ops}
-\alias{st_ops}
+\alias{stops}
 \title{Chains basic operations to character vectors}
 \usage{
 string_ops_alias(op = NULL, pre_unik = NULL, namespace = NULL)
@@ -17,7 +17,7 @@ string_ops(
   envir = parent.frame()
 )
 
-st_ops(
+stops(
   x,
   ...,
   op = NULL,
@@ -70,7 +70,7 @@ is equivalent to \code{string_magic("{op1, op2 ? x}")}.
 \itemize{
 \item \code{string_ops_alias()}: \code{string_ops} alias with custom defaults
 
-\item \code{st_ops()}: Alias to \code{string_ops}
+\item \code{stops()}: Alias to \code{string_ops}
 
 }}
 \examples{
@@ -113,8 +113,8 @@ string_ops(cars,
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
 \code{\link{string_clean_alias}()},
-\code{\link{string_magic}()},
 \code{\link{string_magic_alias}()},
+\code{\link{string_magic}()},
 \code{\link{string_vec_alias}()}
 }
 \author{
