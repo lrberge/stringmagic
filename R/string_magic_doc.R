@@ -357,9 +357,9 @@
 #' back quotes. `x = c("Mark", "Pam"); string_magic("Hello {q, C ? x}!")` leads to "Hello 'Mark' and 'Pam'!".
 #' + format, Format: applies the base R's function [base::format()] to the string. 
 #' By default, the values are left aligned, *even numbers* (differently from [base::format()]'s behavior).
-#' The upper case command (`Format`) applies right alignment. Options: "0", "zero", "right", "center".
+#' The upper case command (`Format`) applies right alignment. Options: "0", "zero", "left", "right", "center".
 #' Options "0" or "zero" fills the blanks with 0s: useful to format numbers. Option "right" right aligns,
-#' and "center" centers the strings.
+#' and "center" centers the strings. Default is left alignment.
 #' Ex: `x = c(1, 12345); string_magic("left: {format.0, q, C ? x}, right: {Format, q, C ? x}")` 
 #' leads to "left: '000001' and '12,345', right: '     1' and '12,345'".
 #' + %: applies [base::sprintf()] formatting. The syntax is 'arg'% with arg an sprintf formatting,
@@ -409,7 +409,7 @@
 #'   Ex: `string_magic("{4k ! long sentence}")` leads to "long",  `string_magic("{'4|..'k ! long sentence}") `
 #' leads to "long..", `string_magic("{'4||..'k ! long sentence}")` leads to "lo..".
 #' + fill, align (alias), width (alias): fills the character strings up to a size in order
-#' to fit a given width. Options: "right", "center".
+#' to fit a given width. Options: "left", "right", "center".
 #' Accepts arguments of the form `'n'` or `'n|s'`, with `n` a number and `s` a symbol. 
 #' Default is left-alignment of the strings. 
 #' Option "right" right aligns and "center" centers the strings. When using `'n|s'`, the symbol `s`
@@ -417,8 +417,8 @@
 #' maximum size of the character string is used. See help for [string_fill()] for more information.
 #' Ex.1: `string_magic("Numbers: {'5|0'fill.right, C ? c(1, 55)}")` leads to "Numbers: 00001 and 00055".
 #' + paste, append: pastes some character to all elements of the string. This operation has no default.
-#' Options: "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
-#' Option "right" pastes on the right and "both" pastes on both sides. Option "front" only 
+#' Options: "left", "both", "right", "front", "back", "delete". By default, a string is pasted on the left.
+#' By default, it pastes on the left. Option "right" pastes on the right and "both" pastes on both sides. Option "front" only 
 #' pastes on the first element while option "back" only pastes on the last element. Option "delete"
 #' first replaces all elements with the empty string.
 #' Example: `string_magic("6 = {'|'paste.both, ' + 'c ? -3:-1}")` leads to "6 = |-3| + |-2| + |-1|".

@@ -15,7 +15,7 @@
 
 ## User visible change: Functions renaming
 
-- the functions `st_ops`, `st_is`, `st_any`, `st_all` have been renamed into `stops`, `stis`, `stany`, `stall` to align with how all other aliased have been created. Although the name aren't great, at least they are consistent.
+- the functions `st_ops`, `st_is`, `st_any`, `st_all` have been renamed into `stops`, `stis`, `stany`, `stall` to align with how all other aliased have been created. Although the names aren't great, at least they are consistent.
 
 ## Minor changes
 
@@ -24,6 +24,8 @@
 - the default screen width for `message_magic` becomes the minimum between 100 characters and 90% of the current screen size (actually the console size).
 
 - improve error handling
+
+- add `left` option to operators when relevant. Thanks to @kylebutts, #3
 
 # stringmagic 1.1.2
 

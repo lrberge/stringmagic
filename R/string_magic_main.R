@@ -1679,7 +1679,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
   } else if(op %in% c("format", "Format")){
     # Format, % ####
 
-    options = check_set_options(options, c("0", "zero", "right", "center"))
+    options = check_set_options(options, c("0", "zero", "left", "right", "center"))
 
     is_zero = any(options %in% c("0", "zero"))
     is_right = "right" %in% options || op == "Format" || is_zero
@@ -2092,7 +2092,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       op = "paste"
     }
     
-    valid_options = c("both", "right")
+    valid_options = c("left", "both", "right")
     if(op == "paste"){
       valid_options = c(valid_options, "front", "back", "delete")
     }
@@ -2227,7 +2227,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     
     # all are equivalent
     
-    valid_options = c("right", "center")
+    valid_options = c("left", "right", "center")
     options = check_set_options(options, valid_options, op = op)
     
     info = extract_pipe(argument, op, double = FALSE, numeric = TRUE, mbt = FALSE)

@@ -496,7 +496,7 @@ string_magic("Hello {q, enum ? x}!")
 
 Applies the base R's function `base::format()` to the string. 
 By default, the values are left aligned, *even numbers* (differently from `base::format()`'s behavior).
-The upper case command (`Format`) applies right alignment. Options: `"0"`, `"zero"`, `"right"`, `"center"`.
+The upper case command (`Format`) applies right alignment. Options: `"0"`, `"left"`, `"zero"`, `"right"`, `"center"`.
 Options `"0"` or `"zero"` fills the blanks with 0s: useful to format numbers. Option `"right"` right aligns,
 and `"center"` centers the strings.
 ```{r}
@@ -664,7 +664,7 @@ string_magic("{'5|0'fill.right, enum ? c(1, 55)}")
 
 Pastes a custom character string to all elements of the string. The operations `paste` and `append` are equivalent.
 This operation has no default. 
-Options: `"both"`, `"right"`, `"front"`, `"back"`, `"delete"`. By default, a string is pasted on the left.
+Options: `"left"`, `"both"`, `"right"`, `"front"`, `"back"`, `"delete"`. By default, a string is pasted on the left.
 Option `"right"` pastes on the right and `"both"` pastes on both sides. Option `"front"` only 
 pastes on the first element while option `"back"` only pastes on the last element. Option `"delete"`
 first replaces all elements with the empty string.
