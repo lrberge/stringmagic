@@ -14,7 +14,7 @@ string_vec_alias(
   .last = NULL,
   .delim = c("{", "}"),
   .split = TRUE,
-  .protect.vars = TRUE,
+  .protect.vars = FALSE,
   .sep = NULL,
   .collapse = NULL,
   .namespace = NULL
@@ -29,7 +29,7 @@ string_vec(
   .delim = c("{", "}"),
   .envir = parent.frame(),
   .split = TRUE,
-  .protect.vars = TRUE,
+  .protect.vars = FALSE,
   .sep = NULL,
   .last = NULL,
   .collapse = NULL,
@@ -45,7 +45,7 @@ stvec(
   .delim = c("{", "}"),
   .envir = parent.frame(),
   .split = TRUE,
-  .protect.vars = TRUE,
+  .protect.vars = FALSE,
   .sep = NULL,
   .last = NULL,
   .collapse = NULL,
@@ -111,7 +111,7 @@ newlines) is discarded.
 
 Ex: by default \code{string_vec("hi, there")} leads to the vector \code{c("hi", "there")}.}
 
-\item{.protect.vars}{Logical scalar, default is \code{TRUE}. If \code{TRUE}, then only
+\item{.protect.vars}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, then only
 arguments equal to a "natural" character scalar are comma-split and interpolated,
 other arguments are not touched. Ex: \code{string_vec("x{1:5}")} will lead to a vector of
 length 5 ("x1" to "x5"), while \code{z = "x{1:5}"} followed by \code{string_vec(z)} leads
@@ -138,12 +138,7 @@ The vectors can contain any interpolation in the form \code{"{var}"} and
 any \code{\link[=string_magic]{string_magic()}} operation can be applied. To change the delimiters for interpolation,
 see \code{.delim}. Named arguments are used in priority for variable substitution,
 otherwise the value of the variables to be interpolated are fetched in the calling environment
-(see argument \code{.envir}).
-
-Note, importantly, that interpolation and comma splitting are performed on "natural" vectors only.
-That is: \code{string_vec("x{1:5}")} will lead to a vector of length 5 ("x1" to "x5"), while \code{z = "x{1:5}"}
-followed by \code{string_vec(z)} leads to a vector of length 1: \code{"x{1:5}"}. To change this behavior and
-obtain equivalent results, use \code{.protect.vars = FALSE}.}
+(see argument \code{.envir}).}
 
 \item{.envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
 evaluated using the environment from where the function is called or using the named
@@ -174,8 +169,9 @@ arguments start with a dot).
 By default character values containing commas are split with respect to the commas
 to create vectors. To change this behavior, see the argument \code{.split}.
 
-The default of the argument \code{.protect.vars} is \code{FALSE} so as to avoid unwanted
-comma-splitting and interpolations. The main use case of this function is
+The default of the argument \code{.protect.vars} is \code{FALSE}. To avoid unwanted
+comma-splitting and interpolations on variables, set it to \code{TRUE}.
+The main use case of this function is
 the creation of small string vectors, which can be written directly at
 function call.
 
@@ -195,10 +191,11 @@ string_vec("x1, y2, z{4:5}")
 
 # variable protection
 x = "x{1:5}"
+# without protection (default) => interpolation takes place
 string_vec(x, "y{1:2}")
 
-# without protection => interpolation takes place
-string_vec(x, "y{1:2}", .protect.vars = FALSE)
+# with protection => no interpolation for x
+string_vec(x, "y{1:2}", .protect.vars = TRUE)
 
 # removing comma splitting
 string_vec("Hi, said Charles.", "Hi, said {girl}.", girl = "Julia", .split = FALSE)

@@ -1580,11 +1580,6 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' see `.delim`. Named arguments are used in priority for variable substitution,
 #' otherwise the value of the variables to be interpolated are fetched in the calling environment 
 #' (see argument `.envir`).
-#' 
-#' Note, importantly, that interpolation and comma splitting are performed on "natural" vectors only.
-#' That is: `string_vec("x{1:5}")` will lead to a vector of length 5 ("x1" to "x5"), while `z = "x{1:5}"`
-#' followed by `string_vec(z)` leads to a vector of length 1: `"x{1:5}"`. To change this behavior and 
-#' obtain equivalent results, use `.protect.vars = FALSE`.
 #' @param .protect.vars Logical scalar, default is `FALSE`. If `TRUE`, then only
 #' arguments equal to a "natural" character scalar are comma-split and interpolated, 
 #' other arguments are not touched. Ex: `string_vec("x{1:5}")` will lead to a vector of 
@@ -1650,8 +1645,9 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' By default character values containing commas are split with respect to the commas
 #' to create vectors. To change this behavior, see the argument `.split`.
 #' 
-#' The default of the argument `.protect.vars` is `FALSE` so as to avoid unwanted 
-#' comma-splitting and interpolations. The main use case of this function is
+#' The default of the argument `.protect.vars` is `FALSE`. To avoid unwanted 
+#' comma-splitting and interpolations on variables, set it to `TRUE`. 
+#' The main use case of this function is
 #' the creation of small string vectors, which can be written directly at
 #' function call. 
 #' 
@@ -1769,8 +1765,9 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
     if(!true_character(di)){
       di = as.character(di)
     }
+
     if(length(di) == 1 && is_to_split[i]){
-      
+    
       if(isFALSE(.split)){
         di_expanded = di
       } else {

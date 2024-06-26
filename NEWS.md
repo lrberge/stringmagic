@@ -9,6 +9,8 @@
 
 - fix major bug in the if-else operator (`&`) leading to opposite operations
 
+- in `string_vec`, fix bug leading to the removal of empty strings
+
 ## New features
 
 - add the argument `.data` to `string_magic()`, used to evaluate variables in the interpolations

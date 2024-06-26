@@ -1512,6 +1512,11 @@ SEXP cpp_parse_simple_operations(SEXP Rstr, SEXP Rdelimiters){
 
 // [[Rcpp::export]]
 SEXP cpp_magic_split(SEXP Rstr, SEXP Rsymbol, SEXP Rdelimiters){
+  
+  if(Rf_length(Rstr) == 0){
+    std::vector<std::string> res;
+    return std_string_to_r_string(res);
+  }
 
   const char *str = Rf_translateCharUTF8(STRING_ELT(Rstr, 0));
   int n = std::strlen(str); 
@@ -1563,6 +1568,8 @@ SEXP cpp_magic_split(SEXP Rstr, SEXP Rsymbol, SEXP Rdelimiters){
   // we save the last one if needed
   if(!string_tmp.empty()){
     res.push_back(string_tmp);
+  } else if(res.empty()){
+    res.push_back("");
   }
   
   return std_string_to_r_string(res);
