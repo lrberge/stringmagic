@@ -27,6 +27,8 @@
 
 - add `left` option to operators when relevant. Thanks to @kylebutts, #3
 
+- in `string_vec`, change the default of argument `.protect.vars` to `FALSE`, which is much more aligned to common sense
+
 # stringmagic 1.1.2
 
 ## Hot fix

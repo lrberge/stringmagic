@@ -1585,7 +1585,7 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' That is: `string_vec("x{1:5}")` will lead to a vector of length 5 ("x1" to "x5"), while `z = "x{1:5}"`
 #' followed by `string_vec(z)` leads to a vector of length 1: `"x{1:5}"`. To change this behavior and 
 #' obtain equivalent results, use `.protect.vars = FALSE`.
-#' @param .protect.vars Logical scalar, default is `TRUE`. If `TRUE`, then only
+#' @param .protect.vars Logical scalar, default is `FALSE`. If `TRUE`, then only
 #' arguments equal to a "natural" character scalar are comma-split and interpolated, 
 #' other arguments are not touched. Ex: `string_vec("x{1:5}")` will lead to a vector of 
 #' length 5 ("x1" to "x5"), while `z = "x{1:5}"` followed by `string_vec(z)` leads 
@@ -1677,10 +1677,11 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' 
 #' # variable protection
 #' x = "x{1:5}"
+#' # without protection (default) => interpolation takes place
 #' string_vec(x, "y{1:2}")
 #' 
-#' # without protection => interpolation takes place
-#' string_vec(x, "y{1:2}", .protect.vars = FALSE)
+#' # with protection => no interpolation for x
+#' string_vec(x, "y{1:2}", .protect.vars = TRUE)
 #' 
 #' # removing comma splitting
 #' string_vec("Hi, said Charles.", "Hi, said {girl}.", girl = "Julia", .split = FALSE)
@@ -1705,7 +1706,7 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
                    .df.convert = TRUE,
                    .delim = c("{", "}"), .envir = parent.frame(), 
-                   .split = TRUE, .protect.vars = TRUE, .sep = NULL, 
+                   .split = TRUE, .protect.vars = FALSE, .sep = NULL, 
                    .last = NULL,
                    .collapse = NULL, .namespace = NULL){
   
