@@ -2,9 +2,12 @@
 % Please edit documentation in R/misc_funs.R
 \name{get_interpolated_expr}
 \alias{get_interpolated_expr}
+\alias{get_interpolated_vars}
 \title{Lists the expressions used for interpolation in a \code{string_magic} call}
 \usage{
 get_interpolated_expr(x, parse = FALSE, delim = c("{", "}"))
+
+get_interpolated_vars(x, delim = c("{", "}"))
 }
 \arguments{
 \item{x}{A character scalar for which the variables will be recovered.
@@ -30,14 +33,22 @@ character vector containing all the expressions that will be interpolated.
 This vector can be empty if there is no interpolation.
 
 If the argument \code{parse = TRUE}, then a list is returned, containing the R expressions.
+
+The function \code{get_interpolated_vars} always return a character vector.
 }
 \description{
 Tool intended for development: use \code{get_interpolated_expr} to obtain the list of expressions
-which will be interpolated in a \code{\link[=string_magic]{string_magic()}} call
+which will be interpolated in a \code{\link[=string_magic]{string_magic()}} call.
+The function \code{get_interpolated_vars} provides the variables instead.
 }
 \details{
 Note that this function captures even deeply nested interpolations.
 }
+\section{Functions}{
+\itemize{
+\item \code{get_interpolated_vars()}: Obtain the variables used in \code{string_magic()} interpolations
+
+}}
 \seealso{
 String operations: \code{\link[=string_is]{string_is()}}, \code{\link[=string_get]{string_get()}}, \code{\link[=string_clean]{string_clean()}}, \code{\link[=string_split2df]{string_split2df()}}.
 Chain basic operations with \code{\link[=string_ops]{string_ops()}}. Clean character vectors efficiently

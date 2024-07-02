@@ -38,7 +38,7 @@ export(sma, catma, mema)
 # utilities
 #
 
-export(get_interpolated_expr)
+export(get_interpolated_expr, get_interpolated_vars)
 
 #
 # imports

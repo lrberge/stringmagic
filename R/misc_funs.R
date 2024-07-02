@@ -16,7 +16,8 @@
 #' Lists the expressions used for interpolation in a `string_magic` call
 #' 
 #' Tool intended for development: use `get_interpolated_expr` to obtain the list of expressions
-#' which will be interpolated in a [string_magic()] call
+#' which will be interpolated in a [string_magic()] call. 
+#' The function `get_interpolated_vars` provides the variables instead.
 #' 
 #' @inheritParams string_magic
 #' 
@@ -38,9 +39,11 @@
 #' @return 
 #' If the argument `parse = FALSE`, the default, then this function returns a 
 #' character vector containing all the expressions that will be interpolated. 
-#' This vector can be empty if there is no interpolation.
+#' This vector can be empty if there is no interpolation. 
 #' 
 #' If the argument `parse = TRUE`, then a list is returned, containing the R expressions.
+#' 
+#' The function `get_interpolated_vars` always return a character vector.
 #' 
 #' @inherit string_clean seealso
 #' 
@@ -61,7 +64,8 @@
 #' eval(char[[1]])
 #' eval(expr[[1]])
 #' 
-#' 
+#' # and only the variables:
+#' get_interpolated_vars(sma_expr)
 #' 
 get_interpolated_expr = function(x, parse = FALSE, delim = c("{", "}")){
   
@@ -86,6 +90,29 @@ get_interpolated_expr = function(x, parse = FALSE, delim = c("{", "}")){
   }
   
   res
+}
+
+#' @describeIn get_interpolated_expr Obtain the variables used in `string_magic()` interpolations
+get_interpolated_vars = function(x, delim = c("{", "}")){
+  
+  check_character(x, scalar = TRUE, mbt = TRUE)
+  delim = check_set_delimiters(delim)
+  
+  expr_all = get_expr_internal(x, delim)
+  
+  expr_all = unique(expr_all)
+  n_expr = length(expr_all)
+  
+  if(n_expr == 0){
+    return(character(0))
+  }
+  
+  vars_list = vector("list", n_expr)
+  for(i in seq_len(n_expr)){
+    vars_list[[i]] = all.vars(str2lang(expr_all[i]))
+  }
+  
+  unique(unlist(vars_list))
 }
 
 

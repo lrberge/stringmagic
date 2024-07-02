@@ -15,7 +15,7 @@
 
 - add the argument `.data` to `string_magic()`, used to evaluate variables in the interpolations
 
-- new function `get_interpolated_expr()`. This function recovers all the expressions to be interpolated in a call to `string_magic()` (oriented for developers).
+- new functions `get_interpolated_expr()` and `get_interpolated_vars()`. This function recovers all the expressions to be interpolated in a call to `string_magic()` (oriented for developers).
 
 ## User visible change: Functions renaming
 
