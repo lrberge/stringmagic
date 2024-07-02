@@ -5,6 +5,125 @@
 #----------------------------------------------#
 
 
+####
+#### use-level ####
+####
+
+# I am exposing a tool that can be useful for developpers (well... me)
+# => finding the variables in a sma call
+# x = "bon{jour} {upper!les} {firstchar?gens} {ok} {s, enum!ou bien {haha}} {&is_ok;TRUE;{.}{damn}}"
+
+#' Lists the expressions used for interpolation in a `string_magic` call
+#' 
+#' Tool intended for development: use `get_interpolated_expr` to obtain the list of expressions
+#' which will be interpolated in a [string_magic()] call
+#' 
+#' @inheritParams string_magic
+#' 
+#' @param x A character scalar for which the variables will be recovered. 
+#' For example `x = "Hi {person}"` will  return `"person"` 
+#' (the variable that will be interpolated).
+#' @param parse Logical scalar, default is `FALSE`. If `TRUE`, the result is a list of R
+#' expressions. If `FALSE` (default), the result is a character vector of expressions.
+#' @param delim Character vector of length 1 or 2. Default is `c("{", "}")`. Defines 
+#' the opening and the closing delimiters for interpolation. 
+#' 
+#' If of length 1, it must be of the form: 1) the opening delimiter, 
+#' 2) a single space, 3) the closing delimiter. Ex: `".[ ]"` is equivalent to `c(".[", "]")`.
+#' The default value is equivalent to `"{ }"`.
+#' 
+#' @details 
+#' Note that this function captures even deeply nested interpolations.
+#' 
+#' @return 
+#' If the argument `parse = FALSE`, the default, then this function returns a 
+#' character vector containing all the expressions that will be interpolated. 
+#' This vector can be empty if there is no interpolation.
+#' 
+#' If the argument `parse = TRUE`, then a list is returned, containing the R expressions.
+#' 
+#' @inherit string_clean seealso
+#' 
+#' @example 
+#' 
+#' # let's create a simple interpolation
+#' x = c("Ken", "Barbie")
+#' sma_expr = "{' loves 'c ? x}. But does {' love 'c ? rev(x)}?"
+#' string_magic(sma_expr)
+#' 
+#' # We recover the two expressions
+#' (char = get_interpolated_expr(sma_expr))
+#' 
+#' # same with parsing
+#' (expr = get_interpolated_expr(sma_expr, parse = TRUE))
+#' 
+#' # see the difference
+#' eval(char[[1]])
+#' eval(expr[[1]])
+#' 
+#' 
+#' 
+get_interpolated_expr = function(x, parse = FALSE, delim = c("{", "}")){
+  
+  check_character(x, scalar = TRUE, mbt = TRUE)
+  delim = check_set_delimiters(delim)
+  check_logical(parse, scalar = TRUE)
+  
+  res = get_expr_internal(x, delim)
+  cpp_trimws_in_place(res)
+  
+  res = unique(res)
+  
+  
+  if(parse){
+    n_res = length(res)
+    res_list = vector("list", n_res)
+    for(i in seq_len(n_res)){
+      res_list[[i]] = str2lang(res[i])
+    }
+    
+    res = res_list
+  }
+  
+  res
+}
+
+
+get_expr_internal = function(x, delim){
+  
+  vars = character()
+  
+  # This is not so straigtforward because of the many cases
+  x_parsed = cpp_string_magic_parser(x, delim)
+  for(elem in x_parsed){
+    if(length(elem) == 1){
+      next
+    }
+    
+    op_slot = elem[[1]]
+    var_slot = elem[[2]]
+    
+    if(var_slot == ""){
+      if(op_slot[1] %in% c("&", "&&")){
+        for(arg in op_slot[-1]){
+          vars = c(vars, get_expr_internal(arg, delim))
+          vars = setdiff(vars, ".")
+        }
+      }
+      next
+    }
+    
+    if(identical(tail(op_slot, 1), "!")){
+      vars = c(vars, get_expr_internal(var_slot, delim))
+      next
+    }
+    
+    vars = c(vars, var_slot)
+  }
+  
+  vars
+}
+
 
 ####
 #### string manipulation ####

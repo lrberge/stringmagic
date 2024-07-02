@@ -35,6 +35,12 @@ export(timer_magic)
 export(sma, catma, mema)
 
 #
+# utilities
+#
+
+export(get_interpolated_expr)
+
+#
 # imports
 #
 

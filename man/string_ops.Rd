@@ -113,8 +113,8 @@ string_ops(cars,
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
 \code{\link{string_clean_alias}()},
-\code{\link{string_magic_alias}()},
 \code{\link{string_magic}()},
+\code{\link{string_magic_alias}()},
 \code{\link{string_vec_alias}()}
 }
 \author{

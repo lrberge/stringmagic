@@ -15,6 +15,8 @@
 
 - add the argument `.data` to `string_magic()`, used to evaluate variables in the interpolations
 
+- new function `get_interpolated_expr()`. This function recovers all the expressions to be interpolated in a call to `string_magic()` (oriented for developers).
+
 ## User visible change: Functions renaming
 
 - the functions `st_ops`, `st_is`, `st_any`, `st_all` have been renamed into `stops`, `stis`, `stany`, `stall` to align with how all other aliased have been created. Although the names aren't great, at least they are consistent.

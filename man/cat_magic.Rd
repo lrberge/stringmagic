@@ -269,8 +269,8 @@ cat_column("code string_magic", "write the docs", "write the vignettes")
 \seealso{
 Other tools with aliases: 
 \code{\link{string_clean_alias}()},
-\code{\link{string_magic_alias}()},
 \code{\link{string_magic}()},
+\code{\link{string_magic_alias}()},
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }
