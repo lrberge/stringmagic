@@ -587,8 +587,9 @@ string_magic = function(..., .envir = parent.frame(), .data = list(),
   
   if(!is.null(.post)){
     # .post must be a function
-    # we catch the arguments
-    res = check_set_eval_fun(.post, res, ...)
+    # => we **don't** catch the arguments (too error prone, and pretty useless TBH)
+    check_function(.post, argname = ".post")
+    res = .post(res)
   }
   
   if(!is.null(.class)){

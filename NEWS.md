@@ -33,6 +33,8 @@
 
 - in `string_vec`, change the default of argument `.protect.vars` to `FALSE`, which is much more aligned to common sense
 
+- in `string_magic`'s argument `.post`: removal of argument catching, which could lead, occasionnally, to bugs very hard to understand
+
 # stringmagic 1.1.2
 
 ## Hot fix
