@@ -74,10 +74,7 @@ get_interpolated_expr = function(x, parse = FALSE, delim = c("{", "}")){
   check_logical(parse, scalar = TRUE)
   
   res = get_expr_internal(x, delim)
-  cpp_trimws_in_place(res)
-  
-  res = unique(res)
-  
+  cpp_trimws_in_place(res)  
   
   if(parse){
     n_res = length(res)
