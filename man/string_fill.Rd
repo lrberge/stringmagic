@@ -10,6 +10,7 @@ string_fill(
   symbol = " ",
   right = FALSE,
   center = FALSE,
+  center.right = TRUE,
   na = "NA"
 )
 }
@@ -28,6 +29,11 @@ done from the left, leading to right-alignment.}
 
 \item{center}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, then the filling of the string will
 be balanced so as to center the strings.}
+
+\item{center.right}{Logical scalar, default is \code{TRUE}. Only used when \code{center = TRUE},
+ignored otherwise. If \code{TRUE}, then when the width is odd and the number of characters of the
+string is even (or vice versa), the text is centered with one character on the right.
+If \code{FALSE}, this is one character on the left.}
 
 \item{na}{Character scalar or \code{NA}. Default is "NA" (a character string!). What happens to NAs: by default
 they are replaced by the character string "NA".}

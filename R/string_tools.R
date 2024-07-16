@@ -1915,6 +1915,10 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
 #' done from the left, leading to right-alignment.
 #' @param center Logical scalar, default is `FALSE`. If `TRUE`, then the filling of the string will
 #' be balanced so as to center the strings.
+#' @param center.right Logical scalar, default is `TRUE`. Only used when `center = TRUE`, 
+#' ignored otherwise. If `TRUE`, then when the width is odd and the number of characters of the 
+#' string is even (or vice versa), the text is centered with one character on the right. 
+#' If `FALSE`, this is one character on the left.
 #' @param na Character scalar or `NA`. Default is "NA" (a character string!). What happens to NAs: by default 
 #' they are replaced by the character string "NA".
 #' 
@@ -1955,7 +1959,8 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
 #' string_fill(x, na = "(missing)")
 #' 
 #' 
-string_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = FALSE, na = "NA"){
+string_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, 
+                       center = FALSE, center.right = TRUE, na = "NA"){
   # Character vectors starting with " " are not well taken care of
 
   x = check_set_character(x, l0 = TRUE)
@@ -1987,7 +1992,8 @@ string_fill = function(x = "", n = NULL, symbol = " ", right = FALSE, center = F
     return(x)
   }
   
-  x_new = simple_string_fill(x[qui], n, symbol, right = right, center = center)
+  x_new = simple_string_fill(x[qui], n, symbol, right = right, 
+                             center = center, center.right = center.right)
 
   res = x
   res[qui] = x_new

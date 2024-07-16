@@ -17,6 +17,8 @@
 
 - new functions `get_interpolated_expr()` and `get_interpolated_vars()`. This function recovers all the expressions to be interpolated in a call to `string_magic()` (oriented for developers).
 
+- new argument `center.right` in the function `string_fill` to resolve situations in which the characters are not perfectly centered
+
 ## User visible change: Functions renaming
 
 - the functions `st_ops`, `st_is`, `st_any`, `st_all` have been renamed into `stops`, `stis`, `stany`, `stall` to align with how all other aliased have been created. Although the names aren't great, at least they are consistent.

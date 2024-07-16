@@ -1063,7 +1063,8 @@ eval_dt = function(call, data = list(), envir){
 
 # substitute to sprintf which does not handle char length properly
 # slower but safer
-simple_string_fill = function(x, n = NULL, symbol = " ", right = FALSE, center = FALSE){
+simple_string_fill = function(x, n = NULL, symbol = " ", right = FALSE, 
+                              center = FALSE, center.right = TRUE){
   
   x_nc = nchar(x)
   if(is.null(n)){
@@ -1081,7 +1082,7 @@ simple_string_fill = function(x, n = NULL, symbol = " ", right = FALSE, center =
     extra = substr(rep(pattern, length(x_add)), 1, n - x_nc[i_add])
     if(center){
       nc_extra = nchar(extra)
-      mid = floor(nc_extra / 2)
+      mid = if(center.right) ceiling(nc_extra / 2) else floor(nc_extra / 2)
       extra_left = substr(extra, 1, mid)
       extra_right = substr(extra, mid + 1, nc_extra)
       x[i_add] = paste0(extra_left, x_add, extra_right)
