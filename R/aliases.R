@@ -158,18 +158,16 @@ string_magic_alias = function(.sep = "", .vectorize = FALSE,
 
 #' @describeIn cat_magic Create an alias of `cat_magic` with custom defaults
 cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "", 
-                           .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
-                           .collapse = NULL, .trigger = TRUE, .check = TRUE, 
+                           .delim = c("{", "}"), .last = NULL, 
+                           .trigger = TRUE, .check = TRUE, 
                            .namespace = NULL){
   
   # checks
   check_character(.sep, scalar = TRUE)
   check_character(.end, scalar = TRUE)
   check_character(.leader, scalar = TRUE)
-  check_logical(.vectorize, scalar = TRUE)
   .delim = check_set_delimiters(.delim)
   check_character(.last, scalar = TRUE, null = TRUE)
-  check_character(.collapse, scalar = TRUE, null = TRUE)
   check_logical(.trigger, scalar = TRUE)
   check_logical(.check, scalar = TRUE)
   check_character(.namespace, scalar = TRUE, null = TRUE)
@@ -186,9 +184,7 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
   sep = .sep
   end = .end
   leader = .leader
-  vectorize = .vectorize
   last = .last
-  collapse = .collapse
   trigger = .trigger
   check = .check
   namespace = .namespace
@@ -196,16 +192,12 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
   delim = .delim
   
   res = function(..., .sep = sep, .end = end, .width = width, .leader = leader, 
-                 .envir = parent.frame(), 
-                 .vectorize = vectorize, .delim = delim, .last = last, 
-                 .collapse = collapse, .trigger = trigger,
-                 .check = check, .help = NULL, 
+                 .envir = parent.frame(), delim = delim, .last = last, 
+                 .trigger = trigger, .check = check, .help = NULL, 
                  .namespace = namespace){
     cat_magic(..., .sep = .sep, .end = .end, .width = .width, .leader = .leader, 
-              .envir = .envir, 
-              .vectorize = .vectorize, .delim = .delim, .last = .last, 
-              .collapse = .collapse, .trigger = .trigger,
-              .check = .check, .help = .help, 
+              .envir = .envir, .delim = .delim, .last = .last, 
+              .trigger = .trigger, .check = .check, .help = .help, 
               .namespace = .namespace)
   }
   
@@ -214,19 +206,15 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
 
 #' @describeIn cat_magic Create an alias of `message_magic` with custom defaults
 message_magic_alias = function(.sep = "", .end = "\n", .width = "min(100, .sw)", .leader = "", 
-                               .vectorize = FALSE, .delim = c("{", "}"), 
-                               .last = NULL, 
-                               .collapse = NULL, .trigger = TRUE, 
+                               .delim = c("{", "}"), .last = NULL, .trigger = TRUE, 
                                .check = TRUE, .namespace = NULL){
   
   # checks
   check_character(.sep, scalar = TRUE)
   check_character(.end, scalar = TRUE)
   check_character(.leader, scalar = TRUE)
-  check_logical(.vectorize, scalar = TRUE)
   .delim = check_set_delimiters(.delim)
   check_character(.last, scalar = TRUE, null = TRUE)
-  check_character(.collapse, scalar = TRUE, null = TRUE)
   check_logical(.check, scalar = TRUE)
   check_logical(.trigger, scalar = TRUE)
   check_character(.namespace, scalar = TRUE, null = TRUE)
@@ -244,9 +232,7 @@ message_magic_alias = function(.sep = "", .end = "\n", .width = "min(100, .sw)",
   sep = .sep
   end = .end
   leader = .leader
-  vectorize = .vectorize
   last = .last
-  collapse = .collapse
   trigger = .trigger
   check = .check
   namespace = .namespace
@@ -254,17 +240,14 @@ message_magic_alias = function(.sep = "", .end = "\n", .width = "min(100, .sw)",
   delim = .delim
   
   res = function(..., .sep = sep, .end = end, .width = width, .leader = leader, 
-                 .envir = parent.frame(), 
-                 .vectorize = vectorize, .delim = delim, .last = last, 
-                 .collapse = collapse, .trigger = trigger,
+                 .envir = parent.frame(), .delim = delim, .last = last, 
+                 .trigger = trigger,
                  .check = check, .help = NULL, 
                  .namespace = namespace){
 
     message_magic(..., .sep = .sep, .end = .end, .width = .width, .leader = .leader, 
-                  .envir = .envir, 
-                  .vectorize = .vectorize, .delim = .delim, .last = .last, 
-                  .collapse = .collapse, .trigger = .trigger,
-                  .check = .check, .help = .help, 
+                  .envir = .envir, .delim = .delim, .last = .last, 
+                  .trigger = .trigger, .check = .check, .help = .help, 
                   .namespace = .namespace)
   }
   

@@ -21,9 +21,11 @@
 
 - new argument `center.right` in the function `string_fill` to resolve situations in which the characters are not perfectly centered
 
+- make `cat_magic` and `message_magic` more in line with their base R counterparts (they work properly with vectors now)
+
 ## User visible change: Functions renaming
 
-- the functions `st_ops`, `st_is`, `st_any`, `st_all` have been renamed into `stops`, `stis`, `stany`, `stall` to align with how all other aliased have been created. Although the names aren't great, at least they are consistent.
+- the functions `st_ops`, `st_is`, `st_any`, `st_all` have been renamed into `stops`, `stis`, `stany`, `stall` to align with the convention of all other aliases. Although the names aren't great, at least they are consistent.
 
 ## Minor changes
 

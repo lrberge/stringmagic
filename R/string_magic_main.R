@@ -381,20 +381,17 @@ save_user_fun = function(fun, alias, namespace){
 #' cat_column("code string_magic", "write the docs", "write the vignettes")
 #' 
 cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "", 
-                     .envir = parent.frame(), 
-                     .vectorize = FALSE, .delim = c("{", "}"), .last = NULL, 
-                     .collapse = NULL, .trigger = TRUE, 
-                     .check = TRUE, .help = NULL, 
+                     .envir = parent.frame(), .delim = c("{", "}"), .last = NULL, 
+                     .trigger = TRUE, .check = TRUE, .help = NULL, 
                      .namespace = NULL){
   
   if(!isTRUE(.trigger)) return(invisible(NULL))
   
   set_pblm_hook()
-  txt = string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
-                     .delim = .delim, .last = .last, .collapse = .collapse,
-                     .check = .check, .help = .help,
-                     .namespace = .namespace)
-            
+  txt = string_vec(..., .envir = .envir, .delim = .delim, .last = .last,
+                   .check = .check, .help = .help, .split = FALSE,
+                   .namespace = .namespace)
+  
   check_character(.end, scalar = TRUE)
   
   # all this is needed to implement lazy default values with  yet to be evaluated expressions (.sw)
@@ -416,7 +413,7 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
     txt = paste0(txt, .end)
   }
 
-  cat(txt)
+  cat(txt, sep = .sep)
 }
 
 #' @describeIn cat_magic Alias to `cat_magic`
@@ -424,21 +421,17 @@ catma = cat_magic
 
 #' @describeIn cat_magic Display messages using interpolated strings
 message_magic = function(..., .sep = "", .end = "\n", .width = NULL, 
-                         .leader = "", 
-                         .envir = parent.frame(), 
-                         .vectorize = FALSE, .delim = c("{", "}"), 
-                         .last = NULL, 
-                         .collapse = NULL, .trigger = TRUE,
+                         .leader = "", .envir = parent.frame(), .delim = c("{", "}"), 
+                         .last = NULL, .trigger = TRUE,
                          .check = TRUE, .help = NULL, 
                          .namespace = NULL){
   
   if(!isTRUE(.trigger)) return(invisible(NULL))
   
   set_pblm_hook()
-  txt = string_magic(..., .envir = .envir, .sep = .sep, .vectorize = .vectorize, 
-                     .delim = .delim, .last = .last, .collapse = .collapse,
-                     .check = .check, .help = .help,
-                     .namespace = .namespace)
+  txt = string_vec(..., .envir = .envir, .delim = .delim, .last = .last,
+                   .check = .check, .help = .help, .split = FALSE,
+                   .namespace = .namespace)
 
 
   check_character(.end, scalar = TRUE)
