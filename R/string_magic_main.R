@@ -388,11 +388,27 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
   if(!isTRUE(.trigger)) return(invisible(NULL))
   
   set_pblm_hook()
-  txt = string_vec(..., .envir = .envir, .delim = .delim, .last = .last,
-                   .check = .check, .help = .help, .split = FALSE,
-                   .namespace = .namespace)
   
-  check_character(.end, scalar = TRUE)
+  if(.check){
+    dots = check_set_dots(..., nofun = TRUE)
+    check_character(.end, scalar = TRUE)
+  } else {
+    dots = list(...)
+  }
+  
+  if(length(dots) == 0){
+    return(invisible(NULL))
+  }
+  
+  if(all(lengths(dots) == 1)){
+    txt = string_magic(..., .envir = .envir, .delim = .delim, .last = .last,
+                       .sep = .sep, .check = .check, .help = .help, .split = FALSE,
+                       .namespace = .namespace)
+  } else {
+    txt = string_vec(..., .envir = .envir, .delim = .delim, .last = .last,
+                     .check = .check, .help = .help, .split = FALSE,
+                     .namespace = .namespace)
+  }
   
   # all this is needed to implement lazy default values with  yet to be evaluated expressions (.sw)
   if(is.character(.width)){
@@ -413,7 +429,7 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
     txt = paste0(txt, .end)
   }
 
-  cat(txt, sep = .sep)
+  cat(txt)
 }
 
 #' @describeIn cat_magic Alias to `cat_magic`
@@ -429,12 +445,27 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL,
   if(!isTRUE(.trigger)) return(invisible(NULL))
   
   set_pblm_hook()
-  txt = string_vec(..., .envir = .envir, .delim = .delim, .last = .last,
-                   .check = .check, .help = .help, .split = FALSE,
-                   .namespace = .namespace)
-
-
-  check_character(.end, scalar = TRUE)
+  
+  if(.check){
+    dots = check_set_dots(..., nofun = TRUE)
+    check_character(.end, scalar = TRUE)
+  } else {
+    dots = list(...)
+  }
+  
+  if(length(dots) == 0){
+    return(invisible(NULL))
+  }
+  
+  if(all(lengths(dots) == 1)){
+    txt = string_magic(..., .envir = .envir, .delim = .delim, .last = .last,
+                       .sep = .sep, .check = .check, .help = .help, .split = FALSE,
+                       .namespace = .namespace)
+  } else {
+    txt = string_vec(..., .envir = .envir, .delim = .delim, .last = .last,
+                     .check = .check, .help = .help, .split = FALSE,
+                     .namespace = .namespace)
+  }
   
   if(is.character(.width)){
     .width = str2lang(.width)
