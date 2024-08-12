@@ -591,7 +591,7 @@ txt = string_magic("{fill.right, q, C ? x}")
 test(txt, "'             bon' and 'bonjour les gens'")
 
 txt = string_magic("{fill.center, q, C ? x}")
-test(txt, "'      bon       ' and 'bonjour les gens'")
+test(txt, "'       bon      ' and 'bonjour les gens'")
 
 x = c(5, 15)
 txt = string_magic("{3 fill.right, q, C ? x}")

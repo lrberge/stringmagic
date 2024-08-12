@@ -256,13 +256,13 @@ test(txt, c("Jules", "Ana", "Charles", "Francis", "RM", "JC"))
 
 # with/without variable protection
 x = "x{{1:2}}, xx"
-txt = string_vec(x, "y{{1:3}}", .delim = "{{ }}")
+txt = string_vec(x, "y{{1:3}}", .delim = "{{ }}", .protect.vars = TRUE)
 test(txt, c("x{{1:2}}, xx", "y1", "y2", "y3"))
 
-txt = string_vec(x, "y{{1:3}}", .delim = "{{ }}", .protect.vars = FALSE)
+txt = string_vec(x, "y{{1:3}}", .delim = "{{ }}")
 test(txt, c("x1", "x2", "xx", "y1", "y2", "y3"))
 
-txt = string_vec(x, "y{{1:3}}", .delim = "{{ }}", .protect.vars = FALSE, .split = FALSE)
+txt = string_vec(x, "y{{1:3}}", .delim = "{{ }}", .split = FALSE)
 test(txt, c("x1, xx", "x2, xx", "y1", "y2", "y3"))
 
 # split
