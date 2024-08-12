@@ -1590,7 +1590,7 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #' the character vectors are split with respect to commas (default). If `FALSE`, no 
 #' splitting is performed. If a character symbol, the string vector will be split
 #' according to this symbol. Note that any space after the symbol (including tabs and 
-#' newlines) is discarded.
+#' newlines) is discarded. You can escape the splitting symbol with a backslash right before it.
 #' 
 #' Ex: by default `string_vec("hi, there")` leads to the vector `c("hi", "there")`.
 #' @param .sep Character scalar or `NULL` (default). If not `NULL`, the function
@@ -1703,24 +1703,25 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
                    .df.convert = TRUE,
                    .delim = c("{", "}"), .envir = parent.frame(), 
                    .split = TRUE, .protect.vars = FALSE, .sep = NULL, 
-                   .last = NULL,
+                   .last = NULL, .check = TRUE, .help = NULL,
                    .collapse = NULL, .namespace = NULL){
   
   # checks
-  set_pblm_hook()  
-  .delim = check_set_delimiters(.delim)
-  check_character(.sep, scalar = TRUE, null = TRUE)
-  check_character(.collapse, scalar = TRUE, null = TRUE)
-  check_character(.last, scalar = TRUE, null = TRUE)
-  .split = check_set_split(.split)
+  set_pblm_hook()
+  if(.check){
+    .delim = check_set_delimiters(.delim)
+    check_character(.sep, scalar = TRUE, null = TRUE)
+    check_character(.collapse, scalar = TRUE, null = TRUE)
+    check_character(.last, scalar = TRUE, null = TRUE)
+    .split = check_set_split(.split)
+    check_logical(.protect.vars, scalar = TRUE)
+    check_envir(.envir)
+    # checking the dots + setting up the data
+    dots = check_set_dots(..., mbt = TRUE, nofun = TRUE)
+  } else {
+    dots = list(...)
+  }
   do_mat = check_set_mat(.cmat, .nmat, .df)
-  
-  check_logical(.protect.vars, scalar = TRUE)
-  
-  check_envir(.envir)
-  
-  # checking the dots + setting up the data
-  dots = check_set_dots(..., mbt = TRUE, nofun = TRUE)
   
   # we check if some variables were passed in the arguments
   .data = list()
@@ -1783,9 +1784,10 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
         for(j in 1:n_di_xpd){
           if(is_open[j]){
             all_elements[[j]] = string_magic_internal(di_expanded[j], .delim = .delim, 
-                                                  .envir = .envir, .is_root = TRUE,
-                                                  .data = .data, .check = TRUE, 
-                                                  .namespace = .namespace)  
+                                                      .envir = .envir, .is_root = TRUE,
+                                                      .data = .data, .check = .check, 
+                                                      .help = .help,
+                                                      .namespace = .namespace)  
           } else {
             all_elements[[j]] = di_expanded[j]
           }        
@@ -1805,8 +1807,8 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
       stopi("The arguments `.sep` or `.collapse` are incompatible with the arguments ",
             "`.cmat` or `.nmat`. Please remove some of these arguments.")
     }
-    res_list$.sep = .sep
-    res_list$.collapse = .collapse
+    res_list$sep = .sep
+    res_list$collapse = .collapse
     res = do.call(base::paste, res_list)
   } else {
     res = do.call(base::c, res_list)

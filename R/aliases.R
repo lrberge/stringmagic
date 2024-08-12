@@ -335,7 +335,7 @@ string_clean_alias = function(replacement = "", pipe = " => ", split = ",[ \n\t]
 #' @describeIn string_vec Create `string_vec` aliases with custom defaults
 string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .df = FALSE, .df.convert = TRUE, 
                             .last = NULL, .delim = c("{", "}"), .split = TRUE, 
-                            .protect.vars = FALSE, .sep = NULL, 
+                            .protect.vars = FALSE, .check = TRUE, .sep = NULL, 
                             .collapse = NULL, .namespace = NULL){
   
   .delim = check_set_delimiters(.delim)
@@ -343,6 +343,7 @@ string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .df = FALSE, .df.conve
   check_character(.collapse, scalar = TRUE, null = TRUE)
   check_character(.last, scalar = TRUE, null = TRUE)
   check_logical(.protect.vars, scalar = TRUE)
+  check_logical(.check, scalar = TRUE)
   check_character(.namespace, scalar = TRUE, null = TRUE)
   .split = check_set_split(.split)
   check_set_mat(.cmat, .nmat, .df)
@@ -357,18 +358,21 @@ string_vec_alias = function(.cmat = FALSE, .nmat = FALSE, .df = FALSE, .df.conve
   delim = .delim
   split = .split
   protect.vars = .protect.vars
+  check = .check
   sep = .sep
   collapse = .collapse
   namespace = .namespace  
   
   res = function(..., .cmat = cmat, .nmat = nmat, .df = df, .df.convert = df.convert,
                  .last = last, .delim = delim, .envir = parent.frame(), 
-                 .split = split, .protect.vars = protect.vars, .sep = sep, 
+                 .split = split, .protect.vars = protect.vars, 
+                 .check = check, .sep = sep, 
                  .collapse = collapse, .namespace = namespace){
 
     string_vec(..., .cmat = .cmat, .nmat = .nmat, .df = .df, .df.convert = .df.convert, 
                .last = last, .delim = .delim, .envir = .envir, 
-               .split = .split, .protect.vars = .protect.vars, .sep = .sep, 
+               .split = .split, .protect.vars = .protect.vars, 
+               .check = .check, .sep = .sep, 
                .collapse = .collapse, .namespace = .namespace)
   }
   

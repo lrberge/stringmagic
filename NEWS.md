@@ -11,6 +11,8 @@
 
 - in `string_vec`, fix bug leading to the removal of empty strings
 
+- in `string_vec`, fix bugs with the arguments `.sep` and `.collapse` 
+
 ## New features
 
 - add the argument `.data` to `string_magic()`, used to evaluate variables in the interpolations
@@ -36,6 +38,8 @@
 - in `string_vec`, change the default of argument `.protect.vars` to `FALSE`, which is much more aligned to common sense
 
 - in `string_magic`'s argument `.post`: removal of argument catching, which could lead, occasionnally, to bugs very hard to understand
+
+- in `string_vec`: add the arguments `.check` and `.help`.
 
 # stringmagic 1.1.2
 
