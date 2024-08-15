@@ -65,15 +65,7 @@ cpp_find_closing_problem <- function(Rstr, Rdelimiters) {
     .Call(`_stringmagic_cpp_find_closing_problem`, Rstr, Rdelimiters)
 }
 
-cpp_to_integer <- function(x) {
-    .Call(`_stringmagic_cpp_to_integer`, x)
-}
-
-cpp_combine_clusters <- function(cluster_list, index) {
-    .Call(`_stringmagic_cpp_combine_clusters`, cluster_list, index)
-}
-
-cpp_create_pos <- function(index) {
-    .Call(`_stringmagic_cpp_create_pos`, index)
+cpp_to_index <- function(x) {
+    .Call(`_stringmagic_cpp_to_index`, x)
 }
 

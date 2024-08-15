@@ -7,9 +7,12 @@
 #include <stdint.h>
 #include <cmath>
 #include <vector>
-#include <Rcpp.h>
-using namespace Rcpp;
+#include <string>
+#include <algorithm>
+#include <R.h>
+#include <Rinternals.h>
 using std::vector;
+namespace indexthis {
 enum {T_INT, T_DBL_INT, T_DBL, T_STR};
 union double2int {
   double dbl;
@@ -609,7 +612,7 @@ void multiple_ints_to_index(vector<r_vector> &all_vecs, vector<int> &all_k,
   n_groups = g;
   delete[] int_array;
 }
-SEXP cpp_to_index(SEXP x){
+SEXP cpp_to_index_main(SEXP &x){
   size_t n = 0;
   int K = 0;
   std::vector<r_vector> all_vecs;
@@ -703,5 +706,10 @@ SEXP cpp_to_index(SEXP x){
     }
   }
   return res;  
+}
+}
+// [[Rcpp::export(rng = false)]]
+SEXP cpp_to_index(SEXP x){
+  return indexthis::cpp_to_index_main(x);
 }
 

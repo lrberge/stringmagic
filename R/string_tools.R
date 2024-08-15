@@ -959,6 +959,7 @@ string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
       }
 
       id_names = deparse_short(mc$id)
+      id = list(id)
     }
   }
 
@@ -967,7 +968,7 @@ string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
   if(!missnull(id)){
     add.id = TRUE
     id_raw = id
-    id = to_index(id)
+    id = to_index(list = id)
 
     if(id_unik && max(id) != length(id)){
       message("The identifiers are not unique, you will not be able to reconstruct the data using only them.")
