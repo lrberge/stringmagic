@@ -112,7 +112,7 @@ string_ops = function(x, ..., op = NULL, pre_unik = NULL, namespace = NULL, envi
   }
 
   if(pre_unik){
-    x_int = to_integer(x)
+    x_int = to_index(x)
     x_small = x[!duplicated(x_int)]
 
     res_small = string_ops(x_small, op = all_ops, pre_unik = FALSE, 
@@ -967,7 +967,7 @@ string_split2df = function(x, data = NULL, split = NULL, id = NULL, add.pos = FA
   if(!missnull(id)){
     add.id = TRUE
     id_raw = id
-    id = to_integer(id)
+    id = to_index(id)
 
     if(id_unik && max(id) != length(id)){
       message("The identifiers are not unique, you will not be able to reconstruct the data using only them.")
@@ -1102,6 +1102,7 @@ paste_conditional = function(x, id, sep = " ", names = TRUE, sort = TRUE){
         stopi("The argument `id` must be of the same length as `x`.",
               "\nPROBLEM: `x` is {len?x} vs `id` is {len?id}.")
       }
+      id = list(id)
     } else if(is.list(id)){
       n_id_all = lengths(id)
       if(any(n_id_all != n_x)){
@@ -1144,7 +1145,7 @@ paste_conditional = function(x, id, sep = " ", names = TRUE, sort = TRUE){
   }
   
   id_raw = id
-  id = to_integer(id, sort)
+  id = to_index(list = id, sorted = sort)
   
   # obs_first: used in names
   obs_first = which(!duplicated(id))
@@ -2319,88 +2320,6 @@ format_pattern = function(pattern, fixed, word, ignore){
   attr(pattern, "fixed") = fixed
   
   pattern
-}
-
-to_integer = function(x, sort = FALSE){
-  # x: vector or a list of vectors
-
-  if(!is.list(x) && !is.atomic(x)){
-    stop("Argument `x` must be either a list or a vector.")
-  }
-
-  if(!is.list(x)){
-    id = to_integer_single(x)
-  } else {
-    Q = length(x)
-
-    if(Q == 1){
-      id = to_integer_single(x[[1]])
-    } else {
-
-      x_int_all = list()
-      g_all = numeric(Q)
-      for(i in seq_along(x)){
-        id_i = to_integer_single(x[[i]])
-        x_int_all[[i]] = id_i
-        g_all[i] = max(id_i)
-      }
-
-      # Then we combine
-      power = floor(1 + log10(g_all))
-
-      is_large = sum(power) > 14
-      if(is_large){
-        order_index = do.call(order, x_int_all)
-        index = cpp_combine_clusters(x_int_all, order_index)
-      } else {
-        # quicker, but limited by the precision of doubles
-        index = x_int_all[[1]]
-        for(q in 2:Q){
-          index = index + x_int_all[[q]] * 10 ** sum(power[1:(q-1)])
-        }
-      }
-
-      id = cpp_to_integer(index)
-
-    }
-  }
-  
-  if(sort){
-    # example:
-    # x = c(5, 5, 8, 8, 1, 4)
-    # x_first = c(5, 8, 1, 4)
-    # id_first = c(1, 2, 3, 4)
-    # id_all = c(1, 1, 2, 2, 3, 4) 
-    
-    obs_first = which(!duplicated(id))
-    
-    if(is.atomic(x)){
-      x_list = list(x[obs_first])
-    } else {
-      x_list = unclass(x)
-      for(i in 1:length(x)){
-        x_list[[i]] = x_list[[i]][obs_first]
-      }
-    }
-    
-    new_order = do.call(base::order, x_list)
-    order_new_order = order(new_order)
-    id = order_new_order[id]
-  }
-
-  return(id)
-}
-
-
-to_integer_single = function(x){
-
-  if(!is.numeric(x) && !is.character(x) && !is.factor(x)){
-    # we're super conservative
-    # otherwise, there can be error when underlying types or "wrongly" integer
-    x = as.character(x)
-  }
-
-  cpp_to_integer(x)
 }
 
 
