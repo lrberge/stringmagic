@@ -1,11 +1,12 @@
-# vendored from indexthis
+# 
+# Generated automatically with indexthis::indexthis_vendor
+# this is indexthis version 1.1.0
+# 
 
 
 to_index = function(..., list = NULL, sorted = FALSE, items = FALSE,
                     items.simplify = TRUE){
-  
   return_items = items
-  
   IS_DOT = TRUE
   if(!missing(list) && !is.null(list)){
     if(!is.list(list)){
@@ -15,22 +16,18 @@ to_index = function(..., list = NULL, sorted = FALSE, items = FALSE,
       stop("The argument `list` must be a list of vectors of the same length.",
            "\nPROBLEM: currently this list is empty.")
     }
-    
     dots = list
     IS_DOT = FALSE
   } else {
     dots = list(...)
   }  
-
   Q = length(dots)
   n_all = lengths(dots)
   n = n_all[1]
-
   if(length(unique(n_all)) != 1){
     stop("All elements in `...` should be of the same length (current lenghts are ", 
          enum(n_all), ").")
   }
-  
   if(n == 0){
     res = integer(0)
     if(return_items){
@@ -38,27 +35,17 @@ to_index = function(..., list = NULL, sorted = FALSE, items = FALSE,
       if(items.simplify){
         items = data.frame()
       }
-      
       res = list(index = res, items = items)
     }
-    
     return(res)
   }
-
-  #
-  # Creating the ID
-  #
-  
   info = cpp_to_index(dots)
   index = info$index
   if(sorted || return_items){
-    
-    # vector of the first items
     items_unik = vector("list", Q)
     for (q in 1:Q) {
       items_unik[[q]] = dots[[q]][info$first_obs]
     }
-    
     if(sorted){
       x_order = do.call(order, items_unik)
       index = order(x_order)[index]
@@ -66,22 +53,17 @@ to_index = function(..., list = NULL, sorted = FALSE, items = FALSE,
         items_unik[[q]] = items_unik[[q]][x_order]
       }
     }
-    
     items = NULL
     if(items.simplify && Q == 1){
       items = items_unik[[1]]
-      
     } else {
-      # Putting into a DF => we take care of names
       user_names = names(dots)
       if(is.null(user_names)){
         user_names = character(Q)
       }
-      
       if(IS_DOT){
         mc_dots = match.call(expand.dots = FALSE)[["..."]]
       }
-      
       for(q in 1:Q){
         if(nchar(user_names[q]) == 0){
           is_done = FALSE
@@ -100,24 +82,18 @@ to_index = function(..., list = NULL, sorted = FALSE, items = FALSE,
           }          
         }
       }
-
       names(items_unik) = user_names
-
       items = as.data.frame(items_unik)
       row.names(items) = 1:nrow(items)
     }
-
     if(return_items){
       res = list(index = index, items = items)
     } else {
       res = index
     }
-    
   } else {
     res = index
   }
-
   res
 }
-
 
