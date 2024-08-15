@@ -531,7 +531,29 @@ List cpp_parse_regex_pattern(SEXP Rstr, bool parse_flags, bool parse_logical){
 }
 
 
+// [[Rcpp::export]]
+IntegerVector cpp_create_pos(IntegerVector index){
+  // index: index vector of consecutive values
+  // output: 1 2 3 1 1 2 for input 1 1 1 2 3 4 4
 
+  int n = index.size();
+  IntegerVector res(n, 1);
+  int current = index[0];
+  int val = 1;
+
+  for(int i=1 ; i<n ; ++i){
+    if(index[i] == current){
+      ++val;
+    } else {
+      current = index[i];
+      val = 1;
+    }
+
+    res[i] = val;
+  }
+
+  return res;
+}
 
 
 

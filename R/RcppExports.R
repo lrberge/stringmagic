@@ -37,6 +37,10 @@ cpp_parse_regex_pattern <- function(Rstr, parse_flags, parse_logical) {
     .Call(`_stringmagic_cpp_parse_regex_pattern`, Rstr, parse_flags, parse_logical)
 }
 
+cpp_create_pos <- function(index) {
+    .Call(`_stringmagic_cpp_create_pos`, index)
+}
+
 cpp_string_magic_parser <- function(Rstr, Rdelimiters, only_last_parsed_section = FALSE) {
     .Call(`_stringmagic_cpp_string_magic_parser`, Rstr, Rdelimiters, only_last_parsed_section)
 }
