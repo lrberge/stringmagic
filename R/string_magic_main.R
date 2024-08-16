@@ -2372,11 +2372,32 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     
     table_data = list(x = info$items, n = x_tab, s = x_tab / length(x))
     
+    # NOTA: there can be no ties in x (by definition)
+    #       but ties can occur in frequencies
+    
     my_order = NULL
     if("sort" %in% options){
-      my_order = order(table_data$x)
+      if("fsort" %in% options){
+        my_order = order(table_data$n, table_data$x)
+        
+      } else if("dfsort" %in% options){
+        my_order = order(-table_data$n, table_data$x)
+        
+      } else {
+        my_order = order(table_data$x)
+      }
+      
     } else if("dsort" %in% options){
-      my_order = order(table_data$x, decreasing = TRUE)
+      if("fsort" %in% options){
+        my_order = order(-table_data$n, table_data$x, decreasing = TRUE)
+        
+      } else if("dfsort" %in% options){
+        my_order = order(table_data$n, table_data$x, decreasing = TRUE)
+        
+      } else {
+        my_order = order(table_data$x, decreasing = TRUE)
+      }
+      
     } else if("fsort" %in% options){
       my_order = order(table_data$n)
     } else if("nosort" %in% options){
