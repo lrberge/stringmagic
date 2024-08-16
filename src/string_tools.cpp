@@ -555,6 +555,21 @@ IntegerVector cpp_create_pos(IntegerVector index){
   return res;
 }
 
+// [[Rcpp::export]]
+IntegerVector cpp_table(IntegerVector index, int n_items){
+  // index: index vector
+  // contains only integer values from 1 to n_items
+  
+  int n = index.length();
+  IntegerVector res(n_items);
+  
+  for(int i=0 ; i<n ; ++i){
+    ++res[index[i] - 1];
+  }
+  
+  return res;
+}
+
 
 
 

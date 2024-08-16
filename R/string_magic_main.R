@@ -2309,7 +2309,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     }
     
   } else if(op == "unik"){
-    # unik ####
+    # unik, table ####
 
     if(!is.null(group_index) && group_flag == 2){
 
@@ -2331,6 +2331,72 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
 
     }
 
+  } else if(op == "table") {
+    
+    if(!is.null(group_index) && group_flag == 2){
+      stop_hook("The `table` operation is not implemented for groups.")
+    }
+    
+    # The default is decreasing frequency sort
+    options = check_set_options(options, c("sort", "dsort", "fsort", "nosort"))
+    
+    if(argument == ""){
+      argument = "{x} ({n ? n})"
+      
+    } else {
+      # we check the validity of the argument
+      vars = get_interpolated_vars(argument)
+      if(length(vars) == 0){
+        stop_hook("The operation `table` requires an argument with at least one of the variables `x` (value), `n` (frequency), or `s` (share) in curly braces.",
+                  "\nPROBLEM: no interpolated variable found in the argument {q?argument}",
+                  "\nEXAMPLE: sma(\"Freq. of months: \\{'\\{x} (\\{n})'table.nosort, enum ? month.name[airquality$Month]}.\")")
+      }
+      
+      pblm = setdiff(vars, c("x", "n", "s"))
+      if(length(pblm) > 0){
+        stop_hook("The operation `table` requires an argument with the variables `x` (value), `n` (frequency), and/or `s` (share) in curly braces (and only those variables).",
+                  "\nPROBLEM: the following invalid variable{$s, is} used {enum.bq ? pblm}.",
+                  "\nEXAMPLE: sma(\"Freq. of months: \\{'\\{x} (\\{n})'table.nosort, enum ? month.name[airquality$Month]}.\")")
+      }
+    }
+    
+    # We apply a SMA interpolation with the following variables:
+    # - x: the character value
+    # - n: the frequency
+    # - s: the share
+    
+    info = to_index(x, items = TRUE, items.simplify = TRUE)
+    
+    n_items = length(info$items)
+    x_tab = cpp_table(info$index, n_items)
+    
+    table_data = list(x = info$items, n = x_tab, s = x_tab / length(x))
+    
+    my_order = NULL
+    if("sort" %in% options){
+      my_order = order(table_data$x)
+    } else if("dsort" %in% options){
+      my_order = order(table_data$x, decreasing = TRUE)
+    } else if("fsort" %in% options){
+      my_order = order(table_data$n)
+    } else if("nosort" %in% options){
+      # nothing
+    } else {
+      # the default
+      my_order = order(table_data$n, decreasing = TRUE)
+    }
+    
+    if(!is.null(my_order)){
+      table_data$x = table_data$x[my_order]
+      table_data$n = table_data$n[my_order]
+      table_data$s = table_data$s[my_order]
+    }
+    
+    res = string_magic_internal(argument, .delim = .delim, .envir = .envir,
+                                .data = table_data, .check = .check, 
+                                .user_funs = .user_funs, .valid_operators = .valid_operators)
+    
+    
   } else if(op %in% c("nth", "Nth", "ntimes", "Ntimes", "n", "N", "len", "Len")){
     #
     # nth, ntimes, n, len ####
@@ -3297,7 +3363,8 @@ setup_operations = function(){
   
   # dp: v1.1.0
   # swidth: v1.1.3
-  OPERATORS = c(OPERATORS, "dp", "deparse", "swidth")
+  # table: v1.1.3
+  OPERATORS = c(OPERATORS, "dp", "deparse", "swidth", "table")
   
   options("string_magic_operations_default" = sort(OPERATORS))
   

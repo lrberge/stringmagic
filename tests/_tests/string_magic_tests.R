@@ -635,6 +635,40 @@ txt = string_magic("{''S, ~(unik, ''c), ' ; 'c ? x}")
 test(txt, "12564 ; agfs")
 
 #
+# table ####
+#
+
+x = strsplit("aggafsggaffasg", "")[[1]]
+
+# default
+txt = sma("letters: {table, enum ? x}.")
+test(txt, "letters: g (5), a (4), f (3) and s (2).")
+
+txt = sma("letters: {table.sort, enum ? x}.")
+test(txt, "letters: a (4), f (3), g (5) and s (2).")
+
+txt = sma("letters: {table.dsort, enum ? x}.")
+test(txt, "letters: s (2), g (5), f (3) and a (4).")
+
+txt = sma("letters: {table.fsort, enum ? x}.")
+test(txt, "letters: s (2), f (3), a (4) and g (5).")
+
+txt = sma("letters: {table.nosort, enum ? x}.")
+test(txt, "letters: a (4), g (5), f (3) and s (2).")
+
+# with argument
+txt = sma("letters: {'{q ? x} {round(s * 100)}%'table, enum ? x}.")
+test(txt, "letters: 'g' 36%, 'a' 29%, 'f' 21% and 's' 14%.")
+
+txt = sma("letters: {'{x}: {n}'table.sort, ', 'c ? x}.")
+test(txt, "letters: a: 4, f: 3, g: 5, s: 2.")
+
+# error
+test(sma("letters: {'x = n'table, ', 'c ? x}."), "no interpolated", "err")
+
+test(sma("letters: {'{zz}'table, ', 'c ? x}."), "following invalid", "err")
+
+#
 # nth ####
 #
 

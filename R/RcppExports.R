@@ -41,6 +41,10 @@ cpp_create_pos <- function(index) {
     .Call(`_stringmagic_cpp_create_pos`, index)
 }
 
+cpp_table <- function(index, n_items) {
+    .Call(`_stringmagic_cpp_table`, index, n_items)
+}
+
 cpp_string_magic_parser <- function(Rstr, Rdelimiters, only_last_parsed_section = FALSE) {
     .Call(`_stringmagic_cpp_string_magic_parser`, Rstr, Rdelimiters, only_last_parsed_section)
 }
