@@ -15,6 +15,7 @@ string_vec_alias(
   .delim = c("{", "}"),
   .split = TRUE,
   .protect.vars = FALSE,
+  .check = TRUE,
   .sep = NULL,
   .collapse = NULL,
   .namespace = NULL
@@ -32,6 +33,8 @@ string_vec(
   .protect.vars = FALSE,
   .sep = NULL,
   .last = NULL,
+  .check = TRUE,
+  .help = NULL,
   .collapse = NULL,
   .namespace = NULL
 )
@@ -48,6 +51,8 @@ stvec(
   .protect.vars = FALSE,
   .sep = NULL,
   .last = NULL,
+  .check = TRUE,
+  .help = NULL,
   .collapse = NULL,
   .namespace = NULL
 )
@@ -107,7 +112,7 @@ The default value is equivalent to \code{"{ }"}.
 the character vectors are split with respect to commas (default). If \code{FALSE}, no
 splitting is performed. If a character symbol, the string vector will be split
 according to this symbol. Note that any space after the symbol (including tabs and
-newlines) is discarded.
+newlines) is discarded. You can escape the splitting symbol with a backslash right before it.
 
 Ex: by default \code{string_vec("hi, there")} leads to the vector \code{c("hi", "there")}.}
 
@@ -117,6 +122,11 @@ other arguments are not touched. Ex: \code{string_vec("x{1:5}")} will lead to a 
 length 5 ("x1" to "x5"), while \code{z = "x{1:5}"} followed by \code{string_vec(z)} leads
 to a vector of length 1: \code{"x{1:5}"}. If \code{FALSE}, comma-splitting and interpolation
 is performed on all variables.}
+
+\item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling (i.e.
+human readable error messages).
+Without error-handling you can save something of the order of 40us. Useful only
+in long loops.}
 
 \item{.sep}{Character scalar or \code{NULL} (default). If not \code{NULL}, the function
 \code{\link[base:paste]{base::paste()}} is applied to the resulting vector with \code{sep = .sep}.}
@@ -143,6 +153,13 @@ otherwise the value of the variables to be interpolated are fetched in the calli
 \item{.envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
 evaluated using the environment from where the function is called or using the named
 arguments passed to the function.}
+
+\item{.help}{Character scalar or \code{TRUE}, default is \code{NULL}. This argument
+is used to generate a dynamic help on the console. If \code{TRUE}, the user can select which
+topic to read from the main documentation, with the possibility to search for keywords and
+navigate the help pages. If a character scalar, then a regex search is perfomed on the main
+documentation and any section containining a match is displayed. The user can easily
+navigate across matches.}
 }
 \value{
 By default this function returns a string vector, the length of which depends on the arguments.

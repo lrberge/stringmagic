@@ -402,6 +402,14 @@ leads to "5 = 3 + 2". See the operation "sort" for a description of the argument
 \item rev: reverses the vector. Example: \code{string_magic("{rev, ''c ? 1:3}")} leads to "321".
 \item unik: makes the string vector unique. Example: \code{string_magic("Iris species: {unik, C ? iris$Species}.")}
 leads to "Iris species: setosa, versicolor and virginica.".
+\item table: counts the frequency of each element and pastes the each element with its frequency.
+Accepts an argument which must be a character string representing a \code{string_magic} interpolation
+with the following variables: \code{x} (the element), \code{n} (its count) and \code{s} (its share). The default is \code{'{x} ({n ? n})'}. By default the resulting string vector is sorted by decreasing frequency.
+You can change how the vector is sorted with five options: \code{sort} (sorts on the elements),
+\code{dsort} (decreasing sort), \code{fsort} (sorts on frequency),
+\code{dfsort} (decreasing sort on freq. -- default),
+\code{nosort} (keeps the order of the first elements). Note that you can combine several sorts (o resolve the ties).
+Example: \code{string_magic("Freq. of months: {'{x} ({n})'table, enum ? month.name[airquality$Month]}.")}
 \item each: repeats each element of the vector \code{n} times. Option "c" then collapses the full vector
 with the empty string as a separator. Ex.1: \code{string_magic("{/x, y}{2 each ? 1:2}")} leads to the
 vector \code{c("x1", "y1", "x2", "y2")}. Ex.2: \code{string_magic("Large number: 1{5 each.c ! 0}")} leads to

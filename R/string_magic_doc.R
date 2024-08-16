@@ -306,6 +306,14 @@
 #' + rev: reverses the vector. Example: `string_magic("{rev, ''c ? 1:3}")` leads to "321".
 #' + unik: makes the string vector unique. Example: `string_magic("Iris species: {unik, C ? iris$Species}.")`
 #' leads to "Iris species: setosa, versicolor and virginica.".
+#' + table: counts the frequency of each element and pastes the each element with its frequency. 
+#' Accepts an argument which must be a character string representing a `string_magic` interpolation
+#' with the following variables: `x` (the element), `n` (its count) and `s` (its share). The default is `'{x} ({n ? n})'`. By default the resulting string vector is sorted by decreasing frequency. 
+#' You can change how the vector is sorted with five options: `sort` (sorts on the elements), 
+#' `dsort` (decreasing sort), `fsort` (sorts on frequency), 
+#' `dfsort` (decreasing sort on freq. -- default), 
+#' `nosort` (keeps the order of the first elements). Note that you can combine several sorts (o resolve the ties).
+#' Example: `string_magic("Freq. of months: {'{x} ({n})'table, enum ? month.name[airquality$Month]}.")`
 #' + each: repeats each element of the vector `n` times. Option "c" then collapses the full vector 
 #' with the empty string as a separator. Ex.1: `string_magic("{/x, y}{2 each ? 1:2}")` leads to the 
 #' vector `c("x1", "y1", "x2", "y2")`. Ex.2: `string_magic("Large number: 1{5 each.c ! 0}")` leads to 

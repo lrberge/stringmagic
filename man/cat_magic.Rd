@@ -14,10 +14,8 @@ cat_magic_alias(
   .end = "",
   .width = FALSE,
   .leader = "",
-  .vectorize = FALSE,
   .delim = c("{", "}"),
   .last = NULL,
-  .collapse = NULL,
   .trigger = TRUE,
   .check = TRUE,
   .namespace = NULL
@@ -28,10 +26,8 @@ message_magic_alias(
   .end = "\\n",
   .width = "min(100, .sw)",
   .leader = "",
-  .vectorize = FALSE,
   .delim = c("{", "}"),
   .last = NULL,
-  .collapse = NULL,
   .trigger = TRUE,
   .check = TRUE,
   .namespace = NULL
@@ -44,10 +40,8 @@ cat_magic(
   .width = FALSE,
   .leader = "",
   .envir = parent.frame(),
-  .vectorize = FALSE,
   .delim = c("{", "}"),
   .last = NULL,
-  .collapse = NULL,
   .trigger = TRUE,
   .check = TRUE,
   .help = NULL,
@@ -61,10 +55,8 @@ catma(
   .width = FALSE,
   .leader = "",
   .envir = parent.frame(),
-  .vectorize = FALSE,
   .delim = c("{", "}"),
   .last = NULL,
-  .collapse = NULL,
   .trigger = TRUE,
   .check = TRUE,
   .help = NULL,
@@ -78,10 +70,8 @@ message_magic(
   .width = NULL,
   .leader = "",
   .envir = parent.frame(),
-  .vectorize = FALSE,
   .delim = c("{", "}"),
   .last = NULL,
-  .collapse = NULL,
   .trigger = TRUE,
   .check = TRUE,
   .help = NULL,
@@ -95,10 +85,8 @@ mema(
   .width = NULL,
   .leader = "",
   .envir = parent.frame(),
-  .vectorize = FALSE,
   .delim = c("{", "}"),
   .last = NULL,
-  .collapse = NULL,
   .trigger = TRUE,
   .check = TRUE,
   .help = NULL,
@@ -130,9 +118,6 @@ Note that you can use the special variable \code{.sw} to refer to the screen wid
 \item{.leader}{Character scalar, default is \code{TRUE}. Only used if argument \code{.width} is not \code{FALSE}.
 Whether to add a leading character string right after the extra new lines.}
 
-\item{.vectorize}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, Further, elements in \code{...} are
-NOT collapsed together, but instead vectorised.}
-
 \item{.delim}{Character vector of length 1 or 2. Default is \code{c("{", "}")}. Defines
 the opening and the closing delimiters for interpolation.
 
@@ -147,10 +132,6 @@ The default value is equivalent to \code{"{ }"}.
 it must be an \code{string_magic} chain of operations of the form \code{"'arg1'op1, op2, etc"}. All these operations
 are applied just before returning the vector. If a function,
 it will be applied to the resulting vector.}
-
-\item{.collapse}{Character scalar, default is \code{NULL}. If provided, the character vector
-that should be returned is collapsed with the value of this argument. This leads
-to return a string of length 1.}
 
 \item{.trigger}{Logical, default is \code{TRUE}. If \code{FALSE}, this function is not run. Can be
 useful in debugging situations where we want conditional evaluations.}
