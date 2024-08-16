@@ -1,6 +1,6 @@
 # 
 # Generated automatically with indexthis::indexthis_vendor
-# this is indexthis version 1.1.0
+# this is indexthis version 2.0.0
 # 
 
 
@@ -26,7 +26,7 @@ to_index = function(..., list = NULL, sorted = FALSE, items = FALSE,
   n = n_all[1]
   if(length(unique(n_all)) != 1){
     stop("All elements in `...` should be of the same length (current lenghts are ", 
-         enum(n_all), ").")
+         paste0(n_all, collapse = ", "), ").")
   }
   if(n == 0){
     res = integer(0)
