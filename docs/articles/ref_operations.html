@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>`string_magic`'s operations: The reference • stringmagic</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -108,7 +108,7 @@ reference</h1>
                         <h4 data-toc-skip class="author">Laurent R.
 Bergé</h4>
             
-            <h4 data-toc-skip class="date">2024-06-20</h4>
+            <h4 data-toc-skip class="date">2024-08-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/stringmagic/blob/HEAD/vignettes/ref_operations.rmd" class="external-link"><code>vignettes/ref_operations.rmd</code></a></small>
       <div class="hidden name"><code>ref_operations.rmd</code></div>
@@ -143,7 +143,9 @@ functions accept regex flags in their patterns. For more information on
 regex flags, see the <a href="https://lrberge.github.io/stringmagic/articles/guide_string_tools.html" class="external-link">dedicated
 section</a>.</p>
 <div class="section level3">
-<h3 id="split-strings-s-s-split-split">Split strings: s, S, split, Split:<a class="anchor" aria-label="anchor" href="#split-strings-s-s-split-split"></a>
+<h3 id="s-s-split-split-split-strings">
+<code>s</code>, <code>S</code>, <code>split</code>,
+<code>Split</code>: Split strings:<a class="anchor" aria-label="anchor" href="#s-s-split-split-split-strings"></a>
 </h3>
 <p>Splits the string according to a pattern. The four operations have
 different defaults: <code>' '</code> for <code>s</code> and
@@ -176,11 +178,13 @@ on group-wise operations</a>.</p>
 <span><span class="co">#&gt; Order matters:</span></span>
 <span><span class="co">#&gt; "Flesh melt o solid that this too too would"</span></span>
 <span><span class="co">#&gt; "   A and dew! Into itself resolve thaw,   "</span></span>
-<span><span class="co">#&gt; "  Everlasting fix'd had not or that the   "</span></span>
-<span><span class="co">#&gt; "    'gainst canon his self-slaughter!     "</span></span></code></pre></div>
+<span><span class="co">#&gt; "   Everlasting fix'd had not or that the  "</span></span>
+<span><span class="co">#&gt; "     'gainst canon his self-slaughter!    "</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="collapse-strings-c-c-collapse-collapse">Collapse strings: c, C, collapse, Collapse<a class="anchor" aria-label="anchor" href="#collapse-strings-c-c-collapse-collapse"></a>
+<h3 id="c-c-collapse-collapse-collapse-strings">
+<code>c</code>, <code>C</code>, <code>collapse</code>,
+<code>Collapse</code>: Collapse strings<a class="anchor" aria-label="anchor" href="#c-c-collapse-collapse-collapse-strings"></a>
 </h3>
 <p>To collapse (or concatenate) multiple strings into a single one. The
 four operations are identical, only their defaults change. The default
@@ -211,7 +215,9 @@ last two elements.</p>
 <span><span class="co">#&gt; [1] "don't short words"</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="extract-patterns-extract-x-x">Extract patterns: extract, x, X<a class="anchor" aria-label="anchor" href="#extract-patterns-extract-x-x"></a>
+<h3 id="extract-x-x-extract-patterns">
+<code>extract</code>, <code>x</code>, <code>X</code>: Extract
+patterns<a class="anchor" aria-label="anchor" href="#extract-x-x-extract-patterns"></a>
 </h3>
 <p>Extracts the first or multiple patterns from a string. Default
 argument is <code>'[[:alnum:]]+'</code>. Command <code>"extract"</code>
@@ -898,11 +904,11 @@ for more information.</p>
 <span><span class="fu"><a href="../reference/cat_magic.html">cat_magic</a></span><span class="op">(</span><span class="st">"{'[ ,]+'split, upper.first, fill.center, q, '\n'collapse ? life}"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; '   Full   '</span></span>
 <span><span class="co">#&gt; '    Of    '</span></span>
-<span><span class="co">#&gt; '  Sound   '</span></span>
-<span><span class="co">#&gt; '   And    '</span></span>
+<span><span class="co">#&gt; '   Sound  '</span></span>
+<span><span class="co">#&gt; '    And   '</span></span>
 <span><span class="co">#&gt; '   Fury   '</span></span>
 <span><span class="co">#&gt; 'Signifying'</span></span>
-<span><span class="co">#&gt; ' Nothing  '</span></span>
+<span><span class="co">#&gt; '  Nothing '</span></span>
 <span></span>
 <span><span class="co"># fixing the length and filling with 0s</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"{'5|0'fill.right, enum ? c(1, 55)}"</span><span class="op">)</span></span>
@@ -1027,7 +1033,7 @@ two</li>
 <span><span class="co"># default is at 7</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"x{sample(100, 30)}"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum ? x}."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "The problematic variables are x2, x4, x10, x13, x15, x17 and 24 others."</span></span>
+<span><span class="co">#&gt; [1] "The problematic variables are x2, x4, x5, x7, x23, x24 and 24 others."</span></span>
 <span></span>
 <span><span class="co"># you can augment or reduce the numbers to display with an option</span></span>
 <span><span class="fu"><a href="../reference/string_magic.html">string_magic</a></span><span class="op">(</span><span class="st">"The problematic variables are {'x'sort.num, enum.3 ? x}."</span><span class="op">)</span></span>
@@ -1121,7 +1127,7 @@ objects of class <code>POSIXt</code> or <code>difftime</code>.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
       </footer>
