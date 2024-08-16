@@ -2338,7 +2338,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     }
     
     # The default is decreasing frequency sort
-    options = check_set_options(options, c("sort", "dsort", "fsort", "nosort"))
+    options = check_set_options(options, c("sort", "dsort", "fsort", "dfsort", "nosort"))
     
     if(argument == ""){
       argument = "{x} ({n ? n})"

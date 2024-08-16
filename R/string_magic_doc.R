@@ -312,7 +312,8 @@
 #' You can change how the vector is sorted with five options: `sort` (sorts on the elements), 
 #' `dsort` (decreasing sort), `fsort` (sorts on frequency), 
 #' `dfsort` (decreasing sort on freq. -- default), 
-#' `nosort` (keeps the order of the first elements). Note that you can combine several sorts (o resolve the ties).
+#' `nosort` (keeps the order of the first elements). Note that you can combine several sorts 
+#' (to resolve the ties of elements with same frequencies).
 #' Example: `string_magic("Freq. of months: {'{x} ({n})'table, enum ? month.name[airquality$Month]}.")`
 #' + each: repeats each element of the vector `n` times. Option "c" then collapses the full vector 
 #' with the empty string as a separator. Ex.1: `string_magic("{/x, y}{2 each ? 1:2}")` leads to the 

@@ -668,6 +668,21 @@ test(sma("letters: {'x = n'table, ', 'c ? x}."), "no interpolated", "err")
 
 test(sma("letters: {'{zz}'table, ', 'c ? x}."), "following invalid", "err")
 
+# double sort
+x = sample(stsplit("aacceebbbuuu", ""))
+
+txt = string_ops(x, "table.dfsort.sort, ', 'c")
+test(txt, "b (3), u (3), a (2), c (2), e (2)")
+
+txt = string_ops(x, "table.fsort.sort, ', 'c")
+test(txt, "a (2), c (2), e (2), b (3), u (3)")
+
+txt = string_ops(x, "table.dfsort.dsort, ', 'c")
+test(txt, "u (3), b (3), e (2), c (2), a (2)")
+
+txt = string_ops(x, "table.fsort.dsort, ', 'c")
+test(txt, "e (2), c (2), a (2), u (3), b (3)")
+
 #
 # nth ####
 #
