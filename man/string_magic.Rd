@@ -402,7 +402,7 @@ leads to "5 = 3 + 2". See the operation "sort" for a description of the argument
 \item rev: reverses the vector. Example: \code{string_magic("{rev, ''c ? 1:3}")} leads to "321".
 \item unik: makes the string vector unique. Example: \code{string_magic("Iris species: {unik, C ? iris$Species}.")}
 leads to "Iris species: setosa, versicolor and virginica.".
-\item table: counts the frequency of each element and pastes the each element with its frequency.
+\item table: computes the frequency of each element and attaches each element to its frequency.
 Accepts an argument which must be a character string representing a \code{string_magic} interpolation
 with the following variables: \code{x} (the element), \code{n} (its count) and \code{s} (its share). The default is \code{'{x} ({n ? n})'}. By default the resulting string vector is sorted by decreasing frequency.
 You can change how the vector is sorted with five options: \code{sort} (sorts on the elements),

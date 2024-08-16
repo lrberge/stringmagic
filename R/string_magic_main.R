@@ -368,17 +368,6 @@ save_user_fun = function(fun, alias, namespace){
 #'           "    + this is a very long item that likely overflows", 
 #'          .width = 30, .sep = "\n")
 #' 
-#' #
-#' # define custom defaults
-#' #
-#' 
-#' # Unhappy about the default values? Create an alias!
-#' 
-#' # Here we change the defaults to mimic the printing of a column
-#' cat_column = cat_magic_alias(.sep = "\n", .end = "\n", .vectorize = TRUE, 
-#'                             .last = "fill.center, ' + 'paste.both")
-#'
-#' cat_column("code string_magic", "write the docs", "write the vignettes")
 #' 
 cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "", 
                      .envir = parent.frame(), .delim = c("{", "}"), .last = NULL, 
