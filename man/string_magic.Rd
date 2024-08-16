@@ -408,7 +408,8 @@ with the following variables: \code{x} (the element), \code{n} (its count) and \
 You can change how the vector is sorted with five options: \code{sort} (sorts on the elements),
 \code{dsort} (decreasing sort), \code{fsort} (sorts on frequency),
 \code{dfsort} (decreasing sort on freq. -- default),
-\code{nosort} (keeps the order of the first elements). Note that you can combine several sorts (o resolve the ties).
+\code{nosort} (keeps the order of the first elements). Note that you can combine several sorts
+(to resolve the ties of elements with same frequencies).
 Example: \code{string_magic("Freq. of months: {'{x} ({n})'table, enum ? month.name[airquality$Month]}.")}
 \item each: repeats each element of the vector \code{n} times. Option "c" then collapses the full vector
 with the empty string as a separator. Ex.1: \code{string_magic("{/x, y}{2 each ? 1:2}")} leads to the
