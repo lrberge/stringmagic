@@ -1,5 +1,5 @@
 
-# stringmagic 1.1.3
+# stringmagic 1.2.0
 
 ## Compatibility with old R versions
 
@@ -12,6 +12,28 @@
 - in `string_vec`, fix bug leading to the removal of empty strings
 
 - in `string_vec`, fix bugs with the arguments `.sep` and `.collapse` 
+
+## New operators
+
+- `string_magic`: new operator `table` to flexibly attach elements with their frequencies:
+```R
+dna = string_split("atagggagctacctgcgcgtcgcccaaaagcaggg", "")
+cat_magic("Letters in the DNA seq. {''c, Q? dna}: ",
+          # by default: inverse frequency sorting
+          "  -      default: {table, enum ? dna}",
+          "  - value sorted: {table.sort, enum ? dna}",
+          # argument in single quotes to customize the display, it's a 
+          #   `string_magic` interpolation
+          "  -       shares: {'{x} [{round(s * 100)}%]' table, enum ? dna}",
+          # `fsort` sorts by **increasing** frequency
+          "  - freq. sorted: {'{q ? x}' table.fsort, enum ? dna}",
+          .sep = "\n")
+#> Letters in the DNA seq. "atagggagctacctgcgcgtcgcccaaaagcaggg": 
+#>   -      default: g (12), c (10), a (9) and t (4)
+#>   - value sorted: a (9), c (10), g (12) and t (4)
+#>   -       shares: g [34%], c [29%], a [26%] and t [11%]
+#>   - freq. sorted: 't', 'a', 'c' and 'g'
+```
 
 ## New features
 
