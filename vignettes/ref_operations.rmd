@@ -347,6 +347,24 @@ Makes the string vector unique.
 string_magic("Iris species: {unik, upper.first, enum ? iris$Species}.")
 ```
 
+## `table`: Attach unique elements to their frequencies
+
+Computes the frequency of each element and attaches each element to its frequency. Accepts an argument which must be a character string representing a `string_magic` interpolation
+with the following variables: `x` (the element), `n` (its count) and `s` (its share). The default argument is `'{x} ({n ? n})'`. 
+
+By default the resulting string vector is sorted by decreasing frequency. You can change how the vector is sorted with five options: `sort` (sorts on the elements), `dsort` (decreasing sort), `fsort` (sorts on frequency), `dfsort` (decreasing sort on freq. -- default), `nosort` (keeps the order of the first elements). Note that you can combine several sorts (to resolve the ties of elements with same frequencies).
+
+```{r}
+dna = string_split("atagggagctacctgcgcgtcgcccaaaagcaggg", "")
+cat_magic("Letters in the DNA seq. {''c, Q? dna}: ",
+          "  -      default: {table, enum ? dna}",
+          "  - value sorted: {table.sort, enum ? dna}",
+          "  -       shares: {'{x} [{round(s * 100)}%]' table, enum ? dna}",
+          # `fsort` sorts by **increasing** frequency
+          "  - freq. sorted: {'{q ? x}' table.fsort, enum ? dna}",
+          .sep = "\n")
+```
+
 ## `each`: Repeat each elements of the vector
 
 Repeats each element of the vector `n` times. Option `"c"` then collapses the full vector 

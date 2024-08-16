@@ -306,7 +306,7 @@
 #' + rev: reverses the vector. Example: `string_magic("{rev, ''c ? 1:3}")` leads to "321".
 #' + unik: makes the string vector unique. Example: `string_magic("Iris species: {unik, C ? iris$Species}.")`
 #' leads to "Iris species: setosa, versicolor and virginica.".
-#' + table: counts the frequency of each element and pastes the each element with its frequency. 
+#' + table: computes the frequency of each element and attaches each element to its frequency. 
 #' Accepts an argument which must be a character string representing a `string_magic` interpolation
 #' with the following variables: `x` (the element), `n` (its count) and `s` (its share). The default is `'{x} ({n ? n})'`. By default the resulting string vector is sorted by decreasing frequency. 
 #' You can change how the vector is sorted with five options: `sort` (sorts on the elements), 
