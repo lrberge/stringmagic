@@ -383,6 +383,16 @@
 #' a warning is prompted. Option "silent" disables the warning in case of failed conversion. The conversion 
 #' is done with [base::iconv()], option "utf8" indicates that the source endocing is UTF-8, can be useful 
 #' in some cases.
+#' + round, r0 to r6: formats numbers by rounding at a given level. Options:  `0` to `9`, `int`, `nocomma`, `s0`-`s9`. 
+#' Option `0` to `9` controls the number of digits to round at. 
+#' Option `int` is whether to preserve integers from formattting.
+#' Option `nocomma` conrtols whether to drop the comma separating the thousands.
+#' `s0`-`s9` also keeps a given number of significant digits.
+#' + signif, s0 to s6: formats numbers by displaying a certain number of significant digits. Options:  `0` to `9`, `int`, `nocomma`, `r0`-`r9`. 
+#' Option `0` to `9` controls the number of significant digits to display. 
+#' Option `int` is whether to preserve integers from formattting.
+#' Option `nocomma` conrtols whether to drop the comma separating the thousands.
+#' `r0`-`r9` also rounds at a given number of decimals.
 #' + n: formats integers by adding a comma to separate thousands. Options: "letter", "upper", "0", "zero".
 #' The option "letter" writes the number in letters (large numbers keep their numeric format). The option
 #' "upper" is like the option "letter" but uppercases the first letter. Options "0" or "zero" left pads

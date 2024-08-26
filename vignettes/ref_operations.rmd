@@ -571,9 +571,9 @@ Options:
 - `r0`-`r9` (options for `signif`): additionnaly the number of digits to round at
 
 Algorithm:
-`signif` displays `d` significant digits. If the `d`th significant digit is not a decimal, the digits up to the first decimal are displayed. Example if `d = 2`, `153.12` will be displayed as `153.1`; `0.0153` will be displayed as `0.015`; `153` as `153.0`.
+`signif` displays `d` significant digits (default is `1`). If the `d`th significant digit is not a decimal, the digits up to the first decimal are displayed. Example if `d = 2`, `153.12` will be displayed as `153.1`; `0.0153` will be displayed as `0.015`; `153` as `153.0`.
 
-`round` displays up to the `d`th decimal. Example if `d = 2`: `153.154` will be displayed as `153.15`; `153`  as `153.00`.
+`round` displays up to the `d`th decimal (default is `0`). Example if `d = 2`: `153.154` will be displayed as `153.15`; `153`  as `153.00`.
 
 When `signif` and `round` are combined, round provides the *minimum* number of decimals displayed.
 
@@ -588,7 +588,7 @@ cat_magic("pi = {r2 ? pi}\n",
 
 x = c(153, 207.256, 0.00254, 15231312.2)
 # keeping one significant digit
-cat_magic("v1: {s1, align.left ? x} ",
+cat_magic("v1: {s1, align ? x} ",
           # removing the comma for large numbers and preserving ints
           "v2: {s1.int.nocomma ? x}", .collapse = "\n")
           

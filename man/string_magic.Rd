@@ -482,6 +482,16 @@ are transformed into question marks. Options: "silent", "utf8". By default, if s
 a warning is prompted. Option "silent" disables the warning in case of failed conversion. The conversion
 is done with \code{\link[base:iconv]{base::iconv()}}, option "utf8" indicates that the source endocing is UTF-8, can be useful
 in some cases.
+\item round, r0 to r6: formats numbers by rounding at a given level. Options:  \code{0} to \code{9}, \code{int}, \code{nocomma}, \code{s0}-\code{s9}.
+Option \code{0} to \code{9} controls the number of digits to round at.
+Option \code{int} is whether to preserve integers from formattting.
+Option \code{nocomma} conrtols whether to drop the comma separating the thousands.
+\code{s0}-\code{s9} also keeps a given number of significant digits.
+\item signif, s0 to s6: formats numbers by displaying a certain number of significant digits. Options:  \code{0} to \code{9}, \code{int}, \code{nocomma}, \code{r0}-\code{r9}.
+Option \code{0} to \code{9} controls the number of significant digits to display.
+Option \code{int} is whether to preserve integers from formattting.
+Option \code{nocomma} conrtols whether to drop the comma separating the thousands.
+\code{r0}-\code{r9} also rounds at a given number of decimals.
 \item n: formats integers by adding a comma to separate thousands. Options: "letter", "upper", "0", "zero".
 The option "letter" writes the number in letters (large numbers keep their numeric format). The option
 "upper" is like the option "letter" but uppercases the first letter. Options "0" or "zero" left pads
