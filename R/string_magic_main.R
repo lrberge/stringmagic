@@ -2466,13 +2466,30 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
                   "\nPROBLEM: the value is of class {enum ? class(x)}.")
       }
       
-      x_num = suppressWarnings(as.numeric())
+      x_num = suppressWarnings(as.numeric(x))
+      
+      if(anyNA(x_num)){
+        id_ok = which(!is.na(x_num))
+        res = as.character(x)
+        res[id_ok] = cpp_format_numeric(x_num[id_ok], R_digits = n_round, R_signif = n_signif, 
+                                        R_int_as_double = int_as_double, 
+                                        minus_sign = "-", decimal = ".", big_mark = big_mark, 
+                                        small_mark = "", prefix = prefix, suffix = suffix)
+      } else {
+        res = cpp_format_numeric(x_num, R_digits = n_round, R_signif = n_signif, 
+                                 R_int_as_double = int_as_double, 
+                                 minus_sign = "-", decimal = ".", big_mark = big_mark, 
+                                 small_mark = "", prefix = prefix, suffix = suffix)
+      }
+      
+    } else {
+      res = cpp_format_numeric(x, R_digits = n_round, R_signif = n_signif, 
+                               R_int_as_double = int_as_double, 
+                               minus_sign = "-", decimal = ".", big_mark = big_mark, 
+                               small_mark = "", prefix = prefix, suffix = suffix)
     }
     
-    res = cpp_format_numeric(x, R_digits = n_round, R_signif = n_signif, 
-                             R_int_as_double = int_as_double, 
-                             minus_sign = "-", decimal = ".", big_mark = big_mark, 
-                             small_mark = "", prefix = prefix, suffix = suffix)
+    
     
     
   } else if(op %in% c("nth", "Nth", "ntimes", "Ntimes", "n", "N", "len", "Len")){
