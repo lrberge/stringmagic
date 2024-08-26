@@ -2423,6 +2423,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     digits_opt = grep("^\\d$", options, value = TRUE)
     if(length(digits_opt) > 0){
       digits = as.numeric(digits_opt)
+      options = setdiff(options, digits_opt)
     } else {
       digits = if(is_round) 0 else 1
     }
@@ -2432,6 +2433,7 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       n_signif = 0
       signif_info = grep("^s\\d", options, value = TRUE)
       if(length(signif_info) > 0){
+        options = setdiff(options, signif_info)
         n_signif = as.numeric(substr(signif_info[1], 2, 2))
       }
     } else {
@@ -2439,9 +2441,12 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
       n_round = 1
       round_info = grep("^r\\d", options, value = TRUE)
       if(length(round_info) > 0){
+        options = setdiff(options, round_info)
         n_round = as.numeric(substr(round_info[1], 2, 2))
       }
     }
+    
+    options = check_set_options(options, c("int", "nocomma"))
     
     int_as_double = !"int" %in% options
     
