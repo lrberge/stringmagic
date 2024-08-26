@@ -555,15 +555,69 @@ author = "Laurent Bergé"
 string_magic("This package has been developped by {ascii ? author}.")
 ```
 
+## `round`, `signif`, `r0`-`r6`, `s0`-`s6`: Formatting numbers
+
+Formats numbers by rounding at a given level or displaying a certain number of significant digits.
+
+Arguments:
+- `'suffix'`: adds a suffix
+- `'prefix|suffix'`: adds a prefix and a suffix, the two are separated with a pipe.
+
+Options:
+- `0`-`9`: the number of digits to round at (`round`) or the number of significant digits (`signif`)
+- `int`: whether to preserve integers from formattting. By default decimals are appended to integers (unless rounding at 0 digits is requested)
+- `nocomma`: whether to drop the comma separating the thousands
+- `s0`-`s9` (options for `round`): additionnaly the number of significant digits to preserve
+- `r0`-`r9` (options for `signif`): additionnaly the number of digits to round at
+
+Algorithm:
+`signif` displays `d` significant digits. If the `d`th significant digit is not a decimal, the digits up to the first decimal are displayed. Example if `d = 2`, `153.12` will be displayed as `153.1`; `0.0153` will be displayed as `0.015`; `153` as `153.0`.
+
+`round` displays up to the `d`th decimal. Example if `d = 2`: `153.154` will be displayed as `153.15`; `153`  as `153.00`.
+
+When `signif` and `round` are combined, round provides the *minimum* number of decimals displayed.
+
+
+```{r}
+# rounding at 2 digits
+cat_magic("pi = {r2 ? pi}\n",
+          # same as above with a different syntax
+          "pi = {round.2 ? pi}")
+
+x = c(153, 207.256, 0.00254, 15231312.2)
+# keeping one significant digit
+cat_magic("v1: {s1, align.left ? x} ",
+          # removing the comma for large numbers and preserving ints
+          "v2: {s1.int.nocomma ? x}", .collapse = "\n")
+          
+# combining signif with round
+y = c(pi, 0.00125)
+cat_magic("raw: {align ? y} ",
+          "s1: {s1, align ? y} ", 
+          "r2: {r2, align ? y} ",
+          "s1.r2: {s1.r2 ? y}", .collapse = "\n")
+
+# prefix and prefix: use and argument
+z = c(55, 22.5, 21)
+cat_magic("Costs in euros  : {' €'r1, enum ? z}.",
+          "\nCosts in dollars: {'USD |'r1, enum ? z}.")
+
+```
+
 ## `n`, `N`: Formatting integers
 
-Formats integers by adding a comma to separate thousands. Options: `"letter"`, `"upper"`, 
-`"0"`, `"zero"`, `"roman"`, `"Roman"`.
-The option `"letter"` writes the number in letters (large numbers keep their numeric format). The option
-`"upper"` is like the option `"letter"` but uppercases the first letter. Options `"0"` or `"zero"` left pads
-numeric vectors with 0s. The options `"roman"` and `"Roman"` write the integer in Roman 
-with `utils::as.roman`. The lower case version writes them in lower case. 
-The upper case command (`N`) adds the option `"letter"`.
+Formats integers by adding a comma to separate thousands. 
+
+Options: 
+- `"letter"`: writes the number in letters (large numbers keep their numeric format)
+- `"upper"`: like the option `"letter"` but uppercases the first letter
+- `"0"`, `"zero"`: left pads numeric vectors with 0s
+- `"roman"`, `"Roman"`: write the integer in Roman with `utils::as.roman`. The lower case version writes them in lower case
+
+Variants:
+- the upper case command `N` adds the option `"letter"` (i.e. is equiv. to `n.letter`)
+
+
 ```{r}
 x = c(5, 12, 52123)
 string_magic("She owes {n, '$'paste, enum ? x}.")
