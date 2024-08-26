@@ -2,6 +2,7 @@
 #include <Rcpp.h>
 #include <string>
 #include <cstring>
+#include <cmath>
 #include <vector>
 #include <algorithm>
 using namespace Rcpp;
@@ -570,6 +571,198 @@ IntegerVector cpp_table(IntegerVector index, int n_items){
   return res;
 }
 
+
+
+inline void add_R_string(std::string &x, SEXP &R_value, std::string def){
+  if(Rf_isNull(R_value)){
+    if(def.size() > 0){
+      x += def;
+    }
+  } else {
+    const char *value = Rf_translateCharUTF8(STRING_ELT(R_value, 0));
+    for(size_t i=0 ; i<std::strlen(value) ; ++i){
+      x += value[i];
+    }
+  }
+}
+
+inline void add_R_string_before(std::string &x, SEXP &R_value, std::string def){
+  if(Rf_isNull(R_value)){
+    if(def.size() > 0){
+      x = def + x;
+    }
+  } else {
+    const char *value = Rf_translateCharUTF8(STRING_ELT(R_value, 0));
+    std::string val;
+    for(size_t i=0 ; i<std::strlen(value) ; ++i){
+      val += value[i];
+    }
+    x = val + x;
+  }
+}
+
+
+std::string format_number_single(double x, int digits, int signif, bool int_as_double, 
+                                 SEXP &minus_sign, SEXP &decimal,
+                                 SEXP &big_mark, SEXP &small_mark,
+                                 SEXP &prefix, SEXP &suffix){
+  // number formatting
+  
+  std::string res;
+  
+  bool is_neg = x < 0;
+  double x_abs = abs(x);
+  
+  // special cases
+  if(x == 0){
+    
+    if(int_as_double){
+      res = digits == 0 ? "0" : "0.";
+      for(int i=0 ; i<digits ; ++i){
+        if(i > 0 && i % 3 == 0){
+          add_R_string(res, small_mark, "");
+        }
+        res += "0";
+      }
+    } else {
+      res = "0";
+    }
+    
+    add_R_string_before(res, prefix, "");
+    add_R_string(res, suffix, "");
+    
+    return res;
+  } else if(std::isnan(x)){
+    return "NA";
+  } else if(std::isinf(x)){
+    return is_neg ? "Inf" : "-Inf";
+  }
+  
+  
+  double x_round = 0, x_trunc = 0, rest = 0;
+  if(signif == 0){
+    // we round at the right number of digits
+    x_round = round(x_abs * pow(10, digits)) / pow(10, digits);
+    x_trunc = trunc(x_round);
+    rest = x_round - x_trunc;
+  } else {
+    // signif: we don't round
+    x_trunc = trunc(x_abs);
+    rest = x_abs - x_trunc;
+  }
+  
+
+  std::string x_str = std::to_string(static_cast<int64_t>(x_trunc));
+  
+  // sign
+  if(is_neg){
+    add_R_string(res, minus_sign, "-");
+  }
+  
+  // whole part
+  int n_signif;
+  if(x_trunc < 1000){
+    res += x_str;
+    n_signif = x_trunc == 0 ? 0 : x_str.size();
+  } else {
+    int n = x_str.size();
+    n_signif = n;
+    int e = n; // e: exponent
+
+    while(e > 0){
+      res += x_str[n - e];
+      --e;
+      if(e > 1 && e % 3 == 0) {
+        add_R_string(res, big_mark, ",");
+      }
+    }
+  }
+  
+  // decimal part
+  bool do_digits = int_as_double || abs(x - round(x)) > 1e-013;
+  if(do_digits){
+    
+    if(digits > 0 || n_signif < signif){
+      add_R_string(res, decimal, ".");
+
+      std::string rest_str = std::to_string(rest);
+      int n_rest = rest_str.size();
+      
+      int k = 0;
+      while(2 + k < n_rest && (k < digits || n_signif < signif)){
+        char c = rest_str[2 + k];
+        
+        if(n_signif > 0 || c != '0'){
+          ++n_signif;
+        }
+        
+        if(k > 0 && k % 3 == 0){
+          add_R_string(res, small_mark, "");
+        }
+        
+        res += c;
+        
+        ++k;
+      }
+      
+    }
+  }
+  
+  add_R_string_before(res, prefix, "");
+  add_R_string(res, suffix, "");
+
+  return res;
+}
+
+inline int get_R_int(SEXP x, int def){
+  if(Rf_isNull(x)){
+    return def;
+  }
+  
+  if(TYPEOF(x) == REALSXP){
+    return REAL(x)[0];
+  }
+  
+  return INTEGER(x)[0];
+}
+
+inline bool get_R_bool(SEXP x, bool def){
+  if(Rf_isNull(x)){
+    return def;
+  }
+  
+  return LOGICAL(x)[0];
+}
+
+
+// [[Rcpp::export(rng = false)]]
+SEXP cpp_format_numeric(SEXP R_x, SEXP R_digits, SEXP R_signif, 
+                        SEXP R_int_as_double, SEXP minus_sign, SEXP decimal, 
+                        SEXP big_mark,SEXP small_mark, 
+                        SEXP prefix, SEXP suffix){
+  
+  // about 20x faster than base::format
+  
+  // This function was originally developped in listable
+  
+  int digits = get_R_int(R_digits, 1);
+  int signif = get_R_int(R_signif, 2);
+  int int_as_double = get_R_bool(R_int_as_double, false);
+  
+  const bool is_double = TYPEOF(R_x) == REALSXP;
+  
+  int n = Rf_length(R_x);
+  std::vector<std::string> res(n);
+  for(int i=0 ; i<n ; ++i){
+    double x = is_double ? REAL(R_x)[i] : INTEGER(R_x)[i];
+    res[i] = format_number_single(x, digits, signif, int_as_double, minus_sign, decimal,
+                                  big_mark, small_mark, prefix, suffix);
+  }
+  
+  SEXP R_res = std_string_to_r_string(res);
+  
+  return R_res;
+}
 
 
 

@@ -1244,6 +1244,7 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
   return(res)
 }
 
+ROUND_SIGNIF_OPS = c(paste0("r", 0:6), paste0("s", 0:6))
 
 sma_char2operator = function(x, .valid_operators){
 
@@ -1265,6 +1266,11 @@ sma_char2operator = function(x, .valid_operators){
   # we partially match operators if needed
   if(!op %in% .valid_operators){
     op = check_set_options(op, .valid_operators, case = TRUE, free = TRUE)
+    op_parsed$operator = op
+  } else if(op %in% ROUND_SIGNIF_OPS){
+    digits = as.numeric(substr(op, 2, 2))
+    op = if(substr(op, 1, 1) == "r") "round" else "signif"
+    op_parsed$options[[length(op_parsed$options) + 1]] = digits
     op_parsed$operator = op
   }
 
@@ -2407,6 +2413,68 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
                                 .user_funs = .user_funs, .valid_operators = .valid_operators)
     
     
+  } else if(op %in% c("round", "signif")){
+    #
+    # round, signif ####
+    #
+    
+    is_round = op == "round"
+    
+    digits_opt = grep("^\\d$", options, value = TRUE)
+    if(length(digits_opt) > 0){
+      digits = as.numeric(digits_opt)
+    } else {
+      digits = if(is_round) 0 else 1
+    }
+    
+    if(is_round){
+      n_round = digits
+      n_signif = 0
+      signif_info = grep("^s\\d", options, value = TRUE)
+      if(length(signif_info) > 0){
+        n_signif = as.numeric(substr(signif_info[1], 2, 2))
+      }
+    } else {
+      n_signif = digits
+      n_round = 1
+      round_info = grep("^r\\d", options, value = TRUE)
+      if(length(round_info) > 0){
+        n_round = as.numeric(substr(round_info[1], 2, 2))
+      }
+    }
+    
+    int_as_double = !"int" %in% options
+    
+    info_pipe = extract_pipe(argument)
+    if(info_pipe$is_pipe){
+      prefix = info_pipe$value
+      suffix = info_pipe$extra
+    } else {
+      prefix = NULL
+      suffix = info_pipe$value
+    }
+    
+    if("nocomma" %in% options){
+      big_mark = ""
+    } else {
+      big_mark = ","
+    }
+    
+    if(!is.numeric(x)){
+      if(!is.atomic(x)){
+        stop_hook("The operation {bq?op} can only be applied on atomic vectors. ",
+                  "\nPROBLEM: the value is of class {enum ? class(x)}.")
+      }
+      
+      x_num = suppressWarnings(as.numeric())
+    }
+    
+    res = cpp_format_numeric(x, R_digits = n_round, R_signif = n_signif, 
+                             R_int_as_double = int_as_double, 
+                             minus_sign = "-", decimal = ".", big_mark = big_mark, 
+                             small_mark = "", prefix = prefix, suffix = suffix)
+    
+    
   } else if(op %in% c("nth", "Nth", "ntimes", "Ntimes", "n", "N", "len", "Len")){
     #
     # nth, ntimes, n, len ####
@@ -3373,8 +3441,14 @@ setup_operations = function(){
   
   # dp: v1.1.0
   # swidth: v1.1.3
-  # table: v1.1.3
-  OPERATORS = c(OPERATORS, "dp", "deparse", "swidth", "table")
+  # table, round, r0-r5, signif, s0-s5: v1.1.3
+  OPERATORS = c(OPERATORS, 
+                # v1.1.0
+                "dp", "deparse", 
+                # v1.1.3
+                "swidth", "table", 
+                "round", paste0("r", 0:6), 
+                "signif", paste0("s", 0:6))
   
   options("string_magic_operations_default" = sort(OPERATORS))
   
