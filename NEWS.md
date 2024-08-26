@@ -35,6 +35,22 @@ cat_magic("Letters in the DNA seq. {''c, Q? dna}: ",
 #>   - freq. sorted: 't', 'a', 'c' and 'g'
 ```
 
+- `string_magic`: new operators `round` and `signif`  (wtih shorthands `r0` to `r6` and `s0` to `s6`) to flexibly format numbers:
+```R
+x = c(153, 207.256, 0.00254, 15231312.2)
+# keeping one significant digit
+cat_magic("v1: {s1, align ? x} ",
+          # removing the comma for large numbers and preserving ints
+          "v2: {s1.int.nocomma ? x}", .collapse = "\n")
+#> v1: 153.0        v2: 153
+#> v1: 207.2        v2: 207.2
+#> v1: 0.002        v2: 0.002
+#> v1: 15,231,312.2 v2: 15231312.2
+
+string_magic("pi = {r3?pi}")
+#> [1] "pi = 3.142"
+```
+
 ## New features
 
 - add the argument `.data` to `string_magic()`, used to evaluate variables in the interpolations
