@@ -399,18 +399,18 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
                      .check = .check, .help = .help, .split = FALSE,
                      .namespace = .namespace)
   }
-  
-  .width = check_set_width(.width)
-  if(is.finite(.width)){
-    txt = fit_screen(txt, .width, leader = .leader)
-  }
-  
+    
   if(length(txt) > 1){
     txt = paste0(txt, collapse = .sep)
   }
   
   if(nchar(.end) > 0){
     txt = paste0(txt, .end)
+  }
+  
+  .width = check_set_width(.width)
+  if(is.finite(.width)){
+    txt = fit_screen(txt, .width, leader = .leader)
   }
 
   cat(txt)
@@ -450,23 +450,18 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL,
                      .check = .check, .help = .help, .split = FALSE,
                      .namespace = .namespace)
   }
-  
-  if(is.character(.width)){
-    .width = str2lang(.width)
-  }
-  is_call = isTRUE(try(is.call(.width), silent = TRUE))
-  .width = if(is_call) .width else substitute(.width)
-  .width = check_set_width(.width)
-  if(is.finite(.width)){
-    txt = fit_screen(txt, .width, leader = .leader)
-  }
-  
+    
   if(length(txt) > 1){
     txt = paste0(txt, collapse = .sep)
   }
   
   if(nchar(.end) > 0){
     txt = paste0(txt, .end)
+  }
+  
+  .width = check_set_width(.width)
+  if(is.finite(.width)){
+    txt = fit_screen(txt, .width, leader = .leader)
   }
 
   message(txt, appendLF = FALSE)

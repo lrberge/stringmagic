@@ -524,15 +524,15 @@ check_set_width = function(width){
     
     if(!is.numeric(width)){
       stop_up("The argument `.width` must be either: 1) an integer scalar, 2) a number between 0 and 1, 3) FALSE, 4) NULL, 5) a one sided formula with the variable .sw (representing the current screen width).",
-              "\nPROBLEM: it is not FALSE, nor NULL nor a formula, but is not of numeric. ",
+              "\nPROBLEM: it is not FALSE, nor NULL nor a formula, but is not numeric. ",
               "Instead it is of class ", class(width)[1], ".")
     }
     
     if(width < 2){
       if(width < 0){
         stop_up("The argument `.width` must be either: 1) an integer scalar, 2) a number between 0 and 1, 3) FALSE, 4) NULL, 5) a one sided formula with the variable .sw (representing the current screen width).",
-              "\nPROBLEM: it is not FALSE, nor NULL nor a formula, but is not of numeric. ",
-              "Instead lower than 0 (", width, ").")
+              "\nPROBLEM: it is not FALSE, nor NULL nor a formula, but is not a positive number. ",
+              "It is lower than 0 (", width, ").")
       }
       
       width = width * sw
@@ -1373,7 +1373,7 @@ fit_screen = function(msg, width = NULL, leading_ws = TRUE, leader = ""){
   # Note that \t are NOT handled
   
   # eval
-  width = check_set_width(substitute(width))
+  width = check_set_width(width)
 
   N_LEAD = nchar(leader)
 
