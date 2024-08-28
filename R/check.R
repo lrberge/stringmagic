@@ -495,10 +495,18 @@ check_set_delimiters = function(.delim){
   .delim
 }
 
-check_set_width = function(width_expr){
+check_set_width = function(width){
   sw = getOption("width") 
   data = list(.sw = sw)
-  width = eval(width_expr, data, parent.frame(2))
+  
+  check_value(width, 
+              "NULL integer scalar | numeric scalar GT{0} LE{1} | match(FALSE) | os formula", 
+              .up = 1, 
+              .message = "The argument `.width` must be either: 1) an integer scalar, 2) a number between 0 and 1, 3) FALSE, 4) NULL, 5) a one sided formula with the variable .sw (representing the current screen width).")
+  
+  if(inherits(width, "formula")){
+    width = eval(width[[2]], data, parent.frame(2))
+  }
   
   if(isFALSE(width)){
     width = Inf

@@ -173,13 +173,7 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
   check_character(.namespace, scalar = TRUE, null = TRUE)
   
   # width is special
-  is_call = isTRUE(try(is.call(.width), silent = TRUE))
-  if(!is_call){
-    .width = substitute(.width)
-    if(!".sw" %in% all.vars(.width)){
-      .width = eval(.width, parent.frame())
-    }
-  }
+  check_set_width(.width)
   
   sep = .sep
   end = .end
@@ -205,7 +199,7 @@ cat_magic_alias = function(.sep = "", .end = "", .width = FALSE, .leader = "",
 }
 
 #' @describeIn cat_magic Create an alias of `message_magic` with custom defaults
-message_magic_alias = function(.sep = "", .end = "\n", .width = "min(100, .sw)", .leader = "", 
+message_magic_alias = function(.sep = "", .end = "\n", .width = ~min(100, .sw), .leader = "", 
                                .delim = c("{", "}"), .last = NULL, .trigger = TRUE, 
                                .check = TRUE, .namespace = NULL){
   
@@ -220,13 +214,7 @@ message_magic_alias = function(.sep = "", .end = "\n", .width = "min(100, .sw)",
   check_character(.namespace, scalar = TRUE, null = TRUE)
   
   # width is special
-  is_call = isTRUE(try(is.call(.width), silent = TRUE))
-  if(!is_call){
-    .width = substitute(.width)
-    if(!".sw" %in% all.vars(.width)){
-      .width = eval(.width, parent.frame())
-    }
-  }
+  check_set_width(.width)
   
   # forcing the eval
   sep = .sep

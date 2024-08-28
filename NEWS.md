@@ -71,6 +71,8 @@ string_magic("pi = {r3?pi}")
 
 - the default screen width for `message_magic` becomes the minimum between 100 characters and 90% of the current screen size (actually the console size).
 
+- rework the argument `.width` in `message_magic` and `cat_magic`: now the special variable `.sw` can only be used in a one-sided formula (non-standard evaluation is no longer supported)
+
 - improve error handling
 
 - add `left` option to operators when relevant. Thanks to @kylebutts, #3
