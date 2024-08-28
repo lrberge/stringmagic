@@ -49,6 +49,10 @@ cpp_format_numeric <- function(R_x, R_digits, R_signif, R_int_as_double, minus_s
     .Call(`_stringmagic_cpp_format_numeric`, R_x, R_digits, R_signif, R_int_as_double, minus_sign, decimal, big_mark, small_mark, prefix, suffix)
 }
 
+cpp_split_newlines <- function(x) {
+    .Call(`_stringmagic_cpp_split_newlines`, x)
+}
+
 cpp_string_magic_parser <- function(Rstr, Rdelimiters, only_last_parsed_section = FALSE) {
     .Call(`_stringmagic_cpp_string_magic_parser`, Rstr, Rdelimiters, only_last_parsed_section)
 }

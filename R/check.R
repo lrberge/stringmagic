@@ -1387,7 +1387,7 @@ fit_screen = function(msg, width = NULL, leading_ws = TRUE, leader = ""){
 
   res = c()
 
-  msg_split = strsplit(msg, "\n", fixed = TRUE)[[1]]
+  msg_split = cpp_split_newlines(msg)
 
   for(m in msg_split){
     if(nchar(m) <= MAX_WIDTH){

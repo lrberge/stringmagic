@@ -161,6 +161,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_split_newlines
+SEXP cpp_split_newlines(SEXP x);
+RcppExport SEXP _stringmagic_cpp_split_newlines(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_split_newlines(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_string_magic_parser
 List cpp_string_magic_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_section);
 RcppExport SEXP _stringmagic_cpp_string_magic_parser(SEXP RstrSEXP, SEXP RdelimitersSEXP, SEXP only_last_parsed_sectionSEXP) {
@@ -269,6 +280,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stringmagic_cpp_create_pos", (DL_FUNC) &_stringmagic_cpp_create_pos, 1},
     {"_stringmagic_cpp_table", (DL_FUNC) &_stringmagic_cpp_table, 2},
     {"_stringmagic_cpp_format_numeric", (DL_FUNC) &_stringmagic_cpp_format_numeric, 10},
+    {"_stringmagic_cpp_split_newlines", (DL_FUNC) &_stringmagic_cpp_split_newlines, 1},
     {"_stringmagic_cpp_string_magic_parser", (DL_FUNC) &_stringmagic_cpp_string_magic_parser, 3},
     {"_stringmagic_cpp_extract_quote_from_op", (DL_FUNC) &_stringmagic_cpp_extract_quote_from_op, 1},
     {"_stringmagic_cpp_parse_operator", (DL_FUNC) &_stringmagic_cpp_parse_operator, 1},

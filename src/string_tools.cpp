@@ -764,7 +764,33 @@ SEXP cpp_format_numeric(SEXP R_x, SEXP R_digits, SEXP R_signif,
   return R_res;
 }
 
-
+// [[Rcpp::export]]
+SEXP cpp_split_newlines(SEXP x){
+  
+  std::vector<std::string> res;
+  
+  int n = Rf_length(x);
+  
+  std::string v;
+  
+  for(int obs = 0 ; obs<n ; obs++){
+    const char *str = Rf_translateCharUTF8(STRING_ELT(x, obs));
+    for(size_t i=0 ; i<std::strlen(str) ; ++i){
+      if(str[i] == '\n'){
+        res.push_back(v);
+        v = "";
+      } else {
+        v += str[i];
+      }
+    }
+  }
+  
+  if(n > 0){
+    res.push_back(v);
+  }
+  
+  return std_string_to_r_string(res);
+}
 
 
 
