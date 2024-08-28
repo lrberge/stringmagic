@@ -499,21 +499,45 @@ check_set_width = function(width){
   sw = getOption("width") 
   data = list(.sw = sw)
   
-  check_value(width, 
-              "NULL integer scalar | numeric scalar GT{0} LE{1} | match(FALSE) | os formula", 
-              .up = 1, 
-              .message = "The argument `.width` must be either: 1) an integer scalar, 2) a number between 0 and 1, 3) FALSE, 4) NULL, 5) a one sided formula with the variable .sw (representing the current screen width).")
-  
   if(inherits(width, "formula")){
+    
+    if(length(width) != 2){
+      stop_up("If the argument `.width` is a formula, it must be a one sided formula.",
+              "\nPROBLEM: this is a two sided formula.")
+    }
+    
     width = eval(width[[2]], data, parent.frame(2))
-  }
-  
-  if(isFALSE(width)){
-    width = Inf
-  }
-  
-  if(is.null(width)){
+    
+  } else if(is.null(width)){
     width = min(100, 0.9 * sw)
+    
+  } else if(isFALSE(width)){
+    width = Inf
+    
+  } else {
+    
+    if(length(width) != 1){
+      stop_up("The argument `.width` must be either: 1) an integer scalar, 2) a number between 0 and 1, 3) FALSE, 4) NULL, 5) a one sided formula with the variable .sw (representing the current screen width).",
+              "\nPROBLEM: it is not FALSE, nor NULL nor a formula, but is not of length 1. ",
+              "Instead it is of length ", length(width), ".")
+    } 
+    
+    if(!is.numeric(width)){
+      stop_up("The argument `.width` must be either: 1) an integer scalar, 2) a number between 0 and 1, 3) FALSE, 4) NULL, 5) a one sided formula with the variable .sw (representing the current screen width).",
+              "\nPROBLEM: it is not FALSE, nor NULL nor a formula, but is not of numeric. ",
+              "Instead it is of class ", class(width)[1], ".")
+    }
+    
+    if(width < 2){
+      if(width < 0){
+        stop_up("The argument `.width` must be either: 1) an integer scalar, 2) a number between 0 and 1, 3) FALSE, 4) NULL, 5) a one sided formula with the variable .sw (representing the current screen width).",
+              "\nPROBLEM: it is not FALSE, nor NULL nor a formula, but is not of numeric. ",
+              "Instead lower than 0 (", width, ").")
+      }
+      
+      width = width * sw
+    }
+    
   }
   
   width
