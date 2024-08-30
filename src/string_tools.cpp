@@ -613,10 +613,6 @@ std::string format_number_single(double x, int digits, int signif, bool int_as_d
   bool is_neg = x < 0;
   double x_abs = abs(x);
   
-  Rcout << "x < 0 ? " << is_neg << "\n";
-  Rcout << "x = " << x << "\n";
-  Rcout << "x_abs = " << x_abs << "\n";
-  
   // special cases
   if(x == 0){
     
@@ -654,22 +650,14 @@ std::string format_number_single(double x, int digits, int signif, bool int_as_d
     x_trunc = trunc(x_abs);
     rest = x_abs - x_trunc;
   }
-  
-  Rcout << "x_round = " << x_round << "\n";
-  Rcout << "x_trunc = " << x_trunc << "\n";
-  Rcout << "rest = " << rest << "\n";
-  
-  Rcout << "x_str_raw = " << std::to_string(x_trunc) << "\n";
 
   std::string x_str = std::to_string(static_cast<int64_t>(x_trunc));
   if(x_trunc > 1e18){
     x_str = std::to_string(x_trunc);
     std::size_t dot_loc = x_str.find('.');
-    Rcout << "dot_loc = " << dot_loc << "\n";
     if(dot_loc != std::string::npos){
       x_str.erase(x_str.begin() + dot_loc, x_str.end());
     }
-    
   }
   
   // sign
@@ -706,8 +694,6 @@ std::string format_number_single(double x, int digits, int signif, bool int_as_d
         }
       }
     }
-
-    
   }
   
   // decimal part
