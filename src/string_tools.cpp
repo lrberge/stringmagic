@@ -613,6 +613,10 @@ std::string format_number_single(double x, int digits, int signif, bool int_as_d
   bool is_neg = x < 0;
   double x_abs = abs(x);
   
+  Rcout << "x < 0 ? " << is_neg << "\n";
+  Rcout << "x = " << x << "\n";
+  Rcout << "x_abs = " << x_abs << "\n";
+  
   // special cases
   if(x == 0){
     
@@ -651,8 +655,22 @@ std::string format_number_single(double x, int digits, int signif, bool int_as_d
     rest = x_abs - x_trunc;
   }
   
+  Rcout << "x_round = " << x_round << "\n";
+  Rcout << "x_trunc = " << x_trunc << "\n";
+  Rcout << "rest = " << rest << "\n";
+  
+  Rcout << "x_str_raw = " << std::to_string(x_trunc) << "\n";
 
   std::string x_str = std::to_string(static_cast<int64_t>(x_trunc));
+  if(x_trunc > 1e18){
+    x_str = std::to_string(x_trunc);
+    std::size_t dot_loc = x_str.find('.');
+    Rcout << "dot_loc = " << dot_loc << "\n";
+    if(dot_loc != std::string::npos){
+      x_str.erase(x_str.begin() + dot_loc, x_str.end());
+    }
+    
+  }
   
   // sign
   if(is_neg){
@@ -668,14 +686,28 @@ std::string format_number_single(double x, int digits, int signif, bool int_as_d
     int n = x_str.size();
     n_signif = n;
     int e = n; // e: exponent
-
-    while(e > 0){
-      res += x_str[n - e];
-      --e;
-      if(e > 1 && e % 3 == 0) {
-        add_R_string(res, big_mark, ",");
+    
+    // for very large numbers too much precision is meaningless
+    if(x_trunc > 5e15){
+      while(e > 0){
+        res += e > n - 15 ? x_str[n - e] : '0';
+        --e;
+        if(e > 1 && e % 3 == 0) {
+          add_R_string(res, big_mark, ",");
+        }
+      }
+      
+    } else {
+      while(e > 0){
+        res += x_str[n - e];
+        --e;
+        if(e > 1 && e % 3 == 0) {
+          add_R_string(res, big_mark, ",");
+        }
       }
     }
+
+    
   }
   
   // decimal part
