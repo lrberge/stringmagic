@@ -306,18 +306,17 @@ save_user_fun = function(fun, alias, namespace){
 #' and `"\n"` (a newline) for `message_magic`. 
 #' This string will be collated at the end of the message (a common alternative is `"\n"`).
 #' @param .width Can be 1) a positive integer, 2) a number in (0;1), 3) `FALSE` (default 
-#' for `cat_magic`), 4) `NULL` (default for `message_magic`), or 5) a one-sided formula. 
-#' It represents the target width of the message on the user console. 
-#' Newlines will be added *between words* to fit the target width.
+#' for `cat_magic`), or 4) `NULL` (default for `message_magic`). It represents the target 
+#' width of the message on the user console. Newlines will be added *between words* to fit the
+#' target width.
 #' 
 #' 1. positive integer: number of characters
 #' 2. number (0;1): fraction of the screen
 #' 3. `FALSE`: does not add newlines
 #' 4. `NULL`: the min between 100 characters and 90% of the screen width
-#' 5. one-sided formula: an expression in which you can use the special variable
-#' `.sw` which represents the current screen width
 #' 
-#' Note that the value `NULL` is equivalent to using `~min(100, 0.9*.sw)`.
+#' Note that you can use the special variable `.sw` to refer to the screen width. Hence the value
+#' `NULL` is equivalent to using `min(100, 0.9*.sw)` (which can be passed as a character string).
 #' @param .leader Character scalar, default is `TRUE`. Only used if argument `.width` is not `FALSE`. 
 #' Whether to add a leading character string right after the extra new lines.
 #' 
@@ -399,7 +398,18 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
                      .check = .check, .help = .help, .split = FALSE,
                      .namespace = .namespace)
   }
-    
+  
+  # all this is needed to implement lazy default values with yet to be evaluated expressions (.sw)
+  if(is.character(.width)){
+    .width = str2lang(.width)
+  }
+  is_call = isTRUE(try(is.call(.width), silent = TRUE))
+  .width = if(is_call) .width else substitute(.width)
+  .width = check_set_width(.width)
+  if(is.finite(.width)){
+    txt = fit_screen(txt, .width, leader = .leader)
+  }
+  
   if(length(txt) > 1){
     txt = paste0(txt, collapse = .sep)
   }

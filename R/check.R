@@ -495,9 +495,10 @@ check_set_delimiters = function(.delim){
   .delim
 }
 
-check_set_width = function(width){
+check_set_width = function(width_expr){
   sw = getOption("width") 
   data = list(.sw = sw)
+  width = eval(width_expr, data, parent.frame(2))
   
   if(inherits(width, "formula")){
     
