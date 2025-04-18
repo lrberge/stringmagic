@@ -306,7 +306,7 @@ save_user_fun = function(fun, alias, namespace){
 #' and `"\n"` (a newline) for `message_magic`. 
 #' This string will be collated at the end of the message (a common alternative is `"\n"`).
 #' @param .width Can be 1) a positive integer, 2) a number in (0;1), 3) `FALSE` (default 
-#' for `cat_magic`), or 4) `NULL` (default for `message_magic`). It represents the target 
+#' for `cat_magic`), 4) `NULL` (default for `message_magic`), or 5) a one-sided formula. It represents the target 
 #' width of the message on the user console. Newlines will be added *between words* to fit the
 #' target width.
 #' 
@@ -314,9 +314,10 @@ save_user_fun = function(fun, alias, namespace){
 #' 2. number (0;1): fraction of the screen
 #' 3. `FALSE`: does not add newlines
 #' 4. `NULL`: the min between 100 characters and 90% of the screen width
+#' 5. one-sided formula: an expression in which you can use the special variable
+#' `.sw` which represents the current screen width
 #' 
-#' Note that you can use the special variable `.sw` to refer to the screen width. Hence the value
-#' `NULL` is equivalent to using `min(100, 0.9*.sw)` (which can be passed as a character string).
+#' Note that the value `NULL` is equivalent to using `~min(100, 0.9*.sw)`.
 #' @param .leader Character scalar, default is `TRUE`. Only used if argument `.width` is not `FALSE`. 
 #' Whether to add a leading character string right after the extra new lines.
 #' 
