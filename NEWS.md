@@ -5,6 +5,8 @@
 
 - `stringmagic` is now fully compatible with R v3.5.0 (at least)
 
+- in C code: use `STRING_PTR_RO` instead of `STRING_PTR` to comply with new CRAN policy
+
 ## Bugs
 
 - fix major bug in the if-else operator (`&`) leading to opposite operations
@@ -18,7 +20,7 @@
 - `string_magic`: new operator `table` to flexibly attach elements with their frequencies:
 ```R
 dna = string_split("atagggagctacctgcgcgtcgcccaaaagcaggg", "")
-cat_magic("Letters in the DNA seq. {''c, Q? dna}: ",
+cat_magic("Letters in the DNA seq. {''c, Q ? dna}: ",
           # by default: inverse frequency sorting
           "  -      default: {table, enum ? dna}",
           "  - value sorted: {table.sort, enum ? dna}",
@@ -47,7 +49,7 @@ cat_magic("v1: {s1, align ? x} ",
 #> v1: 0.002        v2: 0.002
 #> v1: 15,231,312.2 v2: 15231312.2
 
-string_magic("pi = {r3?pi}")
+string_magic("pi = {r3 ? pi}")
 #> [1] "pi = 3.142"
 ```
 

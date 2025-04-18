@@ -15,5 +15,5 @@ Encoding: UTF-8
 BugReports: https://github.com/lrberge/stringmagic/issues
 URL: https://lrberge.github.io/stringmagic/, https://github.com/lrberge/stringmagic
 VignetteBuilder: knitr
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)

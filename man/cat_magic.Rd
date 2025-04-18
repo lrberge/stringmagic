@@ -24,7 +24,7 @@ cat_magic_alias(
 message_magic_alias(
   .sep = "",
   .end = "\\n",
-  .width = "min(100, .sw)",
+  .width = ~min(100, .sw),
   .leader = "",
   .delim = c("{", "}"),
   .last = NULL,
@@ -102,18 +102,19 @@ and \code{"\\n"} (a newline) for \code{message_magic}.
 This string will be collated at the end of the message (a common alternative is \code{"\\n"}).}
 
 \item{.width}{Can be 1) a positive integer, 2) a number in (0;1), 3) \code{FALSE} (default
-for \code{cat_magic}), or 4) \code{NULL} (default for \code{message_magic}). It represents the target
-width of the message on the user console. Newlines will be added \emph{between words} to fit the
-target width.
+for \code{cat_magic}), 4) \code{NULL} (default for \code{message_magic}), or 5) a one-sided formula.
+It represents the target width of the message on the user console.
+Newlines will be added \emph{between words} to fit the target width.
 \enumerate{
 \item positive integer: number of characters
 \item number (0;1): fraction of the screen
 \item \code{FALSE}: does not add newlines
 \item \code{NULL}: the min between 100 characters and 90\% of the screen width
+\item one-sided formula: an expression in which you can use the special variable
+\code{.sw} which represents the current screen width
 }
 
-Note that you can use the special variable \code{.sw} to refer to the screen width. Hence the value
-\code{NULL} is equivalent to using \code{min(100, 0.9*.sw)} (which can be passed as a character string).}
+Note that the value \code{NULL} is equivalent to using \code{~min(100, 0.9*.sw)}.}
 
 \item{.leader}{Character scalar, default is \code{TRUE}. Only used if argument \code{.width} is not \code{FALSE}.
 Whether to add a leading character string right after the extra new lines.}
@@ -239,8 +240,8 @@ cat_magic("Here's a list:",
 \seealso{
 Other tools with aliases: 
 \code{\link{string_clean_alias}()},
-\code{\link{string_magic_alias}()},
 \code{\link{string_magic}()},
+\code{\link{string_magic_alias}()},
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }

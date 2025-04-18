@@ -19,8 +19,6 @@
 #' which will be interpolated in a [string_magic()] call. 
 #' The function `get_interpolated_vars` provides the variables instead.
 #' 
-#' @inheritParams string_magic
-#' 
 #' @param x A character scalar for which the variables will be recovered. 
 #' For example `x = "Hi {person}"` will  return `"person"` 
 #' (the variable that will be interpolated).
@@ -47,7 +45,7 @@
 #' 
 #' @inherit string_clean seealso
 #' 
-#' @example 
+#' @examples 
 #' 
 #' # let's create a simple interpolation
 #' x = c("Ken", "Barbie")

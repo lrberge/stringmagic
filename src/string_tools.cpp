@@ -611,7 +611,7 @@ std::string format_number_single(double x, int digits, int signif, bool int_as_d
   std::string res;
   
   bool is_neg = x < 0;
-  double x_abs = abs(x);
+  double x_abs = fabs(x);
   
   // special cases
   if(x == 0){

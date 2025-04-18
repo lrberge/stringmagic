@@ -1,6 +1,6 @@
 // 
 // Generated automatically with indexthis::indexthis_vendor
-// this is indexthis version 2.0.0
+// this is indexthis version 2.1.0
 // 
 
 
@@ -54,7 +54,7 @@ r_vector::r_vector(SEXP x){
   bool IS_INT = false;
   if(TYPEOF(x) == STRSXP){
     this->type = T_STR;
-    this->px_intptr = (intptr_t *) STRING_PTR(x);
+    this->px_intptr = (intptr_t *) STRING_PTR_RO(x);
   } else if(Rf_isNumeric(x) || Rf_isFactor(x) || TYPEOF(x) == LGLSXP){
     if(TYPEOF(x) == REALSXP){
       this->px_dbl = REAL(x);
@@ -142,7 +142,7 @@ r_vector::r_vector(SEXP x){
         Rf_error("In `to_index`, the vector to index was not standard (int or real, etc) and failed to be converted to character before applying indexation._n");
       }
       this->type = T_STR;
-      this->px_intptr = (intptr_t *) STRING_PTR(this->x_conv);
+      this->px_intptr = (intptr_t *) STRING_PTR_RO(this->x_conv);
       this->is_protect = true;
     } else {
       Rf_error("In `to_index`, the R vectors must be atomic. The current type is not valid.");

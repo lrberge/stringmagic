@@ -49,6 +49,27 @@ Note that this function captures even deeply nested interpolations.
 \item \code{get_interpolated_vars()}: Obtain the variables used in \code{string_magic()} interpolations
 
 }}
+\examples{
+
+# let's create a simple interpolation
+x = c("Ken", "Barbie")
+sma_expr = "{' loves 'c ? x}. But does {' love 'c ? rev(x)}?"
+string_magic(sma_expr)
+
+# We recover the two expressions
+(char = get_interpolated_expr(sma_expr))
+
+# same with parsing
+(expr = get_interpolated_expr(sma_expr, parse = TRUE))
+
+# see the difference
+eval(char[[1]])
+eval(expr[[1]])
+
+# and only the variables:
+get_interpolated_vars(sma_expr)
+
+}
 \seealso{
 String operations: \code{\link[=string_is]{string_is()}}, \code{\link[=string_get]{string_get()}}, \code{\link[=string_clean]{string_clean()}}, \code{\link[=string_split2df]{string_split2df()}}.
 Chain basic operations with \code{\link[=string_ops]{string_ops()}}. Clean character vectors efficiently
@@ -63,8 +84,8 @@ Display messages while benefiting from \code{string_magic} interpolation with \c
 
 Other tools with aliases: 
 \code{\link{cat_magic_alias}()},
-\code{\link{string_magic_alias}()},
 \code{\link{string_magic}()},
+\code{\link{string_magic_alias}()},
 \code{\link{string_ops_alias}()},
 \code{\link{string_vec_alias}()}
 }
