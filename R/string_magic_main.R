@@ -1351,6 +1351,24 @@ sma_char2operator = function(x, .valid_operators){
 sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL, 
                          .data = list(), group_flag = 0, .delim = c("{", "}"),  
                          .user_funs = NULL, .valid_operators = NULL){
+  
+  
+  #
+  # step 1: retro compatibility ####
+  #
+  
+  
+  # now: >=1.2.0 operator width becomes similar to fill
+  # we need take care of not breaking existing code!!!!
+  # special case: width is like swidth (old behavior, < 1.2.0)
+  if(op == "width" && grepl("sw", argument)){
+    op = "swidth"
+  }
+  
+  #
+  # step 2: user functions ####
+  #
+  
 
   # group_flag:  0 nothing
   #                    1 keep track of conditional things
@@ -1378,6 +1396,11 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     #   * allow users to redefine existing operations
     #   * check user defined version first
     #
+    
+    #
+    # step 3: built in functions ####
+    #
+    
     
     if(isTRUE(attr(fun, "simple_ops"))){
       res = apply_simple_operations(x, op, fun, .check, .envir,  .data,
@@ -2246,8 +2269,11 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
   } else if(op %in% c("fill", "align", "width")){
     # fill, align ####
     
-    # all are equivalent
+    #
+    # regular case
+    #
     
+    # all are equivalent
     valid_options = c("left", "right", "center")
     options = check_set_options(options, valid_options, op = op)
     
