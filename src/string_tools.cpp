@@ -697,7 +697,7 @@ std::string format_number_single(double x, int digits, int signif, bool int_as_d
   }
   
   // decimal part
-  bool do_digits = int_as_double || abs(x - round(x)) > 1e-013;
+  bool do_digits = int_as_double || fabs(x - round(x)) > 1e-013;
   if(do_digits){
     
     if(digits > 0 || n_signif < signif){
