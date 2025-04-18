@@ -5,8 +5,6 @@
 
 - `stringmagic` is now fully compatible with R v3.5.0 (at least)
 
-- in C code: use `STRING_PTR_RO` instead of `STRING_PTR` to comply with new CRAN policy
-
 ## Bugs
 
 - fix major bug in the if-else operator (`&`) leading to opposite operations
@@ -14,6 +12,8 @@
 - in `string_vec`, fix bug leading to the removal of empty strings
 
 - in `string_vec`, fix bugs with the arguments `.sep` and `.collapse` 
+
+- in C code: use `STRING_PTR_RO` instead of `STRING_PTR` to comply with new CRAN policy
 
 ## New operators
 

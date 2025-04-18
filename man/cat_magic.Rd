@@ -102,9 +102,9 @@ and \code{"\\n"} (a newline) for \code{message_magic}.
 This string will be collated at the end of the message (a common alternative is \code{"\\n"}).}
 
 \item{.width}{Can be 1) a positive integer, 2) a number in (0;1), 3) \code{FALSE} (default
-for \code{cat_magic}), 4) \code{NULL} (default for \code{message_magic}), or 5) a one-sided formula.
-It represents the target width of the message on the user console.
-Newlines will be added \emph{between words} to fit the target width.
+for \code{cat_magic}), 4) \code{NULL} (default for \code{message_magic}), or 5) a one-sided formula. It represents the target
+width of the message on the user console. Newlines will be added \emph{between words} to fit the
+target width.
 \enumerate{
 \item positive integer: number of characters
 \item number (0;1): fraction of the screen
