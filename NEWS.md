@@ -1,4 +1,14 @@
 
+# stringmagic 1.3.0
+
+## Bugs
+
+- `string_magic`: variables passed in `...` which are `NULL` no longer error.
+
+## Improvements
+
+- add argument `.data` in `cat_magic` and `message_magic`.
+
 # stringmagic 1.2.0
 
 ## Compatibility with old R versions

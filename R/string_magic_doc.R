@@ -45,7 +45,7 @@
 #' to return a string of length 1.
 #' @param .check Logical scalar, default is `TRUE`. Whether to enable error-handling (i.e.
 #' human readable error messages). 
-#' Without error-handling you can save something of the order of 40us. Useful only
+#' Without error-handling you can save something of the order of 40us.Useful only
 #' in long loops.
 #' @param .delim Character vector of length 1 or 2. Default is `c("{", "}")`. Defines 
 #' the opening and the closing delimiters for interpolation. 

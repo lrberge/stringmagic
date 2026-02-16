@@ -370,7 +370,7 @@ save_user_fun = function(fun, alias, namespace){
 #'          .width = 30, .sep = "\n")
 #' 
 #' 
-cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "", 
+cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "", .data = list(),
                      .envir = parent.frame(), .delim = c("{", "}"), .last = NULL, 
                      .trigger = TRUE, .check = TRUE, .help = NULL, 
                      .namespace = NULL){
@@ -391,11 +391,11 @@ cat_magic = function(..., .sep = "", .end = "", .width = FALSE, .leader = "",
   }
   
   if(all(lengths(dots) == 1)){
-    txt = string_magic(..., .envir = .envir, .delim = .delim, .last = .last,
+    txt = string_magic(..., .envir = .envir, .data = .data, .delim = .delim, .last = .last,
                        .sep = .sep, .check = .check, .help = .help, .split = FALSE,
                        .namespace = .namespace)
   } else {
-    txt = string_vec(..., .envir = .envir, .delim = .delim, .last = .last,
+    txt = string_vec(..., .envir = .envir, .data = .data, .delim = .delim, .last = .last,
                      .check = .check, .help = .help, .split = FALSE,
                      .namespace = .namespace)
   }
@@ -432,7 +432,8 @@ catma = cat_magic
 
 #' @describeIn cat_magic Display messages using interpolated strings
 message_magic = function(..., .sep = "", .end = "\n", .width = NULL, 
-                         .leader = "", .envir = parent.frame(), .delim = c("{", "}"), 
+                         .leader = "", .envir = parent.frame(), .data = list(), 
+                         .delim = c("{", "}"), 
                          .last = NULL, .trigger = TRUE,
                          .check = TRUE, .help = NULL, 
                          .namespace = NULL){
@@ -453,11 +454,11 @@ message_magic = function(..., .sep = "", .end = "\n", .width = NULL,
   }
   
   if(all(lengths(dots) == 1)){
-    txt = string_magic(..., .envir = .envir, .delim = .delim, .last = .last,
+    txt = string_magic(..., .envir = .envir, .data = .data, .delim = .delim, .last = .last,
                        .sep = .sep, .check = .check, .help = .help, .split = FALSE,
                        .namespace = .namespace)
   } else {
-    txt = string_vec(..., .envir = .envir, .delim = .delim, .last = .last,
+    txt = string_vec(..., .envir = .envir, .data = .data, .delim = .delim, .last = .last,
                      .check = .check, .help = .help, .split = FALSE,
                      .namespace = .namespace)
   }
@@ -686,7 +687,7 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
       .data = unclass(.data)
     }
   }
-
+  
   if(...length() == 1){
     
     # Note: using ...names() conditionnally adds 110us!!!! (getRversion() >= "4.1.3" is slow)
@@ -728,7 +729,12 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
       if(!is.null(dot_names)){
         is_var = dot_names != ""
         for(i in which(is_var)){
-          .data[[dot_names[i]]] = dots[[i]]
+          if(is.null(dots[[i]])){
+            .data[dot_names[i]] = list(NULL)
+            
+          } else {
+            .data[[dot_names[i]]] = dots[[i]]
+          }
         }
         dots[is_var] = NULL      
       }
