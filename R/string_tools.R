@@ -1967,7 +1967,7 @@ string_fill = function(x = "", n = NULL, symbol = " ", right = FALSE,
                        center = FALSE, center.right = TRUE, na = "NA"){
   # Character vectors starting with " " are not well taken care of
 
-  x = check_set_character(x, l0 = TRUE)
+  x = check_set_character(x, l0 = TRUE, null = TRUE)
   if(length(x) == 0) return(character(0))
 
   check_numeric(n, null = TRUE, scalar = TRUE, integer = TRUE)

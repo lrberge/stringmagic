@@ -5,6 +5,8 @@
 
 - `string_magic`: variables passed in `...` which are `NULL` no longer error.
 
+- `string_fill`: now works with `NULL` values in input.
+
 ## Improvements
 
 - add argument `.data` in `cat_magic` and `message_magic`.
