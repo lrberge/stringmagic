@@ -13,6 +13,8 @@
 
 - add argument `.data` in `cat_magic` and `message_magic`.
 
+- operation `deparse` gain the option `short` and `vec` and behaves more consistently.
+
 # stringmagic 1.2.0
 
 ## Compatibility with old R versions

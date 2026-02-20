@@ -426,13 +426,31 @@ string_magic("{'3'insert.right, ' + 'collapse ? 1:2}")
 
 ## `dp`, `deparse`: Deparse an object
 
-Deparses an object and keeps only the first characters of the deparsed string. Accepts a number as argument. In that case only the first `n` characters are kept. Accepts option `long`: in that case all the lines of the deparsed object are first collapsed.
+It deparses an R object and collapses it into a single string using newlines. 
+By default it keeps only the first 50 lines of the deparsed object.
+The number of lines kept can be modified by using a *numeric argument*.
+
+It accepts the options: `short` and `vec`. If `short`, multiline deparsed elements
+are collapsed with `\\\\n` and the number of characters cannot exceed the value of the
+argument, which by default is 50.
+
+If `vec`, then the deparsed element is not collapsed into a single string, and only 
+the first 50 (default) elements of the vector are kept. You can increase/reduce the 
+number of elements kept with the argument.
 
 ```{r}
 fml = y ~ x1 + x2
+# the full formula
 string_magic("The estimated model is {dp ? fml}.")
+# only the beginning of the formula
+string_magic("The estimated model is {10 dp.short ? fml}.")
 
-string_magic("The estimated model is {10 dp ? fml}.")
+# deparsing a long function, we keep only the first 5 lines:
+cat_magic("The function lm:\n{5 dp ? lm}.")
+
+# using vec to keep the deparsed vector, we add line numbers, then 
+# collapse it with newlines
+cat_magic("The function lm:\n{'\n'c ! {1:5}: {5 dp.vec ? lm}}")
 ```
 
 # Formatting operations {#sec_format}

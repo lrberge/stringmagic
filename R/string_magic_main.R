@@ -1093,7 +1093,13 @@ string_magic_internal = function(..., .delim = c("{", "}"), .envir = parent.fram
           } else if(!verbatim){
             # evaluation
             xi_call = check_set_string_magic_parsing(xi, .check, .delim)
-            xi = check_set_string_magic_eval(xi_call, .data, .envir, .check)
+            is_deparse = length(operators) > 0 && grepl("(dp|dep)[^ ]*$", operators[1])
+            if(is_deparse){
+              op_parsed = sma_char2operator(operators[1], .valid_operators)
+              is_deparse = op_parsed$operator %in% c("dp", "deparse")
+            }
+                           
+            xi = check_set_string_magic_eval(xi_call, .data, .envir, .check, is_deparse)
           }
         }
 
@@ -1904,24 +1910,28 @@ sma_operators = function(x, op, options, argument, .check = FALSE, .envir = NULL
     }
   } else if(op %in% c("dp", "deparse")){
     
-    options = check_set_options(options, "long")
+    options = check_set_options(options, c("long", "short", "vec"))
     
     if(nchar(argument) > 0){
       argument = as.numeric(argument)
     } else {
-      argument = 35
+      argument = 50
     }
     
-    if("long" %in% options){
-      x_dp = paste0(deparse(x, nlines = 100), collapse = " ")
+    if("vec" %in% options){
+      x_dp = deparse(x, nlines = argument)
+      
+    } else if("short" %in% options){
+      x_dp = paste0(deparse(x, nlines = 5), collapse = "\\n")
+      
+      if(nchar(x_dp) > argument){
+        x_dp = substr(x_dp, 1, argument - 2)
+        x_dp = gsub(" *$", "...", x_dp)
+      }
     } else {
-      x_dp = deparse(x, nlines = 1)
-    }
-    
-    
-    if(nchar(x_dp) > argument){
-      x_dp = substr(x_dp, 1, argument - 2)
-      x_dp = gsub(" *$", "...", x_dp)
+      # long is the new default
+      x_dp = paste0(deparse(x, nlines = argument), collapse = "\n")
+      
     }
     
     res = x_dp

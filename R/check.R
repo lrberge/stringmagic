@@ -782,7 +782,7 @@ check_set_string_magic_parsing = function(x, check, .delim){
   x_call
 }
 
-check_set_string_magic_eval = function(call, data, envir, check){
+check_set_string_magic_eval = function(call, data, envir, check, is_deparse = FALSE){
   # we need to eval the call
   
   is_dt = "dt_data" %in% names(attributes(envir))
@@ -822,7 +822,7 @@ check_set_string_magic_eval = function(call, data, envir, check){
     }
   }  
   
-  if(is.function(x)){
+  if(is.function(x) && !is_deparse){
     context = get_string_magic_context()
     call_dp = deparse_short(call)
     msg = .sma("EXPECTATION: interpolated variables should be coercible to character strings.",

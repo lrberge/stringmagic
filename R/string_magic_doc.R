@@ -337,10 +337,15 @@
 #' + insert: inserts a new element to the vector. Options: "right" and "both". Option "right" adds
 #' the new element to the right. Option "both" inserts the new element on the two sides of the vector.
 #' Example: `string_magic("{'3'insert.right, ' + 'c ? 1:2}")` leads to "1 + 2 + 3".
-#' + `dp` or `deparse`: Deparses an object and keeps only the first characters of 
-#' the deparsed string. Accepts a number as argument. In that case only the first `n` 
-#' characters are kept. Accepts option `long`: in that case all the 
-#' lines of the deparsed object are first collapsed.
+#' + `dp` or `deparse`: It deparses an R object and collapses it into a single string 
+#' using newlines. By default it keeps only the first 50 lines of the deparsed object.
+#' The number of lines kept can be modified by using a numeric argument.
+#' It accepts the options: `short` and `vec`. If `short`, multiline deparsed elements
+#' are collapsed with `\\\\n` and the number of characters cannot exceed the value of the
+#' argument, which by default is 50.
+#' If `vec`, then the deparsed element is not collapsed into a single string, and only 
+#' the first 50 (default) elements of the vector are kept. You can increase/reduce the 
+#' number of elements kept with the argument.
 #' Example: `fml = y ~ x1 + x2; string_magic("The estimated model is {dp ? fml}.")`
 #' 
 #' @section Formatting operations:
