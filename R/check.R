@@ -317,9 +317,9 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
   
   # We first catch evaluation problems
   for(i in 1:n){
-    elem = try(...elt(i), silent = TRUE, 
-               error = function(e) structure(conditionMessage(e), 
-                                             class = "stringmagic-error"))
+    elem = tryCatch(...elt(i), silent = TRUE, 
+                    error = function(e) structure(conditionMessage(e), 
+                                                  class = "stringmagic-error"))
 
     if(inherits(elem, "stringmagic-error") || (nofun && is.function(elem))){
       nm = if(is.null(dots_nm)) "" else dots_nm[i]
@@ -1453,7 +1453,8 @@ isError = function(x){
 check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
 
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e),
-                                                          conditionMessage(e)), class = "stringmagic-error"))
+                                                          conditionMessage(e)), 
+                                                     class = "stringmagic-error"))
   if(inherits(res, "stringmagic-error")){
 
     if(missing(up)){
