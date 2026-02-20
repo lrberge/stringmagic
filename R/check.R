@@ -317,9 +317,11 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
   
   # We first catch evaluation problems
   for(i in 1:n){
-    elem = try(...elt(i), silent = TRUE)
+    elem = try(...elt(i), silent = TRUE, 
+               error = function(e) structure(conditionMessage(e), 
+                                             class = "stringmagic-error"))
 
-    if(isError(elem) || (nofun && is.function(elem))){
+    if(inherits(elem, "stringmagic-error") || (nofun && is.function(elem))){
       nm = if(is.null(dots_nm)) "" else dots_nm[i]
       if(is.na(nm)) nm = ""
 
@@ -328,7 +330,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
 
       nm = string_magic(" ({if(.C<4 ; erase) ! {nm} = }{value})")
       
-      if(isError(elem)){
+      if(inherits(elem, "stringmagic-error")){
         if(grepl("try(...", elem, fixed = TRUE)){
           elem = gsub("^[^:]+:", "", elem)
         }
@@ -796,12 +798,16 @@ check_set_string_magic_eval = function(call, data, envir, check){
     # now with check = TRUE
     
     if(is_dt){
-      x = try(eval_dt(call, data, envir), silent = TRUE)
+      x = tryCatch(eval_dt(call, data, envir), silent = TRUE, 
+                   error = function(e) structure(conditionMessage(e), 
+                                                 class = "stringmagic-error"))
     } else {
-      x = try(eval(call, data, envir), silent = TRUE)
+      x = tryCatch(eval(call, data, envir), silent = TRUE,
+                   error = function(e) structure(conditionMessage(e), 
+                                                 class = "stringmagic-error"))
     }
     
-    if(inherits(x, "try-error")){
+    if(inherits(x, "stringmagic-error")){
       context = get_string_magic_context()
       call_dp = deparse_short(call)
       if(grep("^expression\\(", call_dp)){
@@ -1447,8 +1453,8 @@ isError = function(x){
 check_expr = function(expr, ..., clean, up = 0, arg_name, verbatim = FALSE){
 
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e),
-                                                          conditionMessage(e)), class = "try-error"))
-  if(inherits(res, "try-error")){
+                                                          conditionMessage(e)), class = "stringmagic-error"))
+  if(inherits(res, "stringmagic-error")){
 
     if(missing(up)){
       # up with set_up

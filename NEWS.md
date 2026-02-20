@@ -7,6 +7,8 @@
 
 - `string_fill`: now works with `NULL` values in input.
 
+- `string_magic` family: fix bug that led to errors when objects of class `"try-error"` were interpolated
+
 ## Improvements
 
 - add argument `.data` in `cat_magic` and `message_magic`.
@@ -15,7 +17,7 @@
 
 ## Compatibility with old R versions
 
-- `stringmagic` is now fully compatible with R v3.5.0 (at least)
+- `stringmagic` is now fully compatible with R v3.5.0 (at least)*
 
 ## Bugs
 
