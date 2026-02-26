@@ -255,6 +255,14 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
 }
 
 
+check_list = function(x){
+  if(!is.list(x)){
+    x_dp = deparse_short(substitute(x))
+    stop_up("The argument `", x_dp, "` must be a list (e.g. like a data.frame). \n",
+              "PROBLEM: it is not a list, it is of class {enum?class(x)}.")
+  }
+}
+
 check_envir = function(x){
 
   if(!inherits(x, "environment")){
@@ -437,7 +445,7 @@ check_set_dots = function(..., mc = NULL, mbt = FALSE, character = FALSE,
               " {$contain} NA values.")
     }
   }
-
+  
   names(dots) = dots_nm
 
   return(dots)

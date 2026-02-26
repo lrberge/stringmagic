@@ -1702,11 +1702,11 @@ string_replace = function(x, pattern, replacement = "", pipe = " => ", ignore.ca
 #'         8, 6, 2")
 #' 
 string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
-                   .df.convert = TRUE,
-                   .delim = c("{", "}"), .envir = parent.frame(), 
-                   .split = TRUE, .protect.vars = FALSE, .sep = NULL, 
-                   .last = NULL, .check = TRUE, .help = NULL,
-                   .collapse = NULL, .namespace = NULL){
+                      .df.convert = TRUE, .delim = c("{", "}"), 
+                      .data  = list(), .envir = parent.frame(), 
+                      .split = TRUE, .protect.vars = FALSE, .sep = NULL, 
+                      .last = NULL, .check = TRUE, .help = NULL,
+                      .collapse = NULL, .namespace = NULL){
   
   # checks
   set_pblm_hook()
@@ -1718,6 +1718,7 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
     .split = check_set_split(.split)
     check_logical(.protect.vars, scalar = TRUE)
     check_envir(.envir)
+    check_list(.data)
     # checking the dots + setting up the data
     dots = check_set_dots(..., mbt = TRUE, nofun = TRUE)
   } else {
@@ -1726,7 +1727,6 @@ string_vec = function(..., .cmat = FALSE, .nmat = FALSE, .df = FALSE,
   do_mat = check_set_mat(.cmat, .nmat, .df)
   
   # we check if some variables were passed in the arguments
-  .data = list()
   dot_names = names(dots)
   if(!is.null(dot_names)){
     is_var = dot_names != ""
