@@ -212,7 +212,7 @@ check_set_character = function(x, null = FALSE, scalar = FALSE, l0 = FALSE,
     return(NULL)
   }
 
-  if(null && is.null(x)){
+  if( (null && is.null(x)) || (l0 && length(x) == 0) ){
     return(NULL)
   }
 
