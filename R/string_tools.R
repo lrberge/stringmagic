@@ -80,6 +80,10 @@ string_ops = function(x, ..., op = NULL, pre_unik = NULL, namespace = NULL, envi
   if(missing(x)){
     stop("Argument `x` must be provided. PROBLEM: it is currently missing.")
   }
+  
+  if(is.null(x) || length(x) == 0){
+    return(character(0))
+  }
 
   if(!is.atomic(x)){
     stop("Argument `x` must be atomic. Currently it is of class `", class(x)[1], "`")

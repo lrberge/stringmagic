@@ -5,7 +5,7 @@
 
 - `string_magic`: variables passed in `...` which are `NULL` no longer error.
 
-- `string_fill`: now works with `NULL` values in input.
+- `string_fill`, `string_ops`: now works with `NULL` values in input.
 
 - `string_magic` family: fix bug that led to errors when objects of class `"try-error"` were interpolated
 
