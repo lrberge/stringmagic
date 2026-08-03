@@ -28,6 +28,7 @@ string_vec(
   .df = FALSE,
   .df.convert = TRUE,
   .delim = c("{", "}"),
+  .data = list(),
   .envir = parent.frame(),
   .split = TRUE,
   .protect.vars = FALSE,
@@ -46,6 +47,7 @@ stvec(
   .df = FALSE,
   .df.convert = TRUE,
   .delim = c("{", "}"),
+  .data = list(),
   .envir = parent.frame(),
   .split = TRUE,
   .protect.vars = FALSE,
@@ -125,7 +127,7 @@ is performed on all variables.}
 
 \item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling (i.e.
 human readable error messages).
-Without error-handling you can save something of the order of 40us. Useful only
+Without error-handling you can save something of the order of 40us.Useful only
 in long loops.}
 
 \item{.sep}{Character scalar or \code{NULL} (default). If not \code{NULL}, the function
@@ -149,6 +151,10 @@ any \code{\link[=string_magic]{string_magic()}} operation can be applied. To cha
 see \code{.delim}. Named arguments are used in priority for variable substitution,
 otherwise the value of the variables to be interpolated are fetched in the calling environment
 (see argument \code{.envir}).}
+
+\item{.data}{A list used to evaluate the variables in \code{"{}"}. Default is the empty list.
+By default the variables are evaluated using the environment from where the
+function is called or using the named arguments passed to the function.}
 
 \item{.envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
 evaluated using the environment from where the function is called or using the named

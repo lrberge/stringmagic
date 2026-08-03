@@ -39,6 +39,7 @@ cat_magic(
   .end = "",
   .width = FALSE,
   .leader = "",
+  .data = list(),
   .envir = parent.frame(),
   .delim = c("{", "}"),
   .last = NULL,
@@ -54,6 +55,7 @@ catma(
   .end = "",
   .width = FALSE,
   .leader = "",
+  .data = list(),
   .envir = parent.frame(),
   .delim = c("{", "}"),
   .last = NULL,
@@ -70,6 +72,7 @@ message_magic(
   .width = NULL,
   .leader = "",
   .envir = parent.frame(),
+  .data = list(),
   .delim = c("{", "}"),
   .last = NULL,
   .trigger = TRUE,
@@ -85,6 +88,7 @@ mema(
   .width = NULL,
   .leader = "",
   .envir = parent.frame(),
+  .data = list(),
   .delim = c("{", "}"),
   .last = NULL,
   .trigger = TRUE,
@@ -139,7 +143,7 @@ useful in debugging situations where we want conditional evaluations.}
 
 \item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling (i.e.
 human readable error messages).
-Without error-handling you can save something of the order of 40us. Useful only
+Without error-handling you can save something of the order of 40us.Useful only
 in long loops.}
 
 \item{.namespace}{Character scalar or \code{NULL} (default). \strong{Only useful for package developers.}
@@ -163,6 +167,10 @@ from the main documentation.
 Note that in interpolations you have access to the special variables: \code{.now} and \code{.date}
 to get the current time; and the special function \code{.now("format")} to
 format the time. Ex: \code{.now('\%Y-\%m \%H:\%m')}.}
+
+\item{.data}{A list used to evaluate the variables in \code{"{}"}. Default is the empty list.
+By default the variables are evaluated using the environment from where the
+function is called or using the named arguments passed to the function.}
 
 \item{.envir}{An environment used to evaluate the variables in \code{"{}"}. By default the variables are
 evaluated using the environment from where the function is called or using the named

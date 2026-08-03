@@ -136,7 +136,7 @@ useful in debugging situations where we want conditional evaluations.}
 
 \item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling (i.e.
 human readable error messages).
-Without error-handling you can save something of the order of 40us. Useful only
+Without error-handling you can save something of the order of 40us.Useful only
 in long loops.}
 
 \item{.class}{Character vector representing the class to give to the object returned.
@@ -433,10 +433,15 @@ to "Small numbers only: 5 and 7";
 \item insert: inserts a new element to the vector. Options: "right" and "both". Option "right" adds
 the new element to the right. Option "both" inserts the new element on the two sides of the vector.
 Example: \code{string_magic("{'3'insert.right, ' + 'c ? 1:2}")} leads to "1 + 2 + 3".
-\item \code{dp} or \code{deparse}: Deparses an object and keeps only the first characters of
-the deparsed string. Accepts a number as argument. In that case only the first \code{n}
-characters are kept. Accepts option \code{long}: in that case all the
-lines of the deparsed object are first collapsed.
+\item \code{dp} or \code{deparse}: It deparses an R object and collapses it into a single string
+using newlines. By default it keeps only the first 50 lines of the deparsed object.
+The number of lines kept can be modified by using a numeric argument.
+It accepts the options: \code{short} and \code{vec}. If \code{short}, multiline deparsed elements
+are collapsed with \verb{\\\\\\\\n} and the number of characters cannot exceed the value of the
+argument, which by default is 50.
+If \code{vec}, then the deparsed element is not collapsed into a single string, and only
+the first 50 (default) elements of the vector are kept. You can increase/reduce the
+number of elements kept with the argument.
 Example: \verb{fml = y ~ x1 + x2; string_magic("The estimated model is \{dp ? fml\}.")}
 }
 }

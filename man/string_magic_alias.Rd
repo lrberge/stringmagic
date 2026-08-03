@@ -75,7 +75,7 @@ to return a string of length 1.}
 
 \item{.check}{Logical scalar, default is \code{TRUE}. Whether to enable error-handling (i.e.
 human readable error messages).
-Without error-handling you can save something of the order of 40us. Useful only
+Without error-handling you can save something of the order of 40us.Useful only
 in long loops.}
 
 \item{.class}{Character vector representing the class to give to the object returned.
