@@ -1108,7 +1108,6 @@ List cpp_string_magic_parser(SEXP Rstr, SEXP Rdelimiters, bool only_last_parsed_
   // pluralization flag
   bool any_plural = false;
 
-  std::string sop_value = "";
   std::string error_msg = "";
 
   int n = std::strlen(str);
